@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* ============================= */
+/* Design Tokens (Single Source) */
+/* ============================= */
+:root {
+  /* Brand */
+  --color-primary: #0092CB;
+  --color-secondary: #6DD7FE;
+  --color-textField: #F1F4FF;
+  --color-blueLight: #74CDF0;
+  --color-blueShade: #0092CB;
+
+  /* Base UI */
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+}
+
+/* ============================= */
+/* Tailwind v4 Theme Mapping     */
+/* ============================= */
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-textField: var(--color-textField);
+  --color-blueLight: var(--color-blueLight);
+  --color-blueShade: var(--color-blueShade);
+
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ============================= */
+/* Dark Mode                     */
+/* ============================= */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0a0a0a;
+    --color-foreground: #ededed;
+  }
+}
+
+/* ============================= */
+/* Global Styles                 */
+/* ============================= */
+body {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
