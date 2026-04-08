@@ -1,3 +1,5 @@
+"use client";
+
 export default function IntegrationsPage() {
   const integrations = [
     {
@@ -35,68 +37,88 @@ export default function IntegrationsPage() {
   ];
 
   return (
-    <div className="page-wrap">
+    <div className="flex flex-col gap-[22px]">
       <div>
-        <h2 style={{ fontSize: 16, fontWeight: 700 }}>Integrations</h2>
-        <p className="text-muted" style={{ fontSize: 13, marginTop: 4 }}>
+        <h2 className="text-[16px] font-bold">Integrations</h2>
+        <p className="text-[13px] mt-1" style={{ color: "var(--color-muted)" }}>
           Connect your lead sources and communication channels.
         </p>
       </div>
 
-      <div className="integrations-grid">
+      <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
         {integrations.map((intg) => (
-          <div key={intg.name} className="surface intg-card">
-            <div className="intg-header">
-              <div className="intg-icon" style={{ background: intg.color + "22", color: intg.color }}>
+          <div
+            key={intg.name}
+            className="flex flex-col gap-3.5 p-[22px] rounded-2xl border"
+            style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+          >
+            <div className="flex items-center justify-between">
+              <div
+                className="w-11 h-11 rounded-[12px] flex items-center justify-center text-[20px] font-extrabold"
+                style={{ background: intg.color + "22", color: intg.color }}
+              >
                 {intg.icon}
               </div>
-              <span className={`badge ${intg.connected ? "badge-success" : "badge-muted"}`}>
+              <span
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
+                style={intg.connected
+                  ? { background: "#dcfce7", color: "#16a34a" }
+                  : { background: "#f3f4f6", color: "var(--color-muted)" }
+                }
+              >
                 {intg.connected ? "Connected" : "Not Connected"}
               </span>
             </div>
 
-            <h4 className="intg-name">{intg.name}</h4>
-            <p className="text-muted intg-desc">{intg.desc}</p>
+            <h4 className="text-[15px] font-bold">{intg.name}</h4>
+            <p className="text-[13px] leading-relaxed" style={{ color: "var(--color-muted)" }}>{intg.desc}</p>
 
             {intg.fields.length > 0 && !intg.connected && (
-              <div className="intg-fields">
+              <div className="flex flex-col gap-2">
                 {intg.fields.map((f) => (
-                  <input key={f} type="text" placeholder={`Paste your ${f.toLowerCase()}`} />
+                  <input
+                    key={f}
+                    type="text"
+                    placeholder={`Paste your ${f.toLowerCase()}`}
+                    className="h-[38px] px-3 rounded-[10px] text-[13px] outline-none transition-all duration-200"
+                    style={{
+                      border: "1.5px solid var(--color-border)",
+                      color: "var(--color-text)",
+                      background: "var(--color-bg)",
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "var(--color-primary)")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
+                  />
                 ))}
               </div>
             )}
 
-            <div className="intg-footer">
+            <div className="flex items-center gap-3 mt-1">
               {intg.connected ? (
-                <button className="btn-danger">Disconnect</button>
+                <button
+                  className="h-9 px-[18px] rounded-[10px] text-[13px] font-semibold cursor-pointer transition-all duration-150"
+                  style={{ background: "#fee2e2", border: "1px solid var(--color-danger)", color: "var(--color-danger)" }}
+                >
+                  Disconnect
+                </button>
               ) : (
-                <button className="btn-primary-sm">Connect</button>
+                <button
+                  className="h-9 px-[18px] text-white rounded-[10px] border-none text-[13px] font-semibold cursor-pointer"
+                  style={{ background: "var(--color-primary)" }}
+                >
+                  Connect
+                </button>
               )}
-              <button className="btn-ghost">How to get access token →</button>
+              <button
+                className="bg-transparent border-none text-[12.5px] font-semibold cursor-pointer p-0 hover:underline"
+                style={{ color: "var(--color-primary)" }}
+              >
+                How to get access token →
+              </button>
             </div>
           </div>
         ))}
       </div>
-
-      <style>{`
-        .page-wrap { display: flex; flex-direction: column; gap: 22px; }
-        .integrations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-        .intg-card { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
-        .intg-header { display: flex; align-items: center; justify-content: space-between; }
-        .intg-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; }
-        .intg-name { font-size: 15px; font-weight: 700; }
-        .intg-desc { font-size: 13px; line-height: 1.6; }
-        .intg-fields { display: flex; flex-direction: column; gap: 8px; }
-        .intg-fields input { height: 38px; padding: 0 12px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); font-size: 13px; color: var(--color-text); background: var(--color-bg); outline: none; transition: border-color 0.18s; }
-        .intg-fields input:focus { border-color: var(--color-primary); }
-        .intg-footer { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
-        .btn-primary-sm { height: 36px; padding: 0 18px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; }
-        .btn-primary-sm:hover { background: var(--color-primary-dark); }
-        .btn-danger { height: 36px; padding: 0 18px; background: #fee2e2; border: 1px solid var(--color-danger); color: var(--color-danger); border-radius: var(--radius-md); font-size: 13px; font-weight: 600; cursor: pointer; }
-        .btn-danger:hover { background: #fecaca; }
-        .btn-ghost { background: none; border: none; font-size: 12.5px; color: var(--color-primary); font-weight: 600; cursor: pointer; padding: 0; }
-        .btn-ghost:hover { text-decoration: underline; }
-      `}</style>
     </div>
   );
 }

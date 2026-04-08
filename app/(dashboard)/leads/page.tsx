@@ -5,104 +5,123 @@ export default function LeadsPage() {
     { name: "John Wick", mobile: "597366478", source: "WhatsApp", status: "Follow Up", assignedTo: "Nick D", date: "03-02-2026" },
   ];
 
-  const statusColor: Record<string, string> = {
-    "New Lead": "badge-primary",
-    "Hot Lead": "badge-warning",
-    "Follow Up": "badge-info",
-    "Closed": "badge-success",
-    "Not Interested": "badge-danger",
-    "RNR": "badge-muted",
+  const statusStyle: Record<string, { bg: string; color: string }> = {
+    "New Lead":       { bg: "var(--color-primary-light)", color: "var(--color-primary)" },
+    "Hot Lead":       { bg: "#fef3c7", color: "#b45309" },
+    "Follow Up":      { bg: "#dbeafe", color: "#1d4ed8" },
+    "Closed":         { bg: "#dcfce7", color: "#16a34a" },
+    "Not Interested": { bg: "#fee2e2", color: "#dc2626" },
+    "RNR":            { bg: "#f3f4f6", color: "var(--color-muted)" },
   };
 
+  const pipeline = [
+    { label: "New Leads", val: 100 },
+    { label: "Hot Leads", val: 320 },
+    { label: "Follow Up", val: 165 },
+    { label: "Closed", val: 38 },
+    { label: "Not Interested", val: 50 },
+    { label: "RNR", val: 50 },
+  ];
+
   return (
-    <div className="page-wrap">
-      <div className="page-actions">
+    <div className="flex flex-col gap-[22px]">
+      <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 700 }}>All Leads</h2>
-          <p className="text-muted" style={{ fontSize: 13 }}>723 total leads</p>
+          <h2 className="text-[16px] font-bold">All Leads</h2>
+          <p className="text-[13px]" style={{ color: "var(--color-muted)" }}>723 total leads</p>
         </div>
-        <div className="action-btns">
-          <button className="btn-outline">Bulk Upload CSV</button>
-          <button className="btn-outline">Filter</button>
-          <button className="btn-primary-sm">+ New Lead</button>
+        <div className="flex gap-2.5 flex-wrap">
+          <button
+            className="h-9 px-4 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer transition-all duration-150"
+            style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
+          >
+            Bulk Upload CSV
+          </button>
+          <button
+            className="h-9 px-4 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer transition-all duration-150"
+            style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
+          >
+            Filter
+          </button>
+          <button
+            className="h-9 px-4 text-[13px] font-semibold text-white rounded-[10px] border-none cursor-pointer"
+            style={{ background: "var(--color-primary)" }}
+          >
+            + New Lead
+          </button>
         </div>
       </div>
 
-      <div className="pipeline-summary">
-        {[
-          { label: "New Leads", val: 100 },
-          { label: "Hot Leads", val: 320 },
-          { label: "Follow Up", val: 165 },
-          { label: "Closed", val: 38 },
-          { label: "Not Interested", val: 50 },
-          { label: "RNR", val: 50 },
-        ].map((p) => (
-          <div key={p.label} className="pipe-chip surface">
-            <span className="pipe-chip-val">{p.val}</span>
-            <span className="pipe-chip-label">{p.label}</span>
+      <div className="flex gap-3 flex-wrap">
+        {pipeline.map((p) => (
+          <div
+            key={p.label}
+            className="flex flex-col gap-1 px-[18px] py-3.5 rounded-2xl border min-w-[100px]"
+            style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+          >
+            <span className="text-[22px] font-extrabold" style={{ color: "var(--color-text)" }}>{p.val}</span>
+            <span className="text-[11px] font-medium" style={{ color: "var(--color-muted)" }}>{p.label}</span>
           </div>
         ))}
       </div>
 
-      <div className="surface table-wrap">
-        <table className="leads-table">
+      <div
+        className="overflow-x-auto rounded-2xl border"
+        style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+      >
+        <table className="w-full border-collapse text-[13.5px]">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Mobile</th>
-              <th>Source</th>
-              <th>Status</th>
-              <th>Assigned To</th>
-              <th>Created</th>
-              <th>Actions</th>
+              {["Name", "Mobile", "Source", "Status", "Assigned To", "Created", "Actions"].map((h) => (
+                <th
+                  key={h}
+                  className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.05em]"
+                  style={{ color: "var(--color-muted)", borderBottom: "1px solid var(--color-border)", background: "var(--color-bg)" }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {leads.map((l) => (
-              <tr key={l.mobile}>
-                <td><span className="lead-name">{l.name}</span></td>
-                <td className="text-muted">{l.mobile}</td>
-                <td><span className="badge badge-muted">{l.source}</span></td>
-                <td><span className={`badge ${statusColor[l.status] ?? "badge-muted"}`}>{l.status}</span></td>
-                <td>{l.assignedTo}</td>
-                <td className="text-muted">{l.date}</td>
-                <td>
-                  <div className="row-actions">
-                    <button className="action-btn">View</button>
-                    <button className="action-btn danger">Delete</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {leads.map((l) => {
+              const s = statusStyle[l.status] ?? { bg: "#f3f4f6", color: "var(--color-muted)" };
+              return (
+                <tr key={l.mobile} className="hover:[&>td]:bg-[#fafbff]">
+                  <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                    <span className="font-semibold" style={{ color: "var(--color-text)" }}>{l.name}</span>
+                  </td>
+                  <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{l.mobile}</td>
+                  <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide" style={{ background: "#f3f4f6", color: "var(--color-muted)" }}>{l.source}</span>
+                  </td>
+                  <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide" style={{ background: s.bg, color: s.color }}>{l.status}</span>
+                  </td>
+                  <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>{l.assignedTo}</td>
+                  <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{l.date}</td>
+                  <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                    <div className="flex gap-2">
+                      <button
+                        className="px-3 py-1 rounded-[6px] text-[12px] font-semibold cursor-pointer bg-transparent transition-all duration-150"
+                        style={{ border: "1px solid var(--color-border)", color: "var(--color-primary)" }}
+                      >
+                        View
+                      </button>
+                      <button
+                        className="px-3 py-1 rounded-[6px] text-[12px] font-semibold cursor-pointer bg-transparent transition-all duration-150"
+                        style={{ border: "1px solid var(--color-border)", color: "var(--color-danger)" }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
-
-      <style>{`
-        .page-wrap { display: flex; flex-direction: column; gap: 22px; }
-        .page-actions { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-        .action-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-        .pipeline-summary { display: flex; gap: 12px; flex-wrap: wrap; }
-        .pipe-chip { padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; min-width: 100px; }
-        .pipe-chip-val { font-size: 22px; font-weight: 800; color: var(--color-text); }
-        .pipe-chip-label { font-size: 11px; color: var(--color-muted); font-weight: 500; }
-        .table-wrap { overflow-x: auto; padding: 0; }
-        .leads-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-        .leads-table th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--color-border); background: var(--color-bg); }
-        .leads-table td { padding: 13px 16px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
-        .leads-table tr:last-child td { border-bottom: none; }
-        .leads-table tr:hover td { background: #fafbff; }
-        .lead-name { font-weight: 600; color: var(--color-text); }
-        .row-actions { display: flex; gap: 8px; }
-        .action-btn { padding: 4px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: transparent; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--color-primary); transition: background 0.15s; }
-        .action-btn:hover { background: var(--color-primary-light); }
-        .action-btn.danger { color: var(--color-danger); }
-        .action-btn.danger:hover { background: #fee2e2; border-color: var(--color-danger); }
-        .btn-outline { height: 36px; padding: 0 16px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: transparent; font-size: 13px; font-weight: 600; color: var(--color-text); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
-        .btn-outline:hover { border-color: var(--color-primary); background: var(--color-primary-light); color: var(--color-primary); }
-        .btn-primary-sm { height: 36px; padding: 0 16px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; }
-        .btn-primary-sm:hover { background: var(--color-primary-dark); }
-      `}</style>
     </div>
   );
 }

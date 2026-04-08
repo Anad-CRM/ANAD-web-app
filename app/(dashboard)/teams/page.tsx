@@ -12,85 +12,129 @@ export default function TeamsPage() {
   ];
 
   return (
-    <div className="page-wrap">
-      <div className="page-actions">
+    <div className="flex flex-col gap-[22px]">
+      <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 700 }}>Teams</h2>
-          <p className="text-muted" style={{ fontSize: 13 }}>4 Teams · 42 Members · 3 Active</p>
+          <h2 className="text-[16px] font-bold">Teams</h2>
+          <p className="text-[13px]" style={{ color: "var(--color-muted)" }}>4 Teams · 42 Members · 3 Active</p>
         </div>
-        <div className="action-btns">
-          <button className="btn-outline">Invite Member</button>
-          <button className="btn-primary-sm">+ Create Team</button>
+        <div className="flex gap-2.5">
+          <button
+            className="h-[34px] px-3.5 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer"
+            style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
+          >
+            Invite Member
+          </button>
+          <button
+            className="h-[34px] px-4 text-[13px] font-semibold text-white rounded-[10px] border-none cursor-pointer"
+            style={{ background: "var(--color-primary)" }}
+          >
+            + Create Team
+          </button>
         </div>
       </div>
 
-      <div className="teams-grid">
+      <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
         {teams.map((t) => (
-          <div key={t.name} className="surface team-card">
-            <div className="team-card-header">
-              <div className="team-icon">{t.name[0]}</div>
-              <span className={`badge ${t.active ? "badge-success" : "badge-muted"}`}>
+          <div
+            key={t.name}
+            className="flex flex-col gap-2.5 p-5 rounded-2xl border"
+            style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+          >
+            <div className="flex items-center justify-between">
+              <div
+                className="w-[42px] h-[42px] rounded-[12px] flex items-center justify-center font-extrabold text-[18px]"
+                style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}
+              >
+                {t.name[0]}
+              </div>
+              <span
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
+                style={t.active ? { background: "#dcfce7", color: "#16a34a" } : { background: "#f3f4f6", color: "var(--color-muted)" }}
+              >
                 {t.active ? "Active" : "Inactive"}
               </span>
             </div>
-            <h4 className="team-name">{t.name}</h4>
-            <p className="text-muted" style={{ fontSize: 12 }}>{t.members} Members · {t.leads} Leads</p>
-            <div className="perf-wrap">
-              <div className="perf-bar-track">
-                <div className="perf-bar" style={{ width: `${t.performance}%` }} />
+            <h4 className="text-[15px] font-bold">{t.name}</h4>
+            <p className="text-[12px]" style={{ color: "var(--color-muted)" }}>{t.members} Members · {t.leads} Leads</p>
+            <div className="flex items-center gap-2.5 mt-1">
+              <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--color-border)" }}>
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${t.performance}%`, background: "linear-gradient(90deg, #4F6EF7, #7C5CFC)" }}
+                />
               </div>
-              <span className="perf-pct">{t.performance}%</span>
+              <span className="text-[12px] font-bold" style={{ color: "var(--color-primary)" }}>{t.performance}%</span>
             </div>
-            <div className="team-actions">
-              <button className="btn-ghost">View Details →</button>
-              <button className="btn-ghost">Assign Ads</button>
+            <div className="flex gap-3 mt-1">
+              <button className="bg-transparent border-none text-[12.5px] font-semibold cursor-pointer p-0 hover:underline" style={{ color: "var(--color-primary)" }}>View Details →</button>
+              <button className="bg-transparent border-none text-[12.5px] font-semibold cursor-pointer p-0 hover:underline" style={{ color: "var(--color-primary)" }}>Assign Ads</button>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="surface">
-        <div className="card-header" style={{ padding: "18px 20px 0" }}>
-          <h3>Staff Members</h3>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn-outline">Filter Present Staff</button>
-          </div>
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+      >
+        <div className="flex items-center justify-between px-5 pt-[18px] pb-3.5">
+          <h3 className="text-[15px] font-bold">Staff Members</h3>
+          <button
+            className="h-[34px] px-3.5 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer"
+            style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
+          >
+            Filter Present Staff
+          </button>
         </div>
-        <table className="staff-table">
+        <table className="w-full border-collapse text-[13.5px]">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Skill Level</th>
-              <th>Join Date</th>
-              <th>Attendance</th>
-              <th>Actions</th>
+              {["Name", "Role", "Skill Level", "Join Date", "Attendance", "Actions"].map((h) => (
+                <th
+                  key={h}
+                  className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.05em]"
+                  style={{ color: "var(--color-muted)", borderBottom: "1px solid var(--color-border)", background: "var(--color-bg)" }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {staff.map((s) => (
               <tr key={s.name}>
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div className="staff-av">{s.name[0]}</div>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold flex-shrink-0"
+                      style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}
+                    >
+                      {s.name[0]}
+                    </div>
                     <div>
-                      <p style={{ fontWeight: 600, fontSize: 14 }}>{s.name}</p>
-                      <p className="text-muted" style={{ fontSize: 12 }}>Joined {s.joinDate}</p>
+                      <p className="font-semibold text-[14px]">{s.name}</p>
+                      <p className="text-[12px]" style={{ color: "var(--color-muted)" }}>Joined {s.joinDate}</p>
                     </div>
                   </div>
                 </td>
-                <td><span className="badge badge-primary">{s.role}</span></td>
-                <td className="text-muted">{s.skillLevel}</td>
-                <td className="text-muted">{s.joinDate}</td>
-                <td>
-                  <span className={`badge ${s.absent ? "badge-danger" : "badge-success"}`}>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide" style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}>{s.role}</span>
+                </td>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{s.skillLevel}</td>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{s.joinDate}</td>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <span
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
+                    style={s.absent ? { background: "#fee2e2", color: "#dc2626" } : { background: "#dcfce7", color: "#16a34a" }}
+                  >
                     {s.absent ? "Absent" : "Present"}
                   </span>
                 </td>
-                <td>
-                  <div className="row-actions">
-                    <button className="action-btn">Profile</button>
-                    <button className="action-btn">Assign</button>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <div className="flex gap-2">
+                    <button className="px-3 py-1 rounded-[6px] text-[12px] font-semibold bg-transparent cursor-pointer" style={{ border: "1px solid var(--color-border)", color: "var(--color-primary)" }}>Profile</button>
+                    <button className="px-3 py-1 rounded-[6px] text-[12px] font-semibold bg-transparent cursor-pointer" style={{ border: "1px solid var(--color-border)", color: "var(--color-primary)" }}>Assign</button>
                   </div>
                 </td>
               </tr>
@@ -98,36 +142,6 @@ export default function TeamsPage() {
           </tbody>
         </table>
       </div>
-
-      <style>{`
-        .page-wrap { display: flex; flex-direction: column; gap: 22px; }
-        .page-actions { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-        .action-btns { display: flex; gap: 10px; }
-        .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-        .team-card { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .team-card-header { display: flex; align-items: center; justify-content: space-between; }
-        .team-icon { width: 42px; height: 42px; border-radius: 12px; background: var(--color-primary-light); color: var(--color-primary); font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-        .team-name { font-size: 15px; font-weight: 700; }
-        .perf-wrap { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-        .perf-bar-track { flex: 1; height: 6px; background: var(--color-border); border-radius: var(--radius-full); overflow: hidden; }
-        .perf-bar { height: 100%; border-radius: var(--radius-full); background: linear-gradient(90deg, #4F6EF7, #7C5CFC); }
-        .perf-pct { font-size: 12px; font-weight: 700; color: var(--color-primary); }
-        .team-actions { display: flex; gap: 12px; margin-top: 4px; }
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-        .card-header h3 { font-size: 15px; font-weight: 700; }
-        .staff-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-        .staff-table th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--color-border); background: var(--color-bg); }
-        .staff-table td { padding: 14px 16px; border-bottom: 1px solid var(--color-border); }
-        .staff-table tr:last-child td { border-bottom: none; }
-        .staff-av { width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .row-actions { display: flex; gap: 8px; }
-        .action-btn { padding: 4px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: transparent; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--color-primary); }
-        .action-btn:hover { background: var(--color-primary-light); }
-        .btn-outline { height: 34px; padding: 0 14px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: transparent; font-size: 13px; font-weight: 600; color: var(--color-text); cursor: pointer; }
-        .btn-outline:hover { border-color: var(--color-primary); color: var(--color-primary); }
-        .btn-primary-sm { height: 34px; padding: 0 16px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; }
-        .btn-ghost { background: none; border: none; font-size: 12.5px; color: var(--color-primary); font-weight: 600; cursor: pointer; padding: 0; }
-      `}</style>
     </div>
   );
 }

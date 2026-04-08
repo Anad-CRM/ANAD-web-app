@@ -22,13 +22,14 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="dash-loading">
-        <div className="dash-spinner" />
-        <style>{`
-          .dash-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--color-bg); }
-          .dash-spinner { width: 36px; height: 36px; border: 3px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
-          @keyframes spin { to { transform: rotate(360deg); } }
-        `}</style>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--color-bg)" }}>
+        <div
+          className="w-9 h-9 rounded-full border-[3px] animate-spin"
+          style={{
+            borderColor: "var(--color-border)",
+            borderTopColor: "var(--color-primary)",
+          }}
+        />
       </div>
     );
   }
@@ -36,18 +37,12 @@ export default function DashboardLayout({
   if (!isAuthenticated) return null;
 
   return (
-    <div className="dash-shell">
+    <div className="flex min-h-screen">
       <Sidebar />
-      <div className="dash-main">
+      <div className="flex-1 flex flex-col min-w-0 overflow-auto">
         <Topbar />
-        <main className="dash-content">{children}</main>
+        <main className="flex-1 p-7">{children}</main>
       </div>
-
-      <style>{`
-        .dash-shell { display: flex; min-height: 100vh; }
-        .dash-main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: auto; }
-        .dash-content { flex: 1; padding: 28px; }
-      `}</style>
     </div>
   );
 }

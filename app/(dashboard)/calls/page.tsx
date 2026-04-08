@@ -18,105 +18,110 @@ export default function CallsPage() {
   ];
 
   return (
-    <div className="page-wrap">
-      <div className="stats-grid">
+    <div className="flex flex-col gap-[22px]">
+      <div className="grid gap-3.5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
         {statCards.map((s) => (
-          <div key={s.label} className="stat-card surface">
-            <p className="stat-label">{s.label}</p>
-            <p className="stat-val">{s.val}</p>
-            <p className="text-muted" style={{ fontSize: 12 }}>{s.sub}</p>
+          <div
+            key={s.label}
+            className="flex flex-col gap-1.5 px-5 py-[18px] rounded-2xl border"
+            style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+          >
+            <p className="text-[12px] font-semibold uppercase tracking-[0.05em]" style={{ color: "var(--color-muted)" }}>{s.label}</p>
+            <p className="text-[28px] font-extrabold leading-none" style={{ color: "var(--color-text)" }}>{s.val}</p>
+            <p className="text-[12px]" style={{ color: "var(--color-muted)" }}>{s.sub}</p>
           </div>
         ))}
       </div>
 
-      <div className="surface chart-card">
-        <div className="card-header">
-          <h3>Calls Over Time</h3>
-          <div className="chart-legend">
-            <span className="legend-dot" style={{ background: "#4F6EF7" }} /> Incoming
-            <span className="legend-dot" style={{ background: "#F59E0B" }} /> Outgoing
-            <span className="legend-dot" style={{ background: "#EF4444" }} /> Missed
+      <div
+        className="p-[22px] rounded-2xl border"
+        style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-[15px] font-bold">Calls Over Time</h3>
+          <div className="flex items-center gap-3.5 text-[12px]" style={{ color: "var(--color-muted)" }}>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#4F6EF7" }} /> Incoming
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#F59E0B" }} /> Outgoing
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#EF4444" }} /> Missed
+            </span>
           </div>
         </div>
-        <div className="bar-chart">
+        <div className="flex items-end gap-3 h-40 pt-2.5">
           {days.map((d, i) => (
-            <div key={d} className="bar-col">
-              <div className="bar-outer">
+            <div key={d} className="flex flex-col items-center gap-1.5 flex-1 h-full">
+              <div className="flex-1 w-full flex items-end rounded-[6px] overflow-hidden" style={{ background: "var(--color-bg)" }}>
                 <div
-                  className="bar-inner"
+                  className="w-full rounded-[6px_6px_0_0] transition-all duration-500"
                   style={{
                     height: `${(data[i] / maxVal) * 100}%`,
                     background: "linear-gradient(180deg, #4F6EF7, #7C5CFC)",
                   }}
                 />
               </div>
-              <span className="bar-label">{d}</span>
+              <span className="text-[11px]" style={{ color: "var(--color-muted)" }}>{d}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="surface table-wrap">
-        <div className="card-header" style={{ padding: "18px 20px 0" }}>
-          <h3>Detailed Call Breakdown</h3>
-          <button className="btn-outline">Export Report</button>
+      <div
+        className="overflow-x-auto rounded-2xl border"
+        style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+      >
+        <div className="flex items-center justify-between px-5 pt-[18px] pb-0 mb-0">
+          <h3 className="text-[15px] font-bold">Detailed Call Breakdown</h3>
+          <button
+            className="h-[34px] px-3.5 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer"
+            style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
+          >
+            Export Report
+          </button>
         </div>
-        <table className="calls-table">
+        <table className="w-full border-collapse text-[13.5px] mt-3">
           <thead>
             <tr>
-              <th>Staff Member</th>
-              <th>Total Calls</th>
-              <th>Incoming</th>
-              <th>Outgoing</th>
-              <th>Missed</th>
-              <th>Avg Duration</th>
+              {["Staff Member", "Total Calls", "Incoming", "Outgoing", "Missed", "Avg Duration"].map((h) => (
+                <th
+                  key={h}
+                  className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.05em]"
+                  style={{ color: "var(--color-muted)", borderBottom: "1px solid var(--color-border)", background: "var(--color-bg)" }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {staff.map((s) => (
               <tr key={s.name}>
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div className="staff-av">{s.name[0]}</div>
-                    <span style={{ fontWeight: 600 }}>{s.name}</span>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[12px] font-bold flex-shrink-0"
+                      style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}
+                    >
+                      {s.name[0]}
+                    </div>
+                    <span className="font-semibold">{s.name}</span>
                   </div>
                 </td>
-                <td style={{ fontWeight: 700 }}>{s.calls}</td>
-                <td className="text-muted">{s.incoming}</td>
-                <td className="text-muted">{s.outgoing}</td>
-                <td><span className="badge badge-danger">{s.missed}</span></td>
-                <td className="text-muted">{s.duration}</td>
+                <td className="px-4 py-3.5 font-bold" style={{ borderBottom: "1px solid var(--color-border)" }}>{s.calls}</td>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{s.incoming}</td>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{s.outgoing}</td>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide" style={{ background: "#fee2e2", color: "#dc2626" }}>{s.missed}</span>
+                </td>
+                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{s.duration}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <style>{`
-        .page-wrap { display: flex; flex-direction: column; gap: 22px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
-        .stat-card { padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
-        .stat-label { font-size: 12px; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-        .stat-val { font-size: 28px; font-weight: 800; color: var(--color-text); line-height: 1; }
-        .chart-card { padding: 22px; }
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .card-header h3 { font-size: 15px; font-weight: 700; }
-        .chart-legend { display: flex; align-items: center; gap: 14px; font-size: 12px; color: var(--color-muted); }
-        .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
-        .bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 160px; padding-top: 10px; }
-        .bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; height: 100%; }
-        .bar-outer { flex: 1; width: 100%; display: flex; align-items: flex-end; background: var(--color-bg); border-radius: 6px; overflow: hidden; }
-        .bar-inner { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.4s var(--ease); }
-        .bar-label { font-size: 11px; color: var(--color-muted); }
-        .table-wrap { overflow-x: auto; }
-        .calls-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-        .calls-table th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--color-border); background: var(--color-bg); }
-        .calls-table td { padding: 13px 16px; border-bottom: 1px solid var(--color-border); }
-        .calls-table tr:last-child td { border-bottom: none; }
-        .staff-av { width: 30px; height: 30px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .btn-outline { height: 34px; padding: 0 14px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: transparent; font-size: 13px; font-weight: 600; color: var(--color-text); cursor: pointer; }
-        .btn-outline:hover { border-color: var(--color-primary); background: var(--color-primary-light); color: var(--color-primary); }
-      `}</style>
     </div>
   );
 }

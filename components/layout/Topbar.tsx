@@ -27,77 +27,73 @@ export default function Topbar() {
   });
 
   return (
-    <header className="topbar">
-      <div className="topbar-left">
-        <h1 className="topbar-title">{pageTitle}</h1>
-        <p className="topbar-date">{today}</p>
+    <header
+      className="flex items-center gap-5 px-7 sticky top-0 z-40"
+      style={{
+        height: "var(--topbar-height)",
+        background: "var(--color-surface)",
+        borderBottom: "1px solid var(--color-border)",
+      }}
+    >
+      <div className="flex-1 flex flex-col gap-px">
+        <h1 className="text-[18px] font-extrabold leading-tight" style={{ color: "var(--color-text)" }}>
+          {pageTitle}
+        </h1>
+        <p className="text-[12px]" style={{ color: "var(--color-muted)" }}>{today}</p>
       </div>
 
-      <div className="topbar-right">
-        <div className="topbar-search">
-          <span className="search-icon">⌕</span>
-          <input placeholder="Search leads, teams, staff…" />
+      <div className="flex items-center gap-3">
+        <div
+          className="flex items-center gap-2 h-9 px-3.5 rounded-full min-w-[220px] transition-all duration-200"
+          style={{
+            background: "var(--color-bg)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <span className="text-base" style={{ color: "var(--color-subtle)" }}>⌕</span>
+          <input
+            placeholder="Search leads, teams, staff…"
+            className="border-none bg-transparent text-[13px] flex-1 outline-none"
+            style={{ color: "var(--color-text)" }}
+          />
         </div>
 
-        <button className="topbar-icon-btn" aria-label="Notifications">
+        <button
+          className="relative flex items-center justify-center w-9 h-9 rounded-full cursor-pointer text-[15px] transition-all duration-150"
+          aria-label="Notifications"
+          style={{
+            background: "var(--color-bg)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
           <span>🔔</span>
-          <span className="notif-badge">3</span>
+          <span
+            className="absolute flex items-center justify-center text-white font-bold rounded-full"
+            style={{
+              top: -3,
+              right: -3,
+              width: 15,
+              height: 15,
+              fontSize: 9,
+              background: "var(--color-danger)",
+              border: "1.5px solid #fff",
+            }}
+          >
+            3
+          </span>
         </button>
 
-        <div className="topbar-avatar" title={user?.name ?? "Profile"}>
+        <div
+          className="flex items-center justify-center w-9 h-9 rounded-full text-[14px] font-bold text-white cursor-pointer"
+          title={user?.name ?? "Profile"}
+          style={{
+            background: "var(--color-primary)",
+            boxShadow: "0 2px 8px rgba(79,110,247,0.25)",
+          }}
+        >
           {user?.name?.[0]?.toUpperCase() ?? "U"}
         </div>
       </div>
-
-      <style>{`
-        .topbar {
-          height: var(--topbar-height);
-          background: var(--color-surface);
-          border-bottom: 1px solid var(--color-border);
-          display: flex; align-items: center;
-          padding: 0 28px; gap: 20px;
-          position: sticky; top: 0; z-index: 40;
-        }
-        .topbar-left { flex: 1; display: flex; flex-direction: column; gap: 1px; }
-        .topbar-title { font-size: 18px; font-weight: 800; color: var(--color-text); line-height: 1.2; }
-        .topbar-date { font-size: 12px; color: var(--color-muted); }
-        .topbar-right { display: flex; align-items: center; gap: 12px; }
-        .topbar-search {
-          display: flex; align-items: center; gap: 8px;
-          height: 36px; padding: 0 14px;
-          background: var(--color-bg);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-full);
-          min-width: 220px;
-          transition: border-color 0.18s, box-shadow 0.18s;
-        }
-        .topbar-search:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(79,110,247,0.1); }
-        .search-icon { color: var(--color-subtle); font-size: 16px; }
-        .topbar-search input { border: none; background: transparent; font-size: 13px; color: var(--color-text); flex: 1; outline: none; }
-        .topbar-icon-btn {
-          width: 36px; height: 36px;
-          background: var(--color-bg); border: 1px solid var(--color-border);
-          border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          cursor: pointer; font-size: 15px; position: relative;
-          transition: background 0.15s, border-color 0.15s;
-        }
-        .topbar-icon-btn:hover { background: var(--color-primary-light); border-color: var(--color-primary); }
-        .notif-badge {
-          position: absolute; top: -3px; right: -3px;
-          background: var(--color-danger); color: #fff;
-          font-size: 9px; font-weight: 700;
-          width: 15px; height: 15px; border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
-          border: 1.5px solid #fff;
-        }
-        .topbar-avatar {
-          width: 36px; height: 36px; border-radius: 50%;
-          background: var(--color-primary);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 14px; font-weight: 700; color: #fff; cursor: pointer;
-          box-shadow: 0 2px 8px rgba(79,110,247,0.25);
-        }
-      `}</style>
     </header>
   );
 }

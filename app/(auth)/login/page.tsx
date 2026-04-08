@@ -4,8 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 
-type Role = "organization" | "individual" | "student";
-
 export default function LoginPage() {
   const { login, isPending, error } = useAuth();
   const [email, setEmail] = useState("");
@@ -18,220 +16,90 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="card-top">
-        <h2 className="card-title">Welcome Back</h2>
-        <p className="card-sub">Login here</p>
+      <div className="px-8 pt-8 pb-6" style={{ background: "#F6F6F6", borderRadius: "22px 22px 0 0" }}>
+        <h2 className="text-[20px] font-extrabold m-0 mb-1" style={{ color: "#0D1B3E" }}>
+          Welcome Back
+        </h2>
+        <p className="text-[13px] m-0" style={{ color: "#5A7190" }}>Login here</p>
       </div>
-      <div className="card-bottom">
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="field-group">
-            <label className="field-label">Email</label>
+
+      <div className="px-8 pt-7 pb-8" style={{ background: "#D6E4F0", borderRadius: "0 0 22px 22px" }}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-semibold pl-0.5" style={{ color: "#0D1B3E" }}>Email</label>
             <input
               type="email"
-              placeholder=""
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="field-input"
+              className="w-full h-[45px] px-3.5 border-none rounded-[15px] text-[14px] outline-none transition-shadow duration-200 box-border"
+              style={{ background: "#F6F6F6", color: "#0D1B3E" }}
+              onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 2px rgba(22, 49, 114, 0.25)")}
+              onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
             />
           </div>
 
-          <div className="field-group">
-            <label className="field-label">Password</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-semibold pl-0.5" style={{ color: "#0D1B3E" }}>Password</label>
             <input
               type="password"
-              placeholder=""
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="field-input"
+              className="w-full h-[45px] px-3.5 border-none rounded-[15px] text-[14px] outline-none transition-shadow duration-200 box-border"
+              style={{ background: "#F6F6F6", color: "#0D1B3E" }}
+              onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 2px rgba(22, 49, 114, 0.25)")}
+              onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
             />
           </div>
 
-          <div className="forgot-row">
-            <Link href="/forgot-password" className="forgot-link">
+          <div className="flex justify-end -mt-1.5">
+            <Link href="/forgot-password" className="text-[12.5px] font-semibold no-underline hover:underline" style={{ color: "#163172" }}>
               Forgot Password
             </Link>
           </div>
 
-          {error && <p className="error-msg">{error}</p>}
+          {error && (
+            <p className="text-[12.5px] rounded-lg px-3 py-2 m-0" style={{ color: "#c0392b", background: "rgba(255,255,255,0.7)" }}>
+              {error}
+            </p>
+          )}
 
-          <button type="submit" className="btn-signin" disabled={isPending}>
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full h-[45px] border-none rounded-[15px] text-[14px] font-bold text-white cursor-pointer tracking-[0.01em] transition-all duration-200 disabled:opacity-65 disabled:cursor-not-allowed hover:enabled:opacity-90 hover:enabled:-translate-y-px"
+            style={{ background: "#163172", boxShadow: "0 4px 8px rgba(0,0,0,0.25)" }}
+          >
             {isPending ? "Signing in…" : "Sign in"}
           </button>
 
-          <div className="divider">
-            <span>Or</span>
+          <div className="flex items-center gap-2.5 text-[12px] select-none before:flex-1 before:h-px after:flex-1 after:h-px" style={{ color: "#5A7190", ['--tw-content' as string]: "''" }}>
+            <div className="flex items-center gap-2.5" style={{ color: "#5A7190" }}>
+              <span className="flex-1 h-px" style={{ background: "rgba(22, 49, 114, 0.2)" }} />
+              <span className="text-[12px]">Or</span>
+              <span className="flex-1 h-px" style={{ background: "rgba(22, 49, 114, 0.2)" }} />
+            </div>
           </div>
 
-          <button type="button" className="btn-google" disabled={isPending}>
+          <button
+            type="button"
+            disabled={isPending}
+            className="w-full h-[45px] border-none rounded-[15px] text-[14px] font-bold text-white cursor-pointer tracking-[0.01em] transition-opacity duration-200 disabled:opacity-65 disabled:cursor-not-allowed hover:enabled:opacity-90"
+            style={{ background: "#1E56A0", boxShadow: "0 4px 8px rgba(0,0,0,0.25)" }}
+          >
             Login With Google
           </button>
         </form>
 
-        <div className="create-row">
-          <Link href="/signup" className="create-link">
+        <div className="text-center mt-5">
+          <Link href="/signup" className="text-[13px] font-semibold no-underline hover:underline" style={{ color: "#163172" }}>
             Create New Account
           </Link>
         </div>
       </div>
-
-      <style>{`
-        /* ── Top section: off-white ── */
-        .card-top {
-          background: #F6F6F6;
-          padding: 32px 32px 24px;
-          border-radius: 22px 22px 0 0;
-        }
-        .card-title {
-          font-size: 20px;
-          font-weight: 800;
-          color: #0D1B3E;
-          margin: 0 0 4px;
-        }
-        .card-sub {
-          font-size: 13px;
-          color: #5A7190;
-          margin: 0;
-        }
-
-        /* ── Bottom section: #D6E4F0 light blue ── */
-        .card-bottom {
-          background: #D6E4F0;
-          padding: 28px 32px 32px;
-          border-radius: 22px 22px 22px 22px;
-        }
-
-        /* ── Form ── */
-        .login-form {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        }
-
-        /* Fields */
-        .field-group {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-        .field-label {
-          font-size: 13px;
-          font-weight: 600;
-          color: #0D1B3E;
-          padding-left: 2px;
-        }
-        .field-input {
-          width: 100%;
-          height: 45px;
-          padding: 0 14px;
-          background: #F6F6F6;
-          border: none;
-          border-radius: 15px;
-          font-size: 14px;
-          color: #0D1B3E;
-          outline: none;
-          box-sizing: border-box;
-          transition: box-shadow 0.18s;
-        }
-        .field-input:focus {
-          box-shadow: 0 0 0 2px rgba(22, 49, 114, 0.25);
-        }
-
-        /* Forgot */
-        .forgot-row {
-          display: flex;
-          justify-content: flex-end;
-          margin-top: -6px;
-        }
-        .forgot-link {
-          font-size: 12.5px;
-          color: #163172;
-          font-weight: 600;
-          text-decoration: none;
-        }
-        .forgot-link:hover { text-decoration: underline; }
-
-        /* Error */
-        .error-msg {
-          font-size: 12.5px;
-          color: #c0392b;
-          background: rgba(255,255,255,0.7);
-          border-radius: 8px;
-          padding: 8px 12px;
-          margin: 0;
-        }
-
-        /* Sign in — #163172 dark navy */
-        .btn-signin {
-          width: 100%;
-          height: 45px;
-          background: #163172;
-          color: #fff;
-          border: none;
-          border-radius: 15px;
-          font-size: 14px;
-          font-weight: 700;
-          cursor: pointer;
-          letter-spacing: 0.01em;
-          transition: opacity 0.18s, transform 0.1s;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-        }
-        .btn-signin:hover:not(:disabled) {
-          opacity: 0.9;
-          transform: translateY(-1px);
-        }
-        .btn-signin:disabled { opacity: 0.65; cursor: not-allowed; }
-
-        /* Or */
-        .divider {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: #5A7190;
-          font-size: 12px;
-          user-select: none;
-        }
-        .divider::before, .divider::after {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: rgba(22, 49, 114, 0.2);
-        }
-
-        /* Google — #1E56A0 medium blue */
-        .btn-google {
-          width: 100%;
-          height: 45px;
-          background: #1E56A0;
-          color: #fff;
-          border: none;
-          border-radius: 15px;
-          font-size: 14px;
-          font-weight: 700;
-          cursor: pointer;
-          letter-spacing: 0.01em;
-          transition: opacity 0.18s;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-        }
-        .btn-google:hover:not(:disabled) { opacity: 0.9; }
-        .btn-google:disabled { opacity: 0.65; cursor: not-allowed; }
-
-        /* Create account */
-        .create-row {
-          text-align: center;
-          margin-top: 20px;
-        }
-        .create-link {
-          font-size: 13px;
-          color: #163172;
-          font-weight: 600;
-          text-decoration: none;
-        }
-        .create-link:hover { text-decoration: underline; }
-      `}</style>
     </>
   );
 }

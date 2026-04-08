@@ -1,57 +1,46 @@
 @import "tailwindcss";
 
-/* ─── Design Tokens ─────────────────────────────────────────────── */
 :root {
-  /* Brand palette — exact Figma values */
-  --color-primary:       #1E56A0;   /* medium blue — right panel, Google btn */
-  --color-primary-dark:  #163172;   /* dark navy — page bg, Sign In btn */
-  --color-primary-light: #D6E4F0;   /* light blue — card bottom section */
-  --color-primary-xlight:#EEF4FB;   /* very light blue tint */
-  --color-card:          #F6F6F6;   /* card / input background */
+  --color-primary:       #1E56A0;
+  --color-primary-dark:  #163172;
+  --color-primary-light: #D6E4F0;
+  --color-primary-xlight:#EEF4FB;
+  --color-card:          #F6F6F6;
   --color-accent:        #1E56A0;
 
-
-  /* Semantics */
   --color-success:  #22C55E;
   --color-warning:  #F59E0B;
   --color-danger:   #EF4444;
   --color-info:     #3B82F6;
 
-  /* Neutrals */
-  --color-bg:        #F7F8FA;       /* off-white from swatch */
+  --color-bg:        #F7F8FA;
   --color-surface:   #FFFFFF;
-  --color-border:    #D6E4F0;       /* blue-tinted border */
-  --color-text:      #0D1B3E;       /* near-black navy */
+  --color-border:    #D6E4F0;
+  --color-text:      #0D1B3E;
   --color-muted:     #5A7190;
   --color-subtle:    #8BA5C0;
 
-  /* Sidebar */
   --sidebar-width:       240px;
-  --sidebar-bg:          #1B3A7A;   /* dark navy */
+  --sidebar-bg:          #1B3A7A;
   --sidebar-text:        #C8DAEE;
   --sidebar-active-bg:   rgba(31, 93, 173, 0.25);
   --sidebar-active-text: #CCDFF0;
 
-  /* Topbar */
   --topbar-height: 64px;
 
-  /* Radius */
   --radius-sm:  6px;
   --radius-md:  10px;
   --radius-lg:  16px;
   --radius-xl:  24px;
   --radius-full: 9999px;
 
-  /* Shadow */
   --shadow-sm:  0 1px 3px rgba(27,58,122,0.08);
   --shadow-md:  0 4px 12px rgba(27,58,122,0.10);
   --shadow-lg:  0 8px 24px rgba(27,58,122,0.14);
 
-  /* Transition */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ─── Base ───────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { font-size: 16px; -webkit-font-smoothing: antialiased; }
@@ -63,35 +52,6 @@ body {
   line-height: 1.5;
 }
 
-/* ─── Scrollbar ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
-
-/* ─── Utilities ──────────────────────────────────────────────────── */
-.surface {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border);
-}
-
-.text-muted { color: var(--color-muted); }
-.text-subtle { color: var(--color-subtle); }
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.badge-success { background: #dcfce7; color: #16a34a; }
-.badge-warning { background: #fef3c7; color: #b45309; }
-.badge-danger  { background: #fee2e2; color: #dc2626; }
-.badge-info    { background: #dbeafe; color: #1d4ed8; }
-.badge-primary { background: var(--color-primary-light); color: var(--color-primary); }
-.badge-muted   { background: #f3f4f6; color: var(--color-muted); }

@@ -16,14 +16,24 @@ export default function OverviewPage() {
   ];
 
   return (
-    <div className="page-wrap">
-      <div className="stats-grid">
+    <div className="flex flex-col gap-6">
+      <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
         {stats.map((s) => (
-          <div key={s.label} className="stat-card surface">
-            <p className="stat-label">{s.label}</p>
-            <div className="stat-row">
-              <span className="stat-val">{s.value}</span>
-              <span className={`badge ${s.positive ? "badge-success" : "badge-danger"}`}>
+          <div
+            key={s.label}
+            className="flex flex-col gap-2.5 px-[22px] py-5 rounded-2xl border"
+            style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+          >
+            <p className="text-[13px] font-semibold" style={{ color: "var(--color-muted)" }}>{s.label}</p>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="text-[30px] font-extrabold leading-none" style={{ color: "var(--color-text)" }}>{s.value}</span>
+              <span
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
+                style={{
+                  background: s.positive ? "#dcfce7" : "#fee2e2",
+                  color: s.positive ? "#16a34a" : "#dc2626",
+                }}
+              >
                 {s.change}
               </span>
             </div>
@@ -31,114 +41,126 @@ export default function OverviewPage() {
         ))}
       </div>
 
-      <div className="main-grid">
-        <div className="surface pipeline-card">
-          <div className="card-header">
-            <h3>Lead Pipeline</h3>
-            <button className="btn-outline">Export Report</button>
+      <div className="grid gap-5" style={{ gridTemplateColumns: "1fr 320px" }}>
+        <div
+          className="p-[22px] rounded-2xl border"
+          style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+        >
+          <div className="flex items-center justify-between mb-[18px]">
+            <h3 className="text-[15px] font-bold">Lead Pipeline</h3>
+            <button
+              className="h-[34px] px-4 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer transition-all duration-150"
+              style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
+            >
+              Export Report
+            </button>
           </div>
-          <div className="pipeline-bars">
+          <div className="flex flex-col gap-3.5">
             {pipeline.map((p) => (
-              <div key={p.stage} className="pipeline-row">
-                <span className="pipe-label">{p.stage}</span>
-                <div className="pipe-track">
+              <div key={p.stage} className="flex items-center gap-3">
+                <span className="text-[12.5px] w-[110px] flex-shrink-0" style={{ color: "var(--color-muted)" }}>{p.stage}</span>
+                <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--color-border)" }}>
                   <div
-                    className="pipe-fill"
-                    style={{
-                      width: `${(p.count / 400) * 100}%`,
-                      background: p.color,
-                    }}
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${(p.count / 400) * 100}%`, background: p.color }}
                   />
                 </div>
-                <span className="pipe-count">{p.count}</span>
+                <span className="text-[13px] font-bold w-9 text-right" style={{ color: "var(--color-text)" }}>{p.count}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="side-cards">
-          <div className="surface eod-card">
-            <div className="eod-badge badge badge-success">Automatic EOD Mode Active</div>
-            <p className="eod-desc">
-              EOD reports for all staff are generated automatically. Go to EOD
-              settings to switch to manual mode.
+        <div className="flex flex-col gap-4">
+          <div
+            className="p-5 rounded-2xl border flex flex-col gap-2.5"
+            style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+          >
+            <span
+              className="self-start inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
+              style={{ background: "#dcfce7", color: "#16a34a" }}
+            >
+              Automatic EOD Mode Active
+            </span>
+            <p className="text-[13px] leading-relaxed" style={{ color: "var(--color-muted)" }}>
+              EOD reports for all staff are generated automatically. Go to EOD settings to switch to manual mode.
             </p>
           </div>
 
-          <div className="surface auto-card">
-            <h4>Smart Auto Assign</h4>
-            <p className="text-muted" style={{ fontSize: 13 }}>
-              System first checks which team members are present today.
-              Intelligently distributes leads based on availability, skill level,
-              and timing.
+          <div
+            className="p-5 rounded-2xl border flex flex-col gap-2.5"
+            style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+          >
+            <h4 className="text-[14px] font-bold">Smart Auto Assign</h4>
+            <p className="text-[13px] leading-relaxed" style={{ color: "var(--color-muted)" }}>
+              System first checks which team members are present today. Intelligently distributes leads based on availability, skill level, and timing.
             </p>
-            <button className="btn-primary-sm">Configure</button>
+            <button
+              className="self-start h-[34px] px-4 text-[13px] font-semibold text-white rounded-[10px] border-none cursor-pointer"
+              style={{ background: "var(--color-primary)" }}
+            >
+              Configure
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="surface teams-card">
-        <div className="card-header">
-          <h3>Team Overview</h3>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn-outline">Create Team</button>
-            <button className="btn-primary-sm">Invite Member</button>
+      <div
+        className="p-[22px] rounded-2xl border"
+        style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
+      >
+        <div className="flex items-center justify-between mb-[18px]">
+          <h3 className="text-[15px] font-bold">Team Overview</h3>
+          <div className="flex gap-2">
+            <button
+              className="h-[34px] px-4 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer"
+              style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
+            >
+              Create Team
+            </button>
+            <button
+              className="h-[34px] px-4 text-[13px] font-semibold text-white rounded-[10px] border-none cursor-pointer"
+              style={{ background: "var(--color-primary)" }}
+            >
+              Invite Member
+            </button>
           </div>
         </div>
-        <div className="teams-grid">
+        <div className="flex flex-col gap-3">
           {["Client Onboarding Team", "Market Research Team", "Sales Team"].map((team) => (
-            <div key={team} className="team-row">
-              <div className="team-info">
-                <div className="team-avatar">{team[0]}</div>
+            <div
+              key={team}
+              className="flex items-center gap-4 px-4 py-3 rounded-[10px]"
+              style={{ background: "var(--color-bg)" }}
+            >
+              <div className="flex items-center gap-3 flex-1">
+                <div
+                  className="w-9 h-9 rounded-[10px] flex items-center justify-center font-bold text-[15px]"
+                  style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}
+                >
+                  {team[0]}
+                </div>
                 <div>
-                  <p className="team-name">{team}</p>
-                  <p className="text-muted" style={{ fontSize: 12 }}>8 Members</p>
+                  <p className="text-[14px] font-semibold">{team}</p>
+                  <p className="text-[12px]" style={{ color: "var(--color-muted)" }}>8 Members</p>
                 </div>
               </div>
-              <span className="badge badge-primary">Active</span>
-              <button className="btn-ghost">View Details →</button>
+              <span
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
+                style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}
+              >
+                Active
+              </span>
+              <button
+                className="bg-transparent border-none text-[13px] font-semibold cursor-pointer hover:underline"
+                style={{ color: "var(--color-primary)" }}
+              >
+                View Details →
+              </button>
             </div>
           ))}
         </div>
       </div>
-
-      <style>{`
-        .page-wrap { display: flex; flex-direction: column; gap: 24px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
-        .stat-card { padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; }
-        .stat-label { font-size: 13px; font-weight: 600; color: var(--color-muted); }
-        .stat-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .stat-val { font-size: 30px; font-weight: 800; color: var(--color-text); line-height: 1; }
-        .main-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
-        @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-        .card-header h3 { font-size: 15px; font-weight: 700; }
-        .pipeline-card { padding: 22px; }
-        .pipeline-bars { display: flex; flex-direction: column; gap: 14px; }
-        .pipeline-row { display: flex; align-items: center; gap: 12px; }
-        .pipe-label { font-size: 12.5px; color: var(--color-muted); width: 110px; flex-shrink: 0; }
-        .pipe-track { flex: 1; height: 8px; background: var(--color-border); border-radius: var(--radius-full); overflow: hidden; }
-        .pipe-fill { height: 100%; border-radius: var(--radius-full); transition: width 0.4s var(--ease); }
-        .pipe-count { font-size: 13px; font-weight: 700; color: var(--color-text); width: 36px; text-align: right; }
-        .side-cards { display: flex; flex-direction: column; gap: 16px; }
-        .eod-card { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .eod-badge { align-self: flex-start; }
-        .eod-desc { font-size: 13px; color: var(--color-muted); line-height: 1.6; }
-        .auto-card { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .auto-card h4 { font-size: 14px; font-weight: 700; }
-        .teams-card { padding: 22px; }
-        .teams-grid { display: flex; flex-direction: column; gap: 12px; }
-        .team-row { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: var(--color-bg); border-radius: var(--radius-md); }
-        .team-info { display: flex; align-items: center; gap: 12px; flex: 1; }
-        .team-avatar { width: 36px; height: 36px; border-radius: 10px; background: var(--color-primary-light); color: var(--color-primary); font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; }
-        .team-name { font-size: 14px; font-weight: 600; }
-        .btn-outline { height: 34px; padding: 0 16px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: transparent; font-size: 13px; font-weight: 600; color: var(--color-text); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
-        .btn-outline:hover { border-color: var(--color-primary); background: var(--color-primary-light); color: var(--color-primary); }
-        .btn-primary-sm { height: 34px; padding: 0 16px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; transition: background 0.15s; }
-        .btn-primary-sm:hover { background: var(--color-primary-dark); }
-        .btn-ghost { background: none; border: none; font-size: 13px; color: var(--color-primary); font-weight: 600; cursor: pointer; }
-        .btn-ghost:hover { text-decoration: underline; }
-      `}</style>
     </div>
   );
 }
