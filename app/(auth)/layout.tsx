@@ -1,43 +1,24 @@
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="min-h-screen flex" style={{ background: "#163172", fontFamily: "'Inter', sans-serif" }}>
-      <div className="hidden md:flex flex-1 items-center justify-center" style={{ background: "#163172" }}>
-        <img
-          src="/login/login.png"
-          alt="ANAD CRM"
-          className="h-auto rounded-[26px]"
-          style={{ width: "clamp(100px, 18vw, 170px)" }}
-        />
-      </div>
+import React from "react";
 
-      <div
-        className="relative flex-1 flex items-center justify-center py-12 px-7 min-h-screen md:rounded-[60px_0_0_60px]"
-        style={{ background: "#1E56A0" }}
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#163172] overflow-hidden">
+      <svg
+        className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none hidden md:block"
+        viewBox="0 0 1440 1024"
+        preserveAspectRatio="xMidYMid slice"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <div
-          className="absolute pointer-events-none rounded-full"
-          style={{
-            top: -28,
-            left: -28,
-            width: 106,
-            height: 106,
-            background: "rgba(30, 86, 160, 0.2)",
-          }}
-        />
-        <div
-          className="relative w-full max-w-[500px] overflow-hidden"
-          style={{
-            background: "#F6F6F6",
-            borderRadius: 22,
-            boxShadow: "-7px 8px 24px rgba(0,0,0,0.18)",
-          }}
-        >
-          {children}
-        </div>
+        <path d="M651 190C651 82.8568 737.857 -4 845 -4H1443V1020H845C737.857 1020 651 933.143 651 826V190Z" fill="#1E56A0" />
+        
+        <path fillRule="evenodd" clipRule="evenodd" d="M251.166 426.833C241.795 426.833 232.808 430.556 226.182 437.182C219.556 443.808 215.833 452.795 215.833 462.166V585.833C215.833 595.204 219.556 604.191 226.182 610.817C232.808 617.444 241.795 621.166 251.166 621.166H374.833C384.204 621.166 393.191 617.444 399.817 610.817C406.444 604.191 410.166 595.204 410.166 585.833V462.166C410.166 452.795 406.444 443.808 399.817 437.182C393.191 430.556 384.204 426.833 374.833 426.833H251.166ZM383.666 524C383.666 542.742 376.221 560.716 362.969 573.969C349.716 587.221 331.742 594.666 313 594.666C294.258 594.666 276.283 587.221 263.031 573.969C249.778 560.716 242.333 542.742 242.333 524C242.333 505.258 249.778 487.283 263.031 474.031C276.283 460.778 294.258 453.333 313 453.333C331.742 453.333 349.716 460.778 362.969 474.031C376.221 487.283 383.666 505.258 383.666 524ZM276.112 527.401C279.557 526.544 283.037 528.637 283.903 532.082C285.581 538.822 293.77 552.911 313 552.911C332.23 552.911 340.418 538.822 342.097 532.082C342.509 530.428 343.561 529.006 345.023 528.128C346.484 527.25 348.234 526.988 349.888 527.401C351.542 527.813 352.964 528.865 353.842 530.326C354.72 531.787 354.982 533.538 354.569 535.192C352.035 544.188 346.568 552.081 339.038 557.618C331.507 563.155 322.343 566.018 313 565.755C303.656 566.018 294.492 563.155 286.962 557.618C279.431 552.081 273.965 544.188 271.43 535.192C271.225 534.373 271.184 533.521 271.308 532.686C271.433 531.851 271.721 531.049 272.155 530.325C272.59 529.602 273.163 528.971 273.842 528.469C274.521 527.967 275.292 527.604 276.112 527.401Z" fill="black" />
+      </svg>
+      
+      <div className="absolute inset-0 w-full h-full bg-[#1E56A0] z-0 md:hidden block" />
+
+      <div className="relative z-10 w-full max-w-[1440px] h-full flex flex-col md:flex-row items-center justify-center md:justify-end px-5 md:pr-[143px]">
+        {children}
       </div>
     </div>
   );

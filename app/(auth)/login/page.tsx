@@ -15,91 +15,89 @@ export default function LoginPage() {
   }
 
   return (
-    <>
-      <div className="px-8 pt-8 pb-6" style={{ background: "#F6F6F6", borderRadius: "22px 22px 0 0" }}>
-        <h2 className="text-[20px] font-extrabold m-0 mb-1" style={{ color: "#0D1B3E" }}>
+    <div className="relative w-full max-w-[500px] h-[605px] rounded-[22px] bg-[#F6F6F6] shadow-[0_8px_24px_rgba(27,58,122,0.18)] flex flex-col font-['Inter']">
+      
+      <div className="absolute top-0 left-0 w-[106px] h-[106px] rounded-full -translate-x-1/2 -translate-y-1/2 bg-[#1E56A0] opacity-20 pointer-events-none z-0" />
+
+      <div className="px-[27px] pt-[66px] h-[139px] z-10 w-full relative pointer-events-none w-[446px]">
+        <h2 className="text-[24px] font-bold text-[#0D1B3E] tracking-tight leading-none mb-[12px] m-0">
           Welcome Back
         </h2>
-        <p className="text-[13px] m-0" style={{ color: "#5A7190" }}>Login here</p>
+        <p className="text-[14.5px] font-medium text-[#5A7190] leading-none m-0">
+          Login here
+        </p>
       </div>
 
-      <div className="px-8 pt-7 pb-8" style={{ background: "#D6E4F0", borderRadius: "0 0 22px 22px" }}>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-semibold pl-0.5" style={{ color: "#0D1B3E" }}>Email</label>
+      <div className="w-full h-[466px] bg-[#D6E4F0] rounded-[22px] z-20 px-[27px] pt-[22px] relative flex flex-col">
+        <form onSubmit={handleSubmit} className="relative flex flex-col w-full h-full">
+          
+          <div className="flex flex-col mb-[18px]">
+            <label className="text-[13.5px] font-semibold text-[#0D1B3E] mb-[8px] leading-none">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full h-[45px] px-3.5 border-none rounded-[15px] text-[14px] outline-none transition-shadow duration-200 box-border"
-              style={{ background: "#F6F6F6", color: "#0D1B3E" }}
-              onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 2px rgba(22, 49, 114, 0.25)")}
-              onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
+              className="w-full h-[45px] rounded-[15px] bg-[#F6F6F6] px-[20px] text-[14px] text-[#0D1B3E] outline-none border-none focus:ring-2 focus:ring-[#1E56A0] focus:ring-opacity-40 transition-shadow"
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-semibold pl-0.5" style={{ color: "#0D1B3E" }}>Password</label>
+          <div className="flex flex-col mb-[14px]">
+            <label className="text-[13.5px] font-semibold text-[#0D1B3E] mb-[8px] leading-none">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full h-[45px] px-3.5 border-none rounded-[15px] text-[14px] outline-none transition-shadow duration-200 box-border"
-              style={{ background: "#F6F6F6", color: "#0D1B3E" }}
-              onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 2px rgba(22, 49, 114, 0.25)")}
-              onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
+              className="w-full h-[45px] rounded-[15px] bg-[#F6F6F6] px-[20px] text-[14px] text-[#0D1B3E] outline-none border-none focus:ring-2 focus:ring-[#1E56A0] focus:ring-opacity-40 transition-shadow"
             />
           </div>
 
-          <div className="flex justify-end -mt-1.5">
-            <Link href="/forgot-password" className="text-[12.5px] font-semibold no-underline hover:underline" style={{ color: "#163172" }}>
+          <div className="flex justify-end mb-[33px]">
+            <Link href="/forgot-password" className="text-[13px] font-semibold text-[#163172] hover:opacity-80 transition-opacity leading-none">
               Forgot Password
             </Link>
           </div>
 
           {error && (
-            <p className="text-[12.5px] rounded-lg px-3 py-2 m-0" style={{ color: "#c0392b", background: "rgba(255,255,255,0.7)" }}>
-              {error}
-            </p>
+            <div className="absolute left-0 right-0 flex justify-center z-30 pointer-events-none" style={{ top: '185px' }}>
+              <p className="text-[12.5px] rounded-[10px] px-3 py-1.5 text-[#EF4444] bg-[#fee2e2] m-0 drop-shadow-sm border border-[#fca5a5] pointer-events-auto">
+                {error}
+              </p>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={isPending}
-            className="w-full h-[45px] border-none rounded-[15px] text-[14px] font-bold text-white cursor-pointer tracking-[0.01em] transition-all duration-200 disabled:opacity-65 disabled:cursor-not-allowed hover:enabled:opacity-90 hover:enabled:-translate-y-px"
-            style={{ background: "#163172", boxShadow: "0 4px 8px rgba(0,0,0,0.25)" }}
+            className="w-full h-[45px] bg-[#163172] text-[14px] font-bold text-white rounded-[15px] shadow-[0_4px_12px_rgba(22,49,114,0.3)] hover:opacity-90 hover:-translate-y-px transition-all disabled:opacity-60 disabled:hover:translate-y-0 cursor-pointer flex justify-center items-center"
           >
             {isPending ? "Signing in…" : "Sign in"}
           </button>
 
-          <div className="flex items-center gap-2.5 text-[12px] select-none before:flex-1 before:h-px after:flex-1 after:h-px" style={{ color: "#5A7190", ['--tw-content' as string]: "''" }}>
-            <div className="flex items-center gap-2.5" style={{ color: "#5A7190" }}>
-              <span className="flex-1 h-px" style={{ background: "rgba(22, 49, 114, 0.2)" }} />
-              <span className="text-[12px]">Or</span>
-              <span className="flex-1 h-px" style={{ background: "rgba(22, 49, 114, 0.2)" }} />
-            </div>
+          <div className="flex items-center justify-center gap-[18px] my-[5px]">
+            <span className="w-10 h-[1.5px] bg-[#0D1B3E] opacity-20" />
+            <span className="text-[12.5px] font-medium text-[#5A7190] leading-none">Or</span>
+            <span className="w-10 h-[1.5px] bg-[#0D1B3E] opacity-20" />
           </div>
 
           <button
             type="button"
             disabled={isPending}
-            className="w-full h-[45px] border-none rounded-[15px] text-[14px] font-bold text-white cursor-pointer tracking-[0.01em] transition-opacity duration-200 disabled:opacity-65 disabled:cursor-not-allowed hover:enabled:opacity-90"
-            style={{ background: "#1E56A0", boxShadow: "0 4px 8px rgba(0,0,0,0.25)" }}
+            className="w-full h-[45px] bg-[#1E56A0] text-[14px] font-bold text-white rounded-[15px] shadow-[0_4px_12px_rgba(30,86,160,0.3)] hover:opacity-90 hover:-translate-y-px transition-all disabled:opacity-60 disabled:hover:translate-y-0 cursor-pointer flex justify-center items-center"
           >
             Login With Google
           </button>
-        </form>
 
-        <div className="text-center mt-5">
-          <Link href="/signup" className="text-[13px] font-semibold no-underline hover:underline" style={{ color: "#163172" }}>
-            Create New Account
-          </Link>
-        </div>
+          <div className="mt-[40px] text-center w-full">
+            <Link href="/signup" className="text-[15px] font-semibold text-[#0D1B3E] hover:opacity-80 transition-opacity hover:underline leading-none">
+              Create New Account
+            </Link>
+          </div>
+        </form>
       </div>
-    </>
+    </div>
   );
 }
