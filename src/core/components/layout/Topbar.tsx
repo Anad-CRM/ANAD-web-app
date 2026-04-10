@@ -34,7 +34,14 @@ export default function Topbar() {
           </div>
           <div className="flex flex-col justify-center">
             <span className="text-[13px] text-gray-500 font-medium leading-none mb-1.5">{greeting}</span>
-            <h1 className="text-[24px] font-bold text-black tracking-tight leading-none">{user?.userName || "Hinick"}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-[24px] font-bold text-black tracking-tight leading-none">{user?.userName}</h1>
+              {user?.role && (
+                <span className="px-2 py-0.5 bg-[#E2E8F0] text-[#1E3A8A] text-[12px] font-bold rounded-full leading-tight">
+                  {user.role}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
