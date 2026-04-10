@@ -1,97 +1,83 @@
 "use client";
 
 import { useAuthContext } from "@/modules/auth/stores/AuthContext";
-import { usePathname } from "next/navigation";
-
-const PAGE_LABELS: Record<string, string> = {
-  "/overview": "Dashboard",
-  "/leads": "Leads",
-  "/calls": "Call Analytics",
-  "/teams": "Teams",
-  "/eod": "EOD Reports",
-  "/integrations": "Integrations",
-  "/ads": "Ads Analytics",
-  "/subscription": "Subscription",
-};
+import { COLORS } from "@/core/config/colors";
 
 export default function Topbar() {
-  const pathname = usePathname();
   const { user } = useAuthContext();
 
-  const pageTitle = PAGE_LABELS[pathname] ?? "Dashboard";
-  const today = new Date().toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
   return (
-    <header
-      className="flex items-center gap-5 px-7 sticky top-0 z-40"
-      style={{
-        height: "var(--topbar-height)",
-        background: "var(--color-surface)",
-        borderBottom: "1px solid var(--color-border)",
-      }}
-    >
-      <div className="flex-1 flex flex-col gap-px">
-        <h1 className="text-[18px] font-extrabold leading-tight" style={{ color: "var(--color-text)" }}>
-          {pageTitle}
-        </h1>
-        <p className="text-[12px]" style={{ color: "var(--color-muted)" }}>{today}</p>
+    <header className="flex items-center justify-between px-8 h-20 bg-white">
+      <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full border border-black">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="black"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+            <line x1="9" y1="9" x2="9.01" y2="9" />
+            <line x1="15" y1="9" x2="15.01" y2="9" />
+          </svg>
+        </div>
+        <h1 className="text-[28px] font-bold text-black tracking-tight">Hinick</h1>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div
-          className="flex items-center gap-2 h-9 px-3.5 rounded-full min-w-[220px] transition-all duration-200"
-          style={{
-            background: "var(--color-bg)",
-            border: "1px solid var(--color-border)",
-          }}
-        >
-          <span className="text-base" style={{ color: "var(--color-subtle)" }}>⌕</span>
-          <input
-            placeholder="Search leads, teams, staff…"
-            className="border-none bg-transparent text-[13px] flex-1 outline-none"
-            style={{ color: "var(--color-text)" }}
-          />
-        </div>
-
-        <button
-          className="relative flex items-center justify-center w-9 h-9 rounded-full cursor-pointer text-[15px] transition-all duration-150"
-          aria-label="Notifications"
-          style={{
-            background: "var(--color-bg)",
-            border: "1px solid var(--color-border)",
-          }}
-        >
-          <span>🔔</span>
-          <span
-            className="absolute flex items-center justify-center text-white font-bold rounded-full"
-            style={{
-              top: -3,
-              right: -3,
-              width: 15,
-              height: 15,
-              fontSize: 9,
-              background: "var(--color-danger)",
-              border: "1.5px solid #fff",
-            }}
+      <div className="flex items-center gap-4">
+        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-black">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            3
-          </span>
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
         </button>
 
-        <div
-          className="flex items-center justify-center w-9 h-9 rounded-full text-[14px] font-bold text-white cursor-pointer"
-          title={user?.name ?? "Profile"}
-          style={{
-            background: "var(--color-primary)",
-            boxShadow: "0 2px 8px rgba(79,110,247,0.25)",
-          }}
-        >
-          {user?.name?.[0]?.toUpperCase() ?? "U"}
+        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-black relative">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span className="absolute top-[10px] right-[10px] w-[6px] h-[6px] bg-[#1E3A8A] rounded-full" />
+        </button>
+
+        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#1E3A8A] text-white overflow-hidden shadow-sm">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mt-1"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
         </div>
       </div>
     </header>

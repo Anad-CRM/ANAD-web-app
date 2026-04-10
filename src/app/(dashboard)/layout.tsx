@@ -22,14 +22,8 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--color-bg)" }}>
-        <div
-          className="w-9 h-9 rounded-full border-[3px] animate-spin"
-          style={{
-            borderColor: "var(--color-border)",
-            borderTopColor: "var(--color-primary)",
-          }}
-        />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-9 h-9 rounded-full border-[3px] animate-spin border-gray-200 border-t-[#233A78]" />
       </div>
     );
   }
@@ -37,11 +31,11 @@ export default function DashboardLayout({
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-auto">
-        <Topbar />
-        <main className="flex-1 p-7">{children}</main>
+    <div className="flex flex-col min-h-screen bg-white">
+      <Topbar />
+      <div className="flex flex-1 min-h-0">
+        <Sidebar />
+        <main className="flex-1 p-8 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
