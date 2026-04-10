@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "@/modules/auth/stores/AuthContext";
 import { usePathname } from "next/navigation";
 
 const PAGE_LABELS: Record<string, string> = {

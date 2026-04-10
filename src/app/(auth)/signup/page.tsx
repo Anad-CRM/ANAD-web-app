@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/modules/auth/hooks/useAuth";
 import type {
   OrgSignupPayload,
   IndividualSignupPayload,
   StudentSignupPayload,
-} from "@/types/auth.types";
+} from "@/modules/auth/types/auth.types";
 
 type Role = "organization" | "individual" | "student";
 

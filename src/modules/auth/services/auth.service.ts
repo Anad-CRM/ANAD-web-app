@@ -1,6 +1,6 @@
-import { api } from "@/lib/axios";
-import { setToken, setUser, clearToken } from "@/lib/auth";
-import type { LoginPayload, SignupPayload, User } from "@/types/auth.types";
+import { api } from "@/core/api/axios";
+import { setToken, setUser, clearToken } from "@/core/utils/auth";
+import type { LoginPayload, SignupPayload, User } from "@/modules/auth/types/auth.types";
 
 export const authService = {
   async login(payload: LoginPayload): Promise<{ user: User; token: string }> {

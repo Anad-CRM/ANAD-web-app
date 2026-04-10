@@ -7,8 +7,8 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { getToken, getUser, clearToken } from "@/lib/auth";
-import type { User } from "@/types/auth.types";
+import { getToken, getUser, clearToken } from "@/core/utils/auth";
+import type { User } from "@/modules/auth/types/auth.types";
 
 interface AuthContextValue {
   user: User | null;

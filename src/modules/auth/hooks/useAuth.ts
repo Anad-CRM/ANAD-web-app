@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authService } from "@/services/auth.service";
-import { useAuthContext } from "@/context/AuthContext";
-import type { LoginPayload, SignupPayload } from "@/types/auth.types";
+import { authService } from "@/modules/auth/services/auth.service";
+import { useAuthContext } from "@/modules/auth/stores/AuthContext";
+import type { LoginPayload, SignupPayload } from "@/modules/auth/types/auth.types";
 
 export function useAuth() {
   const { user, token, isAuthenticated, isLoading, setAuthData, logout: ctxLogout } =
