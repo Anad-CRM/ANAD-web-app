@@ -15,21 +15,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative w-full max-w-[500px] h-[605px] rounded-[22px] bg-[#F6F6F6] shadow-[0_8px_24px_rgba(27,58,122,0.18)] flex flex-col font-['Inter']">
+    <div className="relative w-full max-w-[446px] flex-shrink-0">
       
-      <div className="absolute top-0 left-0 w-[106px] h-[106px] rounded-full -translate-x-1/2 -translate-y-1/2 bg-[#1E56A0] opacity-20 pointer-events-none z-0" />
+      <div className="absolute top-0 left-0 w-[106px] h-[106px] rounded-full border-[1px] border-white/30 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0" />
 
-      <div className="px-[27px] pt-[66px] h-[139px] z-10 w-full relative pointer-events-none w-[446px]">
-        <h2 className="text-[24px] font-bold text-[#0D1B3E] tracking-tight leading-none mb-[12px] m-0">
-          Welcome Back
-        </h2>
-        <p className="text-[14.5px] font-medium text-[#5A7190] leading-none m-0">
-          Login here
-        </p>
-      </div>
+      <div className="relative w-full h-[605px] rounded-[22px] bg-[#F6F6F6] shadow-[0_8px_24px_rgba(27,58,122,0.18)] flex flex-col font-['Inter'] overflow-hidden z-10">
+        
+        <div className="absolute top-0 left-0 w-[106px] h-[106px] rounded-full bg-[#1E56A0] opacity-20 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0" />
 
-      <div className="w-full h-[466px] bg-[#D6E4F0] rounded-[22px] z-20 px-[27px] pt-[22px] relative flex flex-col">
-        <form onSubmit={handleSubmit} className="relative flex flex-col w-full h-full">
+        <div className="px-[27px] pt-[66px] h-[139px] z-10 w-full relative pointer-events-none">
+          <h2 className="text-[24px] font-bold text-[#0D1B3E] tracking-tight leading-none mb-[12px]">
+            Welcome Back
+          </h2>
+          <p className="text-[14.5px] font-medium text-[#5A7190] leading-none">
+            Login here
+          </p>
+        </div>
+
+        <div className="w-full flex-1 bg-[#D6E4F0] z-20 px-[27px] pt-[22px] relative flex flex-col">
+          <form onSubmit={handleSubmit} className="relative flex flex-col w-full h-full">
           
           <div className="flex flex-col mb-[18px]">
             <label className="text-[13.5px] font-semibold text-[#0D1B3E] mb-[8px] leading-none">Email</label>
@@ -77,7 +81,7 @@ export default function LoginPage() {
             {isPending ? "Signing in…" : "Sign in"}
           </button>
 
-          <div className="flex items-center justify-center gap-[18px] my-[5px]">
+          <div className="flex items-center justify-center gap-[18px] my-[12px]">
             <span className="w-10 h-[1.5px] bg-[#0D1B3E] opacity-20" />
             <span className="text-[12.5px] font-medium text-[#5A7190] leading-none">Or</span>
             <span className="w-10 h-[1.5px] bg-[#0D1B3E] opacity-20" />
@@ -98,6 +102,7 @@ export default function LoginPage() {
           </div>
         </form>
       </div>
+    </div>
     </div>
   );
 }
