@@ -11,6 +11,8 @@ export const metadata: Metadata = {
     "All-in-one CRM dashboard for managers: leads, calls, teams, EOD reports, and integrations.",
 };
 
+import { FeedbackProvider } from "@/core/contexts/FeedbackContext";
+
 export default function RootLayout({
   children,
 }: {
@@ -19,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <FeedbackProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </FeedbackProvider>
       </body>
     </html>
   );
