@@ -20,16 +20,16 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[240px] bg-[#233A78] h-full flex flex-col rounded-tr-3xl">
-      <nav className="flex-1 py-6 px-4 flex flex-col gap-2 overflow-y-auto">
+    <aside className="w-[240px] bg-[#233A78] h-full flex flex-col rounded-tr-3xl overflow-hidden flex-shrink-0">
+      <nav className="flex-1 py-4 px-3 flex flex-col gap-1.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {NAV.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-[12px] text-[15px] font-medium transition-all duration-200 ${
-                active ? "bg-[#E2E8F0] text-black font-bold" : "text-white/90 hover:bg-white/10"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] font-medium transition-all duration-200 ${
+                active ? "bg-[#E2E8F0] text-black font-bold" : "text-white/80 hover:bg-white/10"
               }`}
             >
               <span className="text-[18px] w-6 flex justify-center">
