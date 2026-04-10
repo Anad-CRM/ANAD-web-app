@@ -33,9 +33,9 @@ export default function DashboardLayout({
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white">
       <Topbar />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden bg-[#DCE6F2]">
         <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto bg-[#DCE6F2]">{children}</main>
+        <main className="flex-1 p-8 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

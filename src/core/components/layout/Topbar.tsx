@@ -6,27 +6,37 @@ import { COLORS } from "@/core/config/colors";
 export default function Topbar() {
   const { user } = useAuthContext();
 
+  const hour = new Date().getHours();
+  let greeting = "Good evening";
+  if (hour < 12) greeting = "Good morning";
+  else if (hour < 18) greeting = "Good afternoon";
+
   return (
     <header className="flex items-center justify-between px-8 h-20 bg-white">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-10 h-10 rounded-full border border-black">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="black"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-            <line x1="9" y1="9" x2="9.01" y2="9" />
-            <line x1="15" y1="9" x2="15.01" y2="9" />
-          </svg>
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full border border-black flex-shrink-0">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="black"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+              <line x1="9" y1="9" x2="9.01" y2="9" />
+              <line x1="15" y1="9" x2="15.01" y2="9" />
+            </svg>
+          </div>
+          <div className="flex flex-col justify-center">
+            <span className="text-[13px] text-gray-500 font-medium leading-none mb-1.5">{greeting}</span>
+            <h1 className="text-[24px] font-bold text-black tracking-tight leading-none">{user?.userName || "Hinick"}</h1>
+          </div>
         </div>
-        <h1 className="text-[28px] font-bold text-black tracking-tight">Hinick</h1>
       </div>
 
       <div className="flex items-center gap-4">

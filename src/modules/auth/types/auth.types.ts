@@ -1,5 +1,7 @@
+//this page is just like local db
+
 export type UserRole =
-  | "organization_admin"
+  | "admin"
   | "manager"
   | "team_leader"
   | "staff"
@@ -7,11 +9,17 @@ export type UserRole =
 
 export interface User {
   id: string;
-  name: string;
+  userName: string;
   email: string;
-  role: UserRole;
-  organizationId?: string;
-  profilePicture?: string;
+  role: string | UserRole;
+  organizationId?: string | null;
+  organization?: {
+    id: string;
+    organizationName: string;
+    businessCategory?: string;
+  } | null;
+  avatar?: string | null;
+  [key: string]: any;
 }
 
 export interface LoginPayload {
