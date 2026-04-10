@@ -1,10 +1,10 @@
 "use client";
 
-import { useAuthContext } from "@/modules/auth/stores/AuthContext";
+import { useAuth } from "@/modules/auth/hooks/useAuth";
 import { COLORS } from "@/core/config/colors";
 
 export default function Topbar() {
-  const { user } = useAuthContext();
+  const { user, logout } = useAuth();
 
   const hour = new Date().getHours();
   let greeting = "Good evening";
@@ -80,7 +80,7 @@ export default function Topbar() {
           <span className="absolute top-[10px] right-[10px] w-[6px] h-[6px] bg-[#1E3A8A] rounded-full" />
         </button>
 
-        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#1E3A8A] text-white overflow-hidden shadow-sm">
+        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#E2E8F0] text-[#1E3A8A] overflow-hidden shadow-sm">
           <svg
             width="20"
             height="20"
@@ -96,6 +96,20 @@ export default function Topbar() {
             <circle cx="12" cy="7" r="4" />
           </svg>
         </div>
+
+        <div className="w-[1px] h-8 bg-gray-200 mx-1"></div>
+
+        <button 
+          onClick={logout}
+          className="flex items-center justify-center gap-2 px-4 h-10 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium text-[14px]"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
       </div>
     </header>
   );
