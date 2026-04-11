@@ -3,6 +3,8 @@ export const API_ENDPOINTS = {
     LOGIN: "/auth/login",
     REGISTER: "/auth/signup",
     FORGOT_PASSWORD: "/auth/forgot-password",
+    VERIFY_OTP: "/auth/verify-otp",
+    RESET_PASSWORD: "/auth/reset-password",
   },
   DASHBOARD: {
     OVERVIEW: "/dashboard/overview",
@@ -20,5 +22,11 @@ export const API_ENDPOINTS = {
     DELETE: "/team/block",
     ACTIVATE: "/team/activate",
     DEACTIVATE: "/team/deactivate",
+  },
+  FOLLOW_UP: {
+    GET_ALL: "/followup/getAllFollowUp",
+    SUMMARY: "/followup/summary",
+    COMPLETE: (id: number | string) => `/followup/complete/${id}`,
+    RESCHEDULE: (id: number | string) => `/followup/reschedule/${id}`,
   }
 };
