@@ -16,7 +16,7 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
             <div className="font-medium">Avg Duration</div>
          </div>
 
-         <div className="flex flex-col gap-3 pb-8">
+         <div className="flex flex-col gap-3 pb-8 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
             {isLoading ? (
               <div className="h-40 flex items-center justify-center text-gray-500 bg-[#EAEFF5] rounded-2xl animate-pulse">
                 Fetching call metrics...
@@ -27,7 +27,7 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
               </div>
             ) : (
               data.map((row) => (
-                  <div key={row.id} className="bg-[#3561A5] text-white rounded-2xl p-3 px-8 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center transition-transform hover:scale-[1.01]">
+                  <div key={row.id} className="bg-[#3561A5] text-white rounded-2xl p-3 px-8 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center transition-transform hover:scale-[1.01] flex-shrink-0">
                       
                       <div className="flex items-center gap-4 text-left">
                           <div className="w-[42px] h-[42px] min-w-[42px] bg-white rounded-full overflow-hidden shadow-sm flex items-center justify-center">
@@ -48,6 +48,22 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
               ))
             )}
          </div>
+         <style jsx>{`
+            .custom-scrollbar::-webkit-scrollbar {
+              width: 6px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: #233A78;
+              border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: #3561A5;
+            }
+         `}</style>
 
       </div>
     </div>
