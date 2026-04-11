@@ -1,8 +1,8 @@
 import axios from "axios";
 import { getToken, clearToken } from "@/core/utils/auth";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://10.64.229.175:3000";
+// Use relative /api so requests go through the Next.js proxy → avoids CORS
+const API_BASE_URL = "/api";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -30,8 +30,10 @@ api.interceptors.response.use(
     }
     const message =
       error?.response?.data?.message ||
-      error.message ||
+      (error?.code === "ERR_NETWORK" ? "Cannot reach server — check your connection or backend" : null) ||
+      error?.message ||
       "Something went wrong";
+    console.error("[API Error]", error?.response?.status, message);
     return Promise.reject(new Error(message));
   }
 );

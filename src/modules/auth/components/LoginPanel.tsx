@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
-
+import { Eye, EyeOff } from "lucide-react";
 interface LoginPanelProps {
   onCreateAccount: () => void;
 }
@@ -17,7 +17,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
     e.preventDefault();
     await login({ email, password });
   }
-
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <>
       <div className="px-[30px] pt-[50px] pb-[20px]">
@@ -45,13 +45,23 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
           <label className="text-[13px] font-semibold text-[#0D1B3E] mb-[6px]">
             Password
           </label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="h-[42px] rounded-[12px] bg-white px-[16px] text-[14px] outline-none mb-[10px] focus:ring-2 focus:ring-[#1E56A0]/40"
-          />
+          <div className="relative mb-[10px]">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full h-[42px] rounded-[12px] bg-white px-[16px] text-[14px] outline-none pr-[40px] focus:ring-2 focus:ring-[#1E56A0]/40"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#163172]"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
 
           <div className="flex justify-end mb-[24px]">
             <Link
