@@ -31,9 +31,9 @@ export default function DashboardLayout({
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col h-screen overflow-hidden bg-white">
       <Topbar />
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 overflow-hidden bg-[#DCE6F2]">
         <Sidebar />
         <main className="flex-1 p-8 overflow-y-auto">{children}</main>
       </div>

@@ -1,146 +1,105 @@
-export default function TeamsPage() {
-  const teams = [
-    { name: "Client Onboarding Team", members: 8, leads: 25, performance: 60, active: true },
-    { name: "Market Research Team", members: 6, leads: 25, performance: 54, active: true },
-    { name: "Sales Team", members: 8, leads: 43, performance: 69, active: false },
-  ];
+"use client";
 
-  const staff = [
-    { name: "Nick D", role: "Manager", skillLevel: "Beginner", joinDate: "15/4/2024", absent: false },
-    { name: "Jesse Pinkman", role: "Staff", skillLevel: "Intermediate", joinDate: "6/5/2025", absent: false },
-    { name: "John", role: "Staff Member", skillLevel: "Beginner", joinDate: "6/6/2025", absent: true },
+import { useTeams } from "@/modules/teams/hooks/useTeams";
+
+export default function TeamsPage() {
+  const { teams, stats, isLoading, error } = useTeams();
+
+  const TEAM_STATS = [
+    { label: `${stats.totalTeams} Teams`, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+    { label: `${stats.totalMembers} Members`, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+    { label: `${stats.activeTeams} Active Teams`, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
   ];
 
   return (
-    <div className="flex flex-col gap-[22px]">
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-[16px] font-bold">Teams</h2>
-          <p className="text-[13px]" style={{ color: "var(--color-muted)" }}>4 Teams · 42 Members · 3 Active</p>
-        </div>
-        <div className="flex gap-2.5">
-          <button
-            className="h-[34px] px-3.5 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer"
-            style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
-          >
-            Invite Member
-          </button>
-          <button
-            className="h-[34px] px-4 text-[13px] font-semibold text-white rounded-[10px] border-none cursor-pointer"
-            style={{ background: "var(--color-primary)" }}
-          >
-            + Create Team
-          </button>
-        </div>
+    <div className="flex flex-col h-full max-w-5xl mx-auto py-2">
+      <div className="flex justify-end gap-6 mb-12">
+        <button className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Create Team
+        </button>
+        <button className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="20" y1="8" x2="20" y2="14"/>
+            <line x1="23" y1="11" x2="17" y2="11"/>
+          </svg>
+          Invite Member
+        </button>
       </div>
 
-      <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
-        {teams.map((t) => (
-          <div
-            key={t.name}
-            className="flex flex-col gap-2.5 p-5 rounded-2xl border"
-            style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
-          >
-            <div className="flex items-center justify-between">
-              <div
-                className="w-[42px] h-[42px] rounded-[12px] flex items-center justify-center font-extrabold text-[18px]"
-                style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}
-              >
-                {t.name[0]}
-              </div>
-              <span
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
-                style={t.active ? { background: "#dcfce7", color: "#16a34a" } : { background: "#f3f4f6", color: "var(--color-muted)" }}
-              >
-                {t.active ? "Active" : "Inactive"}
-              </span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+        {TEAM_STATS.map((stat, idx) => (
+          <div key={idx} className="bg-[#EAF1F8] border border-white rounded-[20px] p-4 flex items-center gap-6 shadow-[0px_2px_12px_rgba(0,0,0,0.02)]">
+            <div className="bg-[#1E3A8A] text-white w-14 h-14 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-sm">
+              {stat.icon}
             </div>
-            <h4 className="text-[15px] font-bold">{t.name}</h4>
-            <p className="text-[12px]" style={{ color: "var(--color-muted)" }}>{t.members} Members · {t.leads} Leads</p>
-            <div className="flex items-center gap-2.5 mt-1">
-              <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--color-border)" }}>
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${t.performance}%`, background: "linear-gradient(90deg, #4F6EF7, #7C5CFC)" }}
-                />
-              </div>
-              <span className="text-[12px] font-bold" style={{ color: "var(--color-primary)" }}>{t.performance}%</span>
-            </div>
-            <div className="flex gap-3 mt-1">
-              <button className="bg-transparent border-none text-[12.5px] font-semibold cursor-pointer p-0 hover:underline" style={{ color: "var(--color-primary)" }}>View Details →</button>
-              <button className="bg-transparent border-none text-[12.5px] font-semibold cursor-pointer p-0 hover:underline" style={{ color: "var(--color-primary)" }}>Assign Ads</button>
-            </div>
+            <span className="text-[17px] font-medium text-black">
+              {stat.label}
+            </span>
           </div>
         ))}
       </div>
 
-      <div
-        className="rounded-2xl border overflow-hidden"
-        style={{ background: "var(--color-surface)", boxShadow: "var(--shadow-sm)", borderColor: "var(--color-border)" }}
-      >
-        <div className="flex items-center justify-between px-5 pt-[18px] pb-3.5">
-          <h3 className="text-[15px] font-bold">Staff Members</h3>
-          <button
-            className="h-[34px] px-3.5 text-[13px] font-semibold rounded-[10px] bg-transparent cursor-pointer"
-            style={{ border: "1.5px solid var(--color-border)", color: "var(--color-text)" }}
-          >
-            Filter Present Staff
-          </button>
-        </div>
-        <table className="w-full border-collapse text-[13.5px]">
-          <thead>
-            <tr>
-              {["Name", "Role", "Skill Level", "Join Date", "Attendance", "Actions"].map((h) => (
-                <th
-                  key={h}
-                  className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.05em]"
-                  style={{ color: "var(--color-muted)", borderBottom: "1px solid var(--color-border)", background: "var(--color-bg)" }}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {staff.map((s) => (
-              <tr key={s.name}>
-                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold flex-shrink-0"
-                      style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}
-                    >
-                      {s.name[0]}
+      <div className="mb-6">
+        <h2 className="text-[18px] font-bold text-black mb-6">All Teams</h2>
+        
+        {isLoading ? (
+          <div className="w-full flex justify-center py-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A8A]"></div>
+          </div>
+        ) : error ? (
+          <div className="text-red-500 bg-red-50 p-4 rounded-xl">{error}</div>
+        ) : teams.length === 0 ? (
+          <div className="text-gray-500 bg-white/50 p-6 text-center rounded-xl font-medium">No teams found.</div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {teams.map((team, idx) => {
+              const membersCount = team.users?.length || 0;
+              const totalLeads = team.users?.reduce((acc, user) => acc + (user.leadCounts?.totalLeads || 0), 0) || 0;
+              const positiveLeads = team.users?.reduce(
+                (acc, user) => acc + (user.leadCounts?.closedCount || 0) + (user.leadCounts?.contactedCount || 0), 
+                0
+              ) || 0;
+              const performance = totalLeads > 0 ? Math.round((positiveLeads / totalLeads) * 100) : 0;
+
+              return (
+                <div key={team.id || idx} className="bg-[#EAF1F8] border border-white rounded-[24px] p-6 shadow-[0px_4px_16px_rgba(0,0,0,0.03)] flex flex-col min-h-[220px]">
+                  
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="bg-[#1E3A8A] text-white w-14 h-14 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
-                    <div>
-                      <p className="font-semibold text-[14px]">{s.name}</p>
-                      <p className="text-[12px]" style={{ color: "var(--color-muted)" }}>Joined {s.joinDate}</p>
+                    <h3 className="text-[20px] font-bold text-black tracking-tight line-clamp-1">{team.name}</h3>
+                  </div>
+
+                  <div className="flex flex-col gap-4 pl-4 mb-8">
+                    <div className="text-[16px] text-black">
+                      Members : <span className="font-semibold">{membersCount}</span>
+                    </div>
+                    <div className="text-[16px] text-black">
+                      Leads : <span className="font-semibold">{totalLeads}</span>
+                    </div>
+                    <div className="text-[16px] text-black">
+                      Performance : <span className="font-semibold">{performance}%</span>
                     </div>
                   </div>
-                </td>
-                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide" style={{ background: "var(--color-primary-light)", color: "var(--color-primary)" }}>{s.role}</span>
-                </td>
-                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{s.skillLevel}</td>
-                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)", color: "var(--color-muted)" }}>{s.joinDate}</td>
-                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <span
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
-                    style={s.absent ? { background: "#fee2e2", color: "#dc2626" } : { background: "#dcfce7", color: "#16a34a" }}
-                  >
-                    {s.absent ? "Absent" : "Present"}
-                  </span>
-                </td>
-                <td className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <div className="flex gap-2">
-                    <button className="px-3 py-1 rounded-[6px] text-[12px] font-semibold bg-transparent cursor-pointer" style={{ border: "1px solid var(--color-border)", color: "var(--color-primary)" }}>Profile</button>
-                    <button className="px-3 py-1 rounded-[6px] text-[12px] font-semibold bg-transparent cursor-pointer" style={{ border: "1px solid var(--color-border)", color: "var(--color-primary)" }}>Assign</button>
+
+                  <div className="mt-auto flex justify-end">
+                    <button className="bg-[#1E3A8A] hover:bg-[#152e73] transition-colors text-white text-[14px] font-medium px-8 py-2.5 rounded-full">
+                      View Details
+                    </button>
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

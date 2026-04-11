@@ -6,10 +6,12 @@ import { AuthProvider } from "@/modules/auth/stores/AuthContext";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "ANAD CRM — Manager Dashboard",
+  title: "ANAD CRM — Dashboard",
   description:
-    "All-in-one CRM dashboard for managers: leads, calls, teams, EOD reports, and integrations.",
+    "All-in-one CRM dashboard: leads, calls, teams, EOD reports, and integrations.",
 };
+
+import { FeedbackProvider } from "@/core/contexts/FeedbackContext";
 
 export default function RootLayout({
   children,
@@ -19,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <FeedbackProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </FeedbackProvider>
       </body>
     </html>
   );
