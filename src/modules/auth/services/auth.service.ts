@@ -22,18 +22,18 @@ export const authService = {
   },
 
   async forgotPassword(email: string): Promise<void> {
-    await api.post("/auth/forgot-password", { email });
+    await api.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
   },
 
   async verifyOtp(email: string, otp: string): Promise<void> {
-    await api.post("/auth/verify-otp", { email, otp });
+    await api.post(API_ENDPOINTS.AUTH.VERIFY_OTP, { email, otp });
   },
 
   async resetPassword(
     password: string,
     confirmPassword: string
   ): Promise<void> {
-    await api.post("/auth/reset-password", { password, confirmPassword });
+    await api.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, { password, confirmPassword });
   },
 
   logout(): void {
