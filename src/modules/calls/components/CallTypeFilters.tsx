@@ -1,13 +1,30 @@
 import React from "react";
-import { CallFilterType } from "../types";
+import { CallFilterType, CallAnalyticsResponse } from "../types";
 
 export const CallTypeFilters = ({ 
     activeFilter, 
-    onFilterChange 
+    onFilterChange,
+    analytics
 }: { 
     activeFilter: CallFilterType, 
-    onFilterChange: (type: CallFilterType) => void 
+    onFilterChange: (type: CallFilterType) => void,
+    analytics: CallAnalyticsResponse | null
 }) => {
+  const summary = analytics?.summary;
+  const types = analytics?.callTypes;
+
+  const getCount = (type: CallFilterType) => {
+    if (!analytics) return 0;
+    switch(type) {
+      case "Total": return summary?.totalCalls || 0;
+      case "Incoming": return types?.incoming.count || 0;
+      case "Outgoing": return types?.outgoing.count || 0;
+      case "Missed": return types?.missed.count || 0;
+      case "Connected": return (types?.incoming.count || 0) + (types?.outgoing.count || 0);
+      default: return 0;
+    }
+  };
+
   const filters: { type: CallFilterType, icon: React.ReactNode }[] = [
     {
         type: "Total",
@@ -32,7 +49,7 @@ export const CallTypeFilters = ({
   ];
 
   return (
-    <div className="flex flex-wrap gap-4 mb-8">
+    <div className="flex flex-wrap gap-4 mb-8 font-sans">
       {filters.map((filter) => {
         const isActive = activeFilter === filter.type;
         return (
@@ -43,10 +60,13 @@ export const CallTypeFilters = ({
               isActive ? "bg-[#7198C5] shadow-sm transform scale-[1.02]" : "bg-[#7AA0CA] hover:bg-[#7198C5]"
             }`}
           >
-            <div className={`w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#7AA0CA]`}>
+            <div className={`w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#7AA0CA] shadow-sm`}>
                 {filter.icon}
             </div>
-            <span className="text-white text-[15px] font-medium pr-4">{filter.type}</span>
+            <div className="flex flex-col items-start pr-4">
+               <span className="text-white text-[15px] font-medium leading-none mb-1">{filter.type}</span>
+               <span className="text-white text-[12px] opacity-90 font-bold">{getCount(filter.type)}</span>
+            </div>
           </button>
         );
       })}

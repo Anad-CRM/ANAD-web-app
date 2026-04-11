@@ -9,7 +9,8 @@ export const API_ENDPOINTS = {
   DASHBOARD: {
     OVERVIEW: "/dashboard/overview",
     LEADS: "/dashboard/leads",
-    CALLS: "/dashboard/calls",
+    CALLS_ANALYTICS: "/calls/getCallAnalytics",
+    SPECIFIC_CALL_TYPE: "/calls/specificCallType",
     TEAMS: "/dashboard/teams",
     EOD: "/dashboard/eod",
     GET_LEAD_COUNTS: "/lead/getLeadCounts",
