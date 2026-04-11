@@ -4,13 +4,12 @@ const BACKEND_URL =
   process.env.BACKEND_URL || "http://localhost:3000";
 
 async function handler(req: NextRequest) {
-  // Strip the /api prefix to get the real backend path
+  // Strip the /api prefix to get the real backend
   const path = req.nextUrl.pathname.replace(/^\/api/, "");
   const search = req.nextUrl.search;
   const url = `${BACKEND_URL}${path}${search}`;
 
   const headers = new Headers(req.headers);
-  // Remove host header — let the backend resolve its own host
   headers.delete("host");
 
   let body: string | undefined;
@@ -28,7 +27,9 @@ async function handler(req: NextRequest) {
     });
 
     const responseHeaders = new Headers(backendRes.headers);
-    // Forward CORS headers from backend if any
+    responseHeaders.delete("content-encoding");
+    responseHeaders.delete("transfer-encoding");
+    responseHeaders.delete("content-length");
     responseHeaders.set("Access-Control-Allow-Origin", "*");
 
     const responseBody = await backendRes.text();

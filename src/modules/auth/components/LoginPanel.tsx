@@ -13,9 +13,26 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  function getOrCreate(key: string, generate: () => string): string {
+    if (typeof window === "undefined") return "";
+    let val = localStorage.getItem(key);
+    if (!val) { val = generate(); localStorage.setItem(key, val); }
+    return val;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await login({ email, password });
+    const deviceId = getOrCreate("deviceId", () => crypto.randomUUID());
+    const signinId = getOrCreate("signinId", () => crypto.randomUUID());
+    const fcmToken = getOrCreate("fcmToken", () => "web-token-" + crypto.randomUUID());
+    await login({
+      email,
+      password,
+      platform: "web",
+      token: fcmToken,
+      deviceId,
+      signinId,
+    });
   }
   const [showPassword, setShowPassword] = useState(false);
   return (
