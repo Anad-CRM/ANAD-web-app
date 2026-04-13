@@ -38,5 +38,9 @@ export const API_ENDPOINTS = {
     GET_ATTENDANCE_STATUS: (orgId: string | number) => `/autoAssign/attendance-requirement-status/${orgId}`,
     TOGGLE_AUTO_ASSIGN: "/autoAssign/toggleAutoAssignLeads",
     TOGGLE_ATTENDANCE: "/autoAssign/toggle-attendance-requirement",
+  },
+  INTEGRATION: {
+    CREATE_WHATSAPP: "/webhook/createWhatsappIntegration",
+    DELETE_WHATSAPP: "/webhook/deleteWhatsappIntegration",
   }
 };
