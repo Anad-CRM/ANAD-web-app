@@ -42,5 +42,9 @@ export const API_ENDPOINTS = {
   INTEGRATION: {
     CREATE_WHATSAPP: "/webhook/createWhatsappIntegration",
     DELETE_WHATSAPP: "/webhook/deleteWhatsappIntegration",
+  },
+  CREATE_LEADS: {
+    SINGLE: "/lead/createLead",
+    BULK_CSV: "/lead/createLeadByCSV"
   }
 };
