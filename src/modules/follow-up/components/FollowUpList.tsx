@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { FollowUp } from "../types";
 
 export default function FollowUpList({
@@ -43,9 +44,9 @@ export default function FollowUpList({
               <button aria-label="Missed" className="text-red-500 hover:text-red-600">
                 <PhoneOffIcon />
               </button>
-              <button aria-label="Profile" className="hover:text-black">
+              <Link href={`/lead/${item.lead?.id || item.id}`} aria-label="Profile" className="hover:text-black">
                 <UserIcon />
-              </button>
+              </Link>
             </div>
 
             <div className="flex items-center gap-2">
