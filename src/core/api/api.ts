@@ -31,5 +31,12 @@ export const API_ENDPOINTS = {
     SUMMARY: "/followup/summary",
     COMPLETE: (id: number | string) => `/followup/complete/${id}`,
     RESCHEDULE: (id: number | string) => `/followup/reschedule/${id}`,
+  },
+  AUTO_LEAD: {
+    GET_LIVE_ADS: (orgId: string | number) => `/ad/getLiveAds/${orgId}`,
+    GET_AUTO_ASSIGN_STATUS: (orgId: string | number) => `/autoAssign/autoAssignStatus/${orgId}`,
+    GET_ATTENDANCE_STATUS: (orgId: string | number) => `/autoAssign/attendance-requirement-status/${orgId}`,
+    TOGGLE_AUTO_ASSIGN: "/autoAssign/toggleAutoAssignLeads",
+    TOGGLE_ATTENDANCE: "/autoAssign/toggle-attendance-requirement",
   }
 };
