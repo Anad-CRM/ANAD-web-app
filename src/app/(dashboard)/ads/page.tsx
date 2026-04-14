@@ -48,7 +48,7 @@ export default function AdsAnalyticsPage() {
   };
 
   return (
-    <div className="flex-1 w-full bg-white sm:bg-[#F1F5F9] min-h-screen p-6 overflow-y-auto font-sans">
+    <div className="flex flex-col gap-[22px]">
       
       <AdsHeader />
 

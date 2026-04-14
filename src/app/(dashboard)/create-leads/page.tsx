@@ -5,7 +5,7 @@ import { CreateLeadDashboard } from "@/modules/create-lead/components/CreateLead
 
 export default function CreateLeadsPage() {
   return (
-    <div className="flex flex-col flex-1 w-full bg-[#E5ECF4] h-screen overflow-hidden p-0 font-sans relative">
+    <div className="flex flex-col gap-[22px]">
       <CreateLeadDashboard />
     </div>
   );

@@ -26,7 +26,7 @@ export default function EodPage() {
   }, []);
 
   return (
-    <div className="h-screen w-full flex flex-col bg-[#F1F5F9] font-sans overflow-hidden">
+    <div className="flex flex-col gap-[22px]">
       
       <div className="flex justify-end gap-4 p-6 pb-2">
         <button className="w-11 h-11 bg-[#233A78] text-white rounded-xl flex items-center justify-center shadow-md hover:bg-[#3561A5] transition-colors">

@@ -5,7 +5,7 @@ import { PipelineDashboard } from "@/modules/pipelines/components/PipelineDashbo
 
 export default function PipelinesPage() {
   return (
-    <div className="flex flex-col flex-1 w-full bg-[#F2F5F8] h-full overflow-hidden p-4 lg:p-6 font-sans">
+    <div className="flex flex-col gap-[22px]">
       <PipelineDashboard />
     </div>
   );

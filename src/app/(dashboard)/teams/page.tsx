@@ -12,7 +12,7 @@ export default function TeamsPage() {
   ];
 
   return (
-    <div className="flex flex-col h-full max-w-5xl mx-auto py-2">
+    <div className="flex flex-col gap-[22px]">
       <div className="flex justify-end gap-6 mb-12">
         <button className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
