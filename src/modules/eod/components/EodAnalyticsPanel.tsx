@@ -30,7 +30,7 @@ export const EodAnalyticsPanel = ({ data }: { data: EodStaffMember | null }) => 
 
   if (!data || (totalLeads === 0 && totalCalls === 0)) {
     return (
-      <div className="flex flex-col flex-1 h-full bg-[#233A78] rounded-[32px] p-8 text-white font-sans shadow-xl items-center justify-center opacity-90 border border-white/10">
+      <div className="flex flex-col flex-1 h-full bg-[#233A78] rounded-[24px] p-6 text-white font-sans shadow-xl items-center justify-center opacity-90 border border-white/10">
         <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-md flex flex-col items-center text-center max-w-[300px]">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-4 opacity-50"><path d="M21 21L15 15"/><circle cx="11" cy="11" r="8"/></svg>
           <h3 className="text-[18px] font-bold mb-2">No data recorded</h3>
@@ -41,7 +41,7 @@ export const EodAnalyticsPanel = ({ data }: { data: EodStaffMember | null }) => 
   }
 
   return (
-    <div className="flex flex-col flex-1 h-full bg-[#233A78] rounded-[32px] p-8 text-white font-sans shadow-xl overflow-hidden">
+    <div className="flex flex-col flex-1 h-full bg-[#233A78] rounded-[24px] p-6 text-white font-sans shadow-xl overflow-y-auto">
       
       <div className="flex flex-col flex-1 mb-8">
         <div className="flex items-center gap-3 mb-8">
