@@ -73,7 +73,7 @@ export default function FollowUpPage() {
   };
 
   return (
-    <div className="flex flex-col max-w-[1240px] w-full mx-auto">
+    <div className="flex flex-col gap-[22px]">
       <StatsSection
         summary={summary}
         activeTab={activeTab}

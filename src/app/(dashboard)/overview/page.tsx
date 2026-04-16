@@ -21,7 +21,7 @@ export default function OverviewPage() {
     loadOverviewData();
   }, []);
   return (
-    <div className="flex flex-col max-w-5xl">
+    <div className="flex flex-col gap-[22px]">
       <div className="mb-6">
         <h2 className="text-[28px] font-extrabold text-black leading-tight tracking-tight">Team<br/>Overview</h2>
       </div>

@@ -31,7 +31,7 @@ export default function CallAnalyticsPage() {
   }, []);
 
   return (
-    <div className="flex flex-col flex-1 w-full bg-white sm:bg-[#F2F5F8] min-h-screen p-6 overflow-y-auto font-sans">
+    <div className="flex flex-col gap-[22px]">
       
       <CallsHeader />
 
