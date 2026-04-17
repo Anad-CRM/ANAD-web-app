@@ -6,8 +6,10 @@ export const COLORS = {
   card: "#F6F6F6",
   accent: "#1E56A0",
   success: "#22C55E",
-  warning: "#F59E0B",
-  danger: "#EF4444",
+  warning: "#EE9B00",
+  dark_orange: "#CA6702",
+  brown: "#BB3E03",
+  danger: "#9B2226",
   info: "#3B82F6",
   bg: "#F7F8FA",
   surface: "#FFFFFF",
@@ -15,4 +17,10 @@ export const COLORS = {
   text: "#0D1B3E",
   muted: "#5A7190",
   subtle: "#8BA5C0",
+  anccent_green: "#005F73",
+  light_green: "#94D2BD",
+  light_yellow: "#E9D8A6",
+  // light_yellow: "#E9D8A6",
+
+
 };

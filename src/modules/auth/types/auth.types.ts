@@ -25,6 +25,10 @@ export interface User {
 export interface LoginPayload {
   email: string;
   password: string;
+  platform: string;
+  token: string;
+  deviceId: string;
+  signinId: string;
 }
 
 export interface OrgSignupPayload {
