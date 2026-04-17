@@ -11,7 +11,7 @@ export const getLeadSummary = async (params?: Record<string, any>): Promise<Lead
     const response = await api.request({
       url: API_ENDPOINTS.DASHBOARD.GET_LEAD_COUNTS,
       method: "GET",
-      data: { ...params, organizationId: orgId }
+      params: { ...params, organizationId: orgId }
     });
     return response.data?.data || null;
   } catch (error) {

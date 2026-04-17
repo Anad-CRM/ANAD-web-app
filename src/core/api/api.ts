@@ -46,5 +46,12 @@ export const API_ENDPOINTS = {
   CREATE_LEADS: {
     SINGLE: "/lead/createLead",
     BULK_CSV: "/lead/createLeadByCSV"
-  }
+  },
+  EXPORT: {
+    DOWNLOAD: "/export/download",
+  },
+  STAFF: {
+    GET_ALL: "/staff/getAllStaff",
+    GET_BY_ROLE: "/staff/getStaffByRole",
+  },
 };
