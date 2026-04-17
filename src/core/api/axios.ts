@@ -1,8 +1,7 @@
 import axios from "axios";
 import { getToken, clearToken } from "@/core/utils/auth";
 
-// Use relative /api so requests go through the Next.js proxy → avoids CORS
-const API_BASE_URL = "http://192.168.0.230:3000/";
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000").replace(/\/$/, "") + "/";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
