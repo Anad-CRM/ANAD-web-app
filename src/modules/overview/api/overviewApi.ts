@@ -8,9 +8,7 @@ export const getLeadSummary = async (params?: Record<string, any>): Promise<Lead
     const user = getUser<any>();
     const orgId = user?.organizationId || params?.organizationId;
 
-    const response = await api.request({
-      url: API_ENDPOINTS.DASHBOARD.GET_LEAD_COUNTS,
-      method: "GET",
+    const response = await api.get(API_ENDPOINTS.DASHBOARD.OVERVIEW, {
       params: { ...params, organizationId: orgId }
     });
     return response.data?.data || null;
@@ -25,8 +23,8 @@ export const getEodReports = async (params?: Record<string, any>): Promise<Staff
     const user = getUser<any>();
     const orgId = user?.organizationId || params?.organizationId;
 
-    const response = await api.get(API_ENDPOINTS.DASHBOARD.GET_AUTO_EOD, { 
-       params: { ...params, organizationId: orgId } 
+    const response = await api.get(API_ENDPOINTS.DASHBOARD.GET_AUTO_EOD, {
+      params: { ...params, organizationId: orgId }
     });
     return response.data?.data || [];
   } catch (error) {

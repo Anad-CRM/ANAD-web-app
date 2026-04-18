@@ -2,7 +2,7 @@ import React from "react";
 import { StaffEodSummary, LeadStats } from "../types";
 import { COLORS } from "../../../core/components/theme/colors";
 import { Text } from "../../../core/components/ui/Text";
-import { CalendarDays, PhoneOutgoing, PhoneIncoming, Phone } from "lucide-react";
+import { CalendarDays, PhoneOutgoing, PhoneIncoming, Phone, ArrowRight } from "lucide-react";
 
 export default function EodReportsSection({ eodData }: { eodData: StaffEodSummary[] }) {
 
@@ -26,20 +26,30 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
 
   return (
     <div className="flex flex-col">
-      <h3 className="text-[15px] font-semibold text-black mb-4">EOD Reports</h3>
+      {/* <h3 className="text-[15px] font-semibold text-black mb-4">EOD Reports</h3> */}
+      <Text
+        as="h3"
+        size="custom"
+        weight="normal"
+
+        className="text-[20px] text-black mb-4 truncate"
+      >
+        EOD Reports
+      </Text>
+
 
       <div className="bg-[#233A78] rounded-2xl p-5 shadow-lg relative">
         <div className="absolute top-4 right-4 text-white">
           <CalendarDays width={24} height={24} strokeWidth={2} />
         </div>
 
-        <div className="grid grid-cols-[800px_minmax(150px,2fr)_80px] gap-4 mb-4 px-15">
-          <Text className="text-[18px] text-white text-center" size="custom" weight="light">
+        <div className="flex justify-center mb-4 px-15">
+          <Text
+            className="text-[18px] text-white text-center"
+            size="custom"
+            weight="light"
+          >
             Lead Statistics
-          </Text>
-
-          <Text className="text-[18px] text-white text-center" size="custom" weight="light">
-            Call Static
           </Text>
         </div>
 
@@ -69,7 +79,7 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
               const name = staff.userName || "Unknown";
               const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E2B77A&color=fff&size=100`;
               return (
-                <div key={idx} className="grid grid-cols-[300px_minmax(150px,1fr)_120px] gap-8 items-center px-2">
+                <div key={idx} className="grid grid-cols-[190px_minmax(150px,1fr)_140px] gap-10 items-center px-1">
                   <div className="flex items-center gap-4">
                     <div className="w-[52px] h-[52px] rounded-full bg-[#E2B77A] overflow-hidden flex-shrink-0 shadow-md">
                       <img
@@ -151,8 +161,8 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
           })()}
         </div>
 
-        <div className="mt-8 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between text-[11px] text-white/50 px-2 pb-1 gap-2">
-          <div className="flex flex-wrap gap-20">
+        <div className="mt-8 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between text-[11px] text-white/50 px-2 pb-1 gap-1">
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
             {statusConfig.map(s => (
               <div key={s.label} className="flex items-center gap-1.5 whitespace-nowrap">
                 <div className={`w-2 h-2 rounded-full`} style={{ backgroundColor: s.color }} />
@@ -162,6 +172,9 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
               </div>
             ))}
           </div>
+          <Text as="div" className="text-white text-center flex gap-2 items-center whitespace-nowrap py-6 text-[14px]" size="custom" weight="light">
+            View More <ArrowRight size={16} />
+          </Text>
         </div>
       </div>
     </div>
