@@ -13,11 +13,11 @@ export default function LeadStatsSection({ data, filter, onFilterChange }: LeadS
   const counts = data?.statusCounts;
 
   const statItems = [
-    { label: "New Lead", count: counts?.newLead || 0, color: COLORS.primaryDark },
-    { label: "Hot Lead", count: counts?.hotLead || 0, color: COLORS.primary },
-    { label: "Follow Up", count: counts?.followUp || 0, color: "#64748B" },
-    { label: "Registered", count: counts?.registered || 0, color: COLORS.accent },
-    { label: "Enrolled", count: counts?.closed || 0, color: "#F1F5F9" },
+    { label: "New Lead",   count: counts?.newLead    ?? counts?.newLeadCount    ?? 0, color: COLORS.primaryDark },
+    { label: "Hot Lead",   count: counts?.hotLead    ?? counts?.hotLeadCount    ?? 0, color: COLORS.primary },
+    { label: "Follow Up",  count: counts?.followUp   ?? counts?.followUpCount   ?? 0, color: "#64748B" },
+    { label: "Registered", count: counts?.registered ?? counts?.registerCount   ?? 0, color: COLORS.accent },
+    { label: "Enrolled",   count: counts?.closed     ?? counts?.closedLeadCount ?? 0, color: "#F1F5F9" },
   ];
 
   return (

@@ -1,22 +1,43 @@
+// Matches the keys inside `data.leadCounts` from GET /lead/getFilteredLeadCount
 export interface StatusCounts {
+  newLeadCount?: number;
+  hotLeadCount?: number;
+  closedLeadCount?: number;
+  registerCount?: number;
+  followUpCount?: number;
+  unAssignedLeadCount?: number;
+  allLeadsCount?: number;
+  totalClosedCount?: number;
+  totalAssignedCount?: number;
+
+  // Legacy / alternative field names (kept for backward compat)
   newLead?: number;
   hotLead?: number;
   closed?: number;
   registered?: number;
+  followUp?: number;
   busy?: number;
   switchedOff?: number;
   rnr?: number;
   notInterested?: number;
-  followUp?: number;
   contacted?: number;
   customer?: number;
   disqualified?: number;
 }
 
 export interface LeadCountsData {
-  statusCounts: StatusCounts;
-  unAssignedCount: number;
+  // Top-level convenience fields (mapped from statusCounts)
   totalLeads: number;
+  unAssignedCount: number;
+
+  // The raw nested object returned by getFilteredLeadCount
+  leadCounts?: StatusCounts;
+
+  // Legacy flat shape (kept for backward compat)
+  statusCounts?: StatusCounts;
+
+  // Staff per-lead breakdown also returned by the endpoint
+  staffLeadCounts?: any[];
 }
 
 export interface CallStats {
