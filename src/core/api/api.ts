@@ -54,5 +54,10 @@ export const API_ENDPOINTS = {
   STAFF: {
     GET_ALL: "/staff/getAllStaff",
     GET_BY_ROLE: "/staff/getStaffByRole",
+    GET_BY_ID: "/staff/getStaffById",
+  },
+  ATTENDANCE: {
+    GET_USER_ATTENDANCE: "/attendance/getUserAttendance",
+    GET_BY_MONTH: "/attendance/month",
   },
 };
