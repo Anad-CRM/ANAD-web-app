@@ -11,8 +11,7 @@ import { StaffProfileCard } from "./StaffProfileCard";
 import { LeadStatsCard } from "./LeadStatsCard";
 import { ProfileDetailsCard } from "./ProfileDetailsCard";
 import { AttendanceCard } from "./AttendanceCard";
-import { ChevronLeftIcon, CalendarIcon } from "./icons";
-import { Calendar, } from "lucide-react";
+import { Calendar, ChevronLeft } from "lucide-react";
 function formatDate(iso?: string) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -116,7 +115,11 @@ export function StaffDetailView() {
             style={{ backgroundColor: COLORS.primaryDark }}
             className="w-[42px] h-[42px] flex items-center justify-center rounded-full text-white hover:opacity-90 transition-opacity shadow-lg"
           >
-            <ChevronLeftIcon />
+            <ChevronLeft
+              width={30}
+              height={30}
+              strokeWidth={1.5}
+            />
           </button>
           <Text as="h1" size="custom" className="text-[22px] md:text-[26px] ml-1 font-medium" style={{ color: COLORS.text }}>
             {staff.role} Profile

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
-import { ArrowRightIcon } from "./icons";
+import { ArrowRightIcon } from "lucide-react";
 import type { AttendanceLog } from "../types/staff.types";
 
 interface AttendanceCardProps {

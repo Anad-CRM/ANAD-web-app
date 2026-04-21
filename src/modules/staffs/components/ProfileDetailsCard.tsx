@@ -1,7 +1,7 @@
 import React from "react";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
-import { MailIcon, BriefcaseIcon, UsersIcon, CalendarIcon } from "./icons";
+import { Calendar, Mail, BriefcaseIcon, UserIcon } from "lucide-react";
 import type { Staff } from "../types/staff.types";
 
 interface ProfileDetailsCardProps {
@@ -27,10 +27,14 @@ export function ProfileDetailsCard({ staff, formattedDate }: ProfileDetailsCardP
 
       {/* Detail pills */}
       <div className="flex flex-col gap-3">
-        <Pill icon={<MailIcon />} text={staff.email || "No email"} />
-        <Pill icon={<BriefcaseIcon />} text={`Skill Level : ${staff.skillLevel || "Beginner"}`} />
-        <Pill icon={<UsersIcon />} text={`Team : ${staff.team?.name || "Unassigned"}`} />
-        <Pill icon={<CalendarIcon />} text={`Joined at : ${formattedDate}`} />
+        <Pill icon={<Mail width={20} height={20} />} text={staff.email || "No email"} />
+        <Pill icon={<BriefcaseIcon width={20} height={20} />} text={`Skill Level : ${staff.skillLevel || "Beginner"}`} />
+        <Pill icon={<UserIcon width={
+          20
+        } height={
+          20
+        } />} text={`Team : ${staff.team?.name || "Unassigned"}`} />
+        <Pill icon={<Calendar width={20} height={20} />} text={`Joined at : ${formattedDate}`} />
       </div>
     </div>
   );

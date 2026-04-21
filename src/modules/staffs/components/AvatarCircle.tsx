@@ -3,7 +3,7 @@
 import React from "react";
 import { AuthImage } from "@/core/components/ui/AuthImage";
 import { COLORS } from "@/core/components/theme/colors";
-import { PersonIcon } from "./icons";
+import { User } from "lucide-react";
 
 interface AvatarCircleProps {
   avatar?: string;
@@ -18,7 +18,7 @@ export function AvatarCircle({ avatar, size = 100 }: AvatarCircleProps) {
     >
       {/* Person icon always sits beneath as fallback */}
       <div className="absolute inset-0 flex items-center justify-center text-gray-400 z-0">
-        <PersonIcon size={size * 0.45} />
+        <User width={30} height={30} />
       </div>
 
       {/* AuthImage overlays on top when loaded */}
