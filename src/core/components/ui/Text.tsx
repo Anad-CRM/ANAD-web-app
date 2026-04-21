@@ -5,11 +5,12 @@ interface TextProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
   as?: React.ElementType;
   className?: string;
-  weight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold';
+  weight?: "extraLight" | 'light' | 'normal' | 'medium' | 'semibold' | 'bold';
   size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | 'custom';
 }
 
 const weightClasses = {
+  extraLight: 'font-extralight',
   light: 'font-light',
   normal: 'font-normal',
   medium: 'font-medium',

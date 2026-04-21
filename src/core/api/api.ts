@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     TEAMS: "/dashboard/teams",
     EOD: "/dashboard/eod",
     GET_LEAD_COUNTS: "/lead/getLeadCounts",
+    GET_FILTERED_LEAD_COUNT: "/lead/getFilteredLeadCount",
     GET_AUTO_EOD: "/eod/autoSummary",
     GET_ALL_ADS: (orgId: string) => `/ad/getAllAds/${orgId}`,
     GET_AD_STATUS_COUNT: (orgId: string) => `/ad/getAdWiseLeadStatusCount/${orgId}`,
@@ -53,5 +54,10 @@ export const API_ENDPOINTS = {
   STAFF: {
     GET_ALL: "/staff/getAllStaff",
     GET_BY_ROLE: "/staff/getStaffByRole",
+    GET_BY_ID: "/staff/getStaffById",
+  },
+  ATTENDANCE: {
+    GET_USER_ATTENDANCE: "/attendance/getUserAttendance",
+    GET_BY_MONTH: "/attendance/month",
   },
 };

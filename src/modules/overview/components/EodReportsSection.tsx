@@ -2,60 +2,58 @@ import React from "react";
 import { StaffEodSummary, LeadStats } from "../types";
 import { COLORS } from "../../../core/components/theme/colors";
 import { Text } from "../../../core/components/ui/Text";
-import { Calendar, PhoneOutgoing, PhoneIncoming, Phone } from "lucide-react";
+import { CalendarDays, PhoneOutgoing, PhoneIncoming, Phone, ArrowRight } from "lucide-react";
 
 export default function EodReportsSection({ eodData }: { eodData: StaffEodSummary[] }) {
 
   const statusConfig = [
-    { key: "newLead", label: "New Leads", color: COLORS.subtle },
-    { key: "hotLead", label: "Hot Leads", color: COLORS.anccent_green },
-    {
-      key: "followUp", label: "Follow up", color: COLORS.light_green
-    },
-    { key: "closed", label: "close", color: COLORS.light_yellow },
-    { key: "notInterested", label: "Not interested", color: COLORS.warning },
-    {
-      key: "rnr", label: "RNR", color: COLORS.dark_orange
-    },
-    { key: "busy", label: "Busy", color: COLORS.brown },
-    { key: "switchedOff", label: "Switch Off", color: COLORS.danger },
+    { key: "New Lead", label: "New Leads", color: COLORS.subtle },
+    { key: "Hot Lead", label: "Hot Leads", color: COLORS.anccent_green },
+    { key: "Follow Up", label: "Follow up", color: COLORS.light_green },
+    { key: "Contacted", label: "Contacted", color: COLORS.light_yellow },
+    { key: "Not Interested", label: "Not interested", color: COLORS.warning },
+    { key: "RNR", label: "RNR", color: COLORS.dark_orange },
+    { key: "Busy", label: "Busy", color: COLORS.brown },
+    { key: "Switch Off", label: "Switch Off", color: COLORS.danger },
+    { key: "Disqualified", label: "Disqualified", color: COLORS.subtle },
+    { key: "Assigned", label: "Assigned", color: COLORS.anccent_green },
   ];
 
   const calculateWidth = (count: number, total: number) => {
     if (total === 0 || count === 0) return 0;
-    return Math.max(2, Math.round((count / total) * 100));
+    return Math.max(5, Math.round((count / total) * 100));
   };
 
   return (
     <div className="flex flex-col">
-      <h3 className="text-[15px] font-semibold text-black mb-4">EOD Reports</h3>
+      {/* <h3 className="text-[15px] font-semibold text-black mb-4">EOD Reports</h3> */}
+      <Text
+        as="h3"
+        size="custom"
+        weight="normal"
+
+        className="text-[20px] text-black mb-4 truncate"
+      >
+        EOD Reports
+      </Text>
+
 
       <div className="bg-[#233A78] rounded-2xl p-5 shadow-lg relative">
         <div className="absolute top-4 right-4 text-white">
-          <Calendar width={20} height={20} strokeWidth={2} />
+          <CalendarDays width={24} height={24} strokeWidth={2} />
         </div>
 
-        <div className="grid grid-cols-[300px_minmax(150px,1fr)_120px] gap-8 mb-4 px-2">
-          <div />
+        <div className="flex justify-center mb-4 px-15">
           <Text
+            className="text-[18px] text-white text-center"
             size="custom"
             weight="light"
-            className="text-[18px] text-white text-center"
           >
             Lead Statistics
           </Text>
-
-          <Text
-            size="custom"
-            weight="light"
-            className="text-[18px] text-white text-center"
-          >
-            Call Static
-          </Text>
-
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-10">
           {(() => {
             const activeEods = eodData.filter((staff) => {
               const eod = staff.eods?.[0];
@@ -79,27 +77,47 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
               const totalLeads = leadStats.totalLeads || 0;
 
               const name = staff.userName || "Unknown";
-              const pseudoAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E2B77A&color=fff&size=100`;
-
+              const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E2B77A&color=fff&size=100`;
               return (
-                <div key={idx} className="grid grid-cols-[300px_minmax(150px,1fr)_120px] gap-8 items-center px-2">
+                <div key={idx} className="grid grid-cols-[190px_minmax(150px,1fr)_140px] gap-10 items-center px-1">
                   <div className="flex items-center gap-4">
                     <div className="w-[52px] h-[52px] rounded-full bg-[#E2B77A] overflow-hidden flex-shrink-0 shadow-md">
-                      <img src={pseudoAvatarUrl} width="52" height="52" alt="Avatar" />
+                      <img
+                        src={avatarUrl}
+                        width="70"
+                        height="70"
+                        alt={name}
+                        style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                      />
                     </div>
                     <div className="truncate">
-                      <h4 className="text-[17px] font-bold text-white mb-0.5 truncate">{name}</h4>
-                      <p className="text-[12px] text-white/60">{eod?.role || "Staff Member"}</p>
+                      <Text
+                        as="h4"
+                        size="custom"
+                        weight="normal"
+                        className="text-[20px] text-white mb-0.5 truncate"
+                      >
+                        {name}
+                      </Text>
+
+                      <Text
+                        as="p"
+                        size="custom"
+                        weight="light"
+                        className="text-[15px] text-white/60"
+                      >
+                        {eod?.role || "Staff Member"}
+                      </Text>
                     </div>
                   </div>
 
-                  <div className="flex items-center w-full relative h-[18px]">
+                  <div className="flex items-center w-full relative h-[18px] rounded-[30px] overflow-hidden">
                     {totalLeads === 0 ? (
-                      <div className="w-full bg-[#1C2C5E] h-full rounded-full flex items-center justify-center text-[9px] font-bold text-white/30">
+                      <div className="w-full bg-[#1C2C5E] h-full flex items-center justify-center text-[9px] font-bold text-white/30">
                         No Data
                       </div>
                     ) : (
-                      statusConfig.map((config, sIdx) => {
+                      statusConfig.map((config) => {
                         const count = (leadStats as any)[config.key] || 0;
                         if (count === 0) return null;
                         const widthPct = calculateWidth(count, totalLeads);
@@ -108,7 +126,7 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
                           <div
                             key={config.key}
                             style={{ width: `${widthPct}%`, backgroundColor: config.color }}
-                            className={`h-full flex items-center justify-center text-[9px] font-bold text-white overflow-hidden border-r border-[#64748B] last:border-none`}
+                            className="h-full flex items-center justify-center text-[9px] font-bold text-white border-r border-[#64748B] last:border-none"
                           >
                             {count}
                           </div>
@@ -143,17 +161,20 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
           })()}
         </div>
 
-        <div className="mt-8 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between text-[11px] text-white/50 px-2 pb-1 gap-2">
-          <div className="flex flex-wrap gap-4">
+        <div className="mt-8 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between text-[11px] text-white/50 px-2 pb-1 gap-1">
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
             {statusConfig.map(s => (
               <div key={s.label} className="flex items-center gap-1.5 whitespace-nowrap">
                 <div className={`w-2 h-2 rounded-full`} style={{ backgroundColor: s.color }} />
-                <Text size="custom">
+                <Text size="custom" className="text-[14px]" weight="extraLight" >
                   {s.label}
                 </Text>
               </div>
             ))}
           </div>
+          <Text as="div" className="text-white text-center flex gap-2 items-center whitespace-nowrap py-6 text-[14px]" size="custom" weight="light">
+            View More <ArrowRight size={16} />
+          </Text>
         </div>
       </div>
     </div>

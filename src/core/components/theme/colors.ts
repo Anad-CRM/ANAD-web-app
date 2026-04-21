@@ -20,7 +20,6 @@ export const COLORS = {
   anccent_green: "#005F73",
   light_green: "#94D2BD",
   light_yellow: "#E9D8A6",
+  grey: "#EFEFEF",
   // light_yellow: "#E9D8A6",
-
-
 };
