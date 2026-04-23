@@ -39,5 +39,7 @@ export function AuthImage({ src, fallbackSrc, alt, ...rest }: AuthImageProps) {
 
   const displaySrc = errored || !blobUrl ? fallbackSrc : blobUrl;
 
+  if (!displaySrc) return null;
+
   return <img src={displaySrc} alt={alt} {...rest} />;
 }
