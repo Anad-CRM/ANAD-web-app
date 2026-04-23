@@ -5,8 +5,8 @@ import { LeadHistoryCard } from '@/modules/leads/details/components/LeadHistoryC
 import { LeadFollowUpCard } from '@/modules/leads/details/components/LeadFollowUpCard';
 import { useRouter, useParams } from 'next/navigation';
 import { leadsApi } from '@/modules/leads/api/leadsApi';
+import { getUser } from '@/core/utils/auth';
 import { Lead } from '@/modules/leads/types/lead.types';
-const { getUser } = await import('@/core/utils/auth');
 
 export const LeadDetailsDashboard: React.FC = () => {
   const router = useRouter();
@@ -24,30 +24,49 @@ export const LeadDetailsDashboard: React.FC = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Step 1: Fetch the lead (expanded search across up to 1000 records)
-        const leadData = await leadsApi.fetchLeadFromList(leadId);
+        // Step 1: Try reading the lead from sessionStorage cache first.
+        // LeadList stores the lead object when a card is clicked — this avoids
+        // a blind list re-fetch and ensures we have the correct userId fields.
+        let leadData: Lead | null = null;
+        try {
+          const cached = sessionStorage.getItem(`lead_cache_${leadId}`);
+          if (cached) {
+            leadData = JSON.parse(cached) as Lead;
+            console.log('[LeadDetailsDashboard] ✅ Lead loaded from sessionStorage cache');
+          }
+        } catch {}
+
+        // Fall back to API search if cache miss
+        if (!leadData) {
+          console.log('[LeadDetailsDashboard] 📡 Cache miss — fetching lead from API...');
+          leadData = await leadsApi.fetchLeadFromList(leadId);
+        }
+
         if (leadData) setLead(leadData);
 
-        // DIAGNOSTIC: log the raw lead data to understand the shape
+        // DIAGNOSTIC: log every userId-related field so we can see what the backend expects
         console.log('[LeadDetailsDashboard] leadId:', leadId);
-        console.log('[LeadDetailsDashboard] leadData:', JSON.stringify(leadData, null, 2));
+        console.log('[LeadDetailsDashboard] leadData.userId:', (leadData as any)?.userId);
+        console.log('[LeadDetailsDashboard] leadData.assignedTo:', (leadData as any)?.assignedTo);
+        console.log('[LeadDetailsDashboard] leadData.assignedUser:', JSON.stringify((leadData as any)?.assignedUser));
+        console.log('[LeadDetailsDashboard] full leadData:', JSON.stringify(leadData));
 
-        // Step 2: Resolve the userId that the backend expects for activity/followup queries.
-
+        // Step 2: Resolve the userId the backend expects for activities/followups.
+        // Try every possible field the API might store the assigned user's ID in.
         const sessionUser = getUser<Record<string, string>>();
-        console.log('[LeadDetailsDashboard] sessionUser:', JSON.stringify(sessionUser, null, 2));
+        console.log('[LeadDetailsDashboard] sessionUser.id:', sessionUser?.id);
 
         const assignedUserId =
-          leadData?.assignedTo ||
-          (leadData?.assignedUser as any)?._id ||
-          (leadData?.assignedUser as any)?.id ||
-          leadData?.userId ||
+          (leadData as any)?.assignedTo ||
+          (leadData as any)?.assignedUser?._id ||
+          (leadData as any)?.assignedUser?.id ||
+          (leadData as any)?.userId ||
           sessionUser?.id;
 
         console.log('[LeadDetailsDashboard] resolved assignedUserId:', assignedUserId);
 
         if (!assignedUserId) {
-          console.warn('[LeadDetailsDashboard] Could not resolve assignedUserId — skipping activities/followups fetch.');
+          console.warn('[LeadDetailsDashboard] ⚠️ No userId resolved — skipping activities/followups fetch.');
           return;
         }
 
@@ -60,7 +79,7 @@ export const LeadDetailsDashboard: React.FC = () => {
         setActivities(activitiesData || []);
         setFollowups(followupsData || []);
       } catch (error) {
-        console.error("Failed to load lead details:", error);
+        console.error('Failed to load lead details:', error);
       } finally {
         setIsLoading(false);
       }

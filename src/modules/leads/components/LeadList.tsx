@@ -326,6 +326,9 @@ export function LeadList() {
                       );
                     }}
                     onClick={() => {
+                      // Store lead in sessionStorage so detail page can read it without re-fetching
+                      // (mirrors Flutter: lead data is passed as a prop, not re-fetched)
+                      try { sessionStorage.setItem(`lead_cache_${lead.id}`, JSON.stringify(lead)); } catch {}
                       router.push(`/lead/${lead.id}`);
                     }}
                   />
