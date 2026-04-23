@@ -66,15 +66,17 @@ export const leadsApi = {
 
   // NOTE: Backend has no GET /lead/getLeadById route.
   // Instead, we fetch the lead from the lead list (getLeadsByStatus) using its ID.
-  // This matches how Flutter works: lead data is passed as a prop, not re-fetched.
+  // We use a large limit + Overall filter to maximise the chance of finding the lead.
   fetchLeadFromList: async (leadId: string): Promise<Lead | null> => {
     const userData = getUser<Record<string, string>>();
     if (!userData?.organizationId) return null;
-    try {
+
+    // Helper to search within a page of results
+    const searchPage = async (offset: number, limit: number): Promise<Lead | null> => {
       const response = await api.post("/lead/getLeadsByStatus", {
         organizationId: userData.organizationId,
-        offset: 0,
-        limit: 100,
+        offset,
+        limit,
         filter: "Overall",
         sortByDate: "latest",
       });
@@ -82,6 +84,16 @@ export const leadsApi = {
         return response.data.data.find((l: Lead) => l.id === leadId) ?? null;
       }
       return null;
+    };
+
+    try {
+      // First try a large first page (covers most cases)
+      const firstPage = await searchPage(0, 500);
+      if (firstPage) return firstPage;
+
+      // If not found, try fetching the next 500 (handles large orgs)
+      const secondPage = await searchPage(500, 500);
+      return secondPage;
     } catch (error) {
       console.error("[leadsApi] Error fetching lead from list:", error);
       return null;
@@ -90,12 +102,13 @@ export const leadsApi = {
 
   fetchLeadActivities: async (leadId: string, assignedUserId?: string): Promise<any[]> => {
     try {
-      // Flutter passes { leadId, userId } where userId is the LOGGED-IN user's own ID.
-      // However for admin users viewing other staff's leads, we use the assigned user's ID.
       const userData = getUser<Record<string, string>>();
+      // Use the assigned staff's ID if available; fall back to the logged-in user's ID.
+      // If assignedUserId is undefined (lead not found in list), skip the call to avoid a 500.
       const userId = assignedUserId || userData?.id;
       if (!userId) {
-        console.warn("[leadsApi] No userId found, activities may fail");
+        console.warn("[leadsApi] No userId resolved — skipping activities fetch.");
+        return [];
       }
       const response = await api.get("/lead/getActivities", { params: { leadId, userId } });
       if (response.data?.status === "success") {

@@ -6,6 +6,7 @@ import { LeadFollowUpCard } from '@/modules/leads/details/components/LeadFollowU
 import { useRouter, useParams } from 'next/navigation';
 import { leadsApi } from '@/modules/leads/api/leadsApi';
 import { Lead } from '@/modules/leads/types/lead.types';
+const { getUser } = await import('@/core/utils/auth');
 
 export const LeadDetailsDashboard: React.FC = () => {
   const router = useRouter();
@@ -19,20 +20,38 @@ export const LeadDetailsDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!leadId) return;
-    
+
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Step 1: Fetch lead first (mirrors Flutter: leadData passed as prop)
+        // Step 1: Fetch the lead (expanded search across up to 1000 records)
         const leadData = await leadsApi.fetchLeadFromList(leadId);
         if (leadData) setLead(leadData);
 
-        // Step 2: The backend checks activity/followup ownership against the
-        // ASSIGNED user's ID (not the logged-in admin). Mirror Flutter behavior
-        // where these calls use the lead's assignedTo field.
-        const assignedUserId = leadData?.assignedTo || leadData?.assignedUser?.id || leadData?.userId;
+        // DIAGNOSTIC: log the raw lead data to understand the shape
+        console.log('[LeadDetailsDashboard] leadId:', leadId);
+        console.log('[LeadDetailsDashboard] leadData:', JSON.stringify(leadData, null, 2));
 
-        // Step 3: Fetch activities and followups in parallel using correct userId
+        // Step 2: Resolve the userId that the backend expects for activity/followup queries.
+
+        const sessionUser = getUser<Record<string, string>>();
+        console.log('[LeadDetailsDashboard] sessionUser:', JSON.stringify(sessionUser, null, 2));
+
+        const assignedUserId =
+          leadData?.assignedTo ||
+          (leadData?.assignedUser as any)?._id ||
+          (leadData?.assignedUser as any)?.id ||
+          leadData?.userId ||
+          sessionUser?.id;
+
+        console.log('[LeadDetailsDashboard] resolved assignedUserId:', assignedUserId);
+
+        if (!assignedUserId) {
+          console.warn('[LeadDetailsDashboard] Could not resolve assignedUserId — skipping activities/followups fetch.');
+          return;
+        }
+
+        // Step 3: Fetch activities and followups in parallel using the correct userId
         const [activitiesData, followupsData] = await Promise.all([
           leadsApi.fetchLeadActivities(leadId, assignedUserId),
           leadsApi.fetchFollowupsByLead(leadId, assignedUserId),
@@ -54,7 +73,7 @@ export const LeadDetailsDashboard: React.FC = () => {
     <div className="flex flex-col w-full h-full bg-[#E5ECF4] p-4 lg:p-8 overflow-y-auto [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/20">
       <div className="max-w-[1400px] mx-auto w-full">
         <div className="flex items-center gap-4 mb-8">
-          <button 
+          <button
             onClick={() => router.back()}
             className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0"
           >
@@ -76,12 +95,14 @@ export const LeadDetailsDashboard: React.FC = () => {
             {/* Left Column 60% */}
             <div className="flex flex-col gap-8 w-full lg:w-[60%]">
               <LeadSummaryCard lead={lead} />
-              <LeadHistoryCard activities={activities} />
+              <LeadFollowUpCard followups={followups} />
+
             </div>
-            
+
             {/* Right Column 40% */}
             <div className="w-full lg:w-[40%] flex-shrink-0 sticky top-4">
-              <LeadFollowUpCard followups={followups} />
+              <LeadHistoryCard activities={activities} />
+              {/* <LeadFollowUpCard followups={followups} /> */}
             </div>
           </div>
         )}
