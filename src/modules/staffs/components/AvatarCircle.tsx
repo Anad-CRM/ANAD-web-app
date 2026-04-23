@@ -12,21 +12,23 @@ interface AvatarCircleProps {
 }
 
 export function AvatarCircle({ avatar, size = 100 }: AvatarCircleProps) {
+  const isValidAvatar = avatar && avatar !== "null" && avatar !== "undefined";
+
   return (
     <div
       style={{ width: size, height: size, backgroundColor: COLORS.primaryLight }}
-      className="rounded-full flex-shrink-0 overflow-hidden relative shadow-inner"
+      className="rounded-full flex-shrink-0 overflow-hidden relative shadow-inner flex items-center justify-center"
     >
-      {avatar ? (
+      <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+        <User width={size * 0.5} height={size * 0.5} className="text-gray-400" />
+      </div>
+
+      {isValidAvatar && (
         <AuthImage
           src={`${API_BASE_URL}uploads/${avatar}`}
           alt="Staff avatar"
-          className="w-full h-full object-cover absolute inset-0"
+          className="w-full h-full object-cover absolute inset-0 z-10"
         />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-          <User width={30} height={30} className="text-gray-400" />
-        </div>
       )}
     </div>
   );

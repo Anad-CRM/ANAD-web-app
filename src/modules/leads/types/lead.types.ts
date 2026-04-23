@@ -1,39 +1,63 @@
 export type LeadStatus =
-  | "new_lead"
-  | "hot_lead"
-  | "follow_up"
-  | "contacted"
-  | "closed"
-  | "not_interested"
-  | "rnr"
-  | "busy"
-  | "switch_off"
-  | "enrolled"
-  | "registered"
-  | "disqualified";
+  | "New Lead"
+  | "Hot Lead"
+  | "Follow Up"
+  | "Contacted"
+  | "Closed"
+  | "Not Interested"
+  | "RNR"
+  | "Busy"
+  | "Switch Off"
+  | "Enrolled"
+  | "Register"
+  | "Disqualified"
+  | "Customer";
 
 export type LeadSource =
-  | "facebook"
-  | "instagram"
-  | "whatsapp"
-  | "google"
-  | "manual"
-  | "csv_upload"
-  | "website";
+  | "Facebook"
+  | "Instagram"
+  | "WhatsApp"
+  | "Google Ads"
+  | "Website"
+  | "Manual"
+  | "CSV Upload"
+  | string;
+
+export interface AssignedUser {
+  id?: string;
+  _id?: string;
+  userName?: string;
+  name?: string;
+  avatar?: string;
+}
+
+export interface LeadAd {
+  adId?: string;
+  adName?: string;
+}
 
 export interface Lead {
   id: string;
-  name: string;
+  name?: string;
+  userName?: string;
   email?: string;
-  mobile: string;
+  mobile?: string;
+  mobileNumber?: string;
   status: LeadStatus;
-  source: LeadSource;
+  source?: LeadSource;
   assignedTo?: string;
+  assignedUser?: AssignedUser | null;
+  userId?: string;
   teamId?: string;
+  organizationId?: string;
   adSet?: string;
+  campaignName?: string;
+  ad?: LeadAd | null;
   remark?: string;
   createdAt: string;
+  updatedAt?: string;
   followUpDate?: string;
+  isDuplicated?: boolean;
 }
 
 export interface Pipeline {

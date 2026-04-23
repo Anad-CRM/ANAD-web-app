@@ -1,0 +1,151 @@
+import { api } from "@/core/api/axios";
+import { getUser } from "@/core/utils/auth";
+import { Lead } from "../types/lead.types";
+
+// Mirrors the Flutter LeadListHelper.fetchLeads payload structure
+export interface FetchLeadsParams {
+  keyword?: string;
+  limit?: number;
+  offset?: number;
+  status?: string | string[] | null;
+  userId?: string | null;
+  staffId?: string | string[] | null;
+  teamId?: string | string[] | null;
+  filter?: string; // 'Today' | 'Yesterday' | 'This Week' | 'This Month' | 'Last Month' | 'Custom' | 'Overall'
+  startDate?: string;
+  endDate?: string;
+  sortByDate?: "latest" | "oldest";
+  adId?: string | null;
+  adIds?: string[] | null;
+}
+
+interface FetchLeadsResponse {
+  status: string;
+  message?: string;
+  data: Lead[];
+  totalCount?: number;
+}
+
+export const leadsApi = {
+  fetchLeads: async (params?: FetchLeadsParams): Promise<FetchLeadsResponse> => {
+    // Inject organizationId from the logged-in user session (mirrors Flutter's userData)
+    const userData = getUser<Record<string, string>>();
+    if (!userData?.organizationId) {
+      console.warn("[leadsApi] No organizationId found in session.");
+      return { status: "failed", data: [] };
+    }
+
+    const payload: Record<string, unknown> = {
+      organizationId: userData.organizationId,
+      offset: params?.offset ?? 0,
+      limit: params?.limit ?? 30,
+      keyword: params?.keyword?.trim() ?? "",
+      filter: params?.filter ?? "Overall",
+      sortByDate: params?.sortByDate ?? "latest",
+    };
+
+    // Only append params if they have real values (avoid sending null/undefined noisily)
+    if (params?.status) payload.status = params.status;
+    if (params?.userId) payload.userId = params.userId;
+    if (params?.staffId) payload.staffId = params.staffId;
+    if (params?.teamId) payload.teamId = params.teamId;
+    if (params?.adId) payload.adId = params.adId;
+    if (params?.adIds?.length) payload.adIds = params.adIds;
+    if (params?.startDate) payload.startDate = params.startDate;
+    if (params?.endDate) payload.endDate = params.endDate;
+
+    try {
+      // Backend expects POST (confirmed by Flutter using req.post for this endpoint)
+      const response = await api.post("/lead/getLeadsByStatus", payload);
+      return response.data;
+    } catch (error) {
+      console.error("[leadsApi] Error fetching leads:", error);
+      throw error;
+    }
+  },
+
+  // NOTE: Backend has no GET /lead/getLeadById route.
+  // Instead, we fetch the lead from the lead list (getLeadsByStatus) using its ID.
+  // This matches how Flutter works: lead data is passed as a prop, not re-fetched.
+  fetchLeadFromList: async (leadId: string): Promise<Lead | null> => {
+    const userData = getUser<Record<string, string>>();
+    if (!userData?.organizationId) return null;
+    try {
+      const response = await api.post("/lead/getLeadsByStatus", {
+        organizationId: userData.organizationId,
+        offset: 0,
+        limit: 100,
+        filter: "Overall",
+        sortByDate: "latest",
+      });
+      if (response.data?.status === "success" && Array.isArray(response.data.data)) {
+        return response.data.data.find((l: Lead) => l.id === leadId) ?? null;
+      }
+      return null;
+    } catch (error) {
+      console.error("[leadsApi] Error fetching lead from list:", error);
+      return null;
+    }
+  },
+
+  fetchLeadActivities: async (leadId: string, assignedUserId?: string): Promise<any[]> => {
+    try {
+      // Flutter passes { leadId, userId } where userId is the LOGGED-IN user's own ID.
+      // However for admin users viewing other staff's leads, we use the assigned user's ID.
+      const userData = getUser<Record<string, string>>();
+      const userId = assignedUserId || userData?.id;
+      if (!userId) {
+        console.warn("[leadsApi] No userId found, activities may fail");
+      }
+      const response = await api.get("/lead/getActivities", { params: { leadId, userId } });
+      if (response.data?.status === "success") {
+        return response.data.data || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("[leadsApi] Error fetching lead activities:", error);
+      return [];
+    }
+  },
+
+  fetchFollowupsByLead: async (leadId: string, assignedUserId?: string): Promise<any[]> => {
+    try {
+      // Backend requires leadId + userId (the assigned staff's ID) + organizationId
+      const userData = getUser<Record<string, string>>();
+      const userId = assignedUserId || userData?.id;
+      const organizationId = userData?.organizationId;
+      const response = await api.post("/followup/getAllFollowUpByLeads", { leadId, userId, organizationId });
+      if (response.data?.status === "success") {
+        return response.data.data || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("[leadsApi] Error fetching followups:", error);
+      return [];
+    }
+  },
+
+  fetchStaffMembers: async (): Promise<unknown[]> => {
+    const userData = getUser<Record<string, string>>();
+    if (!userData?.organizationId) return [];
+    try {
+      const date = new Date().toISOString().split("T")[0];
+      const response = await api.post("/staff/getStaffByRole", {
+        params: { organizationId: userData.organizationId, date }
+      });
+
+      if (response.data?.status === "success") {
+        const data = response.data.data;
+        const combined: unknown[] = [];
+        if (userData.role === "Admin" || userData.role === "Manager") {
+          if (data?.admins) combined.push(...data.admins);
+          if (data?.managers) combined.push(...data.managers);
+        }
+        if (data?.teamLeaders) combined.push(...data.teamLeaders);
+        if (data?.staffMembers) combined.push(...data.staffMembers);
+        return combined.filter((s: any) => s.id !== userData.id);
+      }
+    } catch {/* ignore */ }
+    return [];
+  },
+};
