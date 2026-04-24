@@ -1,6 +1,7 @@
 "use client";
 
 import { useTeams } from "@/modules/teams/hooks/useTeams";
+import Link from "next/link";
 
 export default function TeamsPage() {
   const { teams, stats, isLoading, error } = useTeams();
@@ -90,9 +91,11 @@ export default function TeamsPage() {
                   </div>
 
                   <div className="mt-auto flex justify-end">
-                    <button className="bg-[#1E3A8A] hover:bg-[#152e73] transition-colors text-white text-[14px] font-medium px-8 py-2.5 rounded-full">
-                      View Details
-                    </button>
+                    <Link href={`/teams/${team.id}`}>
+                      <button className="bg-[#1E3A8A] hover:bg-[#152e73] transition-colors text-white text-[14px] font-medium px-8 py-2.5 rounded-full">
+                        View Details
+                      </button>
+                    </Link>
                   </div>
 
                 </div>

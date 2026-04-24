@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
     DELETE: "/team/block",
     ACTIVATE: "/team/activate",
     DEACTIVATE: "/team/deactivate",
+    GET_TEAM_LEAD_STATUS_COUNTS: "/team/getTeamLeadStatusCounts",
   },
   FOLLOW_UP: {
     GET_ALL: "/followup/getAllFollowUp",

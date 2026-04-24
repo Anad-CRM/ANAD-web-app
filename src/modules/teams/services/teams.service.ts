@@ -1,6 +1,6 @@
 import { api } from "@/core/api/axios";
 import { API_ENDPOINTS } from "@/core/api/api";
-import { TeamsResponse } from "../types/teams.types";
+import { TeamsResponse, TeamLeadCountsResponse, TeamLeadCountPayload } from "../types/teams.types";
 
 export const TeamsService = {
   async getAllTeams(payload: { organizationId: string; managerId?: string }): Promise<TeamsResponse> {
@@ -10,4 +10,12 @@ export const TeamsService = {
     );
     return response.data;
   },
+
+  async getTeamLeadCounts(payload: TeamLeadCountPayload): Promise<TeamLeadCountsResponse> {
+    const response = await api.post<TeamLeadCountsResponse>(
+      API_ENDPOINTS.TEAM.GET_TEAM_LEAD_STATUS_COUNTS,
+      payload
+    );
+    return response.data;
+  }
 };
