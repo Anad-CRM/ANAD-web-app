@@ -2,15 +2,11 @@
 
 import React from "react";
 import { LeadList } from "@/modules/leads/components/LeadList";
-import { COLORS } from "@/core/components/theme/colors";
 
 export default function LeadsPage() {
   return (
-    <div
-      className="min-h-screen p-6 md:p-8"
-      style={{ backgroundColor: COLORS.primaryXlight }}
-    >
-      <div className="max-w-7xl mx-auto h-[calc(100vh-80px)]">
+    <div className="flex flex-col flex-1 w-full h-full p-0 font-sans relative">
+      <div className="max-w-7xl mx-auto w-full h-full p-4 md:p-6 pb-20">
         <LeadList />
       </div>
     </div>

@@ -100,17 +100,16 @@ export const leadsApi = {
     }
   },
 
+  // Mirrors Flutter activity_list_screen._fetchActivities():
+  // userId = leadData['assignedUser']['id'] ?? ''
+  // Always makes the call even with empty userId.
   fetchLeadActivities: async (leadId: string, assignedUserId?: string): Promise<any[]> => {
     try {
-      const userData = getUser<Record<string, string>>();
-      // Use the assigned staff's ID if available; fall back to the logged-in user's ID.
-      // If assignedUserId is undefined (lead not found in list), skip the call to avoid a 500.
-      const userId = assignedUserId || userData?.id;
-      if (!userId) {
-        console.warn("[leadsApi] No userId resolved — skipping activities fetch.");
-        return [];
-      }
-      const response = await api.get("/lead/getActivities", { params: { leadId, userId } });
+      // Flutter sends assignedUser['id'] — empty string if not assigned. Never skips.
+      const userId = assignedUserId ?? '';
+      console.log('[leadsApi] fetchLeadActivities →', { leadId, userId });
+      const response = await api.post("/lead/getActivities", { leadId, userId });
+      console.log('[leadsApi] getActivities response:', response.data);
       if (response.data?.status === "success") {
         return response.data.data || [];
       }
@@ -121,13 +120,20 @@ export const leadsApi = {
     }
   },
 
-  fetchFollowupsByLead: async (leadId: string, assignedUserId?: string): Promise<any[]> => {
+  // Mirrors Flutter follow_up_page._fetchFollowUps():
+  // userId = leadData['userId']  (the lead's raw userId field, NOT assignedUser.id)
+  // leadId = leadData['id']
+  fetchFollowupsByLead: async (leadId: string, leadUserId?: string): Promise<any[]> => {
     try {
-      // Backend requires leadId + userId (the assigned staff's ID) + organizationId
-      const userData = getUser<Record<string, string>>();
-      const userId = assignedUserId || userData?.id;
-      const organizationId = userData?.organizationId;
-      const response = await api.post("/followup/getAllFollowUpByLeads", { leadId, userId, organizationId });
+      const userId = leadUserId ?? '';
+      console.log('[leadsApi] fetchFollowupsByLead →', { leadId, userId });
+      const response = await api.post("/followup/getAllFollowUpByLeads", { leadId, userId });
+      console.log('[leadsApi] getAllFollowUpByLeads response:', response.data);
+      // Flutter checks result['success'] == true (not status)
+      if (response.data?.success === true) {
+        return response.data.data || [];
+      }
+      // Also handle status-based response shape as fallback
       if (response.data?.status === "success") {
         return response.data.data || [];
       }

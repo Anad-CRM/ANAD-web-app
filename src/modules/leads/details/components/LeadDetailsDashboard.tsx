@@ -5,7 +5,6 @@ import { LeadHistoryCard } from '@/modules/leads/details/components/LeadHistoryC
 import { LeadFollowUpCard } from '@/modules/leads/details/components/LeadFollowUpCard';
 import { useRouter, useParams } from 'next/navigation';
 import { leadsApi } from '@/modules/leads/api/leadsApi';
-import { getUser } from '@/core/utils/auth';
 import { Lead } from '@/modules/leads/types/lead.types';
 
 export const LeadDetailsDashboard: React.FC = () => {
@@ -44,36 +43,26 @@ export const LeadDetailsDashboard: React.FC = () => {
 
         if (leadData) setLead(leadData);
 
-        // DIAGNOSTIC: log every userId-related field so we can see what the backend expects
+        // --- Mirrors Flutter exactly ---
+        // Activities: userId = leadData['assignedUser']['id'] ?? ''
+        // Followups:  userId = leadData['userId'] ?? ''
+        const assignedUserIdForActivities =
+          (leadData as any)?.assignedUser?.id ||
+          (leadData as any)?.assignedUser?._id ||
+          '';
+
+        // Followups use the lead's own userId field (NOT assignedUser.id)
+        const userIdForFollowups = (leadData as any)?.userId ?? '';
+
         console.log('[LeadDetailsDashboard] leadId:', leadId);
-        console.log('[LeadDetailsDashboard] leadData.userId:', (leadData as any)?.userId);
-        console.log('[LeadDetailsDashboard] leadData.assignedTo:', (leadData as any)?.assignedTo);
-        console.log('[LeadDetailsDashboard] leadData.assignedUser:', JSON.stringify((leadData as any)?.assignedUser));
+        console.log('[LeadDetailsDashboard] assignedUser.id (for activities):', assignedUserIdForActivities);
+        console.log('[LeadDetailsDashboard] leadData.userId (for followups):', userIdForFollowups);
         console.log('[LeadDetailsDashboard] full leadData:', JSON.stringify(leadData));
 
-        // Step 2: Resolve the userId the backend expects for activities/followups.
-        // Try every possible field the API might store the assigned user's ID in.
-        const sessionUser = getUser<Record<string, string>>();
-        console.log('[LeadDetailsDashboard] sessionUser.id:', sessionUser?.id);
-
-        const assignedUserId =
-          (leadData as any)?.assignedTo ||
-          (leadData as any)?.assignedUser?._id ||
-          (leadData as any)?.assignedUser?.id ||
-          (leadData as any)?.userId ||
-          sessionUser?.id;
-
-        console.log('[LeadDetailsDashboard] resolved assignedUserId:', assignedUserId);
-
-        if (!assignedUserId) {
-          console.warn('[LeadDetailsDashboard] ⚠️ No userId resolved — skipping activities/followups fetch.');
-          return;
-        }
-
-        // Step 3: Fetch activities and followups in parallel using the correct userId
+        // Step 3: Fetch activities and followups in parallel
         const [activitiesData, followupsData] = await Promise.all([
-          leadsApi.fetchLeadActivities(leadId, assignedUserId),
-          leadsApi.fetchFollowupsByLead(leadId, assignedUserId),
+          leadsApi.fetchLeadActivities(leadId, assignedUserIdForActivities),
+          leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
         ]);
 
         setActivities(activitiesData || []);
