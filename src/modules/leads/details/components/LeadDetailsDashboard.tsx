@@ -34,7 +34,7 @@ export const LeadDetailsDashboard: React.FC = () => {
             leadData = JSON.parse(cached) as Lead;
             console.log('[LeadDetailsDashboard] ✅ Lead loaded from sessionStorage cache');
           }
-        } catch {}
+        } catch { }
 
         // Fall back to API search if cache miss
         if (!leadData) {
@@ -89,7 +89,7 @@ export const LeadDetailsDashboard: React.FC = () => {
   }, [leadId]);
 
   return (
-    <div className="flex flex-col w-full h-full bg-[#E5ECF4] p-4 lg:p-8 overflow-y-auto [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/20">
+    <div className="flex flex-col w-full h-full overflow-y-auto [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/20">
       <div className="max-w-[1400px] mx-auto w-full">
         <div className="flex items-center gap-4 mb-8">
           <button
