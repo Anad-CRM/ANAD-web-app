@@ -12,6 +12,8 @@ import { LeadStatsCard } from "./LeadStatsCard";
 import { ProfileDetailsCard } from "./ProfileDetailsCard";
 import { AttendanceCard } from "./AttendanceCard";
 import { Calendar, ChevronLeft } from "lucide-react";
+import { BackButton } from "@/core/components/ui/BackButton";
+
 function formatDate(iso?: string) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -75,13 +77,7 @@ export function StaffDetailView() {
         <Text size="custom" weight="bold" className="text-[20px]" style={{ color: COLORS.text }}>
           {error ?? "Something went wrong"}
         </Text>
-        <button
-          onClick={() => router.back()}
-          style={{ backgroundColor: COLORS.primaryDark }}
-          className="px-5 py-2.5 rounded-xl text-white font-medium"
-        >
-          Go Back
-        </button>
+        <BackButton onClick={() => router.back()} className="mt-4" />
       </div>
     );
   }
@@ -115,17 +111,7 @@ export function StaffDetailView() {
       {/* Top Nav */}
       <div className="flex justify-between items-start mb-8 lg:mb-12">
         <div className="flex flex-col gap-5">
-          <button
-            onClick={() => router.back()}
-            style={{ backgroundColor: COLORS.primaryDark }}
-            className="w-[42px] h-[42px] flex items-center justify-center rounded-full text-white hover:opacity-90 transition-opacity shadow-lg"
-          >
-            <ChevronLeft
-              width={30}
-              height={30}
-              strokeWidth={1.5}
-            />
-          </button>
+          <BackButton />
           <Text as="h1" size="custom" className="text-[22px] md:text-[26px] ml-1 font-medium" style={{ color: COLORS.text }}>
             {staff.role} Profile
           </Text>

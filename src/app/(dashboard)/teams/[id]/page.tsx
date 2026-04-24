@@ -4,6 +4,8 @@ import { useTeamDetails } from "@/modules/teams/hooks/useTeamDetails";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { BackButton } from "@/core/components/ui/BackButton";
+
 export default function TeamDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -36,9 +38,7 @@ export default function TeamDetailsPage() {
     return (
       <div className="text-red-500 bg-red-50 p-6 rounded-xl flex flex-col gap-4 items-start">
         {error || "Team not found."}
-        <button onClick={() => router.push('/teams')} className="px-4 py-2 bg-white text-red-500 rounded-md font-medium shadow-sm">
-          Go Back
-        </button>
+        <BackButton onClick={() => router.push('/teams')} className="mt-2" />
       </div>
     );
   }
@@ -46,9 +46,7 @@ export default function TeamDetailsPage() {
   return (
     <div className="flex flex-col gap-[22px]">
       <div className="flex items-center gap-4 mb-4">
-        <button onClick={() => router.push('/teams')} className="p-2 bg-white shadow-sm hover:bg-gray-50 rounded-full transition">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-        </button>
+        <BackButton onClick={() => router.push('/teams')} />
         <h1 className="text-[24px] font-bold text-black">{team.name} Details</h1>
       </div>
 
@@ -93,8 +91,12 @@ export default function TeamDetailsPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {team.users?.map((member) => (
-            <div key={member.id} className="bg-white border hover:border-gray-300 transition-colors rounded-[16px] p-5 shadow-[0px_2px_12px_rgba(0,0,0,0.02)] flex items-center gap-4 cursor-pointer">
-              <div className="w-12 h-12 rounded-full bg-[#EAF1F8] flex items-center justify-center text-lg font-bold text-[#1E3A8A]">
+            <div 
+              key={member.id} 
+              onClick={() => router.push(`/staffs/${member.id}`)}
+              className="bg-white border hover:border-gray-300 transition-colors rounded-[16px] p-5 shadow-[0px_2px_12px_rgba(0,0,0,0.02)] flex items-center gap-4 cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-full bg-[#EAF1F8] flex items-center justify-center text-lg font-bold text-[#1E3A8A] relative">
                 {member.userName?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div className="flex-1">
