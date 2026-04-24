@@ -19,10 +19,13 @@ function formatDate(iso?: string) {
   });
 }
 
+import { useAuthContext } from "@/modules/auth/stores/AuthContext";
+
 export function StaffDetailView() {
   const router = useRouter();
   const params = useParams();
   const staffId = params?.id as string;
+  const { user } = useAuthContext();
 
   const [staff, setStaff] = useState<Staff | null>(null);
   const [attendance, setAttendance] = useState<AttendanceLog[]>([]);
@@ -30,9 +33,11 @@ export function StaffDetailView() {
   const [error, setError] = useState<string | null>(null);
 
   const loadStaff = useCallback(async () => {
+    if (!user?.organizationId && !user?.organization?.id) return;
     setLoading(true);
     try {
-      const res = await StaffService.getStaffById(staffId);
+      const orgId = user.organizationId || user.organization?.id;
+      const res = await StaffService.getStaffById(staffId, orgId as string | number);
       if (res.status === "success" && res.data?.length) {
         setStaff(res.data[0]);
       } else {
@@ -43,7 +48,7 @@ export function StaffDetailView() {
     } finally {
       setLoading(false);
     }
-  }, [staffId]);
+  }, [staffId, user]);
 
   const loadAttendance = useCallback(async (userId: string | number) => {
     try {

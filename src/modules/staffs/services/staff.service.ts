@@ -8,7 +8,6 @@ import type {
 } from "../types/staff.types";
 
 export const StaffService = {
-  /** Get all staff filtered by role and date */
   async getStaffList(payload: GetStaffListPayload): Promise<StaffListResponse> {
     const response = await api.post<StaffListResponse>(
       API_ENDPOINTS.STAFF.GET_ALL,
@@ -17,17 +16,30 @@ export const StaffService = {
     return response.data;
   },
 
-  /** Get a single staff member by their user ID */
-  async getStaffById(userId: string | number): Promise<StaffListResponse> {
-    const response = await api.post<StaffListResponse>(
-      API_ENDPOINTS.STAFF.GET_BY_ID,
-      { userId }
+  async getStaffById(userId: string | number, organizationId: string | number): Promise<StaffListResponse> {
+    const response = await api.post<any>(
+      API_ENDPOINTS.STAFF.GET_BY_ROLE,
+      { organizationId }
     );
     
-    return response.data;
+    if (response.data.status === "success" && response.data.data) {
+       const { managers, staffMembers, teamLeaders, students, managerOwn } = response.data.data;
+       const allStaff = [
+         ...(managers || []), 
+         ...(staffMembers || []), 
+         ...(teamLeaders || []), 
+         ...(students || [])
+       ];
+       if (managerOwn) allStaff.push(managerOwn);
+       
+       const foundStaff = allStaff.find((s: any) => String(s.id) === String(userId));
+       if (foundStaff) {
+          return { status: "success", data: [foundStaff] } as unknown as StaffListResponse;
+       }
+    }
+    return { status: "failed", data: [] } as unknown as StaffListResponse;
   },
 
-  /** Get monthly attendance logs for a staff member */
   async getAttendance(payload: GetAttendancePayload): Promise<AttendanceResponse> {
     const response = await api.post<AttendanceResponse>(
       API_ENDPOINTS.ATTENDANCE.GET_USER_ATTENDANCE,
