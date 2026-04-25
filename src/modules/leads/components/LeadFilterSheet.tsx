@@ -11,6 +11,8 @@ export interface FilterState {
   datePreset: string | null;
   startDate: string | null;
   endDate: string | null;
+  teamIds: string[];
+  adIds: string[];
 }
 
 interface LeadFilterSheetProps {
@@ -19,14 +21,10 @@ interface LeadFilterSheetProps {
   initialFilters: FilterState;
   onApply: (filters: FilterState) => void;
   onClearAll: () => void;
-  staffMembers?: StaffMember[];
+  staffMembers?: { id: string; userName: string }[];
+  teams?: { id: string; name: string }[];
+  ads?: { id: string; adName: string; platform?: string }[];
   lockedStatus?: string | null;
-}
-
-interface StaffMember {
-  id: string;
-  userName: string;
-  profilePicture?: string;
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -34,34 +32,18 @@ interface StaffMember {
 const STATUS_OPTIONS = [
   "New Lead", "Hot Lead", "Contacted", "Closed",
   "Register", "RNR", "Not Interested", "Follow Up",
-  "Busy", "Switch Off", "Disqualified"
+  "Busy", "Switch Off", "Disqualified",
 ];
 
 const DATE_PRESETS = [
-  "Today", "Yesterday", "This Week", "This Month", "Last Month", "Custom"
+  "Today", "Yesterday", "This Week", "This Month", "Last Month", "Custom",
 ];
 
-// Status → accent color mapping (mirrors Flutter theme)
-const STATUS_COLORS: Record<string, string> = {
-  "New Lead":      COLORS.primary,
-  "Hot Lead":      "#E85D04",
-  "Contacted":     "#0077B6",
-  "Closed":        COLORS.success,
-  "Register":      "#7B2FBE",
-  "RNR":           COLORS.warning,
-  "Not Interested":"#9B2226",
-  "Follow Up":     "#0096C7",
-  "Busy":          "#CA6702",
-  "Switch Off":    COLORS.muted,
-  "Disqualified":  "#6B6B6B",
-};
-
-// ── Helper: compute date range from preset ─────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 function rangeForPreset(preset: string): { startDate: string; endDate: string } {
   const now = new Date();
   const fmt = (d: Date) => d.toISOString().split("T")[0];
-
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
@@ -79,12 +61,12 @@ function rangeForPreset(preset: string): { startDate: string; endDate: string } 
     }
     case "This Month": {
       const mStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const mEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      const mEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
       return { startDate: fmt(mStart), endDate: fmt(mEnd) };
     }
     case "Last Month": {
       const lmStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const lmEnd   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+      const lmEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
       return { startDate: fmt(lmStart), endDate: fmt(lmEnd) };
     }
     default:
@@ -92,47 +74,90 @@ function rangeForPreset(preset: string): { startDate: string; endDate: string } 
   }
 }
 
-// ── Sub-component: Section Toggle ──────────────────────────────────────────
+// ── Selected chips preview (shown when section is collapsed) ───────────────
 
-function Section({
-  title, count, children, defaultOpen = false
-}: {
-  title: string;
-  count?: number;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
+function SelectedChips({ labels }: { labels: string[] }) {
+  if (!labels.length) return null;
+  const maxShow = 4;
+  const shown = labels.slice(0, maxShow);
+  const extra = labels.length - maxShow;
   return (
-    <div>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between py-3 group"
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-[15px] font-semibold" style={{ color: COLORS.text }}>
-            {title}
-          </span>
-          {count != null && count > 0 && (
-            <span
-              className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
-            >
-              {count}
-            </span>
-          )}
-        </div>
-        <span style={{ color: open ? COLORS.primary : COLORS.muted }}>
-          {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+    <div className="flex flex-wrap gap-2 pb-3">
+      {shown.map(label => (
+        <span
+          key={label}
+          className="text-[10px] font-semibold px-2.5 py-1.5 rounded-full truncate max-w-[90px]"
+          style={{
+            backgroundColor: COLORS.primaryXlight,
+            color: COLORS.primary,
+            border: `1px solid ${COLORS.primaryLight}`,
+          }}
+        >
+          {label}
         </span>
-      </button>
-      {open && <div className="pb-3">{children}</div>}
-      <div className="h-px" style={{ backgroundColor: COLORS.border }} />
+      ))}
+      {extra > 0 && (
+        <span
+          className="text-[10px] font-semibold px-2.5 py-1.5 rounded-full"
+          style={{
+            backgroundColor: COLORS.primaryXlight,
+            color: COLORS.primary,
+            border: `1px solid ${COLORS.primaryLight}`,
+          }}
+        >
+          +{extra} more
+        </span>
+      )}
     </div>
   );
 }
 
+// ── Section header (accordion row) ────────────────────────────────────────
+
+function SectionRow({
+  title, count, isExpanded, onToggle,
+}: {
+  title: string;
+  count: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center justify-between py-3"
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-[15px] font-semibold" style={{ color: COLORS.text }}>
+          {title}
+        </span>
+        {count > 0 && (
+          <span
+            className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
+          >
+            {count}
+          </span>
+        )}
+      </div>
+      <div
+        className="w-7 h-7 rounded-full flex items-center justify-center"
+        style={{
+          backgroundColor: isExpanded ? COLORS.primaryXlight : "#f3f4f6",
+        }}
+      >
+        {isExpanded
+          ? <ChevronUp size={16} style={{ color: COLORS.primary }} />
+          : <ChevronDown size={16} style={{ color: "#9ca3af" }} />
+        }
+      </div>
+    </button>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────
+
+type SectionKey = "date" | "status" | "staff" | "ads" | null;
 
 export function LeadFilterSheet({
   isOpen,
@@ -141,27 +166,41 @@ export function LeadFilterSheet({
   onApply,
   onClearAll,
   staffMembers = [],
+  ads = [],
   lockedStatus = null,
 }: LeadFilterSheetProps) {
   const [tempStatuses, setTempStatuses] = useState<string[]>([]);
   const [tempStaffIds, setTempStaffIds] = useState<string[]>([]);
+  const [tempAdIds, setTempAdIds] = useState<string[]>([]);
   const [datePreset, setDatePreset] = useState<string | null>(null);
   const [customStart, setCustomStart] = useState<string>("");
   const [customEnd, setCustomEnd] = useState<string>("");
+  const [staffSearch, setStaffSearch] = useState<string>("");
+  const [adSearch, setAdSearch] = useState<string>("");
+
+  // Only one section expanded at a time — matches Flutter's _expandedType
+  const [expandedKey, setExpandedKey] = useState<SectionKey>("date");
+
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  // Sync temp state when sheet opens
+  function toggleSection(key: SectionKey) {
+    setExpandedKey(prev => (prev === key ? null : key));
+  }
+
   useEffect(() => {
     if (isOpen) {
       setTempStatuses(initialFilters.statuses);
       setTempStaffIds(initialFilters.staffIds);
+      setTempAdIds(initialFilters.adIds ?? []);
       setDatePreset(initialFilters.datePreset);
       setCustomStart(initialFilters.startDate ?? "");
       setCustomEnd(initialFilters.endDate ?? "");
+      setStaffSearch("");
+      setAdSearch("");
+      setExpandedKey("date");
     }
   }, [isOpen, initialFilters]);
 
-  // Close on Escape key
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", handler);
@@ -170,15 +209,15 @@ export function LeadFilterSheet({
 
   function toggleStatus(s: string) {
     if (lockedStatus) return;
-    setTempStatuses(prev =>
-      prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]
-    );
+    setTempStatuses(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
   }
 
   function toggleStaff(id: string) {
-    setTempStaffIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    setTempStaffIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  }
+
+  function toggleAd(id: string) {
+    setTempAdIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   }
 
   function applyPreset(preset: string) {
@@ -192,35 +231,33 @@ export function LeadFilterSheet({
         const { startDate, endDate } = rangeForPreset(preset);
         setCustomStart(startDate);
         setCustomEnd(endDate);
+      } else {
+        setCustomStart("");
+        setCustomEnd("");
       }
     }
   }
 
   function handleApply() {
-    // At least one filter required
-    const hasFilter =
-      tempStatuses.length > 0 ||
-      tempStaffIds.length > 0 ||
-      datePreset != null;
-    if (!hasFilter) return;
-
     let start: string | null = null;
     let end: string | null = null;
     if (datePreset === "Custom") {
       start = customStart || null;
-      end   = customEnd || null;
+      end = customEnd || null;
     } else if (datePreset) {
       const r = rangeForPreset(datePreset);
       start = r.startDate;
-      end   = r.endDate;
+      end = r.endDate;
     }
 
     onApply({
-      statuses:   lockedStatus ? [lockedStatus] : tempStatuses,
-      staffIds:   tempStaffIds,
+      statuses: lockedStatus ? [lockedStatus] : tempStatuses,
+      staffIds: tempStaffIds,
+      teamIds: [],
+      adIds: tempAdIds,
       datePreset,
-      startDate:  start,
-      endDate:    end,
+      startDate: start,
+      endDate: end,
     });
     onClose();
   }
@@ -228,17 +265,46 @@ export function LeadFilterSheet({
   function handleClear() {
     setTempStatuses([]);
     setTempStaffIds([]);
+    setTempAdIds([]);
     setDatePreset(null);
     setCustomStart("");
     setCustomEnd("");
+    setStaffSearch("");
+    setAdSearch("");
     onClearAll();
     onClose();
   }
 
-  const activeCount =
-    (lockedStatus ? 0 : tempStatuses.length) +
-    tempStaffIds.length +
-    (datePreset ? 1 : 0);
+  // Summary count for header
+  let summaryCount = 0;
+  const summaryParts: string[] = [];
+  if (tempStatuses.length) { summaryCount++; summaryParts.push(`${tempStatuses.length} status`); }
+  if (tempStaffIds.length) { summaryCount++; summaryParts.push(`${tempStaffIds.length} staff`); }
+  if (tempAdIds.length) { summaryCount++; summaryParts.push(`${tempAdIds.length} ad${tempAdIds.length > 1 ? "s" : ""}`); }
+  if (datePreset) { summaryCount++; summaryParts.push("date range"); }
+
+  // Staff name lookup for collapsed chips
+  const selectedStaffLabels = tempStaffIds.map(id => {
+    const found = staffMembers.find(s => s.id === id);
+    return found?.userName ?? id;
+  });
+  const selectedAdLabels = tempAdIds.map(id => {
+    const found = ads.find(a => a.id === id);
+    return found?.adName ?? id;
+  });
+  const dateLabel = datePreset
+    ? (datePreset === "Custom"
+        ? (customStart && customEnd ? `${customStart} – ${customEnd}` : "Custom")
+        : datePreset)
+    : null;
+
+  const filteredStaff = staffMembers.filter(s =>
+    s.userName?.toLowerCase().startsWith(staffSearch.toLowerCase())
+  );
+  const filteredAds = ads.filter(a =>
+    a.adName?.toLowerCase().startsWith(adSearch.toLowerCase()) ||
+    a.platform?.toLowerCase().startsWith(adSearch.toLowerCase())
+  );
 
   if (!isOpen) return null;
 
@@ -256,212 +322,360 @@ export function LeadFilterSheet({
       <div
         className="relative w-full sm:max-w-md rounded-t-[28px] sm:rounded-[24px] overflow-hidden flex flex-col"
         style={{
-          backgroundColor: COLORS.surface,
-          maxHeight: "90vh",
+          backgroundColor: "#fff",
+          maxHeight: "92vh",
           boxShadow: "0 -8px 40px rgba(13,27,62,0.18)",
         }}
       >
-        {/* Drag handle (mobile) */}
+        {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1.5 rounded-full" style={{ backgroundColor: COLORS.border }} />
+          <div className="w-12 h-1.5 rounded-full bg-gray-300" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-4 pb-3">
+        <div className="flex items-center justify-between px-6 pt-5 pb-1">
           <div className="flex items-center gap-2">
             <SlidersHorizontal size={20} style={{ color: COLORS.primary }} />
-            <h2 className="text-[18px] font-bold" style={{ color: COLORS.text }}>
+            <span className="text-[20px] font-bold" style={{ color: "#1a1a1a" }}>
               Filter Options
-            </h2>
+            </span>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full transition-colors hover:bg-gray-100"
+            className="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors"
           >
-            <X size={20} style={{ color: COLORS.muted }} />
+            <X size={18} color="#555" />
           </button>
         </div>
 
-        {/* Active filter summary */}
-        <div className="px-6 pb-2">
+        {/* Summary line */}
+        <div className="px-6 pt-2 pb-3">
           <p
-            className="text-[13px] font-semibold text-center"
-            style={{ color: activeCount > 0 ? COLORS.danger : COLORS.subtle }}
+            className="text-[14px] font-bold text-center"
+            style={{ color: summaryCount > 0 ? "#c0392b" : "#9ca3af" }}
           >
-            {activeCount > 0
-              ? `${activeCount} filter${activeCount > 1 ? "s" : ""} active`
+            {summaryCount > 0
+              ? `${summaryCount} filter${summaryCount > 1 ? "s" : ""} active: ${summaryParts.join(", ")}`
               : "No filters currently active"}
           </p>
         </div>
-        <div className="h-px mx-6" style={{ backgroundColor: COLORS.border }} />
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto px-6 custom-scrollbar">
 
-          {/* ── Date Range ── */}
-          <Section title="Date Range" count={datePreset ? 1 : 0} defaultOpen={true}>
-            <div className="grid grid-cols-3 gap-2 mt-1">
-              {DATE_PRESETS.map(preset => {
-                const isActive = datePreset === preset;
-                return (
-                  <button
-                    key={preset}
-                    onClick={() => applyPreset(preset)}
-                    className="flex items-center justify-center gap-1 py-2 px-1 rounded-full text-[11px] font-semibold transition-all"
-                    style={{
-                      backgroundColor: isActive ? COLORS.primary : COLORS.primaryXlight,
-                      color: isActive ? "#fff" : COLORS.text,
-                      border: `1.5px solid ${isActive ? COLORS.primary : COLORS.border}`,
-                    }}
-                  >
-                    {isActive && <Check size={10} />}
-                    {preset}
-                  </button>
-                );
-              })}
-            </div>
+          {/* ────────── DATE RANGE ────────── */}
+          <div className="h-px bg-gray-200 mb-1" />
+          <SectionRow
+            title="Date Range"
+            count={datePreset ? 1 : 0}
+            isExpanded={expandedKey === "date"}
+            onToggle={() => toggleSection("date")}
+          />
 
-            {/* Custom date inputs */}
-            {datePreset === "Custom" && (
-              <div className="mt-3 flex gap-2">
-                <div className="flex-1">
-                  <label className="text-[11px] font-medium mb-1 block" style={{ color: COLORS.muted }}>
-                    From
-                  </label>
-                  <input
-                    type="date"
-                    value={customStart}
-                    max={customEnd || undefined}
-                    onChange={e => setCustomStart(e.target.value)}
-                    className="w-full rounded-xl px-3 py-2 text-[13px] border outline-none focus:ring-1"
-                    style={{ borderColor: COLORS.border, color: COLORS.text, outlineColor: COLORS.primary }}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="text-[11px] font-medium mb-1 block" style={{ color: COLORS.muted }}>
-                    To
-                  </label>
-                  <input
-                    type="date"
-                    value={customEnd}
-                    min={customStart || undefined}
-                    onChange={e => setCustomEnd(e.target.value)}
-                    className="w-full rounded-xl px-3 py-2 text-[13px] border outline-none focus:ring-1"
-                    style={{ borderColor: COLORS.border, color: COLORS.text, outlineColor: COLORS.primary }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Selected date display */}
-            {datePreset && datePreset !== "Custom" && (
-              <div
-                className="mt-3 flex items-center gap-2 p-3 rounded-xl"
-                style={{ backgroundColor: COLORS.primaryXlight, border: `1px solid ${COLORS.primaryLight}` }}
+          {/* Collapsed preview */}
+          {expandedKey !== "date" && dateLabel && (
+            <div className="flex flex-wrap gap-2 pb-3">
+              <span
+                className="text-[10px] font-semibold px-2.5 py-1.5 rounded-full"
+                style={{
+                  backgroundColor: COLORS.primaryXlight,
+                  color: COLORS.primary,
+                  border: `1px solid ${COLORS.primaryLight}`,
+                }}
               >
-                <Calendar size={15} style={{ color: COLORS.primary }} />
-                <span className="text-[12px] font-semibold" style={{ color: COLORS.primary }}>
-                  {(() => {
-                    const r = rangeForPreset(datePreset);
-                    return `${r.startDate} – ${r.endDate}`;
-                  })()}
-                </span>
-              </div>
-            )}
-          </Section>
+                {dateLabel}
+              </span>
+            </div>
+          )}
 
-          {/* ── Status ── */}
-          <Section
+          {/* Expanded content */}
+          {expandedKey === "date" && (
+            <div className="pb-4">
+              {/* Preset chips — 4 in row 1, 2 in row 2 (like Flutter) */}
+              <div className="grid grid-cols-4 gap-2 mb-2">
+                {DATE_PRESETS.slice(0, 4).map(preset => {
+                  const isActive = datePreset === preset;
+                  return (
+                    <button
+                      key={preset}
+                      onClick={() => applyPreset(preset)}
+                      className="flex items-center justify-center gap-1 py-2 rounded-full text-[11px] font-semibold transition-all"
+                      style={{
+                        backgroundColor: isActive ? COLORS.primary : "#fff",
+                        color: isActive ? "#fff" : "#1a1a1a",
+                        border: `1.5px solid ${isActive ? COLORS.primary : "#d1d5db"}`,
+                      }}
+                    >
+                      {isActive && <Check size={9} />}
+                      {preset}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex gap-2">
+                {DATE_PRESETS.slice(4).map(preset => {
+                  const isActive = datePreset === preset;
+                  return (
+                    <button
+                      key={preset}
+                      onClick={() => applyPreset(preset)}
+                      className="flex items-center justify-center gap-1 py-2 px-4 rounded-full text-[11px] font-semibold transition-all"
+                      style={{
+                        backgroundColor: isActive ? COLORS.primary : "#fff",
+                        color: isActive ? "#fff" : "#1a1a1a",
+                        border: `1.5px solid ${isActive ? COLORS.primary : "#d1d5db"}`,
+                      }}
+                    >
+                      {isActive && <Check size={9} />}
+                      {preset}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Selected date box */}
+              {datePreset && datePreset !== "Custom" && (
+                <div
+                  className="mt-3 flex items-center gap-2 p-3 rounded-xl"
+                  style={{
+                    backgroundColor: COLORS.primaryXlight,
+                    border: `1px solid ${COLORS.primaryLight}`,
+                  }}
+                >
+                  <Calendar size={15} style={{ color: COLORS.primary }} />
+                  <span className="text-[12px] font-semibold" style={{ color: COLORS.primary }}>
+                    {(() => {
+                      const r = rangeForPreset(datePreset);
+                      return `${r.startDate} – ${r.endDate}`;
+                    })()}
+                  </span>
+                </div>
+              )}
+
+              {/* Custom date inputs */}
+              {datePreset === "Custom" && (
+                <div className="mt-3 flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-[11px] font-medium mb-1 block text-gray-500">From</label>
+                    <input
+                      type="date"
+                      value={customStart}
+                      max={customEnd || undefined}
+                      onChange={e => setCustomStart(e.target.value)}
+                      className="w-full rounded-xl px-3 py-2 text-[13px] border outline-none focus:ring-1"
+                      style={{ borderColor: "#d1d5db", color: COLORS.text, outlineColor: COLORS.primary }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-[11px] font-medium mb-1 block text-gray-500">To</label>
+                    <input
+                      type="date"
+                      value={customEnd}
+                      min={customStart || undefined}
+                      onChange={e => setCustomEnd(e.target.value)}
+                      className="w-full rounded-xl px-3 py-2 text-[13px] border outline-none focus:ring-1"
+                      style={{ borderColor: "#d1d5db", color: COLORS.text, outlineColor: COLORS.primary }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ────────── STATUS ────────── */}
+          <div className="h-px bg-gray-200 mb-1" />
+          <SectionRow
             title={lockedStatus ? `Status: ${lockedStatus}` : "Status"}
             count={lockedStatus ? 0 : tempStatuses.length}
-            defaultOpen={!lockedStatus}
-          >
-            {lockedStatus ? (
-              <p className="text-[12px] mt-1" style={{ color: COLORS.muted }}>
-                Status is locked for this view.
-              </p>
-            ) : (
-              <div className="flex flex-wrap gap-2 mt-1">
-                {STATUS_OPTIONS.map(s => {
-                  const isActive = tempStatuses.includes(s);
-                  const color = STATUS_COLORS[s] ?? COLORS.primary;
-                  return (
-                    <button
-                      key={s}
-                      onClick={() => toggleStatus(s)}
-                      className="flex items-center gap-1.5 py-1.5 px-3 rounded-full text-[12px] font-semibold transition-all"
-                      style={{
-                        backgroundColor: isActive ? color : `${color}18`,
-                        color: isActive ? "#fff" : color,
-                        border: `1.5px solid ${isActive ? color : `${color}40`}`,
-                      }}
-                    >
-                      {isActive && <Check size={10} />}
-                      {s}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </Section>
+            isExpanded={expandedKey === "status"}
+            onToggle={() => toggleSection("status")}
+          />
 
-          {/* ── Staff Members (if available) ── */}
-          {staffMembers.length > 0 && (
-            <Section title="Staff Members" count={tempStaffIds.length}>
-              <div className="flex flex-col gap-1 mt-1 max-h-48 overflow-y-auto custom-scrollbar">
-                {staffMembers.map(staff => {
-                  const isActive = tempStaffIds.includes(staff.id);
-                  return (
-                    <button
-                      key={staff.id}
-                      onClick={() => toggleStaff(staff.id)}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
-                      style={{
-                        backgroundColor: isActive ? COLORS.primaryXlight : "transparent",
-                        border: `1.5px solid ${isActive ? COLORS.primary : "transparent"}`,
-                      }}
-                    >
-                      {/* Avatar placeholder */}
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
-                        style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
+          {/* Collapsed preview */}
+          {expandedKey !== "status" && !lockedStatus && tempStatuses.length > 0 && (
+            <SelectedChips labels={tempStatuses} />
+          )}
+
+          {/* Expanded content */}
+          {expandedKey === "status" && (
+            <div className="pb-4">
+              {lockedStatus ? (
+                <p className="text-[12px]" style={{ color: COLORS.muted }}>
+                  Status is locked for this view.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {STATUS_OPTIONS.map(s => {
+                    const isActive = tempStatuses.includes(s);
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => toggleStatus(s)}
+                        className="flex items-center gap-1.5 py-1.5 px-3 rounded-full text-[12px] font-semibold transition-all"
+                        style={{
+                          backgroundColor: isActive ? COLORS.primary : "#fff",
+                          color: isActive ? "#fff" : COLORS.primary,
+                          border: `1.5px solid ${isActive ? COLORS.primary : COLORS.primaryLight}`,
+                        }}
                       >
-                        {staff.userName?.charAt(0)?.toUpperCase() ?? "?"}
-                      </div>
-                      <span className="flex-1 text-[13px] font-medium truncate" style={{ color: COLORS.text }}>
-                        {staff.userName}
-                      </span>
-                      {isActive && (
+                        {isActive && <Check size={10} />}
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ────────── STAFF MEMBERS ────────── */}
+          <div className="h-px bg-gray-200 mb-1" />
+          <SectionRow
+            title="Staff Members"
+            count={tempStaffIds.length}
+            isExpanded={expandedKey === "staff"}
+            onToggle={() => toggleSection("staff")}
+          />
+
+          {/* Collapsed preview */}
+          {expandedKey !== "staff" && selectedStaffLabels.length > 0 && (
+            <SelectedChips labels={selectedStaffLabels} />
+          )}
+
+          {/* Expanded content */}
+          {expandedKey === "staff" && (
+            <div className="pb-4">
+              <input
+                type="text"
+                placeholder="Search staff..."
+                value={staffSearch}
+                onChange={e => setStaffSearch(e.target.value)}
+                className="w-full rounded-xl px-3 py-2.5 text-[13px] border outline-none focus:ring-1 transition-all mb-2"
+                style={{ borderColor: "#d1d5db", color: COLORS.text, outlineColor: COLORS.primary }}
+              />
+              <div className="flex flex-col gap-1 max-h-52 overflow-y-auto custom-scrollbar">
+                {staffMembers.length === 0 ? (
+                  <p className="text-[12px] text-center py-4 text-gray-400">No staff members found</p>
+                ) : filteredStaff.length === 0 ? (
+                  <p className="text-[12px] text-center py-4 text-gray-400">No results for "{staffSearch}"</p>
+                ) : (
+                  filteredStaff.map(staff => {
+                    const isActive = tempStaffIds.includes(staff.id);
+                    return (
+                      <button
+                        key={staff.id}
+                        onClick={() => toggleStaff(staff.id)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
+                        style={{
+                          backgroundColor: isActive ? COLORS.primaryXlight : "transparent",
+                          border: `1.5px solid ${isActive ? COLORS.primary : "transparent"}`,
+                        }}
+                      >
                         <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={{ backgroundColor: COLORS.primary }}
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                          style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
                         >
-                          <Check size={12} color="#fff" />
+                          {staff.userName?.charAt(0)?.toUpperCase() ?? "?"}
                         </div>
-                      )}
-                    </button>
-                  );
-                })}
+                        <span className="flex-1 text-[13px] font-medium truncate" style={{ color: "#1a1a1a" }}>
+                          {staff.userName}
+                        </span>
+                        {isActive && (
+                          <div
+                            className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ backgroundColor: COLORS.primary }}
+                          >
+                            <Check size={12} color="#fff" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
               </div>
-            </Section>
+            </div>
+          )}
+
+          {/* ────────── ADS SOURCE ────────── */}
+          {ads.length > 0 && (
+            <>
+              <div className="h-px bg-gray-200 mb-1" />
+              <SectionRow
+                title="Ads Source"
+                count={tempAdIds.length}
+                isExpanded={expandedKey === "ads"}
+                onToggle={() => toggleSection("ads")}
+              />
+
+              {/* Collapsed preview */}
+              {expandedKey !== "ads" && selectedAdLabels.length > 0 && (
+                <SelectedChips labels={selectedAdLabels} />
+              )}
+
+              {/* Expanded content */}
+              {expandedKey === "ads" && (
+                <div className="pb-4">
+                  <input
+                    type="text"
+                    placeholder="Search ads..."
+                    value={adSearch}
+                    onChange={e => setAdSearch(e.target.value)}
+                    className="w-full rounded-xl px-3 py-2.5 text-[13px] border outline-none focus:ring-1 transition-all mb-2"
+                    style={{ borderColor: "#d1d5db", color: COLORS.text, outlineColor: COLORS.primary }}
+                  />
+                  <div className="flex flex-col gap-1 max-h-52 overflow-y-auto custom-scrollbar">
+                    {filteredAds.length === 0 ? (
+                      <p className="text-[12px] text-center py-4 text-gray-400">
+                        {adSearch ? `No results for "${adSearch}"` : "No ads found"}
+                      </p>
+                    ) : (
+                      filteredAds.map(ad => {
+                        const isActive = tempAdIds.includes(ad.id);
+                        return (
+                          <button
+                            key={ad.id}
+                            onClick={() => toggleAd(ad.id)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
+                            style={{
+                              backgroundColor: isActive ? COLORS.primaryXlight : "transparent",
+                              border: `1.5px solid ${isActive ? COLORS.primary : "transparent"}`,
+                            }}
+                          >
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                              style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
+                            >
+                              {ad.platform?.charAt(0)?.toUpperCase() ?? "A"}
+                            </div>
+                            <span className="flex-1 text-[13px] font-medium truncate" style={{ color: "#1a1a1a" }}>
+                              {ad.adName}
+                            </span>
+                            {isActive && (
+                              <div
+                                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                                style={{ backgroundColor: COLORS.primary }}
+                              >
+                                <Check size={12} color="#fff" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <div className="h-4" />
         </div>
 
-        {/* Footer buttons */}
-        <div
-          className="px-6 py-4 flex gap-3"
-          style={{ borderTop: `1px solid ${COLORS.border}`, backgroundColor: COLORS.surface }}
-        >
+        {/* Footer */}
+        <div className="px-6 py-4 flex gap-3 border-t border-gray-200">
           <button
             onClick={handleClear}
-            className="flex-1 py-3 rounded-xl text-[14px] font-bold transition-all hover:bg-gray-100"
-            style={{
-              backgroundColor: COLORS.grey,
-              color: COLORS.muted,
-              border: `1px solid ${COLORS.border}`,
-            }}
+            className="flex-1 py-3 rounded-xl text-[14px] font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all border border-gray-200"
           >
             Clear All
           </button>

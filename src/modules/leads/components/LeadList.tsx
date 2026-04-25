@@ -7,6 +7,9 @@ import { LeadCard } from "./LeadCard";
 import { LeadFilterSheet, FilterState } from "./LeadFilterSheet";
 import { leadsApi, FetchLeadsParams } from "../api/leadsApi";
 import { Lead } from "../types/lead.types";
+import { TeamsService } from "../../teams/services/teams.service";
+import { getAllAds } from "../../ads/api/adsApi";
+import { getUser } from "@/core/utils/auth";
 
 function buildPayload(
   searchTerm: string,
@@ -14,6 +17,7 @@ function buildPayload(
   statusParam: string | null,
   userIdParam: string | null,
   staffIdParam: string | null,
+  teamIdParam: string | null,
   offset: number,
 ): FetchLeadsParams {
   const payload: FetchLeadsParams = {
@@ -40,7 +44,21 @@ function buildPayload(
     payload.staffId = staffIdParam;
   }
 
-  // userId URL param (legacy — kept for backwards compat)
+  // Team filters
+  if (filters.teamIds.length > 0) {
+    payload.teamId = filters.teamIds.length === 1
+      ? filters.teamIds[0]
+      : filters.teamIds;
+  } else if (teamIdParam) {
+    payload.teamId = teamIdParam;
+  }
+
+  // Ad filters
+  if (filters.adIds.length > 0) {
+    payload.adIds = filters.adIds;
+  }
+
+  // User filter from URL (e.g. clicking a stat on staff profile)
   if (userIdParam) payload.userId = userIdParam;
 
   // Date filter
@@ -60,6 +78,8 @@ function buildPayload(
 const EMPTY_FILTERS: FilterState = {
   statuses: [],
   staffIds: [],
+  teamIds: [],
+  adIds: [],
   datePreset: null,
   startDate: null,
   endDate: null,
@@ -71,6 +91,7 @@ export function LeadList() {
   const statusParam = searchParams.get("status");
   const userIdParam = searchParams.get("userId");
   const staffIdParam = searchParams.get("staffId");
+  const teamIdParam = searchParams.get("teamId");
   const isUnassigned = searchParams.get("unassigned") === "true";
 
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -81,6 +102,8 @@ export function LeadList() {
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [staffMembers, setStaffMembers] = useState<{ id: string; userName: string }[]>([]);
+  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
+  const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
 
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -94,17 +117,34 @@ export function LeadList() {
   const hasActiveFilters =
     filters.statuses.length > 0 ||
     filters.staffIds.length > 0 ||
+    filters.teamIds.length > 0 ||
+    filters.adIds.length > 0 ||
     filters.datePreset != null ||
     !!statusParam ||
     !!userIdParam ||
     !!staffIdParam ||
+    !!teamIdParam ||
     isUnassigned;
 
-  // Load staff members once for filter sheet
+  // Load auxiliary data for filters
   useEffect(() => {
     leadsApi.fetchStaffMembers().then(staff => {
       setStaffMembers(staff as { id: string; userName: string }[]);
     });
+    
+    // Using user info to fetch teams if available
+    const user = getUser<any>();
+    if (user?.organizationId) {
+      TeamsService.getAllTeams({ organizationId: user.organizationId }).then(res => {
+        if (res.status === "success" && res.data) {
+          setTeams(res.data);
+        }
+      }).catch(() => {});
+      
+      getAllAds({ organizationId: user.organizationId }).then(data => {
+        setAds((data || []).map(ad => ({ ...ad, id: String(ad.id) })));
+      }).catch(() => {});
+    }
   }, []);
 
   const loadLeads = useCallback(async (reset: boolean) => {
@@ -123,6 +163,7 @@ export function LeadList() {
         statusParam,
         userIdParam,
         staffIdParam,
+        teamIdParam,
         offsetRef.current,
       );
       // Unassigned filter: pass isUnassigned flag to API
@@ -155,7 +196,7 @@ export function LeadList() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, isUnassigned]);
+  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, teamIdParam, isUnassigned]);
 
   // Debounce search changes
   useEffect(() => {
@@ -216,6 +257,9 @@ export function LeadList() {
 
   if (statusParam && filters.statuses.length === 0) {
     activePills.push({ label: statusParam, onRemove: () => { } }); // URL-driven, not removable here
+  }
+  if (teamIdParam) {
+    activePills.push({ label: `Team Filter Applied`, onRemove: () => {} });
   }
   filters.statuses.forEach(s =>
     activePills.push({
@@ -478,6 +522,8 @@ export function LeadList() {
         onApply={handleApplyFilters}
         onClearAll={handleClearAll}
         staffMembers={staffMembers}
+        teams={teams}
+        ads={ads}
         lockedStatus={statusParam || undefined}
       />
 
