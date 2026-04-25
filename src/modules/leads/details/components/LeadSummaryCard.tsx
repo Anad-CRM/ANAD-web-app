@@ -5,8 +5,13 @@ import { Lead } from '@/modules/leads/types/lead.types';
 import { Text } from '@/core/components/ui/Text';
 import { AvatarCircle } from '@/modules/staffs/components/AvatarCircle';
 import { COLORS } from '@/core/components/theme/colors';
+import { leadsApi } from '@/modules/leads/api/leadsApi';
+import { getUser } from '@/core/utils/auth';
+import { WhatsAppTemplateModal } from './WhatsAppTemplateModal';
 
-export const LeadSummaryCard: React.FC<{ lead: Lead }> = ({ lead }) => {
+export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> = ({ lead, onRefresh }) => {
+  const [showWhatsApp, setShowWhatsApp] = React.useState(false);
+
   const leadName = lead.userName || 'Unknown';
 
   const createdDate = lead.createdAt
@@ -22,6 +27,42 @@ export const LeadSummaryCard: React.FC<{ lead: Lead }> = ({ lead }) => {
   const status = lead.status || 'Unknown';
   const phoneNumber = lead.mobileNumber || 'N/A';
   const email = lead.email || 'N/A';
+
+  const handleCall = async () => {
+    try {
+      const userId = getUser<{ id: string }>()?.id || '';
+      await leadsApi.createActivity(lead.id, {
+        title: 'Phone Call',
+        description: 'Phone Call',
+        userId,
+      });
+      onRefresh?.();
+    } catch (e) {
+      console.error(e);
+    }
+    const cleanPhone = phoneNumber.replace('p:', '');
+    window.location.href = `tel:${cleanPhone}`;
+  };
+
+  const handleEmail = async () => {
+    try {
+      const userId = getUser<{ id: string }>()?.id || '';
+      await leadsApi.createActivity(lead.id, {
+        title: 'Email',
+        description: 'Email',
+        userId,
+      });
+      onRefresh?.();
+    } catch (e) {
+      console.error(e);
+    }
+    const emailUrl = `mailto:${email}?subject=${encodeURIComponent(`Follow up: ${leadName}`)}`;
+    window.location.href = emailUrl;
+  };
+
+  const handleWhatsapp = () => {
+    setShowWhatsApp(true);
+  };
 
   return (
     <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5">
@@ -42,13 +83,13 @@ export const LeadSummaryCard: React.FC<{ lead: Lead }> = ({ lead }) => {
 
         <div className="flex items-center gap-3">
           {[
-            { icon: <Phone className="w-4 h-4" />, label: "Call", color: COLORS.primaryDark },
-            { icon: <Whatsapp className="w-4 h-4" />, label: "WhatsApp", color: COLORS.primaryDark },
-            { icon: <Mail className="w-4 h-4" />, label: "Email", color: COLORS.primaryDark },
-            { icon: <Edit2 className="w-4 h-4" />, label: "Edit", color: COLORS.primaryDark },
-            { icon: <Trash2 className="w-4 h-4" />, label: "Delete", color: COLORS.primaryDark }
+            { icon: <Phone className="w-4 h-4" />, label: "Call", color: COLORS.primaryDark, onClick: handleCall },
+            { icon: <Whatsapp className="w-4 h-4" />, label: "WhatsApp", color: COLORS.primaryDark, onClick: handleWhatsapp },
+            { icon: <Mail className="w-4 h-4" />, label: "Email", color: COLORS.primaryDark, onClick: handleEmail },
+            { icon: <Edit2 className="w-4 h-4" />, label: "Edit", color: COLORS.primaryDark, onClick: () => {} },
+            { icon: <Trash2 className="w-4 h-4" />, label: "Delete", color: COLORS.primaryDark, onClick: () => {} }
           ].map((action, i) => (
-            <div key={i} className="flex flex-col items-center gap-1.5 cursor-pointer group">
+            <div key={i} className="flex flex-col items-center gap-1.5 cursor-pointer group" onClick={action.onClick}>
               <button
                 className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all shadow-sm active:scale-95 hover:opacity-90"
                 style={{ backgroundColor: action.color }}
@@ -108,6 +149,19 @@ export const LeadSummaryCard: React.FC<{ lead: Lead }> = ({ lead }) => {
           />
         </div>
       </div>
+
+      {showWhatsApp && (
+        <WhatsAppTemplateModal
+          leadId={lead.id}
+          leadName={leadName}
+          phoneNumber={phoneNumber}
+          onClose={() => setShowWhatsApp(false)}
+          onSuccess={() => {
+            setShowWhatsApp(false);
+            onRefresh?.();
+          }}
+        />
+      )}
     </div>
   );
 };

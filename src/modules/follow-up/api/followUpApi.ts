@@ -24,6 +24,11 @@ export const getFollowUps = async (
   return response.data;
 };
 
+export const createFollowup = async (payload: { leadId: string; userId: string; notes: string; date: string; type: string }) => {
+  const response = await api.post("/followup/createFollowup", payload);
+  return response.data;
+};
+
 export const getFollowUpSummary = async (
   params?: GetFollowUpsParams
 ): Promise<{ data: FollowUpSummary }> => {

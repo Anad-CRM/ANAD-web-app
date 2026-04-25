@@ -43,7 +43,7 @@ function StatItem({ label, value, userId }: LeadStat & { userId?: string }) {
   }
 
   const queryString = params.toString();
-  const href = `/leads${queryString ? `?${queryString}` : ""}`;
+  const href = `/leads_list${queryString ? `?${queryString}` : ""}`;
 
   return (
     <Link
