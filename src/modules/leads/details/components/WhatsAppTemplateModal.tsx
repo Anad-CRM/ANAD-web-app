@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { X, ExternalLink, Send } from 'lucide-react';
+import { X, ExternalLink, Send, Loader2, SendHorizontal } from 'lucide-react';
 import { Whatsapp } from '@thesvg/react';
 import { COLORS } from '@/core/components/theme/colors';
-import { leadsApi } from '@/modules/leads/api/leadsApi';
+import { activityService } from "@/modules/activities/services/activityService";
 import { getUser } from '@/core/utils/auth';
 
 interface Props {
@@ -54,7 +54,7 @@ export const WhatsAppTemplateModal: React.FC<Props> = ({ leadId, leadName, phone
       const userId = userData?.id || '';
 
       // Log the activity
-      await leadsApi.createActivity(leadId, {
+      await activityService.createActivity(leadId, {
         title: 'Whatsapp',
         description: message,
         userId,

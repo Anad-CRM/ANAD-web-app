@@ -61,4 +61,8 @@ export const API_ENDPOINTS = {
     GET_USER_ATTENDANCE: "/attendance/getUserAttendance",
     GET_BY_MONTH: "/attendance/month",
   },
+  ACTIVITIES: {
+    GET: "/lead/getActivities",
+    CREATE: (leadId: string) => `/lead/${leadId}/createActivity`,
+  },
 };

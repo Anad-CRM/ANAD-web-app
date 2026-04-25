@@ -84,9 +84,6 @@ export const leadsApi = {
     }
   },
 
-  // NOTE: Backend has no GET /lead/getLeadById route.
-  // Instead, we fetch the lead from the lead list (getLeadsByStatus) using its ID.
-  // We use a large limit + Overall filter to maximise the chance of finding the lead.
   fetchLeadFromList: async (leadId: string): Promise<Lead | null> => {
     const userData = getUser<Record<string, string>>();
     if (!userData?.organizationId) return null;
@@ -117,26 +114,6 @@ export const leadsApi = {
     } catch (error) {
       console.error("[leadsApi] Error fetching lead from list:", error);
       return null;
-    }
-  },
-
-  // Mirrors Flutter activity_list_screen._fetchActivities():
-  // userId = leadData['assignedUser']['id'] ?? ''
-  // Always makes the call even with empty userId.
-  fetchLeadActivities: async (leadId: string, assignedUserId?: string): Promise<any[]> => {
-    try {
-      // Flutter sends assignedUser['id'] — empty string if not assigned. Never skips.
-      const userId = assignedUserId ?? '';
-      console.log('[leadsApi] fetchLeadActivities →', { leadId, userId });
-      const response = await api.post("/lead/getActivities", { leadId, userId });
-      console.log('[leadsApi] getActivities response:', response.data);
-      if (response.data?.status === "success") {
-        return response.data.data || [];
-      }
-      return [];
-    } catch (error) {
-      console.error("[leadsApi] Error fetching lead activities:", error);
-      return [];
     }
   },
 

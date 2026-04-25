@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Clock, Loader2 } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
-import { leadsApi } from '@/modules/leads/api/leadsApi';
+import { activityService } from '../../services/activityService';
 import { getUser } from '@/core/utils/auth';
 
 interface Props {
@@ -29,7 +29,7 @@ export const CreateActivityModal: React.FC<Props> = ({ leadId, activityType, onC
       const userData = getUser<Record<string, string>>();
       const userId = userData?.id || '';
 
-      await leadsApi.createActivity(leadId, {
+      await activityService.createActivity(leadId, {
         title: activityType,
         description: description.trim(),
         userId,
