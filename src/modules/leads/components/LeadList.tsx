@@ -19,6 +19,7 @@ function buildPayload(
   statusParam: string | null,
   userIdParam: string | null,
   staffIdParam: string | null,
+  teamIdParam: string | null,
   offset: number,
 ): FetchLeadsParams {
   const payload: FetchLeadsParams = {
@@ -45,7 +46,21 @@ function buildPayload(
     payload.staffId = staffIdParam;
   }
 
-  // userId URL param (legacy — kept for backwards compat)
+  // Team filters
+  if (filters.teamIds.length > 0) {
+    payload.teamId = filters.teamIds.length === 1
+      ? filters.teamIds[0]
+      : filters.teamIds;
+  } else if (teamIdParam) {
+    payload.teamId = teamIdParam;
+  }
+
+  // Ad filters
+  if (filters.adIds.length > 0) {
+    payload.adIds = filters.adIds;
+  }
+
+  // User filter from URL (e.g. clicking a stat on staff profile)
   if (userIdParam) payload.userId = userIdParam;
 
   // Date filter
@@ -78,6 +93,7 @@ export function LeadList() {
   const statusParam = searchParams.get("status");
   const userIdParam = searchParams.get("userId");
   const staffIdParam = searchParams.get("staffId");
+  const teamIdParam = searchParams.get("teamId");
   const isUnassigned = searchParams.get("unassigned") === "true";
 
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -124,6 +140,7 @@ export function LeadList() {
     !!statusParam ||
     !!userIdParam ||
     !!staffIdParam ||
+    !!teamIdParam ||
     isUnassigned;
 
   // Load auxiliary data for filters
