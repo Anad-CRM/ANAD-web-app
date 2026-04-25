@@ -102,19 +102,19 @@ export const LeadDetailsDashboard: React.FC = () => {
             {/* Left Column 60% */}
             <div className="flex flex-col gap-8 w-full lg:w-[60%]">
               <LeadSummaryCard lead={lead} onRefresh={loadData} />
-              <LeadFollowUpCard 
-                followups={followups} 
+              <LeadHistoryCard 
+                activities={activities} 
                 leadId={leadId}
-                assignedUserId={(lead as any)?.assignedUser?.id || (lead as any)?.assignedUser?._id || ''}
                 onRefresh={loadData}
               />
             </div>
 
             {/* Right Column 40% */}
             <div className="w-full lg:w-[40%] flex-shrink-0 sticky top-4">
-              <LeadHistoryCard 
-                activities={activities} 
+              <LeadFollowUpCard 
+                followups={followups} 
                 leadId={leadId}
+                assignedUserId={(lead as any)?.assignedUser?.id || (lead as any)?.assignedUser?._id || ''}
                 onRefresh={loadData}
               />
             </div>
