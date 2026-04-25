@@ -62,7 +62,10 @@ export default function TeamDetailsPage() {
         </div>
 
         <div className="flex gap-4">
-          <button className="flex items-center gap-2 bg-[#E2E8F0] hover:bg-[#cbd5e1] shadow-sm text-black px-5 py-2.5 rounded-full font-medium transition-all text-sm">
+          <button 
+            onClick={() => router.push(`/leads?teamId=${teamId}`)}
+            className="flex items-center gap-2 bg-[#E2E8F0] hover:bg-[#cbd5e1] shadow-sm text-black px-5 py-2.5 rounded-full font-medium transition-all text-sm"
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="7" y1="12" x2="17" y2="12" /><line x1="10" y1="18" x2="14" y2="18" /></svg>
             Filter Leads
           </button>
@@ -73,7 +76,11 @@ export default function TeamDetailsPage() {
         <h2 className="text-[18px] font-bold text-black mb-4">Leads Summary</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {leadStatuses.map((status, idx) => (
-            <div key={idx} className="bg-[#EAF1F8] border border-white rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 shadow-[0px_2px_12px_rgba(0,0,0,0.02)] transition hover:shadow-md cursor-pointer">
+            <div 
+              key={idx} 
+              onClick={() => router.push(`/leads?teamId=${teamId}${status.name !== "All Leads" ? `&status=${status.name}` : ""}`)}
+              className="bg-[#EAF1F8] border border-white rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 shadow-[0px_2px_12px_rgba(0,0,0,0.02)] transition hover:shadow-md cursor-pointer"
+            >
               <span className="text-[24px] font-bold text-[#1E3A8A]">
                 {status.count.toLocaleString()}
               </span>
