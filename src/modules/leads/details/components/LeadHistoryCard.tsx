@@ -4,13 +4,14 @@ import {
   Flame, PhoneIncoming, Clock, BadgeCheck, CheckCircle,
   UserPlus, XCircle, ThumbsDown, PhoneMissed, MinusCircle,
   PhoneOff, UserCheck, RefreshCw, Mic, PlayCircle, Headphones,
-  ArrowRight, ChevronRight, Sparkles, MapPin, History, User,
+  ArrowRight, ChevronRight, Sparkles, MapPin, History, User, Pencil
 } from 'lucide-react';
 import { Text } from '@/core/components/ui/Text';
 import { COLORS } from '@/core/components/theme/colors';
 import { API_BASE_URL } from '@/core/api/axios';
 import { ActivityDetailModal } from './ActivityDetailModal';
 import { AddActivityModal } from './AddActivityModal';
+import { CreateActivityModal } from './CreateActivityModal';
 import { AuthImage } from '@/core/components/ui/AuthImage';
 
 // ── Activity kind classifier (mirrors _activityKind) ─────────────────────────
@@ -275,9 +276,10 @@ const StatusCard: React.FC<{ activity: any; cfg: SCfg }> = ({ activity, cfg }) =
 
 
 // ── Main Component ────────────────────────────────────────────────────────────
-export const LeadHistoryCard: React.FC<{ activities: any[] }> = ({ activities }) => {
+export const LeadHistoryCard: React.FC<{ activities: any[], leadId?: string, onRefresh?: () => void }> = ({ activities, leadId, onRefresh }) => {
   const [selected, setSelected] = useState<any | null>(null);
   const [showAddSheet, setAddSheet] = useState(false);
+  const [selectedActivityType, setSelectedActivityType] = useState<string | null>(null);
 
   return (
     <>
@@ -291,10 +293,10 @@ export const LeadHistoryCard: React.FC<{ activities: any[] }> = ({ activities })
           <button
             id="add-activity-btn"
             onClick={() => setAddSheet(true)}
-            className="absolute bottom-6 right-6 w-12 h-12 rounded-full flex items-center justify-center text-white transition-all shadow-lg active:scale-95 hover:opacity-90 z-20"
+            className="absolute top-5 right-6 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all shadow-lg active:scale-95 hover:opacity-90 z-20"
             style={{ backgroundColor: COLORS.primary }}
           >
-            <Plus className="w-6 h-6" />
+            <Pencil className="w-5 h-5" />
           </button>
 
         </div>
@@ -374,8 +376,28 @@ export const LeadHistoryCard: React.FC<{ activities: any[] }> = ({ activities })
       {/* Activity detail modal */}
       {selected && <ActivityDetailModal activity={selected} onClose={() => setSelected(null)} />}
 
-      {/* Add activity modal */}
-      {showAddSheet && <AddActivityModal onClose={() => setAddSheet(false)} />}
+      {/* Add activity modal (select type) */}
+      {showAddSheet && (
+        <AddActivityModal
+          onClose={() => setAddSheet(false)}
+          onSelectType={(type) => {
+            setSelectedActivityType(type);
+          }}
+        />
+      )}
+
+      {/* Create activity modal (input details) */}
+      {selectedActivityType && leadId && (
+        <CreateActivityModal
+          leadId={leadId}
+          activityType={selectedActivityType}
+          onClose={() => setSelectedActivityType(null)}
+          onSuccess={() => {
+            setSelectedActivityType(null);
+            onRefresh?.();
+          }}
+        />
+      )}
     </>
   );
 };

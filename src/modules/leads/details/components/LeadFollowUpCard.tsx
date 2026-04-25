@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pencil, Clock, CalendarDays, CheckCircle2 } from 'lucide-react';
 import { Text } from '@/core/components/ui/Text';
 import { COLORS } from '@/core/components/theme/colors';
+import { CreateFollowUpModal } from './CreateFollowUpModal';
 
-export const LeadFollowUpCard: React.FC<{ followups: any[] }> = ({ followups }) => {
+export const LeadFollowUpCard: React.FC<{ followups: any[], leadId?: string, assignedUserId?: string, onRefresh?: () => void }> = ({ followups, leadId, assignedUserId, onRefresh }) => {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
   return (
     <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col h-[485px] relative overflow-hidden">      <div className="flex items-center justify-between mb-8">
       <Text size="xl" weight="semibold" className="text-black">Follow Up</Text>
-      <button className="w-12 h-12 rounded-full flex items-center justify-center text-white transition-all shadow-lg active:scale-95 hover:opacity-90 " style={{ backgroundColor: COLORS.primary }}>
+      <button 
+        onClick={() => setShowCreateModal(true)}
+        className="w-12 h-12 rounded-full flex items-center justify-center text-white transition-all shadow-lg active:scale-95 hover:opacity-90 " style={{ backgroundColor: COLORS.primary }}>
         <Pencil className="w-5 h-5" />
       </button>
     </div>
@@ -57,6 +62,18 @@ export const LeadFollowUpCard: React.FC<{ followups: any[] }> = ({ followups }) 
           </div>
           <Text size="lg" weight="medium" className="text-slate-500">No Follow Up</Text>
         </div>
+      )}
+
+      {showCreateModal && leadId && assignedUserId && (
+        <CreateFollowUpModal
+          leadId={leadId}
+          assignedUserId={assignedUserId}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={() => {
+            setShowCreateModal(false);
+            onRefresh?.();
+          }}
+        />
       )}
     </div>
   );

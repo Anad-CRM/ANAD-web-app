@@ -64,6 +64,16 @@ export const leadsApi = {
     }
   },
 
+  createActivity: async (leadId: string, payload: { title: string; description: string; userId: string }): Promise<any> => {
+    try {
+      const response = await api.post(`/lead/${leadId}/createActivity`, payload);
+      return response.data;
+    } catch (error) {
+      console.error("[leadsApi] Error creating activity:", error);
+      throw error;
+    }
+  },
+
   // NOTE: Backend has no GET /lead/getLeadById route.
   // Instead, we fetch the lead from the lead list (getLeadsByStatus) using its ID.
   // We use a large limit + Overall filter to maximise the chance of finding the lead.

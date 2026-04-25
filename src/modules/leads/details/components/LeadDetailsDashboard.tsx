@@ -17,63 +17,62 @@ export const LeadDetailsDashboard: React.FC = () => {
   const [followups, setFollowups] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  const loadData = async () => {
     if (!leadId) return;
-
-    const loadData = async () => {
-      setIsLoading(true);
+    setIsLoading(true);
+    try {
+      // Step 1: Try reading the lead from sessionStorage cache first.
+      // LeadList stores the lead object when a card is clicked — this avoids
+      // a blind list re-fetch and ensures we have the correct userId fields.
+      let leadData: Lead | null = null;
       try {
-        // Step 1: Try reading the lead from sessionStorage cache first.
-        // LeadList stores the lead object when a card is clicked — this avoids
-        // a blind list re-fetch and ensures we have the correct userId fields.
-        let leadData: Lead | null = null;
-        try {
-          const cached = sessionStorage.getItem(`lead_cache_${leadId}`);
-          if (cached) {
-            leadData = JSON.parse(cached) as Lead;
-            console.log('[LeadDetailsDashboard] ✅ Lead loaded from sessionStorage cache');
-          }
-        } catch { }
-
-        // Fall back to API search if cache miss
-        if (!leadData) {
-          console.log('[LeadDetailsDashboard] 📡 Cache miss — fetching lead from API...');
-          leadData = await leadsApi.fetchLeadFromList(leadId);
+        const cached = sessionStorage.getItem(`lead_cache_${leadId}`);
+        if (cached) {
+          leadData = JSON.parse(cached) as Lead;
+          console.log('[LeadDetailsDashboard] ✅ Lead loaded from sessionStorage cache');
         }
+      } catch { }
 
-        if (leadData) setLead(leadData);
-
-        // --- Mirrors Flutter exactly ---
-        // Activities: userId = leadData['assignedUser']['id'] ?? ''
-        // Followups:  userId = leadData['userId'] ?? ''
-        const assignedUserIdForActivities =
-          (leadData as any)?.assignedUser?.id ||
-          (leadData as any)?.assignedUser?._id ||
-          '';
-
-        // Followups use the lead's own userId field (NOT assignedUser.id)
-        const userIdForFollowups = (leadData as any)?.userId ?? '';
-
-        console.log('[LeadDetailsDashboard] leadId:', leadId);
-        console.log('[LeadDetailsDashboard] assignedUser.id (for activities):', assignedUserIdForActivities);
-        console.log('[LeadDetailsDashboard] leadData.userId (for followups):', userIdForFollowups);
-        console.log('[LeadDetailsDashboard] full leadData:', JSON.stringify(leadData));
-
-        // Step 3: Fetch activities and followups in parallel
-        const [activitiesData, followupsData] = await Promise.all([
-          leadsApi.fetchLeadActivities(leadId, assignedUserIdForActivities),
-          leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
-        ]);
-
-        setActivities(activitiesData || []);
-        setFollowups(followupsData || []);
-      } catch (error) {
-        console.error('Failed to load lead details:', error);
-      } finally {
-        setIsLoading(false);
+      // Fall back to API search if cache miss
+      if (!leadData) {
+        console.log('[LeadDetailsDashboard] 📡 Cache miss — fetching lead from API...');
+        leadData = await leadsApi.fetchLeadFromList(leadId);
       }
-    };
 
+      if (leadData) setLead(leadData);
+
+      // --- Mirrors Flutter exactly ---
+      // Activities: userId = leadData['assignedUser']['id'] ?? ''
+      // Followups:  userId = leadData['userId'] ?? ''
+      const assignedUserIdForActivities =
+        (leadData as any)?.assignedUser?.id ||
+        (leadData as any)?.assignedUser?._id ||
+        '';
+
+      // Followups use the lead's own userId field (NOT assignedUser.id)
+      const userIdForFollowups = (leadData as any)?.userId ?? '';
+
+      console.log('[LeadDetailsDashboard] leadId:', leadId);
+      console.log('[LeadDetailsDashboard] assignedUser.id (for activities):', assignedUserIdForActivities);
+      console.log('[LeadDetailsDashboard] leadData.userId (for followups):', userIdForFollowups);
+      console.log('[LeadDetailsDashboard] full leadData:', JSON.stringify(leadData));
+
+      // Step 3: Fetch activities and followups in parallel
+      const [activitiesData, followupsData] = await Promise.all([
+        leadsApi.fetchLeadActivities(leadId, assignedUserIdForActivities),
+        leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
+      ]);
+
+      setActivities(activitiesData || []);
+      setFollowups(followupsData || []);
+    } catch (error) {
+      console.error('Failed to load lead details:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, [leadId]);
 
@@ -102,15 +101,22 @@ export const LeadDetailsDashboard: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* Left Column 60% */}
             <div className="flex flex-col gap-8 w-full lg:w-[60%]">
-              <LeadSummaryCard lead={lead} />
-              <LeadFollowUpCard followups={followups} />
-
+              <LeadSummaryCard lead={lead} onRefresh={loadData} />
+              <LeadFollowUpCard 
+                followups={followups} 
+                leadId={leadId}
+                assignedUserId={(lead as any)?.assignedUser?.id || (lead as any)?.assignedUser?._id || ''}
+                onRefresh={loadData}
+              />
             </div>
 
             {/* Right Column 40% */}
             <div className="w-full lg:w-[40%] flex-shrink-0 sticky top-4">
-              <LeadHistoryCard activities={activities} />
-              {/* <LeadFollowUpCard followups={followups} /> */}
+              <LeadHistoryCard 
+                activities={activities} 
+                leadId={leadId}
+                onRefresh={loadData}
+              />
             </div>
           </div>
         )}
