@@ -7,6 +7,7 @@ import { LeadCard } from "./LeadCard";
 import { LeadFilterSheet, FilterState } from "./LeadFilterSheet";
 import { leadsApi, FetchLeadsParams } from "../api/leadsApi";
 import { Lead } from "../types/lead.types";
+import { ArrowLeft, } from 'lucide-react';
 
 // ── Helper: build API payload from filter state ─────────────────────────────
 
@@ -168,7 +169,7 @@ export function LeadList() {
   const activePills: { label: string; onRemove: () => void }[] = [];
 
   if (statusParam && filters.statuses.length === 0) {
-    activePills.push({ label: statusParam, onRemove: () => {} }); // URL-driven, not removable here
+    activePills.push({ label: statusParam, onRemove: () => { } }); // URL-driven, not removable here
   }
   filters.statuses.forEach(s =>
     activePills.push({
@@ -187,6 +188,24 @@ export function LeadList() {
   return (
     <>
       <div className="flex flex-col h-full space-y-4">
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => router.back()}
+            className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-xl font-semibold text-slate-800">
+            {statusParam
+              ? statusParam.endsWith("Lead")
+                ? statusParam + "s"
+                : statusParam === "Follow Up"
+                  ? "Follow Ups"
+                  : statusParam
+              : "Leads List"}
+          </h1>
+        </div>
+
         {/* ── Search + Filter Row ── */}
         <div className="flex items-center gap-3 relative">
           <div className="flex-1 relative group">
@@ -328,7 +347,7 @@ export function LeadList() {
                     onClick={() => {
                       // Store lead in sessionStorage so detail page can read it without re-fetching
                       // (mirrors Flutter: lead data is passed as a prop, not re-fetched)
-                      try { sessionStorage.setItem(`lead_cache_${lead.id}`, JSON.stringify(lead)); } catch {}
+                      try { sessionStorage.setItem(`lead_cache_${lead.id}`, JSON.stringify(lead)); } catch { }
                       router.push(`/lead/${lead.id}`);
                     }}
                   />
