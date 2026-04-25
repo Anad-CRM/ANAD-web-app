@@ -4,13 +4,17 @@ import { PipelineMetric } from "../types";
 
 interface PipelineMetricCardProps {
   metric: PipelineMetric;
+  onClick?: () => void;
 }
 
-export const PipelineMetricCard: React.FC<PipelineMetricCardProps> = ({ metric }) => {
+export const PipelineMetricCard: React.FC<PipelineMetricCardProps> = ({ metric, onClick }) => {
   const IconComponent = (Icons as any)[metric.iconName] || Icons.HelpCircle;
 
   return (
-    <div className="bg-white rounded-xl p-4 lg:p-5 flex flex-col justify-between shadow-sm border border-slate-100 flex-1">
+    <div
+      className="bg-white rounded-xl p-4 lg:p-5 flex flex-col justify-between shadow-sm border border-slate-100 flex-1 cursor-pointer hover:shadow-md transition-shadow"
+      onClick={onClick}
+    >
       <div className="flex justify-between items-start w-full">
         <h3 className="text-[#1A1A1A] text-[15px] font-medium tracking-tight">
           {metric.title}
