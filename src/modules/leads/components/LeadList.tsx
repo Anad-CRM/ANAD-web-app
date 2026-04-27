@@ -106,14 +106,15 @@ export function LeadList() {
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [staffMembers, setStaffMembers] = useState<{ id: string; userName: string }[]>([]);
-  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
-  const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
 
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [staffToAssign, setStaffToAssign] = useState("");
   const [isAssigning, setIsAssigning] = useState(false);
+  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
+  const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
+
 
   const offsetRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -160,8 +161,8 @@ export function LeadList() {
         }
       }).catch(() => {});
       
-      getAllAds({ organizationId: user.organizationId }).then(data => {
-        setAds((data || []).map(ad => ({ ...ad, id: String(ad.id) })));
+      getAllAds({ organizationId: user.organizationId }).then((data: any) => {
+        setAds((data || []).map((ad: any) => ({ ...ad, id: String(ad.id) })));
       }).catch(() => {});
     }
   }, []);
@@ -274,6 +275,7 @@ export function LeadList() {
       setIsAssigning(false);
     }
   };
+
 
   // ── Active filter pills ────────────────────────────────────────────────
   const activePills: { label: string; onRemove: () => void }[] = [];
