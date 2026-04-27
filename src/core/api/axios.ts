@@ -3,7 +3,7 @@ import { getToken, clearToken } from "@/core/utils/auth";
 
 // Use relative /api so requests go through the Next.js proxy → avoids CORS
 // const API_BASE_URL = "http://192.168.0.230:3000/";
-export const API_BASE_URL = "http://192.168.220.7:3000/"; //Nibin
+export const API_BASE_URL = "http://192.168.220.2:3000/"; //Nibin
 // export const API_BASE_URL = "http://localhost:3000/";  //Local host
 // const API_BASE_URL = "https://api.anad.ae/";  //Live server
 
