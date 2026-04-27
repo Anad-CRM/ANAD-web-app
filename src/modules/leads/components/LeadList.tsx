@@ -61,6 +61,7 @@ function buildPayload(
   }
 
   // User filter from URL (e.g. clicking a stat on staff profile)
+  // userId URL param (legacy — kept for backwards compat)
   if (userIdParam) payload.userId = userIdParam;
 
   // Date filter
@@ -94,6 +95,7 @@ export function LeadList() {
   const userIdParam = searchParams.get("userId");
   const staffIdParam = searchParams.get("staffId");
   const teamIdParam = searchParams.get("teamId");
+
   const isUnassigned = searchParams.get("unassigned") === "true";
 
   const [leads, setLeads] = useState<Lead[]>([]);
