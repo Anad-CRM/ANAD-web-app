@@ -1,4 +1,4 @@
-import ProfileForm from "../../../modules/profile/components/ProfileForm";
+import ProfileForm from "@/modules/profile/components/ProfileForm";
 
 export default function EditProfilePage() {
   return (

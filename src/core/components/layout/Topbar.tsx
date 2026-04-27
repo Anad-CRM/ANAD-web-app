@@ -64,7 +64,7 @@ export default function Topbar() {
           </svg>
         </button>
 
-        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-black relative">
+        <Link href="/notifications" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-black relative hover:opacity-80 transition-opacity">
           <svg
             width="18"
             height="18"
@@ -79,7 +79,7 @@ export default function Topbar() {
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
           <span className="absolute top-[10px] right-[10px] w-[6px] h-[6px] bg-[#1E3A8A] rounded-full" />
-        </button>
+        </Link>
 
         <Link href="/profile" className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#E2E8F0] text-[#1E3A8A] overflow-hidden shadow-sm hover:opacity-80 transition-opacity">
           <svg

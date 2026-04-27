@@ -94,7 +94,7 @@ export default function ProfileForm() {
   };
 
   return (
-    <div className="max-w-2xl bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+    <div className="w-full bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <h2 className="text-xl font-bold bg-white text-gray-800 flex items-center mb-4">
