@@ -2,7 +2,6 @@ import React from 'react';
 import { Phone, MessageCircle, Users, FileText, ChevronRight, X } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
 
-// ── Activity type definitions ─────────────────────────────────────────────────
 const ACTIVITY_TYPES = [
   { label: 'Phone Call', icon: <Phone size={18} />,        color: COLORS.anccent_green },
   { label: 'Message',    icon: <MessageCircle size={18} />, color: COLORS.anccent_green },
@@ -10,28 +9,21 @@ const ACTIVITY_TYPES = [
   { label: 'Note',       icon: <FileText size={18} />,      color: COLORS.warning },
 ] as const;
 
-// ── Props ─────────────────────────────────────────────────────────────────────
 interface Props {
   onClose: () => void;
-  /** Optional: called when a type is selected, passes the activity label */
   onSelectType?: (type: string) => void;
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export const AddActivityModal: React.FC<Props> = ({ onClose, onSelectType }) => (
   <div
     className="fixed inset-0 z-50 flex items-center justify-center p-4"
     onClick={onClose}
   >
-    {/* Backdrop */}
     <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-
-    {/* Popup */}
     <div
       className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
       onClick={e => e.stopPropagation()}
     >
-      {/* Header */}
       <div className="flex justify-between items-center px-5 py-4 border-b border-slate-100">
         <span className="text-[18px] font-semibold text-slate-800">Add Activity</span>
         <button
@@ -42,7 +34,6 @@ export const AddActivityModal: React.FC<Props> = ({ onClose, onSelectType }) => 
         </button>
       </div>
 
-      {/* Type list */}
       <div className="py-2">
         {ACTIVITY_TYPES.map((t, i) => (
           <button

@@ -2,30 +2,15 @@ import React from 'react';
 import { Clock, FileText, MapPin, Edit3, User } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
 import { AuthImage } from '@/core/components/ui/AuthImage';
+import { Activity } from '../../types/activity.types';
+import { SmallAvatar } from '../ActivityCards';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function fmtFull(rawDate: string): string {
+const fmtFull = (rawDate: string): string => {
   const dt = new Date(rawDate);
   return new Intl.DateTimeFormat('en-US', {
     month: 'long', day: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: true,
   }).format(dt);
-}
-
-const SmallAvatar: React.FC<{ user: any; size?: number }> = ({ user, size = 28 }) => {
-  const av   = user?.avatar;
-  const name = user?.userName ?? '?';
-  return (
-    <div
-      className="rounded-full relative flex items-center justify-center overflow-hidden flex-shrink-0"
-      style={{ width: size, height: size, backgroundColor: 'rgba(28,58,118,0.2)' }}
-    >
-      <User size={size * 0.55} color={COLORS.primary} className="absolute" />
-      {av && (
-        <AuthImage src={`uploads/${av}`} alt={name} className="w-full h-full object-cover relative z-10" />
-      )}
-    </div>
-  );
 };
 
 const DetailSection: React.FC<{
@@ -43,13 +28,11 @@ const DetailSection: React.FC<{
   </div>
 );
 
-// ── Props ─────────────────────────────────────────────────────────────────────
 interface Props {
-  activity: any;
+  activity: Activity;
   onClose: () => void;
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
   const rawDate      = activity.created_at ?? activity.createdAt ?? new Date().toISOString();
   const fullStr      = fmtFull(rawDate);
@@ -70,19 +53,14 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-
-      {/* Popup */}
       <div
         className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl flex flex-col max-h-[90vh]"
         onClick={e => e.stopPropagation()}
       >
         <div className="overflow-y-auto custom-scrollbar flex-1 pr-2" style={{ scrollbarWidth: 'thin' }}>
-          {/* Title */}
           <p className="text-[20px] font-bold text-slate-800">{displayTitle}</p>
 
-          {/* Date */}
           <div className="flex items-center gap-1.5 mt-2">
             <Clock size={14} className="text-slate-400" />
             <span className="text-[14px] text-slate-500">{fullStr}</span>
@@ -90,7 +68,6 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
 
           <div className="h-px bg-slate-100 my-5" />
 
-          {/* Note / description */}
           {desc && (
             <DetailSection icon={<FileText size={13} />} color={COLORS.warning} label="Note">
               <div
@@ -105,7 +82,6 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
             </DetailSection>
           )}
 
-          {/* Assigned to */}
           {assigned && (
             <DetailSection icon={<MapPin size={13} />} color={COLORS.primaryDark} label="Assigned to">
               <div className="flex items-center gap-2.5 mt-2">
@@ -115,7 +91,6 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
             </DetailSection>
           )}
 
-          {/* Done by */}
           {user && (
             <DetailSection icon={<Edit3 size={13} />} color={COLORS.info} label="By">
               <div className="flex items-center gap-2.5 mt-2">
@@ -126,7 +101,6 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
           )}
         </div>
 
-        {/* Close button */}
         <div className="mt-6 flex-shrink-0 pt-2">
           <button
             onClick={onClose}

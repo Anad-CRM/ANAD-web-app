@@ -5,7 +5,7 @@ import { Lead } from '@/modules/leads/types/lead.types';
 import { Text } from '@/core/components/ui/Text';
 import { AvatarCircle } from '@/modules/staffs/components/AvatarCircle';
 import { COLORS } from '@/core/components/theme/colors';
-import { leadsApi } from '@/modules/leads/api/leadsApi';
+import { activityService } from '@/modules/activities/services/activityService';
 import { getUser } from '@/core/utils/auth';
 import { WhatsAppTemplateModal } from './WhatsAppTemplateModal';
 
@@ -31,7 +31,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   const handleCall = async () => {
     try {
       const userId = getUser<{ id: string }>()?.id || '';
-      await leadsApi.createActivity(lead.id, {
+      await activityService.createActivity(lead.id, {
         title: 'Phone Call',
         description: 'Phone Call',
         userId,
@@ -47,7 +47,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   const handleEmail = async () => {
     try {
       const userId = getUser<{ id: string }>()?.id || '';
-      await leadsApi.createActivity(lead.id, {
+      await activityService.createActivity(lead.id, {
         title: 'Email',
         description: 'Email',
         userId,

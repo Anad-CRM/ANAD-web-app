@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { LeadSummaryCard } from '@/modules/leads/details/components/LeadSummaryCard';
-import { LeadHistoryCard } from '@/modules/leads/details/components/LeadHistoryCard';
 import { LeadFollowUpCard } from '@/modules/leads/details/components/LeadFollowUpCard';
 import { useRouter, useParams } from 'next/navigation';
 import { leadsApi } from '@/modules/leads/api/leadsApi';
+import { activityService } from '@/modules/activities/services/activityService';
+import { LeadActivityLog } from '@/modules/activities/components/LeadActivityLog';
 import { Lead } from '@/modules/leads/types/lead.types';
 
 export const LeadDetailsDashboard: React.FC = () => {
@@ -59,7 +60,7 @@ export const LeadDetailsDashboard: React.FC = () => {
 
       // Step 3: Fetch activities and followups in parallel
       const [activitiesData, followupsData] = await Promise.all([
-        leadsApi.fetchLeadActivities(leadId, assignedUserIdForActivities),
+        activityService.fetchLeadActivities(leadId, assignedUserIdForActivities),
         leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
       ]);
 
@@ -102,19 +103,19 @@ export const LeadDetailsDashboard: React.FC = () => {
             {/* Left Column 60% */}
             <div className="flex flex-col gap-8 w-full lg:w-[60%]">
               <LeadSummaryCard lead={lead} onRefresh={loadData} />
-              <LeadFollowUpCard 
-                followups={followups} 
+              <LeadActivityLog 
+                activities={activities} 
                 leadId={leadId}
-                assignedUserId={(lead as any)?.assignedUser?.id || (lead as any)?.assignedUser?._id || ''}
                 onRefresh={loadData}
               />
             </div>
 
             {/* Right Column 40% */}
             <div className="w-full lg:w-[40%] flex-shrink-0 sticky top-4">
-              <LeadHistoryCard 
-                activities={activities} 
+              <LeadFollowUpCard 
+                followups={followups} 
                 leadId={leadId}
+                assignedUserId={(lead as any)?.assignedUser?.id || (lead as any)?.assignedUser?._id || ''}
                 onRefresh={loadData}
               />
             </div>

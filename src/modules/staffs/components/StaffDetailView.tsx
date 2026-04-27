@@ -131,7 +131,7 @@ export function StaffDetailView() {
         {/* LEFT */}
         <div className="xl:col-span-7 flex flex-col gap-8">
           <StaffProfileCard staff={staff} />
-          <LeadStatsCard stats={leadStats} />
+          <LeadStatsCard stats={leadStats} userId={staff.id.toString()} />
         </div>
 
         {/* RIGHT */}

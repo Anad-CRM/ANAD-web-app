@@ -1,13 +1,15 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter, X, ArrowLeft } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
 import { LeadCard } from "./LeadCard";
 import { LeadFilterSheet, FilterState } from "./LeadFilterSheet";
 import { leadsApi, FetchLeadsParams } from "../api/leadsApi";
 import { Lead } from "../types/lead.types";
-import { ArrowLeft, } from 'lucide-react';
+import { TeamsService } from "../../teams/services/teams.service";
+import { getAllAds } from "../../ads/api/adsApi";
+import { getUser } from "@/core/utils/auth";
 
 // ── Helper: build API payload from filter state ─────────────────────────────
 
@@ -16,6 +18,7 @@ function buildPayload(
   filters: FilterState,
   statusParam: string | null,
   userIdParam: string | null,
+  teamIdParam: string | null,
   offset: number,
 ): FetchLeadsParams {
   const payload: FetchLeadsParams = {
@@ -39,6 +42,20 @@ function buildPayload(
       : filters.staffIds;
   }
 
+  // Team filters
+  if (filters.teamIds.length > 0) {
+    payload.teamId = filters.teamIds.length === 1
+      ? filters.teamIds[0]
+      : filters.teamIds;
+  } else if (teamIdParam) {
+    payload.teamId = teamIdParam;
+  }
+
+  // Ad filters
+  if (filters.adIds.length > 0) {
+    payload.adIds = filters.adIds;
+  }
+
   // User filter from URL (e.g. clicking a stat on staff profile)
   if (userIdParam) payload.userId = userIdParam;
 
@@ -59,6 +76,8 @@ function buildPayload(
 const EMPTY_FILTERS: FilterState = {
   statuses: [],
   staffIds: [],
+  teamIds: [],
+  adIds: [],
   datePreset: null,
   startDate: null,
   endDate: null,
@@ -69,6 +88,7 @@ export function LeadList() {
   const router = useRouter();
   const statusParam = searchParams.get("status");
   const userIdParam = searchParams.get("userId");
+  const teamIdParam = searchParams.get("teamId");
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,6 +98,8 @@ export function LeadList() {
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [staffMembers, setStaffMembers] = useState<{ id: string; userName: string }[]>([]);
+  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
+  const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
 
   const offsetRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,15 +107,32 @@ export function LeadList() {
   const hasActiveFilters =
     filters.statuses.length > 0 ||
     filters.staffIds.length > 0 ||
+    filters.teamIds.length > 0 ||
+    filters.adIds.length > 0 ||
     filters.datePreset != null ||
     !!statusParam ||
-    !!userIdParam;
+    !!userIdParam ||
+    !!teamIdParam;
 
-  // Load staff members once for filter sheet
+  // Load auxiliary data for filters
   useEffect(() => {
     leadsApi.fetchStaffMembers().then(staff => {
       setStaffMembers(staff as { id: string; userName: string }[]);
     });
+    
+    // Using user info to fetch teams if available
+    const user = getUser<any>();
+    if (user?.organizationId) {
+      TeamsService.getAllTeams({ organizationId: user.organizationId }).then(res => {
+        if (res.status === "success" && res.data) {
+          setTeams(res.data);
+        }
+      }).catch(() => {});
+      
+      getAllAds({ organizationId: user.organizationId }).then(data => {
+        setAds((data || []).map(ad => ({ ...ad, id: String(ad.id) })));
+      }).catch(() => {});
+    }
   }, []);
 
   const loadLeads = useCallback(async (reset: boolean) => {
@@ -111,6 +150,7 @@ export function LeadList() {
         filters,
         statusParam,
         userIdParam,
+        teamIdParam,
         offsetRef.current,
       );
 
@@ -138,7 +178,7 @@ export function LeadList() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [searchTerm, filters, statusParam, userIdParam]);
+  }, [searchTerm, filters, statusParam, userIdParam, teamIdParam]);
 
   // Debounce search changes
   useEffect(() => {
@@ -170,6 +210,9 @@ export function LeadList() {
 
   if (statusParam && filters.statuses.length === 0) {
     activePills.push({ label: statusParam, onRemove: () => { } }); // URL-driven, not removable here
+  }
+  if (teamIdParam) {
+    activePills.push({ label: `Team Filter Applied`, onRemove: () => {} });
   }
   filters.statuses.forEach(s =>
     activePills.push({
@@ -384,6 +427,8 @@ export function LeadList() {
         onApply={handleApplyFilters}
         onClearAll={handleClearAll}
         staffMembers={staffMembers}
+        teams={teams}
+        ads={ads}
         lockedStatus={statusParam || undefined}
       />
     </>
