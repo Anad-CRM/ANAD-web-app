@@ -16,6 +16,7 @@ function buildPayload(
   filters: FilterState,
   statusParam: string | null,
   userIdParam: string | null,
+  staffIdParam: string | null,
   offset: number,
 ): FetchLeadsParams {
   const payload: FetchLeadsParams = {
@@ -32,14 +33,17 @@ function buildPayload(
     payload.status = statusParam;
   }
 
-  // Staff filter
+  // Staff filter: explicit sheet filter beats URL param
   if (filters.staffIds.length > 0) {
     payload.staffId = filters.staffIds.length === 1
       ? filters.staffIds[0]
       : filters.staffIds;
+  } else if (staffIdParam) {
+    // staffId URL param (from staff profile stat cards)
+    payload.staffId = staffIdParam;
   }
 
-  // User filter from URL (e.g. clicking a stat on staff profile)
+  // userId URL param (legacy — kept for backwards compat)
   if (userIdParam) payload.userId = userIdParam;
 
   // Date filter
@@ -69,6 +73,8 @@ export function LeadList() {
   const router = useRouter();
   const statusParam = searchParams.get("status");
   const userIdParam = searchParams.get("userId");
+  const staffIdParam = searchParams.get("staffId");
+  const isUnassigned = searchParams.get("unassigned") === "true";
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,7 +93,9 @@ export function LeadList() {
     filters.staffIds.length > 0 ||
     filters.datePreset != null ||
     !!statusParam ||
-    !!userIdParam;
+    !!userIdParam ||
+    !!staffIdParam ||
+    isUnassigned;
 
   // Load staff members once for filter sheet
   useEffect(() => {
@@ -111,8 +119,14 @@ export function LeadList() {
         filters,
         statusParam,
         userIdParam,
+        staffIdParam,
         offsetRef.current,
       );
+      // Unassigned filter: pass isUnassigned flag to API
+      if (isUnassigned) {
+        (payload as any).isUnassigned = true;
+        delete payload.status;
+      }
 
       const res = await leadsApi.fetchLeads(payload);
 
@@ -138,7 +152,7 @@ export function LeadList() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [searchTerm, filters, statusParam, userIdParam]);
+  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, isUnassigned]);
 
   // Debounce search changes
   useEffect(() => {
@@ -196,13 +210,15 @@ export function LeadList() {
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h1 className="text-xl font-semibold text-slate-800">
-            {statusParam
-              ? statusParam.endsWith("Lead")
-                ? statusParam + "s"
-                : statusParam === "Follow Up"
-                  ? "Follow Ups"
-                  : statusParam
-              : "Leads List"}
+            {isUnassigned
+              ? "Unassigned Leads"
+              : statusParam
+                ? statusParam.endsWith("Lead")
+                  ? statusParam + "s"
+                  : statusParam === "Follow Up"
+                    ? "Follow Ups"
+                    : statusParam
+                : "Leads List"}
           </h1>
         </div>
 
