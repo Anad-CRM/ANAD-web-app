@@ -151,7 +151,7 @@ export function LeadList() {
     leadsApi.fetchStaffMembers().then(staff => {
       setStaffMembers(staff as { id: string; userName: string }[]);
     });
-    
+
     // Using user info to fetch teams if available
     const user = getUser<any>();
     if (user?.organizationId) {
@@ -159,11 +159,11 @@ export function LeadList() {
         if (res.status === "success" && res.data) {
           setTeams(res.data);
         }
-      }).catch(() => {});
-      
+      }).catch(() => { });
+
       getAllAds({ organizationId: user.organizationId }).then((data: any) => {
         setAds((data || []).map((ad: any) => ({ ...ad, id: String(ad.id) })));
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }, []);
 
@@ -300,8 +300,9 @@ export function LeadList() {
 
   return (
     <>
-      <div className="flex flex-col h-full space-y-4">
-        <div className="flex items-center gap-4 mb-8">
+      <div className="flex flex-col h-full space-y-2 " >
+        {/* <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6"> */}
+        <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => router.back()}
             className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0"
@@ -434,11 +435,10 @@ export function LeadList() {
               )}
               <button
                 onClick={toggleSelectionMode}
-                className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors border ${
-                  isSelectionMode 
-                    ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100" 
-                    : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
-                }`}
+                className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors border ${isSelectionMode
+                  ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100"
+                  : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+                  }`}
               >
                 {isSelectionMode ? "Cancel" : "Select"}
               </button>
@@ -447,7 +447,7 @@ export function LeadList() {
         </div>
 
         {/* ── Leads Grid ── */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-6 " >
           {isLoading ? (
             <div className="flex justify-center items-center h-52">
               <div className="flex flex-col items-center gap-3">
@@ -459,7 +459,7 @@ export function LeadList() {
               </div>
             </div>
           ) : leads.length === 0 ? (
-            <div className="flex flex-col justify-center items-center h-60 space-y-3">
+            <div className="flex flex-col justify-center items-center h-90 space-y-2">
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: COLORS.primaryXlight }}
@@ -501,7 +501,7 @@ export function LeadList() {
                     }}
                     onClick={() => {
                       if (isSelectionMode) {
-                        setSelectedLeadIds(prev => 
+                        setSelectedLeadIds(prev =>
                           prev.includes(lead.id) ? prev.filter(id => id !== lead.id) : [...prev, lead.id]
                         );
                         return;

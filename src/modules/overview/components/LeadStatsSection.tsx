@@ -208,7 +208,7 @@ function FilterModal({
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
         </div>
 
@@ -221,14 +221,13 @@ function FilterModal({
               <button
                 key={f}
                 onClick={() => setSelFilter(f)}
-                className={`flex items-center gap-1 px-4 py-2 rounded-full text-[13px] font-semibold border-[1.5px] transition-all ${
-                  active
+                className={`flex items-center gap-1 px-4 py-2 rounded-full text-[13px] font-semibold border-[1.5px] transition-all ${active
                     ? "bg-[#233A78] text-white border-[#233A78]"
                     : "bg-white text-[#1E293B] border-gray-300 hover:border-[#233A78]"
-                }`}
+                  }`}
               >
                 {active && (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                 )}
                 {f}
               </button>
@@ -299,7 +298,7 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold bg-[#EEF4FB] text-[#233A78] border border-[#A5BCD1]">
       {label}
       <button onClick={onRemove} className="ml-0.5 hover:text-red-500 transition-colors">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
       </button>
     </span>
   );
@@ -320,12 +319,12 @@ export default function LeadStatsSection({
 
   // ── stat rows (donut legend + grid) ──
   const statItems = [
-    { label: "New Lead",   count: counts?.newLead    ?? counts?.newLeadCount    ?? 0, status: "New Lead",   color: "#233A78" },
-    { label: "Hot Lead",   count: counts?.hotLead    ?? counts?.hotLeadCount    ?? 0, status: "Hot Lead",   color: "#1E56A0" },
-    { label: "Follow Up",  count: counts?.followUp   ?? counts?.followUpCount   ?? 0, status: "Follow Up",  color: "#3B82F6" },
-    { label: "Registered", count: counts?.registered ?? counts?.registerCount   ?? 0, status: "Register",  color: "#0EA5E9" },
-    { label: "Enrolled",   count: counts?.closed     ?? counts?.closedLeadCount ?? 0, status: "Closed",    color: "#22C55E" },
-    { label: "RNR",        count: (counts as any)?.rnr ?? (counts as any)?.rnrCount ?? 0, status: "RNR", color: "#F59E0B" },
+    { label: "New Lead", count: counts?.newLead ?? counts?.newLeadCount ?? 0, status: "New Lead", color: COLORS.primary },
+    { label: "Hot Lead", count: counts?.hotLead ?? counts?.hotLeadCount ?? 0, status: "Hot Lead", color: COLORS.primaryDark },
+    { label: "Follow Up", count: counts?.followUp ?? counts?.followUpCount ?? 0, status: "Follow Up", color: COLORS.anccent_green },
+    { label: "Registered", count: counts?.registered ?? counts?.registerCount ?? 0, status: "Register", color: "#0EA5E9" },
+    { label: "Enrolled", count: counts?.closed ?? counts?.closedLeadCount ?? 0, status: "Closed", color: "#22C55E" },
+    { label: "RNR", count: (counts as any)?.rnr ?? (counts as any)?.rnrCount ?? 0, status: "RNR", color: "#F59E0B" },
   ];
 
   const totalLeads = data?.totalLeads ?? 0;
@@ -361,11 +360,11 @@ export default function LeadStatsSection({
           className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-[#E2E8F0] shadow-sm hover:bg-gray-50 transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#233A78]">
-            <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
-            <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
-            <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/>
-            <line x1="17" y1="16" x2="23" y2="16"/>
+            <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
+            <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
+            <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" />
+            <line x1="17" y1="16" x2="23" y2="16" />
           </svg>
           <span className="text-[13px] font-bold text-[#233A78]">
             {filter && filter !== "Overall" ? getFilterLabel() : "Filter"}
@@ -427,7 +426,7 @@ export default function LeadStatsSection({
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[12px] font-bold text-white/80">All Leads</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white" className="opacity-60"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white" className="opacity-60"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             </div>
             <span className="text-[40px] font-extrabold text-white leading-none group-hover:scale-105 transition-transform inline-block">
               {totalLeads}
@@ -440,7 +439,7 @@ export default function LeadStatsSection({
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[12px] font-bold text-[#233A78]/70">Unassigned</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#233A78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#233A78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
             </div>
             <span className="text-[40px] font-extrabold text-[#233A78] leading-none group-hover:scale-105 transition-transform inline-block">
               {unassigned}
