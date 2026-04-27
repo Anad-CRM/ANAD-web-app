@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Filter, X, ArrowLeft } from "lucide-react";
+import { Search, Filter, X, ArrowLeft, Users } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
 import { LeadCard } from "./LeadCard";
@@ -50,7 +50,7 @@ function buildPayload(
 
   // Date filter
   if (filters.datePreset && filters.datePreset !== "Custom") {
-    payload.filter = filters.datePreset.replace(" ", "") as FetchLeadsParams["filter"];
+    payload.filter = filters.datePreset as FetchLeadsParams["filter"];
   } else if (filters.datePreset === "Custom") {
     payload.filter = "Custom";
   }
@@ -90,6 +90,12 @@ export function LeadList() {
   const [staffMembers, setStaffMembers] = useState<{ id: string; userName: string }[]>([]);
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
   const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
+
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [staffToAssign, setStaffToAssign] = useState("");
+  const [isAssigning, setIsAssigning] = useState(false);
 
   const offsetRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -221,6 +227,35 @@ export function LeadList() {
     }
   }
 
+  const toggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedLeadIds([]);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedLeadIds.length === leads.length) {
+      setSelectedLeadIds([]);
+    } else {
+      setSelectedLeadIds(leads.map(l => l.id));
+    }
+  };
+
+  const handleAssign = async () => {
+    if (!staffToAssign || selectedLeadIds.length === 0) return;
+    setIsAssigning(true);
+    try {
+      await leadsApi.assignLeads(selectedLeadIds, staffToAssign);
+      setIsAssignModalOpen(false);
+      setSelectedLeadIds([]);
+      setIsSelectionMode(false);
+      loadLeads(true);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
   // ── Active filter pills ────────────────────────────────────────────────
   const activePills: { label: string; onRemove: () => void }[] = [];
 
@@ -347,13 +382,48 @@ export function LeadList() {
           </div>
         )}
 
-        {/* ── Lead count label ── */}
-        {!isLoading && (
-          <p className="text-[12px] font-medium" style={{ color: COLORS.muted }}>
-            {leads.length} lead{leads.length !== 1 ? "s" : ""} found
-            {statusParam && filters.statuses.length === 0 ? ` · ${statusParam}` : ""}
-          </p>
-        )}
+        {/* ── Selection Action Bar ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {!isLoading && (
+            <p className="text-[12px] font-medium" style={{ color: COLORS.muted }}>
+              {leads.length} lead{leads.length !== 1 ? "s" : ""} found
+              {statusParam && filters.statuses.length === 0 ? ` · ${statusParam}` : ""}
+            </p>
+          )}
+
+          {leads.length > 0 && (
+            <div className="flex items-center gap-2">
+              {isSelectionMode && (
+                <>
+                  <button
+                    onClick={toggleSelectAll}
+                    className="text-[12px] font-semibold text-primary px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
+                  >
+                    {selectedLeadIds.length === leads.length ? "Deselect All" : "Select All"}
+                  </button>
+                  <button
+                    disabled={selectedLeadIds.length === 0}
+                    onClick={() => setIsAssignModalOpen(true)}
+                    className="flex items-center gap-1.5 text-[12px] font-bold text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                    style={{ backgroundColor: COLORS.primary }}
+                  >
+                    <Users size={14} /> Assign ({selectedLeadIds.length})
+                  </button>
+                </>
+              )}
+              <button
+                onClick={toggleSelectionMode}
+                className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors border ${
+                  isSelectionMode 
+                    ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100" 
+                    : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+                }`}
+              >
+                {isSelectionMode ? "Cancel" : "Select"}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* ── Leads Grid ── */}
         <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6">
@@ -398,12 +468,23 @@ export function LeadList() {
                     lead={lead}
                     searchKeyword={searchTerm}
                     showStatusBadge={true}
+                    isSelected={selectedLeadIds.includes(lead.id)}
                     onStatusChange={(leadId, newStatus) => {
                       setLeads(prev =>
                         prev.map(l => l.id === leadId ? { ...l, status: newStatus as Lead["status"] } : l)
                       );
                     }}
+                    onAssignClick={() => {
+                      setSelectedLeadIds([lead.id]);
+                      setIsAssignModalOpen(true);
+                    }}
                     onClick={() => {
+                      if (isSelectionMode) {
+                        setSelectedLeadIds(prev => 
+                          prev.includes(lead.id) ? prev.filter(id => id !== lead.id) : [...prev, lead.id]
+                        );
+                        return;
+                      }
                       // Store lead in sessionStorage so detail page can read it without re-fetching
                       // (mirrors Flutter: lead data is passed as a prop, not re-fetched)
                       try { sessionStorage.setItem(`lead_cache_${lead.id}`, JSON.stringify(lead)); } catch { }
@@ -447,6 +528,53 @@ export function LeadList() {
         ads={ads}
         lockedStatus={statusParam || undefined}
       />
+
+      {/* ── Assign Staff Modal ── */}
+      {isAssignModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(13,27,62,0.55)", backdropFilter: "blur(3px)" }}>
+          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-gray-100">
+              <h3 className="text-[16px] font-bold text-gray-900">Assign Leads</h3>
+              <p className="text-[13px] text-gray-500 mt-1">
+                Select a staff member to assign {selectedLeadIds.length} lead{selectedLeadIds.length !== 1 ? 's' : ''} to.
+              </p>
+            </div>
+            <div className="p-5">
+              <label className="block text-[13px] font-semibold text-gray-700 mb-2">Staff Member</label>
+              <select
+                value={staffToAssign}
+                onChange={(e) => setStaffToAssign(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-[14px] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1C3A76]/20 focus:border-[#1C3A76] outline-none transition-all"
+              >
+                <option value="">Select a staff member</option>
+                {staffMembers.map(staff => (
+                  <option key={staff.id} value={staff.id}>{staff.userName}</option>
+                ))}
+              </select>
+            </div>
+            <div className="p-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
+              <button
+                onClick={() => {
+                  setIsAssignModalOpen(false);
+                  if (!isSelectionMode) setSelectedLeadIds([]); // Clear if it was a single assign
+                }}
+                className="px-5 py-2.5 rounded-xl text-[13px] font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
+                disabled={isAssigning}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAssign}
+                disabled={!staffToAssign || isAssigning}
+                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white transition-colors disabled:opacity-50 flex items-center gap-2"
+                style={{ backgroundColor: COLORS.primary }}
+              >
+                {isAssigning ? "Assigning..." : "Confirm Assignment"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

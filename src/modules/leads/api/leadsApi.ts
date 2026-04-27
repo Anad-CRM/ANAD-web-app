@@ -64,6 +64,25 @@ export const leadsApi = {
     }
   },
 
+  assignLeads: async (leadIds: string[], staffId: string, shouldResetStatus = false): Promise<any> => {
+    try {
+      const response = await api.post("/lead/assign", { leadIds, staffMemberId: staffId, shouldResetStatus });
+      return response.data;
+    } catch (error) {
+      console.error("[leadsApi] Error assigning leads:", error);
+      throw error;
+    }
+  },
+
+  createActivity: async (leadId: string, payload: { title: string; description: string; userId: string }): Promise<any> => {
+    try {
+      const response = await api.post(`/lead/${leadId}/createActivity`, payload);
+      return response.data;
+    } catch (error) {
+      console.error("[leadsApi] Error creating activity:", error);
+      throw error;
+    }
+  },
 
   fetchLeadFromList: async (leadId: string): Promise<Lead | null> => {
     const userData = getUser<Record<string, string>>();
@@ -127,9 +146,9 @@ export const leadsApi = {
     if (!userData?.organizationId) return [];
     try {
       const date = new Date().toISOString().split("T")[0];
-      const response = await api.post("/staff/getStaffByRole", {
-        params: { organizationId: userData.organizationId, date }
-      });
+      const response = await api.post("/staff/getStaffByRole",
+        { organizationId: userData.organizationId, date }
+      );
 
       if (response.data?.status === "success") {
         const data = response.data.data;

@@ -21,43 +21,44 @@ export const getLeadSummary = async (params?: {
     };
 
     if (params?.customStartDate) queryParams.customStartDate = params.customStartDate;
-    if (params?.customEndDate)   queryParams.customEndDate   = params.customEndDate;
-    if (params?.teamId)          queryParams.teamId          = params.teamId;
-    if (params?.staffId)         queryParams.staffId         = params.staffId;
+    if (params?.customEndDate) queryParams.customEndDate = params.customEndDate;
+    if (params?.teamId) queryParams.teamId = params.teamId;
+    if (params?.staffId) queryParams.staffId = params.staffId;
 
-    const response = await api.get(API_ENDPOINTS.DASHBOARD.GET_FILTERED_LEAD_COUNT, {
-      params: queryParams,
-    });
+    const response = await api.post(API_ENDPOINTS.DASHBOARD.GET_FILTERED_LEAD_COUNT, queryParams);
 
     if (response.data?.status !== "success") return null;
+    
 
     // The backend returns: { data: { leadCounts: { newLeadCount, hotLeadCount, ... }, staffLeadCounts: [...] } }
     const raw = response.data?.data;
-    const lc  = raw?.leadCounts ?? {};
+    const lc = raw?.leadCounts ?? {};
 
     // Normalise into LeadCountsData so the UI always has consistent field names
     return {
-      totalLeads:      lc.allLeadsCount         ?? 0,
-      unAssignedCount: lc.unAssignedLeadCount   ?? 0,
-      leadCounts:      lc,
+      totalLeads: lc.allLeadsCount ?? 0,
+      unAssignedCount: lc.unAssignedLeadCount ?? 0,
+      leadCounts: lc,
       staffLeadCounts: raw?.staffLeadCounts ?? [],
       // Also populate the legacy statusCounts shape so nothing breaks
       statusCounts: {
-        newLead:    lc.newLeadCount    ?? 0,
-        hotLead:    lc.hotLeadCount    ?? 0,
-        closed:     lc.closedLeadCount ?? 0,
-        registered: lc.registerCount   ?? 0,
-        followUp:   lc.followUpCount   ?? 0,
+        newLead: lc.newLeadCount ?? 0,
+        hotLead: lc.hotLeadCount ?? 0,
+        closed: lc.closedLeadCount ?? 0,
+        registered: lc.registerCount ?? 0,
+        followUp: lc.followUpCount ?? 0,
         // new-shape fields too
-        newLeadCount:      lc.newLeadCount,
-        hotLeadCount:      lc.hotLeadCount,
-        closedLeadCount:   lc.closedLeadCount,
-        registerCount:     lc.registerCount,
-        followUpCount:     lc.followUpCount,
+        newLeadCount: lc.newLeadCount,
+        hotLeadCount: lc.hotLeadCount,
+        closedLeadCount: lc.closedLeadCount,
+        registerCount: lc.registerCount,
+        followUpCount: lc.followUpCount,
         unAssignedLeadCount: lc.unAssignedLeadCount,
-        allLeadsCount:     lc.allLeadsCount,
-        totalClosedCount:  lc.totalClosedCount,
+        allLeadsCount: lc.allLeadsCount,
+        totalClosedCount: lc.totalClosedCount,
         totalAssignedCount: lc.totalAssignedCount,
+        // rnrCount: lc.rnrCount ?? 0,
+        rnr: lc.rnrCount ?? 0,
       },
     };
   } catch (error: any) {
