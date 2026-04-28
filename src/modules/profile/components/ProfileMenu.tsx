@@ -95,12 +95,12 @@ export default function ProfileMenu() {
             <MenuItem 
               icon={renderIcon("M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z")} 
               title="Invite a Friend" 
-              onClick={() => {}} 
+              href="/invite" 
             />
             <MenuItem 
               icon={renderIcon("M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z")} 
               title="Install Call Monitor" 
-              onClick={() => {}} 
+              href="/call-monitor" 
             />
             <MenuItem 
               icon={renderIcon("M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z")} 
@@ -110,17 +110,9 @@ export default function ProfileMenu() {
             <MenuItem 
               icon={renderIcon("M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z")} 
               title="Privacy Policy" 
-              href="/privacy" 
+              href="/privacy-policy" 
             />
-            <MenuItem 
-              icon={renderIcon("M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1")} 
-              title="Logout" 
-              onClick={logout} 
-              textColor="text-red-600"
-              iconColor="text-red-500"
-              iconBgColor="bg-red-50"
-            />
-          </div>
+            </div>
         </div>
 
         <div className="flex flex-col gap-0">

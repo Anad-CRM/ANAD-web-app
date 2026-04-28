@@ -9,11 +9,26 @@ import type {
 
 export const StaffService = {
   async getStaffList(payload: GetStaffListPayload): Promise<StaffListResponse> {
-    const response = await api.post<StaffListResponse>(
-      API_ENDPOINTS.STAFF.GET_ALL,
-      payload
+    const response = await api.post<any>(
+      API_ENDPOINTS.STAFF.GET_BY_ROLE,
+      { organizationId: payload.organizationId, date: payload.date }
     );
-    return response.data;
+
+    if (response.data.status !== "success" || !response.data.data) {
+      return { status: "failed", data: [] } as unknown as StaffListResponse;
+    }
+
+    const { managers, staffMembers, teamLeaders, students } = response.data.data;
+
+    const roleMap: Record<string, unknown[]> = {
+      "Manager": managers ?? [],
+      "Team Leader": teamLeaders ?? [],
+      "Staff Member": staffMembers ?? [],
+      "Students": students ?? [],
+    };
+
+    const filtered = roleMap[payload.role] ?? [];
+    return { status: "success", data: filtered } as unknown as StaffListResponse;
   },
 
   async getStaffById(userId: string | number, organizationId: string | number): Promise<StaffListResponse> {
