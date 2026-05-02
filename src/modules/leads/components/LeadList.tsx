@@ -18,7 +18,7 @@ function buildPayload(
   filters: FilterState,
   statusParam: string | null,
   userIdParam: string | null,
-  teamIdParam: string | null,
+  staffIdParam: string | null,
   offset: number,
 ): FetchLeadsParams {
   const payload: FetchLeadsParams = {
@@ -35,28 +35,17 @@ function buildPayload(
     payload.status = statusParam;
   }
 
-  // Staff filter
+  // Staff filter: explicit sheet filter beats URL param
   if (filters.staffIds.length > 0) {
     payload.staffId = filters.staffIds.length === 1
       ? filters.staffIds[0]
       : filters.staffIds;
+  } else if (staffIdParam) {
+    // staffId URL param (from staff profile stat cards)
+    payload.staffId = staffIdParam;
   }
 
-  // Team filters
-  if (filters.teamIds.length > 0) {
-    payload.teamId = filters.teamIds.length === 1
-      ? filters.teamIds[0]
-      : filters.teamIds;
-  } else if (teamIdParam) {
-    payload.teamId = teamIdParam;
-  }
-
-  // Ad filters
-  if (filters.adIds.length > 0) {
-    payload.adIds = filters.adIds;
-  }
-
-  // User filter from URL (e.g. clicking a stat on staff profile)
+  // userId URL param (legacy — kept for backwards compat)
   if (userIdParam) payload.userId = userIdParam;
 
   // Date filter
@@ -88,7 +77,8 @@ export function LeadList() {
   const router = useRouter();
   const statusParam = searchParams.get("status");
   const userIdParam = searchParams.get("userId");
-  const teamIdParam = searchParams.get("teamId");
+  const staffIdParam = searchParams.get("staffId");
+  const isUnassigned = searchParams.get("unassigned") === "true";
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,6 +94,21 @@ export function LeadList() {
   const offsetRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Sync query values into refs so loadLeads never needs to be recreated ──
+  // This prevents state updates (from load-more) from cascading into a full reset.
+  const searchTermRef = useRef(searchTerm);
+  const filtersRef = useRef(filters);
+  const statusParamRef = useRef(statusParam);
+  const userIdParamRef = useRef(userIdParam);
+  const staffIdParamRef = useRef(staffIdParam);
+  const isUnassignedRef = useRef(isUnassigned);
+  searchTermRef.current = searchTerm;
+  filtersRef.current = filters;
+  statusParamRef.current = statusParam;
+  userIdParamRef.current = userIdParam;
+  staffIdParamRef.current = staffIdParam;
+  isUnassignedRef.current = isUnassigned;
+
   const hasActiveFilters =
     filters.statuses.length > 0 ||
     filters.staffIds.length > 0 ||
@@ -112,7 +117,8 @@ export function LeadList() {
     filters.datePreset != null ||
     !!statusParam ||
     !!userIdParam ||
-    !!teamIdParam;
+    !!staffIdParam ||
+    isUnassigned;
 
   // Load auxiliary data for filters
   useEffect(() => {
@@ -135,6 +141,7 @@ export function LeadList() {
     }
   }, []);
 
+  // Stable — reads all query values from refs, never recreated on state changes.
   const loadLeads = useCallback(async (reset: boolean) => {
     if (reset) {
       offsetRef.current = 0;
@@ -146,13 +153,18 @@ export function LeadList() {
 
     try {
       const payload = buildPayload(
-        searchTerm,
-        filters,
-        statusParam,
-        userIdParam,
-        teamIdParam,
+        searchTermRef.current,
+        filtersRef.current,
+        statusParamRef.current,
+        userIdParamRef.current,
+        staffIdParamRef.current,
         offsetRef.current,
       );
+      // Unassigned filter: pass isUnassigned flag to API
+      if (isUnassignedRef.current) {
+        (payload as any).isUnassigned = true;
+        delete payload.status;
+      }
 
       const res = await leadsApi.fetchLeads(payload);
 
@@ -178,9 +190,12 @@ export function LeadList() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [searchTerm, filters, statusParam, userIdParam, teamIdParam]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally empty — reads all query values from refs
 
-  // Debounce search changes
+  // Trigger a reset fetch whenever the real query values change (debounced for search).
+  // Depends on the actual values — NOT loadLeads — so loading-more state updates
+  // never accidentally fire a full reset.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -189,7 +204,8 @@ export function LeadList() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [loadLeads]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, isUnassigned]);
 
   function handleApplyFilters(newFilters: FilterState) {
     setFilters(newFilters);
@@ -211,9 +227,7 @@ export function LeadList() {
   if (statusParam && filters.statuses.length === 0) {
     activePills.push({ label: statusParam, onRemove: () => { } }); // URL-driven, not removable here
   }
-  if (teamIdParam) {
-    activePills.push({ label: `Team Filter Applied`, onRemove: () => {} });
-  }
+  // teamIdParam filter pill removed (param no longer read from URL in this branch)
   filters.statuses.forEach(s =>
     activePills.push({
       label: s,
@@ -239,13 +253,15 @@ export function LeadList() {
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h1 className="text-xl font-semibold text-slate-800">
-            {statusParam
-              ? statusParam.endsWith("Lead")
-                ? statusParam + "s"
-                : statusParam === "Follow Up"
-                  ? "Follow Ups"
-                  : statusParam
-              : "Leads List"}
+            {isUnassigned
+              ? "Unassigned Leads"
+              : statusParam
+                ? statusParam.endsWith("Lead")
+                  ? statusParam + "s"
+                  : statusParam === "Follow Up"
+                    ? "Follow Ups"
+                    : statusParam
+                : "Leads List"}
           </h1>
         </div>
 
