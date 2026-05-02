@@ -126,12 +126,14 @@ export function LeadList() {
   const statusParamRef = useRef(statusParam);
   const userIdParamRef = useRef(userIdParam);
   const staffIdParamRef = useRef(staffIdParam);
+  const teamIdParamRef = useRef(teamIdParam);
   const isUnassignedRef = useRef(isUnassigned);
   searchTermRef.current = searchTerm;
   filtersRef.current = filters;
   statusParamRef.current = statusParam;
   userIdParamRef.current = userIdParam;
   staffIdParamRef.current = staffIdParam;
+  teamIdParamRef.current = teamIdParam;
   isUnassignedRef.current = isUnassigned;
 
   const hasActiveFilters =
@@ -184,6 +186,7 @@ export function LeadList() {
         statusParamRef.current,
         userIdParamRef.current,
         staffIdParamRef.current,
+        teamIdParamRef.current,
         offsetRef.current,
       );
       // Unassigned filter: pass isUnassigned flag to API
@@ -219,6 +222,7 @@ export function LeadList() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally empty — reads all query values from refs
 
+
   // Trigger a reset fetch whenever the real query values change (debounced for search).
   // Depends on the actual values — NOT loadLeads — so loading-more state updates
   // never accidentally fire a full reset.
@@ -241,11 +245,7 @@ export function LeadList() {
     setFilters(EMPTY_FILTERS);
   }
 
-  function handleLoadMore() {
-    if (!isLoadingMore && hasMore) {
-      loadLeads(false);
-    }
-  }
+  // function handleLoadMore() is no longer needed
 
   const toggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
@@ -283,7 +283,7 @@ export function LeadList() {
   if (statusParam && filters.statuses.length === 0) {
     activePills.push({ label: statusParam, onRemove: () => { } }); // URL-driven, not removable here
   }
-  // teamIdParam filter pill removed (param no longer read from URL in this branch)
+
   filters.statuses.forEach(s =>
     activePills.push({
       label: s,
@@ -447,7 +447,7 @@ export function LeadList() {
         </div>
 
         {/* ── Leads Grid ── */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-6 " >
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-6">
           {isLoading ? (
             <div className="flex justify-center items-center h-52">
               <div className="flex flex-col items-center gap-3">
@@ -515,21 +515,18 @@ export function LeadList() {
                 ))}
               </div>
 
-              {/* Load more */}
-              {hasMore && (
-                <div className="flex justify-center mt-6">
-                  <button
-                    onClick={handleLoadMore}
-                    disabled={isLoadingMore}
-                    className="px-6 py-2.5 rounded-full text-[13px] font-semibold transition-all hover:opacity-90"
-                    style={{
-                      backgroundColor: COLORS.primaryXlight,
-                      color: COLORS.primary,
-                      border: `1px solid ${COLORS.primaryLight}`,
-                    }}
-                  >
-                    {isLoadingMore ? "Loading..." : "Load More"}
-                  </button>
+              {/* Load more spinner */}
+              {hasMore && isLoadingMore && (
+                <div className="flex justify-center mt-6 pb-6">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="animate-spin rounded-full h-5 w-5 border-[2px] border-t-transparent"
+                      style={{ borderColor: `${COLORS.primary}40`, borderTopColor: COLORS.primary }}
+                    />
+                    <span className="text-[13px] font-medium" style={{ color: COLORS.primary }}>
+                      Loading more...
+                    </span>
+                  </div>
                 </div>
               )}
             </>

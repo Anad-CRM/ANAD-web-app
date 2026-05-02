@@ -222,8 +222,8 @@ function FilterModal({
                 key={f}
                 onClick={() => setSelFilter(f)}
                 className={`flex items-center gap-1 px-4 py-2 rounded-full text-[13px] font-semibold border-[1.5px] transition-all ${active
-                    ? "bg-[#233A78] text-white border-[#233A78]"
-                    : "bg-white text-[#1E293B] border-gray-300 hover:border-[#233A78]"
+                  ? "bg-[#233A78] text-white border-[#233A78]"
+                  : "bg-white text-[#1E293B] border-gray-300 hover:border-[#233A78]"
                   }`}
               >
                 {active && (
@@ -319,12 +319,15 @@ export default function LeadStatsSection({
 
   // ── stat rows (donut legend + grid) ──
   const statItems = [
-    { label: "New Lead", count: counts?.newLead ?? counts?.newLeadCount ?? 0, status: "New Lead", color: COLORS.primary },
-    { label: "Hot Lead", count: counts?.hotLead ?? counts?.hotLeadCount ?? 0, status: "Hot Lead", color: COLORS.primaryDark },
-    { label: "Follow Up", count: counts?.followUp ?? counts?.followUpCount ?? 0, status: "Follow Up", color: COLORS.anccent_green },
-    { label: "Registered", count: counts?.registered ?? counts?.registerCount ?? 0, status: "Register", color: "#0EA5E9" },
-    { label: "Enrolled", count: counts?.closed ?? counts?.closedLeadCount ?? 0, status: "Closed", color: "#22C55E" },
-    { label: "RNR", count: (counts as any)?.rnr ?? (counts as any)?.rnrCount ?? 0, status: "RNR", color: "#F59E0B" },
+    { label: "New Lead", count: counts?.newLead ?? counts?.newLeadCount ?? 0, status: "New Lead", color: COLORS.primaryDark },
+    { label: "Hot Lead", count: counts?.hotLead ?? counts?.hotLeadCount ?? 0, status: "Hot Lead", color: COLORS.violet },
+    { label: "Follow Up", count: counts?.followUp ?? counts?.followUpCount ?? 0, status: "Follow Up", color: COLORS.primary },
+    { label: "Registered", count: counts?.registered ?? counts?.registerCount ?? 0, status: "Register", color: COLORS.anccent_green },
+    { label: "Enrolled", count: counts?.closed ?? counts?.closedLeadCount ?? 0, status: "Closed", color: COLORS.muted },
+    {
+      label: "RNR", count: (counts as any)?.rnr ?? (counts as any)?.rnrCount ?? 0, status: "RNR", color: COLORS.subtle
+
+    },
   ];
 
   const totalLeads = data?.totalLeads ?? 0;
