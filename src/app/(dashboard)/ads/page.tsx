@@ -32,7 +32,7 @@ export default function AdsAnalyticsPage() {
       if (leadSummary) {
         setGlobalCounts({
           total: leadSummary.totalLeads,
-          closed: leadSummary.statusCounts.closed || 0
+          closed: leadSummary.statusCounts?.closed || 0
         });
       }
 

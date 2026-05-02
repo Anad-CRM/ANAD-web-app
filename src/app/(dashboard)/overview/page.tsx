@@ -8,19 +8,22 @@ import { LeadCountsData, StaffEodSummary } from "@/modules/overview/types";
 
 export default function OverviewPage() {
   const [filter, setFilter] = useState("Overall");
+  const [customStartDate, setCustomStartDate] = useState<string | undefined>();
+  const [customEndDate, setCustomEndDate] = useState<string | undefined>();
+  const [staffId, setStaffId] = useState<string | undefined>();
   const [leadSummary, setLeadSummary] = useState<LeadCountsData | null>(null);
   const [eodData, setEodData] = useState<StaffEodSummary[]>([]);
 
   useEffect(() => {
     const loadOverviewData = async () => {
-      const summary = await getLeadSummary({ filter });
+      const summary = await getLeadSummary({ filter, customStartDate, customEndDate, staffId });
       if (summary) setLeadSummary(summary);
 
       const eods = await getEodReports();
       if (eods) setEodData(eods);
     };
     loadOverviewData();
-  }, [filter]);
+  }, [filter, customStartDate, customEndDate, staffId]);
   return (
     <div className="flex flex-col gap-[22px]">
       <div className="mb-6">
@@ -89,7 +92,19 @@ export default function OverviewPage() {
         ))}
       </div>
 
-      <LeadStatsSection data={leadSummary} filter={filter} onFilterChange={setFilter} />
+      <LeadStatsSection
+        data={leadSummary}
+        filter={filter}
+        customStartDate={customStartDate}
+        customEndDate={customEndDate}
+        staffId={staffId}
+        onFilterChange={(opts) => {
+          setFilter(opts.filter);
+          setCustomStartDate(opts.customStartDate);
+          setCustomEndDate(opts.customEndDate);
+          setStaffId(opts.staffId);
+        }}
+      />
       <EodReportsSection eodData={eodData} />
     </div>
   );
