@@ -9,6 +9,13 @@ export interface TeamUser {
   };
 }
 
+export interface CreateTeamPayload {
+  organizationId: string;
+  name: string;
+  managerId?: string;
+  iconIndex?: number;
+}
+
 export interface Team {
   id: string;
   name: string;

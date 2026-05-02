@@ -17,5 +17,13 @@ export const TeamsService = {
       payload
     );
     return response.data;
+  },
+
+  async createTeam(payload: { organizationId: string; name: string }): Promise<any> {
+    const response = await api.post(
+      API_ENDPOINTS.TEAM.CREATE,
+      payload
+    );
+    return response.data;
   }
 };

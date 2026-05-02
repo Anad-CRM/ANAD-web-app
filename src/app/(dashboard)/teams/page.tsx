@@ -2,9 +2,17 @@
 
 import { useTeams } from "@/modules/teams/hooks/useTeams";
 import Link from "next/link";
+import { useState } from "react";
+import { CreateTeamModal } from "@/modules/teams/components/CreateTeamModal";
+import { InviteMemberModal } from "@/modules/teams/components/InviteMemberModal";
+import { useAuthContext } from "@/modules/auth/stores/AuthContext";
 
 export default function TeamsPage() {
-  const { teams, stats, isLoading, error } = useTeams();
+  const { teams, stats, isLoading, error, refetch } = useTeams();
+  const { user } = useAuthContext();
+  
+  const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
+  const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
 
   const TEAM_STATS = [
     { label: `${stats.totalTeams} Teams`, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
@@ -15,14 +23,20 @@ export default function TeamsPage() {
   return (
     <div className="flex flex-col gap-[22px]">
       <div className="flex justify-end gap-6 mb-12">
-        <button className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all">
+        <button 
+          onClick={() => setIsCreateTeamOpen(true)}
+          className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all"
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
           Create Team
         </button>
-        <button className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all">
+        <button 
+          onClick={() => setIsInviteMemberOpen(true)}
+          className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all"
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="8.5" cy="7" r="4"/>
@@ -104,6 +118,23 @@ export default function TeamsPage() {
           </div>
         )}
       </div>
+
+      <CreateTeamModal
+        isOpen={isCreateTeamOpen}
+        onClose={() => setIsCreateTeamOpen(false)}
+        organizationId={user?.organizationId || user?.organization?.id || ""}
+        onSuccess={() => refetch?.()}
+      />
+
+      <InviteMemberModal
+        isOpen={isInviteMemberOpen}
+        onClose={() => setIsInviteMemberOpen(false)}
+        organizationId={user?.organizationId || user?.organization?.id || ""}
+        senderName={user?.userName || ""}
+        senderAvatar={user?.avatar || ""}
+        teams={teams}
+        onSuccess={() => {}}
+      />
     </div>
   );
 }

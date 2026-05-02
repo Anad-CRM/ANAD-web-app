@@ -72,7 +72,7 @@ export const API_ENDPOINTS = {
     UPLOAD: "/file/uploadFile",
   },
   INVITATION: {
-    SEND: "/invitation/sendInvitation",
+    SEND: "/invite/sendInvitation",
   },
   NOTIFICATIONS: {
     GET_BY_USER: "/notification/getByUser",
