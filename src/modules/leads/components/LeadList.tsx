@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Filter, X, ArrowLeft } from "lucide-react";
+import { Search, Filter, X, ArrowLeft, Users } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
 import { LeadCard } from "./LeadCard";
@@ -18,6 +18,7 @@ function buildPayload(
   filters: FilterState,
   statusParam: string | null,
   userIdParam: string | null,
+  staffIdParam: string | null,
   teamIdParam: string | null,
   offset: number,
 ): FetchLeadsParams {
@@ -35,11 +36,14 @@ function buildPayload(
     payload.status = statusParam;
   }
 
-  // Staff filter
+  // Staff filter: explicit sheet filter beats URL param
   if (filters.staffIds.length > 0) {
     payload.staffId = filters.staffIds.length === 1
       ? filters.staffIds[0]
       : filters.staffIds;
+  } else if (staffIdParam) {
+    // staffId URL param (from staff profile stat cards)
+    payload.staffId = staffIdParam;
   }
 
   // Team filters
@@ -57,11 +61,12 @@ function buildPayload(
   }
 
   // User filter from URL (e.g. clicking a stat on staff profile)
+  // userId URL param (legacy — kept for backwards compat)
   if (userIdParam) payload.userId = userIdParam;
 
   // Date filter
   if (filters.datePreset && filters.datePreset !== "Custom") {
-    payload.filter = filters.datePreset.replace(" ", "") as FetchLeadsParams["filter"];
+    payload.filter = filters.datePreset as FetchLeadsParams["filter"];
   } else if (filters.datePreset === "Custom") {
     payload.filter = "Custom";
   }
@@ -88,7 +93,10 @@ export function LeadList() {
   const router = useRouter();
   const statusParam = searchParams.get("status");
   const userIdParam = searchParams.get("userId");
+  const staffIdParam = searchParams.get("staffId");
   const teamIdParam = searchParams.get("teamId");
+
+  const isUnassigned = searchParams.get("unassigned") === "true";
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,11 +106,35 @@ export function LeadList() {
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [staffMembers, setStaffMembers] = useState<{ id: string; userName: string }[]>([]);
+
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [staffToAssign, setStaffToAssign] = useState("");
+  const [isAssigning, setIsAssigning] = useState(false);
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
   const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
 
+
   const offsetRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Sync query values into refs so loadLeads never needs to be recreated ──
+  // This prevents state updates (from load-more) from cascading into a full reset.
+  const searchTermRef = useRef(searchTerm);
+  const filtersRef = useRef(filters);
+  const statusParamRef = useRef(statusParam);
+  const userIdParamRef = useRef(userIdParam);
+  const staffIdParamRef = useRef(staffIdParam);
+  const teamIdParamRef = useRef(teamIdParam);
+  const isUnassignedRef = useRef(isUnassigned);
+  searchTermRef.current = searchTerm;
+  filtersRef.current = filters;
+  statusParamRef.current = statusParam;
+  userIdParamRef.current = userIdParam;
+  staffIdParamRef.current = staffIdParam;
+  teamIdParamRef.current = teamIdParam;
+  isUnassignedRef.current = isUnassigned;
 
   const hasActiveFilters =
     filters.statuses.length > 0 ||
@@ -112,14 +144,16 @@ export function LeadList() {
     filters.datePreset != null ||
     !!statusParam ||
     !!userIdParam ||
-    !!teamIdParam;
+    !!staffIdParam ||
+    !!teamIdParam ||
+    isUnassigned;
 
   // Load auxiliary data for filters
   useEffect(() => {
     leadsApi.fetchStaffMembers().then(staff => {
       setStaffMembers(staff as { id: string; userName: string }[]);
     });
-    
+
     // Using user info to fetch teams if available
     const user = getUser<any>();
     if (user?.organizationId) {
@@ -127,14 +161,15 @@ export function LeadList() {
         if (res.status === "success" && res.data) {
           setTeams(res.data);
         }
-      }).catch(() => {});
-      
-      getAllAds({ organizationId: user.organizationId }).then(data => {
-        setAds((data || []).map(ad => ({ ...ad, id: String(ad.id) })));
-      }).catch(() => {});
+      }).catch(() => { });
+
+      getAllAds({ organizationId: user.organizationId }).then((data: any) => {
+        setAds((data || []).map((ad: any) => ({ ...ad, id: String(ad.id) })));
+      }).catch(() => { });
     }
   }, []);
 
+  // Stable — reads all query values from refs, never recreated on state changes.
   const loadLeads = useCallback(async (reset: boolean) => {
     if (reset) {
       offsetRef.current = 0;
@@ -146,13 +181,19 @@ export function LeadList() {
 
     try {
       const payload = buildPayload(
-        searchTerm,
-        filters,
-        statusParam,
-        userIdParam,
-        teamIdParam,
+        searchTermRef.current,
+        filtersRef.current,
+        statusParamRef.current,
+        userIdParamRef.current,
+        staffIdParamRef.current,
+        teamIdParamRef.current,
         offsetRef.current,
       );
+      // Unassigned filter: pass isUnassigned flag to API
+      if (isUnassignedRef.current) {
+        (payload as any).isUnassigned = true;
+        delete payload.status;
+      }
 
       const res = await leadsApi.fetchLeads(payload);
 
@@ -178,9 +219,13 @@ export function LeadList() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [searchTerm, filters, statusParam, userIdParam, teamIdParam]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally empty — reads all query values from refs
 
-  // Debounce search changes
+
+  // Trigger a reset fetch whenever the real query values change (debounced for search).
+  // Depends on the actual values — NOT loadLeads — so loading-more state updates
+  // never accidentally fire a full reset.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -189,7 +234,8 @@ export function LeadList() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [loadLeads]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, isUnassigned]);
 
   function handleApplyFilters(newFilters: FilterState) {
     setFilters(newFilters);
@@ -199,11 +245,37 @@ export function LeadList() {
     setFilters(EMPTY_FILTERS);
   }
 
-  function handleLoadMore() {
-    if (!isLoadingMore && hasMore) {
-      loadLeads(false);
+  // function handleLoadMore() is no longer needed
+
+  const toggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedLeadIds([]);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedLeadIds.length === leads.length) {
+      setSelectedLeadIds([]);
+    } else {
+      setSelectedLeadIds(leads.map(l => l.id));
     }
-  }
+  };
+
+  const handleAssign = async () => {
+    if (!staffToAssign || selectedLeadIds.length === 0) return;
+    setIsAssigning(true);
+    try {
+      await leadsApi.assignLeads(selectedLeadIds, staffToAssign);
+      setIsAssignModalOpen(false);
+      setSelectedLeadIds([]);
+      setIsSelectionMode(false);
+      loadLeads(true);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
 
   // ── Active filter pills ────────────────────────────────────────────────
   const activePills: { label: string; onRemove: () => void }[] = [];
@@ -211,9 +283,7 @@ export function LeadList() {
   if (statusParam && filters.statuses.length === 0) {
     activePills.push({ label: statusParam, onRemove: () => { } }); // URL-driven, not removable here
   }
-  if (teamIdParam) {
-    activePills.push({ label: `Team Filter Applied`, onRemove: () => {} });
-  }
+
   filters.statuses.forEach(s =>
     activePills.push({
       label: s,
@@ -230,8 +300,9 @@ export function LeadList() {
 
   return (
     <>
-      <div className="flex flex-col h-full space-y-4">
-        <div className="flex items-center gap-4 mb-8">
+      <div className="flex flex-col h-full space-y-2 " >
+        {/* <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6"> */}
+        <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => router.back()}
             className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0"
@@ -239,13 +310,15 @@ export function LeadList() {
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h1 className="text-xl font-semibold text-slate-800">
-            {statusParam
-              ? statusParam.endsWith("Lead")
-                ? statusParam + "s"
-                : statusParam === "Follow Up"
-                  ? "Follow Ups"
-                  : statusParam
-              : "Leads List"}
+            {isUnassigned
+              ? "Unassigned Leads"
+              : statusParam
+                ? statusParam.endsWith("Lead")
+                  ? statusParam + "s"
+                  : statusParam === "Follow Up"
+                    ? "Follow Ups"
+                    : statusParam
+                : "Leads List"}
           </h1>
         </div>
 
@@ -331,16 +404,50 @@ export function LeadList() {
           </div>
         )}
 
-        {/* ── Lead count label ── */}
-        {!isLoading && (
-          <p className="text-[12px] font-medium" style={{ color: COLORS.muted }}>
-            {leads.length} lead{leads.length !== 1 ? "s" : ""} found
-            {statusParam && filters.statuses.length === 0 ? ` · ${statusParam}` : ""}
-          </p>
-        )}
+        {/* ── Selection Action Bar ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {!isLoading && (
+            <p className="text-[12px] font-medium" style={{ color: COLORS.muted }}>
+              {leads.length} lead{leads.length !== 1 ? "s" : ""} found
+              {statusParam && filters.statuses.length === 0 ? ` · ${statusParam}` : ""}
+            </p>
+          )}
+
+          {leads.length > 0 && (
+            <div className="flex items-center gap-2">
+              {isSelectionMode && (
+                <>
+                  <button
+                    onClick={toggleSelectAll}
+                    className="text-[12px] font-semibold text-primary px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
+                  >
+                    {selectedLeadIds.length === leads.length ? "Deselect All" : "Select All"}
+                  </button>
+                  <button
+                    disabled={selectedLeadIds.length === 0}
+                    onClick={() => setIsAssignModalOpen(true)}
+                    className="flex items-center gap-1.5 text-[12px] font-bold text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                    style={{ backgroundColor: COLORS.primary }}
+                  >
+                    <Users size={14} /> Assign ({selectedLeadIds.length})
+                  </button>
+                </>
+              )}
+              <button
+                onClick={toggleSelectionMode}
+                className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors border ${isSelectionMode
+                  ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100"
+                  : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+                  }`}
+              >
+                {isSelectionMode ? "Cancel" : "Select"}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* ── Leads Grid ── */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-6">
           {isLoading ? (
             <div className="flex justify-center items-center h-52">
               <div className="flex flex-col items-center gap-3">
@@ -352,7 +459,7 @@ export function LeadList() {
               </div>
             </div>
           ) : leads.length === 0 ? (
-            <div className="flex flex-col justify-center items-center h-60 space-y-3">
+            <div className="flex flex-col justify-center items-center h-90 space-y-2">
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: COLORS.primaryXlight }}
@@ -382,12 +489,23 @@ export function LeadList() {
                     lead={lead}
                     searchKeyword={searchTerm}
                     showStatusBadge={true}
+                    isSelected={selectedLeadIds.includes(lead.id)}
                     onStatusChange={(leadId, newStatus) => {
                       setLeads(prev =>
                         prev.map(l => l.id === leadId ? { ...l, status: newStatus as Lead["status"] } : l)
                       );
                     }}
+                    onAssignClick={() => {
+                      setSelectedLeadIds([lead.id]);
+                      setIsAssignModalOpen(true);
+                    }}
                     onClick={() => {
+                      if (isSelectionMode) {
+                        setSelectedLeadIds(prev =>
+                          prev.includes(lead.id) ? prev.filter(id => id !== lead.id) : [...prev, lead.id]
+                        );
+                        return;
+                      }
                       // Store lead in sessionStorage so detail page can read it without re-fetching
                       // (mirrors Flutter: lead data is passed as a prop, not re-fetched)
                       try { sessionStorage.setItem(`lead_cache_${lead.id}`, JSON.stringify(lead)); } catch { }
@@ -397,21 +515,18 @@ export function LeadList() {
                 ))}
               </div>
 
-              {/* Load more */}
-              {hasMore && (
-                <div className="flex justify-center mt-6">
-                  <button
-                    onClick={handleLoadMore}
-                    disabled={isLoadingMore}
-                    className="px-6 py-2.5 rounded-full text-[13px] font-semibold transition-all hover:opacity-90"
-                    style={{
-                      backgroundColor: COLORS.primaryXlight,
-                      color: COLORS.primary,
-                      border: `1px solid ${COLORS.primaryLight}`,
-                    }}
-                  >
-                    {isLoadingMore ? "Loading..." : "Load More"}
-                  </button>
+              {/* Load more spinner */}
+              {hasMore && isLoadingMore && (
+                <div className="flex justify-center mt-6 pb-6">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="animate-spin rounded-full h-5 w-5 border-[2px] border-t-transparent"
+                      style={{ borderColor: `${COLORS.primary}40`, borderTopColor: COLORS.primary }}
+                    />
+                    <span className="text-[13px] font-medium" style={{ color: COLORS.primary }}>
+                      Loading more...
+                    </span>
+                  </div>
                 </div>
               )}
             </>
@@ -431,6 +546,53 @@ export function LeadList() {
         ads={ads}
         lockedStatus={statusParam || undefined}
       />
+
+      {/* ── Assign Staff Modal ── */}
+      {isAssignModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(13,27,62,0.55)", backdropFilter: "blur(3px)" }}>
+          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-gray-100">
+              <h3 className="text-[16px] font-bold text-gray-900">Assign Leads</h3>
+              <p className="text-[13px] text-gray-500 mt-1">
+                Select a staff member to assign {selectedLeadIds.length} lead{selectedLeadIds.length !== 1 ? 's' : ''} to.
+              </p>
+            </div>
+            <div className="p-5">
+              <label className="block text-[13px] font-semibold text-gray-700 mb-2">Staff Member</label>
+              <select
+                value={staffToAssign}
+                onChange={(e) => setStaffToAssign(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-[14px] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1C3A76]/20 focus:border-[#1C3A76] outline-none transition-all"
+              >
+                <option value="">Select a staff member</option>
+                {staffMembers.map(staff => (
+                  <option key={staff.id} value={staff.id}>{staff.userName}</option>
+                ))}
+              </select>
+            </div>
+            <div className="p-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
+              <button
+                onClick={() => {
+                  setIsAssignModalOpen(false);
+                  if (!isSelectionMode) setSelectedLeadIds([]); // Clear if it was a single assign
+                }}
+                className="px-5 py-2.5 rounded-xl text-[13px] font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
+                disabled={isAssigning}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAssign}
+                disabled={!staffToAssign || isAssigning}
+                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white transition-colors disabled:opacity-50 flex items-center gap-2"
+                style={{ backgroundColor: COLORS.primary }}
+              >
+                {isAssigning ? "Assigning..." : "Confirm Assignment"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

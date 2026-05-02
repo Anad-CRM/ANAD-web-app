@@ -32,14 +32,12 @@ export function LeadStatsCard({ stats, userId }: LeadStatsCardProps) {
 }
 
 function StatItem({ label, value, userId }: LeadStat & { userId?: string }) {
-  // Construct href with query params
   const params = new URLSearchParams();
-  if (label !== "All Leads" && label !== "Total Leads") {
-    // Optionally format label to match API expectations if needed
-    params.set("status", label); 
+  if (label !== "Total Leads" && label !== "All Leads") {
+    params.set("status", label);
   }
   if (userId) {
-    params.set("userId", userId);
+    params.set("staffId", userId);
   }
 
   const queryString = params.toString();

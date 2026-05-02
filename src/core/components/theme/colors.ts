@@ -1,6 +1,7 @@
 export const COLORS = {
   primary: "#1E56A0",
   primaryDark: "#163172",
+  violet: "#4e448e",
   primaryLight: "#D6E4F0",
   primaryXlight: "#EEF4FB",
   card: "#F6F6F6",
@@ -10,6 +11,7 @@ export const COLORS = {
   dark_orange: "#CA6702",
   brown: "#BB3E03",
   danger: "#9B2226",
+
   info: "#3B82F6",
   bg: "#F7F8FA",
   surface: "#FFFFFF",
