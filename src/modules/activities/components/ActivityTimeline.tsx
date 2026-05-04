@@ -78,7 +78,7 @@ interface Props {
 
 export const ActivityTimeline: React.FC<Props> = ({ activities, onSelect }) => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col max-w-[500px] w-full mx-auto pl-4 lg:pl-10">
       {activities.map((activity, i) => {
         const rawDate = activity.created_at ?? activity.createdAt ?? new Date().toISOString();
         const { dateStr, timeStr } = fmtDateTime(rawDate);
@@ -104,12 +104,12 @@ export const ActivityTimeline: React.FC<Props> = ({ activities, onSelect }) => {
         return (
           <div
             key={activity.id || i}
-            className="flex gap-4 cursor-pointer"
+            className="flex gap-5 cursor-pointer"
             onClick={() => kind !== 'call_recording' && onSelect?.(activity)}
           >
-            <div className="flex flex-col items-end pt-0.5 flex-shrink-0 w-[55px]">
-              <span className="text-[12px] font-bold text-black leading-tight">{timeStr}</span>
-              <span className="text-[11px] font-medium text-slate-500 mt-0.5">{dateStr}</span>
+            <div className="flex flex-col items-end pt-0.5 flex-shrink-0 w-auto min-w-[70px] text-right">
+              <span className="text-[12px] font-bold text-black leading-tight whitespace-nowrap">{timeStr}</span>
+              <span className="text-[11px] font-medium text-slate-500 mt-0.5 whitespace-nowrap">{dateStr}</span>
             </div>
 
             <div className="flex flex-col items-center flex-shrink-0">

@@ -10,6 +10,7 @@ import { COLORS } from '@/core/components/theme/colors';
 import { AuthImage } from '@/core/components/ui/AuthImage';
 import { AudioPlayer } from '@/core/components/ui/AudioPlayer';
 import { Activity, FollowupConfig, StatusConfig } from '../types/activity.types';
+import { API_ENDPOINTS } from '@/core/api/api';
 
 export const SmallAvatar: React.FC<{ user: any; size?: number }> = ({ user, size = 20 }) => {
   const av = user?.avatar;
@@ -58,7 +59,7 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
       {hasFile && (
         <div className="mt-2 text-left">
           <AudioPlayer 
-            src={`uploads/${activity.fileName}`} 
+            src={API_ENDPOINTS.CALLS.RECORDING(activity.fileName)} 
             initialDuration={duration} 
             fileSize={fileSize} 
             className="w-full max-w-[300px]" 

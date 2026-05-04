@@ -58,18 +58,34 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     };
   }, [src]);
 
+  const animationRef = useRef<number | null>(null);
+
+  const updateProgress = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+    animationRef.current = requestAnimationFrame(updateProgress);
+  };
+
+  useEffect(() => {
+    if (playing) {
+      animationRef.current = requestAnimationFrame(updateProgress);
+    } else if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [playing]);
+
   const togglePlayPause = () => {
     if (!audioRef.current || !blobUrl) return;
     if (playing) {
       audioRef.current.pause();
     } else {
       audioRef.current.play();
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
     }
   };
 
@@ -116,7 +132,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         <audio
           ref={audioRef}
           src={blobUrl}
-          onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}
           onPlay={() => setPlaying(true)}
