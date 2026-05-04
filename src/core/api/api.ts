@@ -43,6 +43,15 @@ export const API_ENDPOINTS = {
     GET_ATTENDANCE_STATUS: (orgId: string | number) => `/autoAssign/attendance-requirement-status/${orgId}`,
     TOGGLE_AUTO_ASSIGN: "/autoAssign/toggleAutoAssignLeads",
     TOGGLE_ATTENDANCE: "/autoAssign/toggle-attendance-requirement",
+    // Team-based
+    TEAM_TOGGLE: "/autoAssign/teams/toggle-auto-assign",
+    TEAM_STATUS: (teamId: string) => `/autoAssign/teams/auto-assign-status/${teamId}`,
+    TEAM_UPDATE_ADS: "/autoAssign/teams/update-ads",
+    // Manager-based
+    MANAGER_TOGGLE: "/autoAssign/managers/toggle-auto-assign",
+    MANAGER_STATUS: (orgId: string | number) => `/autoAssign/managers/auto-assign-status/${orgId}`,
+    MANAGER_UPDATE_ADS: "/autoAssign/managers/update-ads",
+    MANAGER_ADS_STATUS: (managerId: string) => `/autoAssign/managers/ads-status/${managerId}`,
   },
   INTEGRATION: {
     CREATE_WHATSAPP: "/webhook/createWhatsappIntegration",
