@@ -11,6 +11,7 @@ import { getAllAds } from "@/modules/ads/api/adsApi";
 import { getLeadSummary } from "@/modules/overview/api/overviewApi";
 
 import Link from "next/link";
+import { Text } from "@/core/components/ui/Text";
 
 export default function AdsAnalyticsPage() {
   const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
@@ -59,17 +60,17 @@ export default function AdsAnalyticsPage() {
         <div className="flex flex-col w-full h-full max-w-[500px]">
           {isLoading ? (
             <div className="flex items-center justify-center p-12 text-gray-400 animate-pulse">
-              Loading analytics...
+              <Text size="base">Loading analytics...</Text>
             </div>
           ) : (
             <>
               <GlobalMetrics data={globalMetrics} />
               
               <div className="flex justify-between items-center mt-6 mb-4">
-                <h2 className="text-[16px] font-extrabold text-black">Top Performing Ad</h2>
-                <Link href="/ads/all" className="text-[13px] font-bold text-[#1E56A0] hover:underline flex items-center gap-1">
-                  View All
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <Text as="h2" size="base" weight="bold" className="text-black font-extrabold">Top Performing Ad</Text>
+                <Link href="/ads/all" className="flex items-center gap-1 hover:underline">
+                  <Text size="sm" weight="bold" className="text-[#1E56A0]">View All</Text>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E56A0" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </Link>
               </div>
 
