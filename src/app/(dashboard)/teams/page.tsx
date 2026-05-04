@@ -75,11 +75,11 @@ export default function TeamsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {teams.map((team, idx) => {
               const membersCount = team.users?.length || 0;
-              const totalLeads = team.users?.reduce((acc, user) => acc + (user.leadCounts?.totalLeads || 0), 0) || 0;
-              const positiveLeads = team.users?.reduce(
+              const totalLeads = team.totalLeads ?? (team.users?.reduce((acc, user) => acc + (user.leadCounts?.totalLeads || 0), 0) || 0);
+              const positiveLeads = team.positiveLeads ?? (team.users?.reduce(
                 (acc, user) => acc + (user.leadCounts?.closedCount || 0) + (user.leadCounts?.contactedCount || 0), 
                 0
-              ) || 0;
+              ) || 0);
               const performance = totalLeads > 0 ? Math.round((positiveLeads / totalLeads) * 100) : 0;
 
               return (
