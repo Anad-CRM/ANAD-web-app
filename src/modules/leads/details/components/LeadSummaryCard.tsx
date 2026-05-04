@@ -65,10 +65,10 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   };
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-        <div className="flex  items-center gap-4">
-          <div className="w-16 h-16 rounded-full flex-shrink-0 flex flex-col items-center justify-center font-bold text-2xl text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}>
+    <div className="bg-[#F8F7F3] rounded-[32px] px-6 py-5 shadow-sm border border-black/5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-14 h-14 rounded-full flex-shrink-0 flex flex-col items-center justify-center font-bold text-2xl text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}>
             {leadName.charAt(0).toUpperCase()}
           </div>
           <div>
@@ -109,7 +109,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
           Lead Information
         </Text>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-4">
           <InfoItem
             label="Assigned To"
             value={assignedName}

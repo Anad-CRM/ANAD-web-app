@@ -8,7 +8,7 @@ export const LeadFollowUpCard: React.FC<{ followups: any[], leadId?: string, ass
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col h-[485px] relative overflow-hidden">      <div className="flex items-center justify-between mb-8">
+    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col flex-1 h-full relative overflow-hidden">      <div className="flex items-center justify-between mb-8">
       <Text size="xl" weight="semibold" className="text-black">Follow Up</Text>
       <button 
         onClick={() => setShowCreateModal(true)}

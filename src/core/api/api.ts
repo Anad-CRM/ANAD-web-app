@@ -28,6 +28,9 @@ export const API_ENDPOINTS = {
     DEACTIVATE: "/team/deactivate",
     GET_TEAM_LEAD_STATUS_COUNTS: "/team/getTeamLeadStatusCounts",
   },
+  CALLS: {
+    RECORDING: (fileName: string) => `/calls/recording/${fileName}`,
+  },
   FOLLOW_UP: {
     GET_ALL: "/followup/getAllFollowUp",
     SUMMARY: "/followup/summary",

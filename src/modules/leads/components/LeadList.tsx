@@ -4,6 +4,7 @@ import { Search, Filter, X, ArrowLeft, Users } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
 import { LeadCard } from "./LeadCard";
+import { BackButton } from "@/core/components/ui/BackButton";
 import { LeadFilterSheet, FilterState } from "./LeadFilterSheet";
 import { leadsApi, FetchLeadsParams } from "../api/leadsApi";
 import { Lead } from "../types/lead.types";
@@ -25,7 +26,7 @@ function buildPayload(
   const payload: FetchLeadsParams = {
     keyword: searchTerm.trim(),
     offset,
-    limit: 30,
+    limit: 20,
     sortByDate: "latest",
   };
 
@@ -206,7 +207,7 @@ export function LeadList() {
           setLeads(prev => [...prev, ...incoming]);
         }
 
-        setHasMore(incoming.length === 30);
+        setHasMore(incoming.length === 20);
         offsetRef.current += incoming.length;
       } else {
         if (reset) setLeads([]);
@@ -245,7 +246,24 @@ export function LeadList() {
     setFilters(EMPTY_FILTERS);
   }
 
-  // function handleLoadMore() is no longer needed
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+          loadLeads(false);
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, isLoading, loadLeads]);
 
   const toggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
@@ -303,12 +321,7 @@ export function LeadList() {
       <div className="flex flex-col h-full space-y-2 " >
         {/* <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6"> */}
         <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={() => router.back()}
-            className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
+          <BackButton onClick={() => router.back()} />
           <h1 className="text-xl font-semibold text-slate-800">
             {isUnassigned
               ? "Unassigned Leads"
@@ -514,6 +527,10 @@ export function LeadList() {
                   />
                 ))}
               </div>
+
+              {hasMore && !isLoading && (
+                <div ref={observerTarget} className="h-4 w-full" aria-hidden="true" />
+              )}
 
               {/* Load more spinner */}
               {hasMore && isLoadingMore && (

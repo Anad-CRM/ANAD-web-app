@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 
 interface BackButtonProps {
@@ -11,24 +11,18 @@ interface BackButtonProps {
   size?: number;
 }
 
-export function BackButton({ onClick, className = "", size = 20 }: BackButtonProps) {
+export function BackButton({ onClick, className = "", size = 24 }: BackButtonProps) {
   const router = useRouter();
 
   return (
     <button
       onClick={onClick || (() => router.back())}
-      style={{
-        backgroundColor: COLORS.primaryDark,
-        border: `1px solid ${COLORS.border}`
-      }}
-      className={`w-[42px] h-[42px] flex items-center justify-center rounded-full hover:shadow-lg transition-all shadow-md ${className}`}
+      className={`w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0 ${className}`}
       aria-label="Go back"
     >
-      <ChevronLeft
+      <ArrowLeft
         width={size}
         height={size}
-        strokeWidth={2.5}
-        style={{ color: COLORS.primaryXlight }}
       />
     </button>
   );

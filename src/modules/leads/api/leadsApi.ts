@@ -38,13 +38,12 @@ export const leadsApi = {
     const payload: Record<string, unknown> = {
       organizationId: userData.organizationId,
       offset: params?.offset ?? 0,
-      limit: params?.limit ?? 30,
+      limit: params?.limit ?? 20,
       keyword: params?.keyword?.trim() ?? "",
       filter: params?.filter ?? "Overall",
       sortByDate: params?.sortByDate ?? "latest",
     };
 
-    // Only append params if they have real values (avoid sending null/undefined noisily)
     if (params?.status) payload.status = params.status;
     if (params?.userId) payload.userId = params.userId;
     if (params?.staffId) payload.staffId = params.staffId;

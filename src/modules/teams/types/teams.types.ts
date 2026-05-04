@@ -24,6 +24,8 @@ export interface Team {
   category?: string;
   status: string;
   users: TeamUser[];
+  totalLeads?: number;
+  positiveLeads?: number;
   createdAt: string;
 }
 
