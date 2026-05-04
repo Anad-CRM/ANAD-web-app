@@ -94,9 +94,9 @@ export const LeadDetailsDashboard: React.FC = () => {
             Lead not found.
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
+          <div className="flex flex-col lg:flex-row gap-6 items-stretch h-full">
             {/* Left Column 60% */}
-            <div className="flex flex-col gap-8 w-full lg:w-[60%]">
+            <div className="flex flex-col gap-6 w-full lg:w-[60%] flex-1">
               <LeadSummaryCard lead={lead} onRefresh={loadData} />
               <LeadActivityLog 
                 activities={activities} 
@@ -106,7 +106,7 @@ export const LeadDetailsDashboard: React.FC = () => {
             </div>
 
             {/* Right Column 40% */}
-            <div className="w-full lg:w-[40%] flex-shrink-0 sticky top-4">
+            <div className="w-full lg:w-[40%] flex-shrink-0 flex flex-col">
               <LeadFollowUpCard 
                 followups={followups} 
                 leadId={leadId}

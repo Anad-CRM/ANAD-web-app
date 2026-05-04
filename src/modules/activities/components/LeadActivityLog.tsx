@@ -20,7 +20,7 @@ export const LeadActivityLog: React.FC<Props> = ({ activities, leadId, onRefresh
   const [selectedActivityType, setSelectedActivityType] = useState<string | null>(null);
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col relative h-[calc(60vh-200px)] overflow-hidden">
+    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col relative flex-1 h-[320px] overflow-hidden">
       <div className="flex justify-between items-center mb-6 flex-shrink-0">
         <Text size="xl" weight="semibold" className="text-black">Activity Log</Text>
         <button

@@ -104,21 +104,21 @@ export const ActivityTimeline: React.FC<Props> = ({ activities, onSelect }) => {
         return (
           <div
             key={activity.id || i}
-            className="flex gap-3 cursor-pointer"
+            className="flex gap-4 cursor-pointer"
             onClick={() => kind !== 'call_recording' && onSelect?.(activity)}
           >
-            <div className="flex flex-col items-end pt-1.5 flex-shrink-0" style={{ width: 54 }}>
-              <span className="text-[11px] font-semibold text-slate-700 leading-none">{timeStr}</span>
-              <span className="text-[10px] font-medium text-slate-400 mt-0.5">{dateStr}</span>
+            <div className="flex flex-col items-end pt-0.5 flex-shrink-0 w-[55px]">
+              <span className="text-[12px] font-bold text-black leading-tight">{timeStr}</span>
+              <span className="text-[11px] font-medium text-slate-500 mt-0.5">{dateStr}</span>
             </div>
 
             <div className="flex flex-col items-center flex-shrink-0">
               <div
-                className="w-2.5 h-2.5 rounded-full mt-2 ring-[3px] ring-[#F8F7F3] flex-shrink-0"
-                style={{ backgroundColor: dotColor }}
+                className="rounded-full mt-1.5 flex-shrink-0"
+                style={{ backgroundColor: i === 1 ? '#2563EB' : '#1E293B', width: '8px', height: '8px' }}
               />
               {!isLast && (
-                <div className="w-px flex-1 mt-1" style={{ backgroundColor: '#E2E8F0', minHeight: 20 }} />
+                <div className="w-px flex-1 mt-1.5 mb-1.5" style={{ backgroundColor: '#1E293B', minHeight: 40 }} />
               )}
             </div>
 
