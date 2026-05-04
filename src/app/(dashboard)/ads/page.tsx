@@ -10,6 +10,8 @@ import { AdCampaign, GlobalAdMetrics } from "@/modules/ads/types";
 import { getAllAds } from "@/modules/ads/api/adsApi";
 import { getLeadSummary } from "@/modules/overview/api/overviewApi";
 
+import Link from "next/link";
+
 export default function AdsAnalyticsPage() {
   const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null);
@@ -62,7 +64,19 @@ export default function AdsAnalyticsPage() {
           ) : (
             <>
               <GlobalMetrics data={globalMetrics} />
-              <CampaignCard data={selectedCampaign || undefined} />
+              
+              <div className="flex justify-between items-center mt-6 mb-4">
+                <h2 className="text-[16px] font-extrabold text-black">Top Performing Ad</h2>
+                <Link href="/ads/all" className="text-[13px] font-bold text-[#1E56A0] hover:underline flex items-center gap-1">
+                  View All
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </Link>
+              </div>
+
+              <Link href={`/ads/${selectedCampaign?.adId || ''}`} className="block">
+                <CampaignCard data={selectedCampaign || undefined} />
+              </Link>
+
               <TeamPerformance data={{ totalSpend: "-", leads: globalMetrics.totalAssigned, avgCtr: "0%" }} />
             </>
           )}
