@@ -17,6 +17,7 @@ export default function AdsAnalyticsPage() {
   const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null);
   const [globalCounts, setGlobalCounts] = useState<{ total: number; closed: number } | null>(null);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function AdsAnalyticsPage() {
           total: leadSummary.totalLeads,
           closed: leadSummary.statusCounts?.closed || 0
         });
+        setTeamMembers(leadSummary.staffLeadCounts || []);
       }
 
       setIsLoading(false);
@@ -78,7 +80,7 @@ export default function AdsAnalyticsPage() {
                 <CampaignCard data={selectedCampaign || undefined} />
               </Link>
 
-              <TeamPerformance data={{ totalSpend: "-", leads: globalMetrics.totalAssigned, avgCtr: "0%" }} />
+              <TeamPerformance data={{ totalSpend: "-", leads: globalMetrics.totalAssigned, avgCtr: "0%" }} teamMembers={teamMembers} />
             </>
           )}
         </div>
