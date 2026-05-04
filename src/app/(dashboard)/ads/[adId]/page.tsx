@@ -7,9 +7,11 @@ import { getAdById } from "@/modules/ads/api/adsApi";
 import { api } from "@/core/api/axios";
 import { API_ENDPOINTS } from "@/core/api/api";
 import { getUser } from "@/core/utils/auth";
-import { ArrowLeft, } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
+import { PlatformAvatar } from "@/modules/ads/components/PlatformAvatar";
+
 
 export default function AdDetailsPage() {
   const router = useRouter();
@@ -85,11 +87,6 @@ export default function AdDetailsPage() {
     { title: "Register", value: leadCounts?.registerCount, color: COLORS.light_green, bg: '#D1FAE5' },
   ];
 
-  const getPlatformIcon = (platform: string) => {
-    const initial = platform?.charAt(0) || "A";
-    return <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-sm" style={{ backgroundColor: COLORS.primary }}>{initial}</div>;
-  };
-
   return (
     <div className="flex flex-col p-4 w-full max-w-[1600px] mx-auto min-h-screen">
       <div className="flex items-center gap-4 mb-6">
@@ -106,11 +103,7 @@ export default function AdDetailsPage() {
       {/* Ad Header */}
       <div className="rounded-3xl p-6 shadow-sm border mb-8" style={{ backgroundColor: COLORS.surface, borderColor: COLORS.grey }}>
         <div className="flex items-center gap-6 mb-6">
-          {adDetail.thumbnailUrl ? (
-            <img src={adDetail.thumbnailUrl} alt="Ad Thumbnail" className="w-16 h-16 rounded-2xl object-cover shadow-sm" />
-          ) : (
-            getPlatformIcon(adDetail.platform)
-          )}
+          <PlatformAvatar thumbnailUrl={adDetail.thumbnailUrl} platform={adDetail.platform} size={64} />
           <div className="flex flex-col flex-1">
             <Text as="h2" size="xl" weight="bold" className="mb-2 block font-extrabold" style={{ color: COLORS.text }}>{adDetail.adName || 'Unnamed Ad'}</Text>
             <Text size="xs" weight="bold" className="px-3 py-1 rounded-full self-start inline-block" style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primaryDark }}>

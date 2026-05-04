@@ -6,130 +6,69 @@ import { AdCampaign } from "@/modules/ads/types";
 import { getAllAds, getLiveAds } from "@/modules/ads/api/adsApi";
 import { ArrowLeft, Search, X, MousePointerClick, Eye, ChevronRight } from "lucide-react";
 import { Text } from "@/core/components/ui/Text";
-import { COLORS } from "@/core/components/theme/colors";
-import { AuthImage } from "@/core/components/ui/AuthImage";
+import { COLORS, getPlatformColor } from "@/core/components/theme/colors";
+import { PlatformAvatar, AdImage } from "@/modules/ads/components/PlatformAvatar";
 
-// ─── Platform color/initial helper ───────────────────────────────────────────
-
-const PLATFORM_COLORS: Record<string, string> = {
-  facebook: "#1877F2",
-  instagram: "#E1306C",
-  google: "#4285F4",
-  youtube: "#FF0000",
-  tiktok: "#010101",
-  twitter: "#1DA1F2",
-  linkedin: "#0A66C2",
-};
-
-function getPlatformColor(platform?: string): string {
-  if (!platform) return COLORS.primary;
-  return PLATFORM_COLORS[platform.toLowerCase()] ?? COLORS.primary;
-}
-
-// ─── Platform Avatar ─────────────────────────────────────────────────────────
-
-function PlatformAvatar({
-  thumbnailUrl,
-  platform,
-  size = 46,
-  className = "",
-}: {
-  thumbnailUrl?: string | null;
-  platform?: string;
-  size?: number;
-  className?: string;
-}) {
-  const color = getPlatformColor(platform);
-  const initial = (platform ?? "A").charAt(0).toUpperCase();
-
-  if (thumbnailUrl) {
-    return (
-      <AuthImage
-        src={thumbnailUrl}
-        alt={platform ?? "Ad"}
-        className={`object-cover rounded-2xl flex-shrink-0 ${className}`}
-        style={{ width: size, height: size }}
-        fallbackSrc={undefined}
-      />
-    );
-  }
-
-  return (
-    <div
-      className={`flex-shrink-0 rounded-2xl flex items-center justify-center font-bold text-white ${className}`}
-      style={{
-        width: size,
-        height: size,
-        background: `linear-gradient(135deg, ${color}cc, ${color})`,
-      }}
-    >
-      <span style={{ fontSize: size * 0.38 }}>{initial}</span>
-    </div>
-  );
-}
 
 // ─── Live Ad Card (horizontal scroll) ────────────────────────────────────────
 
 function LiveAdCard({ ad, onClick }: { ad: AdCampaign; onClick: () => void }) {
   const color = getPlatformColor(ad.platform);
-  const ctr = ad.totalImpressions
-    ? ((ad.totalClicks / ad.totalImpressions) * 100).toFixed(1)
-    : "0";
+  const ctr =
+    ad.totalImpressions
+      ? ((ad.totalClicks / ad.totalImpressions) * 100).toFixed(1)
+      : "0";
 
   return (
     <div
       onClick={onClick}
-      className="relative flex-shrink-0 w-[240px] rounded-[22px] overflow-hidden cursor-pointer shadow-[0_6px_20px_rgba(0,0,0,0.10)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:-translate-y-0.5 transition-all duration-200 border"
-      style={{ borderColor: `${color}22` }}
+      className="relative flex-shrink-0 w-[240px] rounded-[22px] overflow-hidden cursor-pointer shadow-[0_6px_20px_rgba(0,0,0,0.10)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.18)] hover:-translate-y-0.5 transition-all duration-200 border"
+      style={{ borderColor: `${color}22`, backgroundColor: COLORS.surface }}
     >
-      {/* Image or gradient background */}
-      {ad.thumbnailUrl ? (
-        <div className="w-full h-[140px] relative">
-          <AuthImage
-            src={ad.thumbnailUrl}
-            alt={ad.adName}
-            className="w-full h-full object-cover"
-            fallbackSrc={undefined}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        </div>
-      ) : (
-        <div
-          className="w-full h-[140px] flex items-center justify-center"
-          style={{ background: `linear-gradient(135deg, ${color}33, ${color}11)` }}
-        >
+      {/* Image or branded placeholder */}
+      <div className="w-full h-[140px] relative overflow-hidden">
+        {ad.thumbnailUrl ? (
+          <>
+            <AdImage
+              src={ad.thumbnailUrl}
+              alt={ad.adName}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          </>
+        ) : (
           <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-md"
-            style={{ background: `linear-gradient(135deg, ${color}cc, ${color})` }}
+            className="w-full h-full flex items-center justify-center"
+            style={{ backgroundColor: `${color}1A` }}
           >
-            {(ad.platform ?? "A").charAt(0).toUpperCase()}
+            <PlatformAvatar platform={ad.platform} size={64} />
           </div>
+        )}
+
+        {/* Platform chip — top left */}
+        <div
+          className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold text-white shadow-sm"
+          style={{ backgroundColor: `${color}dd` }}
+        >
+          {ad.platform ?? "Unknown"}
         </div>
-      )}
 
-      {/* LIVE badge */}
-      <div
-        className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-white text-xs font-bold shadow-md"
-        style={{ backgroundColor: COLORS.success }}
-      >
-        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
-        LIVE
-      </div>
-
-      {/* Platform chip */}
-      <div
-        className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold shadow-sm text-white"
-        style={{ backgroundColor: `${color}dd` }}
-      >
-        {ad.platform ?? "Unknown"}
+        {/* LIVE badge — top right */}
+        <div
+          className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-white text-xs font-bold shadow-md"
+          style={{ backgroundColor: COLORS.success }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
+          LIVE
+        </div>
       </div>
 
       {/* Bottom info */}
-      <div className="p-4" style={{ backgroundColor: COLORS.surface }}>
+      <div className="p-4">
         <Text size="sm" weight="bold" className="truncate block mb-2" style={{ color: COLORS.text }}>
           {ad.adName || "Unnamed Ad"}
         </Text>
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <div className="flex items-center gap-1">
             <MousePointerClick className="w-3 h-3" style={{ color: COLORS.primary }} />
             <Text size="xs" weight="bold" style={{ color: COLORS.primary }}>
@@ -213,9 +152,12 @@ function AdCard({ ad, onClick }: { ad: AdCampaign; onClick: () => void }) {
 
 function LiveAdSkeleton() {
   return (
-    <div className="flex-shrink-0 w-[240px] rounded-[22px] overflow-hidden border" style={{ borderColor: COLORS.grey }}>
+    <div
+      className="flex-shrink-0 w-[240px] rounded-[22px] overflow-hidden border"
+      style={{ borderColor: COLORS.grey, backgroundColor: COLORS.surface }}
+    >
       <div className="w-full h-[140px] animate-pulse" style={{ backgroundColor: COLORS.bg }} />
-      <div className="p-4 space-y-2" style={{ backgroundColor: COLORS.surface }}>
+      <div className="p-4 space-y-2">
         <div className="h-4 rounded-lg animate-pulse w-3/4" style={{ backgroundColor: COLORS.bg }} />
         <div className="h-3 rounded-lg animate-pulse w-1/2" style={{ backgroundColor: COLORS.bg }} />
       </div>
@@ -225,11 +167,21 @@ function LiveAdSkeleton() {
 
 // ─── Section Header ────────────────────────────────────────────────────────────
 
-function SectionHeader({ title, accentColor, count }: { title: string; accentColor: string; count?: number }) {
+function SectionHeader({
+  title,
+  accentColor,
+  count,
+}: {
+  title: string;
+  accentColor: string;
+  count?: number;
+}) {
   return (
     <div className="flex items-center gap-2 mb-4">
       <div className="w-1 h-5 rounded-full" style={{ backgroundColor: accentColor }} />
-      <Text as="h2" size="lg" weight="bold" style={{ color: COLORS.text }}>{title}</Text>
+      <Text as="h2" size="lg" weight="bold" style={{ color: COLORS.text }}>
+        {title}
+      </Text>
       {count != null && (
         <div
           className="flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs font-bold"
@@ -283,7 +235,6 @@ export default function AllAdsPage() {
     );
   }, [liveAds, searchQuery]);
 
-  // Ads that are in allAds but NOT live
   const liveIds = new Set(filteredLiveAds.map((a) => a.adId));
   const otherAds = filteredAllAds.filter((a) => !liveIds.has(a.adId));
 
@@ -298,7 +249,9 @@ export default function AllAdsPage() {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <Text as="h1" size="2xl" weight="bold" style={{ color: COLORS.text }}>All Ads</Text>
+        <Text as="h1" size="2xl" weight="bold" style={{ color: COLORS.text }}>
+          All Ads
+        </Text>
       </div>
 
       {/* Search bar */}
@@ -316,7 +269,11 @@ export default function AllAdsPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
         {searchQuery && (
-          <button onClick={() => setSearchQuery("")} className="hover:opacity-70 flex-shrink-0" style={{ color: COLORS.subtle }}>
+          <button
+            onClick={() => setSearchQuery("")}
+            className="hover:opacity-70 flex-shrink-0"
+            style={{ color: COLORS.subtle }}
+          >
             <X className="w-4 h-4" />
           </button>
         )}
@@ -325,17 +282,19 @@ export default function AllAdsPage() {
       {/* Content */}
       {isLoading ? (
         <div className="flex flex-col gap-8">
-          {/* Live skeleton */}
           <div>
-            <div className="h-6 w-24 rounded-lg animate-pulse mb-4" style={{ backgroundColor: COLORS.bg }} />
+            <div className="h-6 w-24 rounded-lg animate-pulse mb-4" style={{ backgroundColor: COLORS.grey }} />
             <div className="flex gap-4 overflow-x-hidden">
               {[1, 2, 3].map((i) => <LiveAdSkeleton key={i} />)}
             </div>
           </div>
-          {/* List skeleton */}
           <div className="flex flex-col gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-20 rounded-[18px] animate-pulse" style={{ backgroundColor: COLORS.surface }} />
+              <div
+                key={i}
+                className="h-20 rounded-[18px] animate-pulse"
+                style={{ backgroundColor: COLORS.surface }}
+              />
             ))}
           </div>
         </div>
@@ -352,10 +311,21 @@ export default function AllAdsPage() {
           {/* Live Ads — horizontal scroll */}
           {filteredLiveAds.length > 0 && (
             <div>
-              <SectionHeader title="Live Ads" accentColor={COLORS.success} count={filteredLiveAds.length} />
-              <div className="flex gap-4 overflow-x-auto pb-2 snap-x" style={{ scrollbarWidth: "none" }}>
+              <SectionHeader
+                title="Live Ads"
+                accentColor={COLORS.success}
+                count={filteredLiveAds.length}
+              />
+              <div
+                className="flex gap-4 overflow-x-auto pb-2 snap-x"
+                style={{ scrollbarWidth: "none" }}
+              >
                 {filteredLiveAds.map((ad) => (
-                  <LiveAdCard key={ad.adId} ad={ad} onClick={() => router.push(`/ads/${ad.adId}`)} />
+                  <LiveAdCard
+                    key={ad.adId}
+                    ad={ad}
+                    onClick={() => router.push(`/ads/${ad.adId}`)}
+                  />
                 ))}
               </div>
             </div>
@@ -370,7 +340,11 @@ export default function AllAdsPage() {
               />
               <div className="flex flex-col gap-3">
                 {otherAds.map((ad) => (
-                  <AdCard key={ad.adId} ad={ad} onClick={() => router.push(`/ads/${ad.adId}`)} />
+                  <AdCard
+                    key={ad.adId}
+                    ad={ad}
+                    onClick={() => router.push(`/ads/${ad.adId}`)}
+                  />
                 ))}
               </div>
             </div>
