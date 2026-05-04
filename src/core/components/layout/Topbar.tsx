@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import { COLORS } from "@/core/components/theme/colors";
+import Link from "next/link";
 
 export default function Topbar() {
   const { user, logout } = useAuth();
@@ -63,7 +64,7 @@ export default function Topbar() {
           </svg>
         </button>
 
-        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-black relative">
+        <Link href="/notifications" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-black relative hover:opacity-80 transition-opacity">
           <svg
             width="18"
             height="18"
@@ -78,9 +79,9 @@ export default function Topbar() {
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
           <span className="absolute top-[10px] right-[10px] w-[6px] h-[6px] bg-[#1E3A8A] rounded-full" />
-        </button>
+        </Link>
 
-        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#E2E8F0] text-[#1E3A8A] overflow-hidden shadow-sm">
+        <Link href="/profile" className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#E2E8F0] text-[#1E3A8A] overflow-hidden shadow-sm hover:opacity-80 transition-opacity">
           <svg
             width="20"
             height="20"
@@ -95,7 +96,7 @@ export default function Topbar() {
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
-        </div>
+        </Link>
 
         <div className="w-[1px] h-8 bg-gray-200 mx-1"></div>
 

@@ -1,10 +1,9 @@
 import axios from "axios";
 import { getToken, clearToken } from "@/core/utils/auth";
 
-// Use relative /api so requests go through the Next.js proxy → avoids CORS
-// const API_BASE_URL = "http://192.168.0.230:3000/";
+export const API_BASE_URL = "http://10.53.244.175:3000/"; //Nibin
 
-export const API_BASE_URL = "http://localhost:3000/";  //Local host
+// export const API_BASE_URL = "http://localhost:3000/";  //Local host
 // const API_BASE_URL = "https://api.anad.ae/";  //Live server
 
 

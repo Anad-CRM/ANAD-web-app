@@ -65,4 +65,16 @@ export const API_ENDPOINTS = {
     GET: "/lead/getActivities",
     CREATE: (leadId: string) => `/lead/${leadId}/createActivity`,
   },
+  USER: {
+    UPDATE_PROFILE: "/user/updateProfile",
+  },
+  FILE: {
+    UPLOAD: "/file/uploadFile",
+  },
+  INVITATION: {
+    SEND: "/invite/sendInvitation",
+  },
+  NOTIFICATIONS: {
+    GET_BY_USER: "/notification/getByUser",
+  },
 };
