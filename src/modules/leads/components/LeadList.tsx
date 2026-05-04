@@ -26,7 +26,7 @@ function buildPayload(
   const payload: FetchLeadsParams = {
     keyword: searchTerm.trim(),
     offset,
-    limit: 30,
+    limit: 20,
     sortByDate: "latest",
   };
 
@@ -207,7 +207,7 @@ export function LeadList() {
           setLeads(prev => [...prev, ...incoming]);
         }
 
-        setHasMore(incoming.length === 30);
+        setHasMore(incoming.length === 20);
         offsetRef.current += incoming.length;
       } else {
         if (reset) setLeads([]);
@@ -246,7 +246,24 @@ export function LeadList() {
     setFilters(EMPTY_FILTERS);
   }
 
-  // function handleLoadMore() is no longer needed
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+          loadLeads(false);
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, isLoading, loadLeads]);
 
   const toggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
@@ -510,6 +527,10 @@ export function LeadList() {
                   />
                 ))}
               </div>
+
+              {hasMore && !isLoading && (
+                <div ref={observerTarget} className="h-4 w-full" aria-hidden="true" />
+              )}
 
               {/* Load more spinner */}
               {hasMore && isLoadingMore && (
