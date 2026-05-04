@@ -5,9 +5,7 @@ export const activityService = {
   fetchLeadActivities: async (leadId: string, assignedUserId?: string): Promise<any[]> => {
     try {
       const userId = assignedUserId ?? '';
-      const response = await api.get(API_ENDPOINTS.ACTIVITIES.GET, { 
-        data: { leadId, userId } 
-      });
+      const response = await api.post(API_ENDPOINTS.ACTIVITIES.GET, { leadId, userId });
       if (response.data?.status === "success") {
         return response.data.data || [];
       }

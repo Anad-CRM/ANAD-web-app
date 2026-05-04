@@ -7,6 +7,7 @@ import { leadsApi } from '@/modules/leads/api/leadsApi';
 import { activityService } from '@/modules/activities/services/activityService';
 import { LeadActivityLog } from '@/modules/activities/components/LeadActivityLog';
 import { Lead } from '@/modules/leads/types/lead.types';
+import { getUser } from '@/core/utils/auth';
 
 export const LeadDetailsDashboard: React.FC = () => {
   const router = useRouter();
@@ -42,25 +43,19 @@ export const LeadDetailsDashboard: React.FC = () => {
 
       if (leadData) setLead(leadData);
 
-      // --- Mirrors Flutter exactly ---
-      // Activities: userId = leadData['assignedUser']['id'] ?? ''
-      // Followups:  userId = leadData['userId'] ?? ''
-      const assignedUserIdForActivities =
-        (leadData as any)?.assignedUser?.id ||
-        (leadData as any)?.assignedUser?._id ||
-        '';
+      const loggedInUser = getUser<{ id: string }>();
+      const loggedInUserId = loggedInUser?.id || '';
 
-      // Followups use the lead's own userId field (NOT assignedUser.id)
       const userIdForFollowups = (leadData as any)?.userId ?? '';
 
       console.log('[LeadDetailsDashboard] leadId:', leadId);
-      console.log('[LeadDetailsDashboard] assignedUser.id (for activities):', assignedUserIdForActivities);
+      console.log('[LeadDetailsDashboard] loggedInUserId (for activities):', loggedInUserId);
       console.log('[LeadDetailsDashboard] leadData.userId (for followups):', userIdForFollowups);
       console.log('[LeadDetailsDashboard] full leadData:', JSON.stringify(leadData));
 
       // Step 3: Fetch activities and followups in parallel
       const [activitiesData, followupsData] = await Promise.all([
-        activityService.fetchLeadActivities(leadId, assignedUserIdForActivities),
+        activityService.fetchLeadActivities(leadId, loggedInUserId),
         leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
       ]);
 
