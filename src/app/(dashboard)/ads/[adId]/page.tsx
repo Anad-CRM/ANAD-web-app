@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from "@/core/api/api";
 import { getUser } from "@/core/utils/auth";
 import { ArrowLeft, } from "lucide-react";
 import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 
 export default function AdDetailsPage() {
   const router = useRouter();
@@ -62,47 +63,48 @@ export default function AdDetailsPage() {
   const disqualifiedRate = computeRate(leadCounts?.disqualifiedCount, leadCounts?.allLeadsCount);
 
   if (isLoading) {
-    return <div className="flex justify-center p-12 text-gray-400 animate-pulse"><Text>Loading ad details...</Text></div>;
+    return <div className="flex justify-center p-12 animate-pulse" style={{ color: COLORS.muted }}><Text>Loading ad details...</Text></div>;
   }
 
   if (!adDetail) {
-    return <div className="p-12 text-center text-gray-500"><Text>Ad not found.</Text></div>;
+    return <div className="p-12 text-center" style={{ color: COLORS.subtle }}><Text>Ad not found.</Text></div>;
   }
 
   const leadCards = [
-    { title: "All Leads", value: leadCounts?.allLeadsCount, color: "text-[#1E56A0]", bg: "bg-[#1E56A0]/10" },
-    { title: "New Leads", value: leadCounts?.newLeadCount, color: "text-[#22C55E]", bg: "bg-[#22C55E]/10" },
-    { title: "Follow Up", value: leadCounts?.followUpCount, color: "text-[#EE9B00]", bg: "bg-[#EE9B00]/10" },
-    { title: "Hot Leads", value: leadCounts?.hotLeadCount, color: "text-[#CA6702]", bg: "bg-[#CA6702]/10" },
-    { title: "Closed", value: leadCounts?.closedLeadCount, color: "text-[#005F73]", bg: "bg-[#005F73]/10" },
-    { title: "Disqualified", value: leadCounts?.disqualifiedCount, color: "text-[#9B2226]", bg: "bg-[#9B2226]/10" },
-    { title: "Contacted", value: leadCounts?.contactedLeadCount, color: "text-[#3B82F6]", bg: "bg-[#3B82F6]/10" },
-    { title: "RNR", value: leadCounts?.rnrCount, color: "text-[#5A7190]", bg: "bg-[#5A7190]/10" },
-    { title: "Not Interested", value: leadCounts?.notInterestCount, color: "text-[#8BA5C0]", bg: "bg-[#8BA5C0]/10" },
-    { title: "Busy", value: leadCounts?.busyCount, color: "text-[#BB3E03]", bg: "bg-[#BB3E03]/10" },
-    { title: "Switch Off", value: leadCounts?.switchOffCount, color: "text-[#4e448e]", bg: "bg-[#4e448e]/10" },
-    { title: "Register", value: leadCounts?.registerCount, color: "text-[#94D2BD]", bg: "bg-[#94D2BD]/10" },
+    { title: "All Leads", value: leadCounts?.allLeadsCount, color: COLORS.primary, bg: COLORS.primaryXlight },
+    { title: "New Leads", value: leadCounts?.newLeadCount, color: COLORS.success, bg: '#DCFCE7' },
+    { title: "Follow Up", value: leadCounts?.followUpCount, color: COLORS.warning, bg: '#FEF3C7' },
+    { title: "Hot Leads", value: leadCounts?.hotLeadCount, color: COLORS.dark_orange, bg: '#FFEDD5' },
+    { title: "Closed", value: leadCounts?.closedLeadCount, color: COLORS.anccent_green, bg: '#CCFBF1' },
+    { title: "Disqualified", value: leadCounts?.disqualifiedCount, color: COLORS.danger, bg: '#FEE2E2' },
+    { title: "Contacted", value: leadCounts?.contactedLeadCount, color: COLORS.info, bg: '#DBEAFE' },
+    { title: "RNR", value: leadCounts?.rnrCount, color: COLORS.muted, bg: '#F1F5F9' },
+    { title: "Not Interested", value: leadCounts?.notInterestCount, color: COLORS.subtle, bg: '#F8FAFC' },
+    { title: "Busy", value: leadCounts?.busyCount, color: COLORS.brown, bg: '#FFEDD5' },
+    { title: "Switch Off", value: leadCounts?.switchOffCount, color: COLORS.violet, bg: '#F3E8FF' },
+    { title: "Register", value: leadCounts?.registerCount, color: COLORS.light_green, bg: '#D1FAE5' },
   ];
 
   const getPlatformIcon = (platform: string) => {
     const initial = platform?.charAt(0) || "A";
-    return <div className="w-16 h-16 bg-[#233A78] rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-sm">{initial}</div>;
+    return <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-sm" style={{ backgroundColor: COLORS.primary }}>{initial}</div>;
   };
 
   return (
-    <div className="flex flex-col p-4 w-full max-w-[1600px] mx-auto  min-h-screen">
+    <div className="flex flex-col p-4 w-full max-w-[1600px] mx-auto min-h-screen">
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-colors shadow-md flex-shrink-0 hover:opacity-80"
+          style={{ backgroundColor: COLORS.primaryDark }}
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <Text as="h1" size="2xl" weight="bold" className="text-gray-900">Ad Detail</Text>
+        <Text as="h1" size="2xl" weight="bold" style={{ color: COLORS.text }}>Ad Detail</Text>
       </div>
 
       {/* Ad Header */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8">
+      <div className="rounded-3xl p-6 shadow-sm border mb-8" style={{ backgroundColor: COLORS.surface, borderColor: COLORS.grey }}>
         <div className="flex items-center gap-6 mb-6">
           {adDetail.thumbnailUrl ? (
             <img src={adDetail.thumbnailUrl} alt="Ad Thumbnail" className="w-16 h-16 rounded-2xl object-cover shadow-sm" />
@@ -110,31 +112,31 @@ export default function AdDetailsPage() {
             getPlatformIcon(adDetail.platform)
           )}
           <div className="flex flex-col flex-1">
-            <Text as="h2" size="xl" weight="bold" className="text-[#0C2C55] mb-2 block font-extrabold">{adDetail.adName || 'Unnamed Ad'}</Text>
-            <Text size="xs" weight="bold" className="bg-[#EAEFF5] text-[#233A78] px-3 py-1 rounded-full self-start inline-block">
+            <Text as="h2" size="xl" weight="bold" className="mb-2 block font-extrabold" style={{ color: COLORS.text }}>{adDetail.adName || 'Unnamed Ad'}</Text>
+            <Text size="xs" weight="bold" className="px-3 py-1 rounded-full self-start inline-block" style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primaryDark }}>
               {adDetail.platform || 'Unknown Platform'}
             </Text>
           </div>
         </div>
 
-        <div className="flex gap-4 p-4 bg-[#F8FAFC] rounded-2xl border border-gray-50">
+        <div className="flex gap-4 p-4 rounded-2xl border" style={{ backgroundColor: COLORS.bg, borderColor: COLORS.grey }}>
           <div className="flex-1 flex items-center gap-4 cursor-pointer" onClick={() => router.push(`/leads_list?adId=${adId}&status=Closed`)}>
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#DCFCE7', color: COLORS.success }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
             </div>
             <div className="flex flex-col">
-              <Text as="span" size="lg" weight="bold" className="text-[#0C2C55] font-extrabold block">{conversionRate ? `${conversionRate}%` : '--'}</Text>
-              <Text as="span" size="xs" weight="bold" className="text-gray-500 block">Conversion</Text>
+              <Text as="span" size="lg" weight="bold" className="font-extrabold block" style={{ color: COLORS.text }}>{conversionRate ? `${conversionRate}%` : '--'}</Text>
+              <Text as="span" size="xs" weight="bold" className="block" style={{ color: COLORS.subtle }}>Conversion</Text>
             </div>
           </div>
-          <div className="w-[1px] bg-gray-200"></div>
+          <div className="w-[1px]" style={{ backgroundColor: COLORS.border }}></div>
           <div className="flex-1 flex items-center gap-4 cursor-pointer" onClick={() => router.push(`/leads_list?adId=${adId}&status=Disqualified`)}>
-            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FEE2E2', color: COLORS.danger }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /></svg>
             </div>
             <div className="flex flex-col">
-              <Text as="span" size="lg" weight="bold" className="text-[#0C2C55] font-extrabold block">{disqualifiedRate ? `${disqualifiedRate}%` : '--'}</Text>
-              <Text as="span" size="xs" weight="bold" className="text-gray-500 block">Disqualified</Text>
+              <Text as="span" size="lg" weight="bold" className="font-extrabold block" style={{ color: COLORS.text }}>{disqualifiedRate ? `${disqualifiedRate}%` : '--'}</Text>
+              <Text as="span" size="xs" weight="bold" className="block" style={{ color: COLORS.subtle }}>Disqualified</Text>
             </div>
           </div>
         </div>
@@ -142,11 +144,12 @@ export default function AdDetailsPage() {
 
       {/* Pipeline Header */}
       <div className="flex justify-between items-end mb-6">
-        <Text as="h2" size="2xl" weight="bold" className="text-[#0C2C55] font-extrabold block">Lead Pipeline</Text>
+        <Text as="h2" size="2xl" weight="bold" className="font-extrabold block" style={{ color: COLORS.text }}>Lead Pipeline</Text>
         <select
           value={selectedFilter}
           onChange={handleFilterChange}
-          className="bg-white border border-gray-200 text-[#0C2C55] font-bold text-sm rounded-xl px-4 py-2 focus:outline-none shadow-sm cursor-pointer"
+          className="border font-bold text-sm rounded-xl px-4 py-2 focus:outline-none shadow-sm cursor-pointer"
+          style={{ backgroundColor: COLORS.surface, borderColor: COLORS.grey, color: COLORS.text }}
         >
           <option value="This Day">This Day</option>
           <option value="This Week">This Week</option>
@@ -164,17 +167,18 @@ export default function AdDetailsPage() {
               const statusQuery = card.title === "All Leads" ? "" : `&status=${card.title}`;
               router.push(`/leads_list?adId=${adId}${statusQuery}`);
             }}
-            className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between cursor-pointer hover:shadow-md transition-shadow h-[120px]"
+            className="p-4 rounded-2xl shadow-sm border flex flex-col justify-between cursor-pointer hover:shadow-md transition-shadow h-[120px]"
+            style={{ backgroundColor: COLORS.surface, borderColor: COLORS.grey }}
           >
             <div className="flex justify-between items-start w-full">
-              <div className={`p-2 rounded-xl ${card.bg}`}>
-                <svg className={card.color} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+              <div className="p-2 rounded-xl" style={{ backgroundColor: card.bg, color: card.color }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
               </div>
-              <svg className="text-gray-300" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: COLORS.border }}><polyline points="9 18 15 12 9 6" /></svg>
             </div>
             <div className="flex flex-col mt-2">
-              <Text as="span" size="2xl" weight="bold" className="text-[#0C2C55] font-extrabold leading-none block">{card.value != null ? card.value : '--'}</Text>
-              <Text as="span" size="xs" weight="bold" className="text-gray-500 mt-1 truncate block">{card.title}</Text>
+              <Text as="span" size="2xl" weight="bold" className="font-extrabold leading-none block" style={{ color: COLORS.text }}>{card.value != null ? card.value : '--'}</Text>
+              <Text as="span" size="xs" weight="bold" className="mt-1 truncate block" style={{ color: COLORS.muted }}>{card.title}</Text>
             </div>
           </div>
         ))}
