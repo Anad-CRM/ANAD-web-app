@@ -45,8 +45,6 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
   const duration = Number(activity.duration ?? 0);
   const fileSize = Number(activity.fileSize ?? 0);
   const user = activity.user;
-  const hasFile = !!activity.fileName;
-
   return (
     <div className="flex flex-col">
       <span className="text-[14px] font-bold text-black leading-tight">
@@ -56,7 +54,7 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
         By {user?.userName ?? 'test organization'}
       </span>
 
-      {hasFile && (
+      {activity.fileName && (
         <div className="mt-2 text-left">
           <AudioPlayer 
             src={API_ENDPOINTS.CALLS.RECORDING(activity.fileName)} 
