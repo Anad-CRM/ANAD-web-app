@@ -35,6 +35,7 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
       StaffService.getStaffList({
         organizationId,
         role: "Manager",
+        date: new Date().toISOString(),
       }).then(res => {
         if (res.status === "success") {
           setManagers(res.data);
