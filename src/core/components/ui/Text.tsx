@@ -1,5 +1,5 @@
 import React from 'react';
-import { clsx, type ClassValue } from 'clsx';
+import { clsx } from 'clsx';
 
 interface TextProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ const sizeClasses = {
   lg: 'text-lg',
   xl: 'text-xl',
   '2xl': 'text-2xl',
-  'custom': '', // Allows overriding size through className
+  'custom': '', 
 };
 
 export function Text({

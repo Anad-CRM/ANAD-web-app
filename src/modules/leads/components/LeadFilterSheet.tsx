@@ -189,15 +189,17 @@ export function LeadFilterSheet({
 
   useEffect(() => {
     if (isOpen) {
-      setTempStatuses(initialFilters.statuses);
-      setTempStaffIds(initialFilters.staffIds);
-      setTempAdIds(initialFilters.adIds ?? []);
-      setDatePreset(initialFilters.datePreset);
-      setCustomStart(initialFilters.startDate ?? "");
-      setCustomEnd(initialFilters.endDate ?? "");
-      setStaffSearch("");
-      setAdSearch("");
-      setExpandedKey("date");
+      Promise.resolve().then(() => {
+        setTempStatuses(initialFilters.statuses);
+        setTempStaffIds(initialFilters.staffIds);
+        setTempAdIds(initialFilters.adIds ?? []);
+        setDatePreset(initialFilters.datePreset);
+        setCustomStart(initialFilters.startDate ?? "");
+        setCustomEnd(initialFilters.endDate ?? "");
+        setStaffSearch("");
+        setAdSearch("");
+        setExpandedKey("date");
+      });
     }
   }, [isOpen, initialFilters]);
 
@@ -557,7 +559,7 @@ export function LeadFilterSheet({
                 {staffMembers.length === 0 ? (
                   <p className="text-[12px] text-center py-4 text-gray-400">No staff members found</p>
                 ) : filteredStaff.length === 0 ? (
-                  <p className="text-[12px] text-center py-4 text-gray-400">No results for "{staffSearch}"</p>
+                  <p className="text-[12px] text-center py-4 text-gray-400">No results for &quot;{staffSearch}&quot;</p>
                 ) : (
                   filteredStaff.map(staff => {
                     const isActive = tempStaffIds.includes(staff.id);

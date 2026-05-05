@@ -11,6 +11,14 @@ import { ArrowLeft } from "lucide-react";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
 import { PlatformAvatar } from "@/modules/ads/components/PlatformAvatar";
+import { useCallback } from "react";
+import { StatusCounts } from "@/modules/overview/types";
+
+interface AuthUser {
+  id?: string;
+  organizationId?: string;
+  role?: string;
+}
 
 
 export default function AdDetailsPage() {
@@ -20,23 +28,12 @@ export default function AdDetailsPage() {
 
   const [adDetail, setAdDetail] = useState<AdCampaign | null>(null);
   const [selectedFilter, setSelectedFilter] = useState("Overall");
-  const [leadCounts, setLeadCounts] = useState<any>(null);
+  const [leadCounts, setLeadCounts] = useState<StatusCounts | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAdData = async () => {
-      setIsLoading(true);
-      const ad = await getAdById(adId);
-      setAdDetail(ad);
-      await fetchLeadCounts("Overall");
-      setIsLoading(false);
-    };
-    if (adId) fetchAdData();
-  }, [adId]);
-
-  const fetchLeadCounts = async (filter: string) => {
+  const fetchLeadCounts = useCallback(async (filter: string) => {
     try {
-      const user = getUser<any>();
+      const user = getUser<AuthUser>();
       const response = await api.post(API_ENDPOINTS.DASHBOARD.GET_FILTERED_LEAD_COUNT, {
         filter,
         organizationId: user?.organizationId,
@@ -48,7 +45,19 @@ export default function AdDetailsPage() {
     } catch (error) {
       console.error("Failed to fetch lead counts", error);
     }
-  };
+  }, [adId]);
+
+  useEffect(() => {
+    const fetchAdData = async () => {
+      setIsLoading(true);
+      const ad = await getAdById(adId);
+      setAdDetail(ad);
+      await fetchLeadCounts("Overall");
+      setIsLoading(false);
+    };
+    if (adId) fetchAdData();
+  }, [adId, fetchLeadCounts]);
+
 
   const handleFilterChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const filter = e.target.value;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { X, Clock, CalendarDays, Loader2, Phone, MessageCircle, Mail } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';

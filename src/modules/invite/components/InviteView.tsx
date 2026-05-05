@@ -17,6 +17,14 @@ interface Team {
   name: string;
 }
 
+interface ApiResponse {
+  data?: {
+    status?: string;
+    message?: string;
+    data?: Team[];
+  };
+}
+
 export function InviteView() {
   const router = useRouter();
   const user = getUser<{ organizationId: string; userName: string; avatar?: string }>();
@@ -39,11 +47,11 @@ export function InviteView() {
   useEffect(() => {
     if (!user?.organizationId) return;
     api.post(API_ENDPOINTS.TEAM.GET_ALL, { organizationId: user.organizationId })
-      .then((r: any) => {
+      .then((r: ApiResponse) => {
         if (r.data?.status === "success") setTeams(r.data.data ?? []);
       })
       .catch(() => {});
-  }, []);
+  }, [user?.organizationId]);
 
   const validate = () => {
     if (!email || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
@@ -63,7 +71,7 @@ export function InviteView() {
     if (!validate()) return;
     setLoading(true);
     try {
-      const body: Record<string, any> = {
+      const body: Record<string, string | undefined> = {
         senderName: user?.userName,
         senderAvatar: user?.avatar,
         organizationId: user?.organizationId,
@@ -74,7 +82,7 @@ export function InviteView() {
         batchName: isStudents ? batchName.toLowerCase().replace(/\s/g, "") : undefined,
       };
       const res = await api.post(API_ENDPOINTS.INVITATION.SEND, body);
-      const data: any = res.data;
+      const data: { status?: string; message?: string } = res.data;
       if (data?.status === "success") {
         setSuccess(true);
       } else {
@@ -96,7 +104,7 @@ export function InviteView() {
           </div>
           <Text as="h1" size="xl" weight="bold" style={{ color: COLORS.text }}>Invitation Sent!</Text>
           <Text style={{ color: COLORS.muted }}>
-            An invitation has been sent to <strong>{email}</strong>. They'll receive an email to join your organization.
+            An invitation has been sent to <strong>{email}</strong>. They&apos;ll receive an email to join your organization.
           </Text>
           <button
             onClick={() => { setSuccess(false); setEmail(""); setRole(""); setTeamId(""); setBatchName(""); setSkillLevel("Expert"); }}

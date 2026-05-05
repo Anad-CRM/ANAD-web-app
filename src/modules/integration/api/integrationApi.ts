@@ -11,7 +11,7 @@ export interface WhatsAppIntegrationPayload {
 }
 
 export const connectWhatsAppIntegration = async (data: WhatsAppIntegrationPayload) => {
-  const user = getUser<any>();
+  const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
   if (!user || !user.organizationId) {
      throw new Error("Authentication context missing");
   }

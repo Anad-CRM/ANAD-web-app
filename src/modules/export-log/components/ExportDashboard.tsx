@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useExportData } from '../hooks/useExportData';
 import { downloadExport } from '../api/exportApi';
@@ -152,7 +152,6 @@ export function ExportDashboard() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showNoDataConfirm, setShowNoDataConfirm] = useState(false);
   const [filterSearch, setFilterSearch] = useState('');
-  const confirmRef = useRef(false);
 
   const hasFilters =
     startDate || endDate || selectedStaff.length || selectedTeams.length || selectedStatuses.length || selectedAds.length;
@@ -197,9 +196,10 @@ export function ExportDashboard() {
         URL.revokeObjectURL(url);
         clearFilters();
         setShowNoDataConfirm(false); // Close modal if it was open
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { message?: string };
         // If we get a 404, it means no data found.
-        if (err.message?.includes('404') && !forceEmpty) {
+        if (error.message?.includes('404') && !forceEmpty) {
           setShowNoDataConfirm(true);
           return;
         }

@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "@/core/api/axios";
 import { getUser } from "@/core/utils/auth";
 import { Lead } from "../types/lead.types";
 
-// Mirrors the Flutter LeadListHelper.fetchLeads payload structure
 export interface FetchLeadsParams {
   keyword?: string;
   limit?: number;
@@ -11,7 +11,7 @@ export interface FetchLeadsParams {
   userId?: string | null;
   staffId?: string | string[] | null;
   teamId?: string | string[] | null;
-  filter?: string; // 'Today' | 'Yesterday' | 'This Week' | 'This Month' | 'Last Month' | 'Custom' | 'Overall'
+  filter?: string; 
   startDate?: string;
   endDate?: string;
   sortByDate?: "latest" | "oldest";
@@ -63,7 +63,7 @@ export const leadsApi = {
     }
   },
 
-  assignLeads: async (leadIds: string[], staffId: string, shouldResetStatus = false): Promise<any> => {
+  assignLeads: async (leadIds: string[], staffId: string, shouldResetStatus = false): Promise<Record<string, unknown>> => {
     try {
       const response = await api.post("/lead/assign", { leadIds, staffMemberId: staffId, shouldResetStatus });
       return response.data;
@@ -73,7 +73,7 @@ export const leadsApi = {
     }
   },
 
-  createActivity: async (leadId: string, payload: { title: string; description: string; userId: string }): Promise<any> => {
+  createActivity: async (leadId: string, payload: { title: string; description: string; userId: string }): Promise<Record<string, unknown>> => {
     try {
       const response = await api.post(`/lead/${leadId}/createActivity`, payload);
       return response.data;
@@ -119,7 +119,7 @@ export const leadsApi = {
   // Mirrors Flutter follow_up_page._fetchFollowUps():
   // userId = leadData['userId']  (the lead's raw userId field, NOT assignedUser.id)
   // leadId = leadData['id']
-  fetchFollowupsByLead: async (leadId: string, leadUserId?: string): Promise<any[]> => {
+  fetchFollowupsByLead: async (leadId: string, leadUserId?: string): Promise<Record<string, unknown>[]> => {
     try {
       const userId = leadUserId ?? '';
       console.log('[leadsApi] fetchFollowupsByLead →', { leadId, userId });

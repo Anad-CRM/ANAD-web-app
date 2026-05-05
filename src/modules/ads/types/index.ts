@@ -42,3 +42,11 @@ export interface GlobalAdMetrics {
   totalClosed: number;
   successRate: string;
 }
+
+export interface TeamMemberPerformance {
+  userId?: string | number;
+  userName?: string;
+  assignedCount?: number;
+  closedCount?: number;
+}
+

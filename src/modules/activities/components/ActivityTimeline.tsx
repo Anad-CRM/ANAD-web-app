@@ -85,19 +85,15 @@ export const ActivityTimeline: React.FC<Props> = ({ activities, onSelect }) => {
         const kind = getKind(activity);
         const isLast = i === activities.length - 1;
 
-        let dotColor: string;
         let card: React.ReactNode;
 
         if (kind === 'call_recording') {
-          dotColor = COLORS.anccent_green;
           card = <RecordingCard activity={activity} />;
         } else if (kind === 'followup' || kind === 'manual') {
           const cfg = getFollowupCfg(activity);
-          dotColor = cfg.color;
           card = <ManualCard activity={activity} cfg={cfg} />;
         } else {
           const cfg = getStatusCfg(activity.status ?? '');
-          dotColor = cfg.color;
           card = <StatusCard activity={activity} cfg={cfg} />;
         }
 

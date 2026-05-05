@@ -11,7 +11,7 @@ interface InviteMemberModalProps {
   organizationId: string;
   senderName: string;
   senderAvatar: string;
-  teams: any[];
+  teams: { id: string | number; name: string }[];
   onSuccess: () => void;
 }
 
@@ -108,10 +108,10 @@ export function InviteMemberModal({
       } else if (res?.status === "User Already Exists with Organization or Team") {
         showToast("User with this email already has an account", "error");
       } else {
-        const errorMsg = res?.errors?.length ? res.errors.join("\n") : res?.error || "Something went wrong";
-        showToast(errorMsg, "error");
+        const errorMsg = (res?.errors as string[])?.length ? (res.errors as string[]).join("\n") : res?.error || "Something went wrong";
+        showToast(errorMsg as string, "error");
       }
-    } catch (err: any) {
+    } catch {
       showToast("Network error. Please check your connection.", "error");
     } finally {
       setLoading(false);

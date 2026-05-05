@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { KeyRound, Eye, ClipboardList, ChevronDown } from 'lucide-react';
 import { connectWhatsAppIntegration } from '../api/integrationApi';

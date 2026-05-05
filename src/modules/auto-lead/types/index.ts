@@ -3,4 +3,5 @@ export interface AutoLeadCampaign {
   title: string;
   leadsCount: number;
   isLive?: boolean;
+  platform?: string;
 }

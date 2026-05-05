@@ -70,7 +70,7 @@ export function CallMonitorView() {
             ANAD Call Monitor
           </Text>
           <Text size="custom" className="text-[14px] text-white/80 leading-relaxed max-w-sm">
-            The companion Android app that keeps all your team's call records perfectly synced with the CRM — automatically.
+            The companion Android app that keeps all your team&apos;s call records perfectly synced with the CRM — automatically.
           </Text>
           <a
             href="https://play.google.com/store"

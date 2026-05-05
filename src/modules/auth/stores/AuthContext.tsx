@@ -29,11 +29,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const storedToken = getToken();
     const storedUser = getUser<User>();
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(storedUser);
-    }
-    setIsLoading(false);
+    Promise.resolve().then(() => {
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(storedUser);
+      }
+      setIsLoading(false);
+    });
   }, []);
 
   const setAuthData = useCallback((newUser: User, newToken: string) => {

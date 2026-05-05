@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { createSingleLead, CreateLeadPayload } from '../api/createLeadApi';

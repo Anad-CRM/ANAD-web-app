@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Filter, X, ArrowLeft, Users } from "lucide-react";
+import { Search, Filter, X, Users } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
 import { LeadCard } from "./LeadCard";
@@ -119,7 +119,6 @@ export function LeadList() {
 
   const offsetRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const debugRef = useRef<HTMLDivElement>(null);
 
   // ── Sync query values into refs so loadLeads never needs to be recreated ──
   // This prevents state updates (from load-more) from cascading into a full reset.
@@ -157,7 +156,7 @@ export function LeadList() {
     });
 
     // Using user info to fetch teams if available
-    const user = getUser<any>();
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     if (user?.organizationId) {
       TeamsService.getAllTeams({ organizationId: user.organizationId }).then(res => {
         if (res.status === "success" && res.data) {
@@ -165,8 +164,8 @@ export function LeadList() {
         }
       }).catch(() => { });
 
-      getAllAds({ organizationId: user.organizationId }).then((data: any) => {
-        setAds((data || []).map((ad: any) => ({ ...ad, id: String(ad.id) })));
+      getAllAds({ organizationId: user.organizationId }).then((data) => {
+        setAds((data || []).map((ad) => ({ ...ad, id: String(ad.id) })));
       }).catch(() => { });
     }
   }, []);
@@ -193,7 +192,7 @@ export function LeadList() {
       );
       // Unassigned filter: pass isUnassigned flag to API
       if (isUnassignedRef.current) {
-        (payload as any).isUnassigned = true;
+        (payload as Record<string, unknown>).isUnassigned = true;
         delete payload.status;
       }
 
@@ -230,13 +229,8 @@ export function LeadList() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally empty — reads all query values from refs
 
-
-  // Trigger a reset fetch whenever the real query values change (debounced for search).
-  // Depends on the actual values — NOT loadLeads — so loading-more state updates
-  // never accidentally fire a full reset.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -307,11 +301,10 @@ export function LeadList() {
   };
 
 
-  // ── Active filter pills ────────────────────────────────────────────────
   const activePills: { label: string; onRemove: () => void }[] = [];
 
   if (statusParam && filters.statuses.length === 0) {
-    activePills.push({ label: statusParam, onRemove: () => { } }); // URL-driven, not removable here
+    activePills.push({ label: statusParam, onRemove: () => { } }); 
   }
 
   filters.statuses.forEach(s =>
@@ -331,15 +324,6 @@ export function LeadList() {
   return (
     <>
       <div className="flex flex-col h-full min-h-0 space-y-2" >
-        {/* Visual Debugger - Temporary to see if onScroll is firing */}
-        {/* <div
-          ref={debugRef}
-          className="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 font-mono rounded"
-          style={{ display: 'block' }}
-        >
-          Scroll Math will appear here when you scroll...
-        </div> */}
-
         {/* <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6"> */}
         <div className="flex items-center gap-4 mb-4">
           <BackButton onClick={() => router.back()} />
@@ -488,9 +472,6 @@ export function LeadList() {
             const distanceToBottom = t.scrollHeight - t.scrollTop - t.clientHeight;
 
             // Update on-screen debugger
-            // if (debugRef.current) {
-            //   debugRef.current.innerText = `Scroll Distance: ${distanceToBottom.toFixed(0)}px | hasMore: ${hasMore} | loading: ${isLoadingMore}`;
-            // }
 
             // Trigger pre-fetch when within 400px of the bottom to prevent lag
             if (distanceToBottom <= 400 && hasMore && !isLoading && !isLoadingMore) {

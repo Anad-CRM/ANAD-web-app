@@ -12,8 +12,15 @@ export interface SendInvitationPayload {
   batchName?: string;
 }
 
+export interface InviteResponse {
+  status?: string;
+  errors?: string[];
+  error?: string;
+  [key: string]: unknown;
+}
+
 export const InviteService = {
-  async sendInvitation(payload: SendInvitationPayload): Promise<any> {
+  async sendInvitation(payload: SendInvitationPayload): Promise<InviteResponse> {
     const response = await api.post(
       API_ENDPOINTS.INVITATION.SEND,
       payload

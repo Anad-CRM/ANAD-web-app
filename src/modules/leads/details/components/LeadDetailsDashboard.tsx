@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState, useCallback } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { LeadSummaryCard } from '@/modules/leads/details/components/LeadSummaryCard';
 import { LeadFollowUpCard } from '@/modules/leads/details/components/LeadFollowUpCard';
@@ -7,6 +8,7 @@ import { leadsApi } from '@/modules/leads/api/leadsApi';
 import { activityService } from '@/modules/activities/services/activityService';
 import { LeadActivityLog } from '@/modules/activities/components/LeadActivityLog';
 import { Lead } from '@/modules/leads/types/lead.types';
+import { Activity } from '@/modules/activities/types/activity.types';
 import { getUser } from '@/core/utils/auth';
 
 export const LeadDetailsDashboard: React.FC = () => {
@@ -15,11 +17,12 @@ export const LeadDetailsDashboard: React.FC = () => {
   const leadId = params?.id as string;
 
   const [lead, setLead] = useState<Lead | null>(null);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [followups, setFollowups] = useState<any[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [followups, setFollowups] = useState<Record<string, unknown>[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!leadId) return;
     setIsLoading(true);
     try {
@@ -46,7 +49,7 @@ export const LeadDetailsDashboard: React.FC = () => {
       const loggedInUser = getUser<{ id: string }>();
       const loggedInUserId = loggedInUser?.id || '';
 
-      const userIdForFollowups = (leadData as any)?.userId ?? '';
+      const userIdForFollowups = (leadData as unknown as { userId?: string })?.userId ?? '';
 
       console.log('[LeadDetailsDashboard] leadId:', leadId);
       console.log('[LeadDetailsDashboard] loggedInUserId (for activities):', loggedInUserId);
@@ -66,11 +69,11 @@ export const LeadDetailsDashboard: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [leadId]);
 
   useEffect(() => {
     loadData();
-  }, [leadId]);
+  }, [loadData]);
 
   return (
     <div className="flex flex-col w-full h-full overflow-y-auto [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/20">
@@ -108,7 +111,7 @@ export const LeadDetailsDashboard: React.FC = () => {
             {/* Left Column 60% */}
             <div className="flex flex-col gap-6 w-full lg:w-[60%] flex-1">
               <LeadSummaryCard lead={lead} onRefresh={loadData} />
-              <LeadActivityLog
+              <LeadActivityLog 
                 activities={activities}
                 leadId={leadId}
                 onRefresh={loadData}
@@ -120,7 +123,7 @@ export const LeadDetailsDashboard: React.FC = () => {
               <LeadFollowUpCard
                 followups={followups}
                 leadId={leadId}
-                assignedUserId={(lead as any)?.assignedUser?.id || (lead as any)?.assignedUser?._id || ''}
+                assignedUserId={(lead as unknown as any)?.assignedUser?.id || (lead as unknown as any)?.assignedUser?._id || ''}
                 onRefresh={loadData}
               />
             </div>

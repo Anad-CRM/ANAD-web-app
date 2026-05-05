@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { CallTeamRow } from "../types";
 
 export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[], isLoading: boolean }) => {
@@ -32,7 +33,7 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
                       <div className="flex items-center gap-4 text-left">
                           <div className="w-[42px] h-[42px] min-w-[42px] bg-white rounded-full overflow-hidden shadow-sm flex items-center justify-center">
                               {row.avatarUrl ? (
-                                  <img src={row.avatarUrl} alt={row.name} className="w-full h-full object-cover" />
+                                  <Image src={row.avatarUrl} alt={row.name} width={42} height={42} className="w-full h-full object-cover" unoptimized />
                               ) : (
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                               )}

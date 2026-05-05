@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import * as Icons from "lucide-react";
 import { PipelineMetric } from "../types";
@@ -8,7 +9,7 @@ interface PipelineMetricCardProps {
 }
 
 export const PipelineMetricCard: React.FC<PipelineMetricCardProps> = ({ metric, onClick }) => {
-  const IconComponent = (Icons as any)[metric.iconName] || Icons.HelpCircle;
+  const IconComponent = ((Icons as Record<string, any>)[metric.iconName] || Icons.HelpCircle) as any;
 
   return (
     <div

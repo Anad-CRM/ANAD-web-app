@@ -10,6 +10,14 @@ export interface StatusCounts {
   totalClosedCount?: number;
   totalAssignedCount?: number;
 
+  rnrCount?: number;
+  newCount?: number;
+  disqualifiedCount?: number;
+  contactedLeadCount?: number;
+  notInterestCount?: number;
+  busyCount?: number;
+  switchOffCount?: number;
+
   // Legacy / alternative field names (kept for backward compat)
   newLead?: number;
   hotLead?: number;
@@ -25,6 +33,7 @@ export interface StatusCounts {
   disqualified?: number;
 }
 
+
 export interface LeadCountsData {
   // Top-level convenience fields (mapped from statusCounts)
   totalLeads: number;
@@ -37,7 +46,7 @@ export interface LeadCountsData {
   statusCounts?: StatusCounts;
 
   // Staff per-lead breakdown also returned by the endpoint
-  staffLeadCounts?: any[];
+  staffLeadCounts?: Record<string, unknown>[];
 }
 
 export interface CallStats {
@@ -52,7 +61,15 @@ export interface LeadStats {
   staffName?: string;
   newLeads: number;
   totalLeads: number;
-  [key: string]: any;
+  hotLeads?: number;
+  followUps?: number;
+  closedLeads?: number;
+  notInterested?: number;
+  rnr?: number;
+  busy?: number;
+  switchOff?: number;
+  inEligible?: number;
+  registered?: number;
 }
 
 export interface EodRecord {

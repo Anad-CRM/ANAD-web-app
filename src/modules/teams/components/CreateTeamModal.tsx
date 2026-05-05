@@ -6,6 +6,7 @@ import { TeamsService } from "../services/teams.service";
 import { useFeedback } from "@/core/contexts/FeedbackContext";
 import { useAuthContext } from "@/modules/auth/stores/AuthContext";
 import { StaffService } from "@/modules/staffs/services/staff.service";
+import { Staff } from "@/modules/staffs/types/staff.types";
 import { TEAM_ICONS } from "../constants/teamIcons";
 
 interface CreateTeamModalProps {
@@ -23,7 +24,7 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
   const [name, setName] = useState("");
   const [managerId, setManagerId] = useState("");
   const [iconIndex, setIconIndex] = useState(0);
-  const [managers, setManagers] = useState<any[]>([]);
+  const [managers, setManagers] = useState<Staff[]>([]);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -37,7 +38,7 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         role: "Manager",
         date: new Date().toISOString(),
       }).then(res => {
-        if (res.status === "success") {
+        if (res.status === "success" && Array.isArray(res.data)) {
           setManagers(res.data);
         }
       }).catch(console.error);
@@ -81,9 +82,9 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         onSuccess();
         onClose();
       } else {
-        showToast(res.message || "Something went wrong", "error");
+        showToast((res.message as string) || "Something went wrong", "error");
       }
-    } catch (err: any) {
+    } catch {
       showToast("Failed to create team. Please try again.", "error");
     } finally {
       setLoading(false);
@@ -156,8 +157,8 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
                 style={{ borderColor: "#d1d5db", outlineColor: COLORS.primary }}
               >
                 <option value="">Do not assign</option>
-                {managers.map(m => (
-                  <option key={m.id} value={m.id}>{m.userName || m.id}</option>
+                {managers.map((m) => (
+                  <option key={m.id} value={m.id}>{m.userName || (m.id as string)}</option>
                 ))}
               </select>
             </div>

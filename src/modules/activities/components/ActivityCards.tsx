@@ -1,18 +1,12 @@
 import React from 'react';
-import { 
-  Phone, MessageCircle, Users, FileText, CheckCircle2, 
-  Flame, PhoneIncoming, Clock, BadgeCheck, CheckCircle, 
-  UserPlus, XCircle, ThumbsDown, PhoneMissed, MinusCircle, 
-  PhoneOff, UserCheck, RefreshCw, Mic, PlayCircle, Headphones, 
-  ArrowRight, ChevronRight, Sparkles, MapPin, User 
-} from 'lucide-react';
+import { User } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
 import { AuthImage } from '@/core/components/ui/AuthImage';
 import { AudioPlayer } from '@/core/components/ui/AudioPlayer';
 import { Activity, FollowupConfig, StatusConfig } from '../types/activity.types';
 import { API_ENDPOINTS } from '@/core/api/api';
 
-export const SmallAvatar: React.FC<{ user: any; size?: number }> = ({ user, size = 20 }) => {
+export const SmallAvatar: React.FC<{ user: { avatar?: string, userName?: string } | null | undefined; size?: number }> = ({ user, size = 20 }) => {
   const av = user?.avatar;
   const name = user?.userName ?? '?';
   return (
@@ -57,7 +51,7 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
       {activity.fileName && (
         <div className="mt-2 text-left">
           <AudioPlayer 
-            src={API_ENDPOINTS.CALLS.RECORDING(activity.fileName)} 
+            src={API_ENDPOINTS.CALLS.RECORDING(activity.fileName || "")} 
             initialDuration={duration} 
             fileSize={fileSize} 
             className="w-full max-w-[300px]" 
