@@ -1,53 +1,17 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { COLORS } from "@/core/components/theme/colors";
 import { Text } from "@/core/components/ui/Text";
 import { AvatarCircle } from "@/modules/staffs/components/AvatarCircle";
 import {
   Mail, Phone, CalendarDays, ClipboardList, User, MoreHorizontal,
-  Globe, Facebook, Instagram, UserPlus, RefreshCw, Check,
+  Globe, Facebook, Instagram, UserPlus, RefreshCw, Check, X
 } from "lucide-react";
 import { Lead, LeadStatus } from "../types/lead.types";
 import { getUser } from "@/core/utils/auth";
 import { api } from "@/core/api/axios";
-
-// ── Status config ────────────────────────────────────────────────────────────
-
-const STATUS_COLORS: Record<string, string> = {
-  "New Lead": "#22C55E",
-  "Hot Lead": "#3B82F6",
-  "Contacted": "#EAB308",
-  "Follow Up": "#F97316",
-  "RNR": "#A855F7",
-  "Switch Off": "#6B7280",
-  "Busy": "#EF4444",
-  "Not Interested": "#EC4899",
-  "Closed": "#6366F1",
-  "Register": "#0EA5E9",
-  "Enrolled": "#6366F1",
-  "Disqualified": "#F59E0B",
-  "Customer": "#10B981",
-};
-
-const STATUS_TRANSITIONS: Record<string, string[]> = {
-  "New Lead": ["Hot Lead", "Contacted", "Not Interested", "Follow Up", "RNR", "Register", "Enrolled", "Switch Off", "Busy", "Disqualified"],
-  "Contacted": ["Hot Lead", "Follow Up", "Register", "Enrolled", "Not Interested", "RNR", "Switch Off", "Disqualified"],
-  "Hot Lead": ["Register", "Enrolled", "Contacted", "Not Interested", "Follow Up", "RNR", "Switch Off", "Disqualified"],
-  "Follow Up": ["Contacted", "Hot Lead", "Register", "Enrolled", "Not Interested", "RNR", "Switch Off", "Disqualified"],
-  "Register": ["Enrolled", "Follow Up", "Not Interested", "Disqualified"],
-  "Enrolled": ["Customer"],
-  "Closed": ["New Lead", "Hot Lead"],
-  "RNR": ["Follow Up", "Contacted", "Not Interested", "Switch Off", "Disqualified"],
-  "Busy": ["Follow Up", "Contacted", "Switch Off", "Disqualified"],
-  "Not Interested": ["Switch Off", "Busy", "New Lead", "Disqualified"],
-  "Switch Off": ["New Lead", "Hot Lead", "Contacted", "Follow Up", "Not Interested", "Disqualified"],
-  "Disqualified": ["New Lead", "Hot Lead", "Contacted", "Follow Up"],
-};
-
-const DEFAULT_TRANSITIONS = [
-  "New Lead", "Hot Lead", "Contacted", "Follow Up", "RNR", "Switch Off",
-  "Busy", "Not Interested", "Register", "Enrolled", "Disqualified",
-];
+import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
+import { STATUS_COLORS, STATUS_TRANSITIONS, DEFAULT_TRANSITIONS } from "../constants/leadConstants";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -93,99 +57,51 @@ function SourceIcon({ source }: { source?: string }) {
   return <ClipboardList size={13} color="#fff" opacity={0.7} />;
 }
 
-// ── Confirmation dialog ───────────────────────────────────────────────────────
+// ── Status Modal (Replaces Dropdown) ──────────────────────────────────────────
 
-function ConfirmDialog({
-  title, message, onConfirm, onCancel,
-}: { title: string; message: string; onConfirm: () => void; onCancel: () => void }) {
-  return (
-    <div
-      className="fixed inset-0 z-[80] flex items-center justify-center"
-      style={{ backgroundColor: "rgba(13,27,62,0.55)", backdropFilter: "blur(3px)" }}
-      onClick={onCancel}
-    >
-      <div
-        className="w-[290px] rounded-2xl p-5 text-center shadow-2xl"
-        style={{ backgroundColor: COLORS.surface }}
-        onClick={e => e.stopPropagation()}
-      >
-        <Text as="p" size="custom" weight="bold" className="text-[15px] mb-1.5" style={{ color: COLORS.text }}>{title}</Text>
-        <Text as="p" size="custom" className="text-[12px] leading-relaxed mb-5" style={{ color: COLORS.muted }}>{message}</Text>
-        <div className="flex gap-2.5">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition-colors hover:bg-gray-200"
-            style={{ backgroundColor: COLORS.grey, color: COLORS.muted }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white transition-opacity hover:opacity-90"
-            style={{ background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryDark})` }}
-          >
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Status dropdown menu ──────────────────────────────────────────────────────
-
-function StatusMenu({ currentStatus, onSelect }: { currentStatus: LeadStatus; onSelect: (s: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
+function StatusModal({ currentStatus, onSelect, onClose }: { currentStatus: LeadStatus; onSelect: (s: string) => void, onClose: () => void }) {
   const options = STATUS_TRANSITIONS[currentStatus] ?? DEFAULT_TRANSITIONS;
 
   return (
-    <div ref={ref} className="relative" onClick={e => e.stopPropagation()}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="p-1.5 rounded-full transition-colors hover:bg-white/10"
-        title="Change status"
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200"
+      style={{ backgroundColor: "rgba(13,27,62,0.6)", backdropFilter: "blur(4px)" }}
+      onClick={onClose}
+    >
+      <div 
+        className="w-full max-w-[340px] rounded-2xl p-5 shadow-2xl animate-in zoom-in-95 duration-200"
+        style={{ backgroundColor: COLORS.surface }}
+        onClick={e => e.stopPropagation()}
       >
-        <MoreHorizontal size={20} color="rgba(255,255,255,0.75)" />
-      </button>
-
-      {open && (
-        <div
-          className="absolute right-0 top-9 z-[70] rounded-xl overflow-hidden py-1 min-w-[165px]"
-          style={{
-            backgroundColor: COLORS.surface,
-            boxShadow: "0 10px 35px rgba(13,27,62,0.25)",
-            border: `1px solid ${COLORS.border}`,
-          }}
-        >
-          {options.map(opt => (
-            <button
-              key={opt}
-              onClick={() => { onSelect(opt); setOpen(false); }}
-              className="w-full text-left px-3.5 py-2.5 text-[12px] font-semibold transition-colors hover:bg-gray-50 flex items-center gap-2.5"
-              style={{ color: COLORS.text }}
-            >
-              <span
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: STATUS_COLORS[opt] ?? COLORS.muted }}
-              />
-              <Text as="span" size="custom" weight="semibold" className="text-[12px]">
-                {opt === "Closed" ? "Enrolled" : opt}
-              </Text>
-            </button>
-          ))}
+        <div className="flex items-center justify-between mb-5">
+          <Text as="h3" size="custom" weight="bold" className="text-[17px]" style={{ color: COLORS.text }}>
+            Update Status
+          </Text>
+          <button onClick={onClose} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+            <X size={16} style={{ color: COLORS.subtle }} />
+          </button>
         </div>
-      )}
+        
+        <div className="grid grid-cols-2 gap-3 max-h-[55vh] overflow-y-auto custom-scrollbar pr-1">
+          {options.map(opt => {
+            const color = STATUS_COLORS[opt] ?? COLORS.muted;
+            return (
+              <button
+                key={opt}
+                onClick={() => { onSelect(opt); onClose(); }}
+                className="w-full text-left px-3.5 py-3 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5 flex items-center gap-2.5 border border-gray-100 shadow-sm hover:shadow-md"
+                style={{ backgroundColor: "white", color: COLORS.text, borderColor: `${color}40` }}
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}80` }}
+                />
+                <span className="truncate">{opt === "Closed" ? "Enrolled" : opt}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -220,6 +136,8 @@ export function LeadCard({
   const [confirm, setConfirm] = useState<{
     title: string; message: string; onConfirm: () => void;
   } | null>(null);
+  
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
   const name = safeText(lead.userName ?? lead.name, "Unknown Lead");
   const email = safeText(lead.email, "No email provided");
@@ -253,43 +171,62 @@ export function LeadCard({
 
   return (
     <>
-      {/* ── Card shell — keeps original dark-blue design ── */}
+
       <div
         onClick={onClick}
-        className="relative flex items-center p-4 md:p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden group"
+        className="relative flex items-center p-4 md:p-5 rounded-[20px] transition-all duration-300 cursor-pointer overflow-hidden group"
         style={{
-          backgroundColor: COLORS.primary,
+          background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryDark})`,
           border: isSelected
-            ? `2px solid rgba(255,255,255,0.55)`
-            : "1.5px solid transparent",
+            ? `2px solid #ffffff`
+            : "1px solid rgba(255,255,255,0.08)",
           boxShadow: isSelected
-            ? `0 0 0 3px ${COLORS.primary}60, 0 4px 18px rgba(0,0,0,0.18)`
-            : "0 2px 12px rgba(0,0,0,0.1)",
+            ? `0 0 0 3px ${COLORS.primary}60, 0 12px 30px rgba(13,27,62,0.3)`
+            : "0 6px 18px rgba(13,27,62,0.15)",
+          transform: "translateY(0)",
+        }}
+        onMouseEnter={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.transform = "translateY(-3px)";
+            e.currentTarget.style.boxShadow = "0 12px 28px rgba(13,27,62,0.25)";
+            e.currentTarget.style.border = "1px solid rgba(255,255,255,0.2)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 6px 18px rgba(13,27,62,0.15)";
+            e.currentTarget.style.border = "1px solid rgba(255,255,255,0.08)";
+          }
         }}
       >
-
+        {/* Subtle glass reflection overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
         {/* ── Selection check overlay ── */}
         {isSelected && (
           <div
-            className="absolute top-3 left-3 w-5 h-5 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: COLORS.primary }}
+            className="absolute top-3 left-3 w-[22px] h-[22px] rounded-full flex items-center justify-center shadow-lg animate-in zoom-in-95 duration-200"
+            style={{ backgroundColor: "#22C55E" }}
           >
-            <Check size={12} color="#fff" strokeWidth={3} />
+            <Check size={13} color="#fff" strokeWidth={3} />
           </div>
         )}
 
         {/* ── Avatar ── */}
-        <div className="mr-4 md:mr-5 flex-shrink-0">
+        <div className="mr-4 md:mr-5 flex-shrink-0 relative z-10">
           {assignedUser?.avatar ? (
-            <AvatarCircle avatar={assignedUser.avatar} size={64} />
+            <div className="ring-2 ring-white/20 rounded-full">
+              <AvatarCircle avatar={assignedUser.avatar} size={64} />
+            </div>
           ) : (
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-[20px] font-bold"
+              className="w-16 h-16 rounded-full flex items-center justify-center text-[22px] font-bold shadow-inner"
               style={{
-                background: "rgba(255,255,255,0.12)",
-                color: "rgba(255,255,255,0.6)",
-                border: "1.5px solid rgba(255,255,255,0.2)",
+                background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
+                color: "rgba(255,255,255,0.9)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                backdropFilter: "blur(5px)"
               }}
             >
               {getInitials(name)}
@@ -298,81 +235,81 @@ export function LeadCard({
         </div>
 
         {/* ── Content columns ── */}
-        <div className="flex flex-1 flex-col md:flex-row md:items-start justify-between min-w-0 gap-2">
+        <div className="flex flex-1 flex-col md:flex-row md:items-start justify-between min-w-0 gap-3 relative z-10">
 
           {/* Left column */}
           <div className="flex flex-col gap-1.5 flex-1 min-w-0 pr-2">
             {/* Name + status badge */}
-            <div className="flex flex-wrap items-center gap-2 mb-0.5">
-              <Text as="h3" size="custom" weight="bold" className="text-white text-[14px] truncate leading-tight">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <Text as="h3" size="custom" weight="bold" className="text-white text-[15px] truncate leading-tight tracking-wide">
                 {searchKeyword ? highlight(name, searchKeyword) : name}
               </Text>
               {showStatusBadge && (
-                <Text
-                  as="span"
-                  size="custom"
-                  weight="bold"
-                  className="text-[8.5px] px-1.5 py-0.5 rounded-[4px] flex-shrink-0"
+                <div
+                  className="px-2 py-0.5 rounded-md flex-shrink-0 flex items-center gap-1.5 shadow-sm"
                   style={{
-                    backgroundColor: `${statusColor}30`,
-                    color: statusColor,
-                    border: `1px solid ${statusColor}60`,
+                    backgroundColor: "rgba(0,0,0,0.2)",
+                    border: `1px solid ${statusColor}50`,
                   }}
                 >
-                  {statusLabel}
-                </Text>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: statusColor }} />
+                  <Text as="span" size="custom" weight="bold" className="text-[9px] uppercase tracking-wider" style={{ color: statusColor }}>
+                    {statusLabel}
+                  </Text>
+                </div>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 text-white truncate">
-              <Mail size={13} className="flex-shrink-0" />
-              <Text as="span" size="custom" weight="medium" className="text-[11px] truncate">
+            <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
+              <div className="p-1 rounded-md bg-white/10"><Mail size={12} /></div>
+              <Text as="span" size="custom" weight="medium" className="text-[11.5px] truncate">
                 {searchKeyword ? highlight(email, searchKeyword) : email}
               </Text>
             </div>
 
-            <div className="flex items-center gap-1.5 text-white truncate">
-              <Phone size={13} className="flex-shrink-0" />
-              <Text as="span" size="custom" weight="medium" className="text-[11px] truncate">
+            <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
+              <div className="p-1 rounded-md bg-white/10"><Phone size={12} /></div>
+              <Text as="span" size="custom" weight="medium" className="text-[11.5px] truncate">
                 {searchKeyword ? highlight(mobile, searchKeyword) : mobile}
               </Text>
             </div>
 
             {/* Ad / campaign */}
             {adName && (
-              <div className="flex items-center gap-1.5 text-white truncate">
-                <User size={13} className="flex-shrink-0" />
-                <Text as="span" size="custom" weight="medium" className="text-[11px] truncate">
+              <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
+                <div className="p-1 rounded-md bg-white/10"><User size={12} /></div>
+                <Text as="span" size="custom" weight="medium" className="text-[11.5px] truncate">
                   {adName}
                 </Text>
               </div>
             )}
 
             {createdAt && (
-              <div className="flex items-center gap-1.5 text-white/60">
+              <div className="flex items-center gap-2 text-white/60 mt-1">
                 <CalendarDays size={12} className="flex-shrink-0" />
-                <Text as="span" size="custom" weight="medium" className="text-[10px]">
-                  Created {createdAt}
+                <Text as="span" size="custom" weight="medium" className="text-[10px] tracking-wide">
+                  CREATED {createdAt}
                 </Text>
               </div>
             )}
           </div>
 
           {/* Right column */}
-          <div className="md:min-w-[160px] shrink-0 md:mt-11 md:ml-10 self-start">
+          <div className="md:min-w-[160px] shrink-0 md:mt-8 md:ml-6 self-start">
             <div
-              className="flex flex-col gap-1.5 pl-0 md:pl-4 md:border-l"
-              style={{ borderColor: "rgba(255,255,255,0.12)" }}
+              className="flex flex-col gap-2 pl-0 md:pl-4 md:border-l"
+              style={{ borderColor: "rgba(255,255,255,0.15)" }}
             >
               {/* Assigned staff */}
-              <div className="flex items-center gap-1.5 text-white/75 truncate">
+              <div className="flex items-center gap-2 text-white/80 truncate bg-black/10 px-2 py-1.5 rounded-lg">
                 {assignedUser ? (
-                  <AvatarCircle avatar={assignedUser.avatar} size={16} />
+                  <AvatarCircle avatar={assignedUser.avatar} size={18} />
                 ) : (
                   <span
-                    className="w-3 h-3 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: "rgba(255,255,255,0.3)" }}
-                  />
+                    className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center bg-white/20"
+                  >
+                    <User size={10} color="#fff" />
+                  </span>
                 )}
                 <Text as="span" size="custom" weight="semibold" className="text-[11px] truncate">
                   {assignedName}
@@ -380,7 +317,7 @@ export function LeadCard({
               </div>
 
               {/* Source */}
-              <div className="flex items-center gap-1.5 text-white/75 truncate">
+              <div className="flex items-center gap-2 text-white/80 truncate px-2">
                 <SourceIcon source={source} />
                 <Text as="span" size="custom" weight="medium" className="text-[11px] truncate capitalize">
                   {source}
@@ -389,10 +326,9 @@ export function LeadCard({
 
               {/* ── Recaptured badge ── */}
               {lead.isDuplicated && (
-                <div className="flex items-center gap-1.5 text-white/75 truncate">
-                  <RefreshCw size={13} />
-
-                  <Text as="span" size="custom" weight="medium" className="text-[11px] truncate capitalize">
+                <div className="flex items-center gap-2 text-orange-300 truncate px-2">
+                  <RefreshCw size={12} />
+                  <Text as="span" size="custom" weight="semibold" className="text-[11px] truncate uppercase tracking-wider">
                     Recaptured
                   </Text>
                 </div>
@@ -403,26 +339,41 @@ export function LeadCard({
 
         {/* ── Top-right actions ── */}
         <div
-          className="absolute top-3 right-3 flex items-center gap-0.5"
+          className="absolute top-4 right-4 flex items-center gap-1.5 z-20"
           onClick={e => e.stopPropagation()}
         >
-          {/* Assign button — admin/manager/team leader only */}
+          {/* Assign button */}
           {canAssign && !isClosed && (
             <button
               onClick={() => onAssignClick?.(lead.id)}
-              className="p-1.5 rounded-full transition-colors hover:bg-white/10"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/20 transition-all shadow-sm backdrop-blur-sm group/btn"
               title="Assign to staff"
             >
-              <UserPlus size={17} color="rgba(255,255,255,0.75)" />
+              <UserPlus size={16} className="text-white/80 group-hover/btn:text-white" />
             </button>
           )}
 
-          {/* Status change menu */}
+          {/* Status change modal trigger */}
           {!isClosed && (
-            <StatusMenu currentStatus={lead.status} onSelect={handleStatusChange} />
+            <button
+              onClick={() => setIsStatusModalOpen(true)}
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/20 transition-all shadow-sm backdrop-blur-sm group/btn"
+              title="Change status"
+            >
+              <MoreHorizontal size={16} className="text-white/80 group-hover/btn:text-white" />
+            </button>
           )}
         </div>
       </div>
+
+      {/* ── Status Modal ── */}
+      {isStatusModalOpen && (
+        <StatusModal 
+          currentStatus={lead.status} 
+          onSelect={handleStatusChange} 
+          onClose={() => setIsStatusModalOpen(false)} 
+        />
+      )}
 
       {/* ── Confirm dialog ── */}
       {confirm && (

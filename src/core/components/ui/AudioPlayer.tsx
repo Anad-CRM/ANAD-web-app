@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { PlayCircle, PauseCircle, Headphones, Loader2 } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 import { api } from "@/core/api/axios";
@@ -62,12 +62,12 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
   const animationRef = useRef<number | null>(null);
 
-  const updateProgress = () => {
+  const updateProgress = useCallback(function update() {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
     }
-    animationRef.current = requestAnimationFrame(updateProgress);
-  };
+    animationRef.current = requestAnimationFrame(update);
+  }, []);
 
   useEffect(() => {
     if (playing) {
@@ -80,7 +80,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [playing]);
+  }, [playing, updateProgress]);
+
 
   const togglePlayPause = () => {
     if (!audioRef.current || !blobUrl) return;

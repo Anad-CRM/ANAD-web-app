@@ -10,6 +10,14 @@ export interface StatusCounts {
   totalClosedCount?: number;
   totalAssignedCount?: number;
 
+  rnrCount?: number;
+  newCount?: number;
+  disqualifiedCount?: number;
+  contactedLeadCount?: number;
+  notInterestCount?: number;
+  busyCount?: number;
+  switchOffCount?: number;
+
   // Legacy / alternative field names (kept for backward compat)
   newLead?: number;
   hotLead?: number;
@@ -24,6 +32,7 @@ export interface StatusCounts {
   customer?: number;
   disqualified?: number;
 }
+
 
 export interface LeadCountsData {
   // Top-level convenience fields (mapped from statusCounts)

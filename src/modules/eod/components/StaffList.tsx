@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { EodStaffMember } from "../types";
 
 interface StaffListProps {
@@ -40,10 +41,13 @@ export const StaffList = ({ staff, selectedId, onSelect }: StaffListProps) => {
                 }`}
               >
                 {member.avatarUrl ? (
-                  <img
+                  <Image
                     src={member.avatarUrl}
                     alt={member.userName}
+                    width={36}
+                    height={36}
                     className="w-full h-full object-cover"
+                    unoptimized
                   />
                 ) : (
                   <div

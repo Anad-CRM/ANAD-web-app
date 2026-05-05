@@ -69,7 +69,7 @@ export default function NotificationList() {
     if (user?.id) {
       fetchNotifications(true);
     }
-  }, [user?.id]);
+  }, [user?.id, fetchNotifications]);
 
   const getIconProps = (title: string) => {
     const t = title.toLowerCase();

@@ -18,6 +18,8 @@ export const API_ENDPOINTS = {
     GET_AUTO_EOD: "/eod/autoSummary",
     GET_ALL_ADS: (orgId: string) => `/ad/getAllAds/${orgId}`,
     GET_AD_STATUS_COUNT: (orgId: string) => `/ad/getAdWiseLeadStatusCount/${orgId}`,
+    GET_AD_WITH_MOST_LEADS: "/ad/getAdWithMostLeads",
+    GET_AD_BY_ID: "/ad/byId",
   },
   TEAM: {
     GET_ALL: "/team/getAllTeams",

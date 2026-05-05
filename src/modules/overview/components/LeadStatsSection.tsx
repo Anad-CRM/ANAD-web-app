@@ -325,9 +325,9 @@ export default function LeadStatsSection({
     { label: "Registered", count: counts?.registered ?? counts?.registerCount ?? 0, status: "Register", color: COLORS.anccent_green },
     { label: "Enrolled", count: counts?.closed ?? counts?.closedLeadCount ?? 0, status: "Closed", color: COLORS.muted },
     {
-      label: "RNR", count: (counts as { rnr?: number, rnrCount?: number })?.rnr ?? (counts as { rnr?: number, rnrCount?: number })?.rnrCount ?? 0, status: "RNR", color: COLORS.subtle
-
+      label: "RNR", count: counts?.rnr ?? counts?.rnrCount ?? 0, status: "RNR", color: COLORS.subtle
     },
+
   ];
 
   const totalLeads = data?.totalLeads ?? 0;
@@ -410,12 +410,12 @@ export default function LeadStatsSection({
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: stat.color }}
                 />
-                <span className="text-[12px] text-gray-600 flex-1 whitespace-nowrap group-hover:text-black transition-colors font-medium">
+                <Text as="span" size="custom" weight="medium" className="text-[12px] text-gray-600 flex-1 whitespace-nowrap group-hover:text-black transition-colors">
                   {stat.label}
-                </span>
-                <span className="text-[13px] font-bold text-[#1E293B] w-7 text-right flex-shrink-0">
+                </Text>
+                <Text as="span" size="custom" weight="bold" className="text-[13px] text-[#1E293B] w-7 text-right flex-shrink-0">
                   {stat.count}
-                </span>
+                </Text>
               </Link>
             ))}
           </div>
@@ -428,12 +428,12 @@ export default function LeadStatsSection({
             className="flex-1 min-w-[160px] bg-gradient-to-br from-[#233A78] to-[#1E56A0] rounded-2xl p-5 flex flex-col justify-between shadow-md no-underline hover:opacity-90 transition-opacity group"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[12px] font-bold text-white/80">All Leads</span>
+              <Text as="span" size="custom" weight="medium" className="text-[12px] text-white/80">All Leads</Text>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white" className="opacity-60"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             </div>
-            <span className="text-[40px] font-extrabold text-white leading-none group-hover:scale-105 transition-transform inline-block">
+            <Text as="span" size="custom" weight="semibold" className="text-[40px] font-extrabold text-white leading-none group-hover:scale-105 transition-transform inline-block">
               {totalLeads}
-            </span>
+            </Text>
           </Link>
 
           <Link
@@ -441,12 +441,12 @@ export default function LeadStatsSection({
             className="flex-1 min-w-[160px] bg-[#EEF4FB] border border-[#A5BCD1] rounded-2xl p-5 flex flex-col justify-between shadow-sm no-underline hover:bg-[#ddeaf8] transition-colors group"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[12px] font-bold text-[#233A78]/70">Unassigned</span>
+              <Text as="span" size="custom" weight="medium" className="text-[12px] text-[#233A78]/70">Unassigned</Text>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#233A78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
             </div>
-            <span className="text-[40px] font-extrabold text-[#233A78] leading-none group-hover:scale-105 transition-transform inline-block">
+            <Text as="span" size="custom" weight="semibold" className="text-[40px] font-extrabold text-[#233A78] leading-none group-hover:scale-105 transition-transform inline-block">
               {unassigned}
-            </span>
+            </Text>
           </Link>
         </div>
       </div>
@@ -459,18 +459,22 @@ export default function LeadStatsSection({
             href={leadsHref(card.status, filter)}
             className="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm no-underline hover:shadow-md hover:border-[#A5BCD1] transition-all group"
           >
-            <span
+            <Text
+              as="span"
+              size="custom"
+              weight="bold"
               className="text-[26px] font-extrabold leading-none mb-1.5 group-hover:scale-105 transition-transform inline-block"
               style={{ color: card.color }}
             >
               {card.count}
-            </span>
-            <span className="text-[11px] text-gray-500 text-center font-medium leading-tight">
+            </Text>
+            <Text as="span" size="custom" weight="medium" className="text-[11px] text-gray-500 text-center leading-tight">
               {card.label}
-            </span>
+            </Text>
           </Link>
         ))}
       </div>
+
 
       {/* ── Filter Modal ── */}
       <FilterModal

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
+import Image from "next/image";
 import { StaffEodSummary, LeadStats } from "../types";
 import { COLORS } from "../../../core/components/theme/colors";
 import { Text } from "../../../core/components/ui/Text";
@@ -83,12 +84,13 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
                 <div key={idx} className="grid grid-cols-[190px_minmax(150px,1fr)_140px] gap-10 items-center px-1">
                   <div className="flex items-center gap-4">
                     <div className="w-[52px] h-[52px] rounded-full bg-[#E2B77A] overflow-hidden flex-shrink-0 shadow-md">
-                      <img
+                      <Image
                         src={avatarUrl}
-                        width="70"
-                        height="70"
+                        width={70}
+                        height={70}
                         alt={name}
                         style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                        unoptimized
                       />
                     </div>
                     <div className="truncate">

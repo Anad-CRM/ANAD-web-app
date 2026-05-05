@@ -51,7 +51,7 @@ export function InviteView() {
         if (r.data?.status === "success") setTeams(r.data.data ?? []);
       })
       .catch(() => {});
-  }, []);
+  }, [user?.organizationId]);
 
   const validate = () => {
     if (!email || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {

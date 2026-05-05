@@ -203,11 +203,20 @@ export function LeadList() {
 
         if (reset) {
           setLeads(incoming);
+          setHasMore(incoming.length > 0);
         } else {
-          setLeads(prev => [...prev, ...incoming]);
+          setLeads(prev => {
+            // Filter out any duplicates returned by the API or caused by double-fetching
+            const existingIds = new Set(prev.map(l => l.id));
+            const uniqueIncoming = incoming.filter(l => !existingIds.has(l.id));
+
+            // If we got new unique leads, we might have more. If not, stop fetching to prevent infinite loops.
+            setHasMore(uniqueIncoming.length > 0);
+
+            return [...prev, ...uniqueIncoming];
+          });
         }
 
-        setHasMore(incoming.length === 20);
         offsetRef.current += incoming.length;
       } else {
         if (reset) setLeads([]);
@@ -230,8 +239,10 @@ export function LeadList() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, isUnassigned]);
+
+
 
   function handleApplyFilters(newFilters: FilterState) {
     setFilters(newFilters);
@@ -312,7 +323,7 @@ export function LeadList() {
 
   return (
     <>
-      <div className="flex flex-col h-full space-y-2 " >
+      <div className="flex flex-col h-full min-h-0 space-y-2" >
         {/* <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6"> */}
         <div className="flex items-center gap-4 mb-4">
           <BackButton onClick={() => router.back()} />
@@ -454,7 +465,21 @@ export function LeadList() {
         </div>
 
         {/* ── Leads Grid ── */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-6">
+        <div
+          className="flex-1 overflow-y-auto custom-scrollbar px-3 py-6"
+          onScroll={(e) => {
+            const t = e.currentTarget;
+            const distanceToBottom = t.scrollHeight - t.scrollTop - t.clientHeight;
+
+            // Update on-screen debugger
+
+            // Trigger pre-fetch when within 400px of the bottom to prevent lag
+            if (distanceToBottom <= 400 && hasMore && !isLoading && !isLoadingMore) {
+              loadLeads(false);
+            }
+          }}
+        >
+
           {isLoading ? (
             <div className="flex justify-center items-center h-52">
               <div className="flex flex-col items-center gap-3">
