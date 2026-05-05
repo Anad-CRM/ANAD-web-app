@@ -75,7 +75,17 @@ export const LeadDetailsDashboard: React.FC = () => {
   return (
     <div className="flex flex-col w-full h-full overflow-y-auto [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/20">
       <div className="max-w-[1400px] mx-auto w-full">
-        <div className="flex items-center gap-4 mb-8">
+        {/* <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => router.back()}
+            className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-xl font-semibold text-slate-800">Lead Details</h1>
+        </div> */}
+
+        <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => router.back()}
             className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center text-white hover:bg-[#11234D] transition-colors shadow-md flex-shrink-0"
@@ -98,17 +108,17 @@ export const LeadDetailsDashboard: React.FC = () => {
             {/* Left Column 60% */}
             <div className="flex flex-col gap-6 w-full lg:w-[60%] flex-1">
               <LeadSummaryCard lead={lead} onRefresh={loadData} />
-              <LeadActivityLog 
-                activities={activities} 
+              <LeadActivityLog
+                activities={activities}
                 leadId={leadId}
                 onRefresh={loadData}
               />
             </div>
 
             {/* Right Column 40% */}
-            <div className="w-full lg:w-[40%] flex-shrink-0 flex flex-col">
-              <LeadFollowUpCard 
-                followups={followups} 
+            <div className="w-full lg:w-[40%] flex-shrink-0 sticky top-4 flex flex-col">
+              <LeadFollowUpCard
+                followups={followups}
                 leadId={leadId}
                 assignedUserId={(lead as any)?.assignedUser?.id || (lead as any)?.assignedUser?._id || ''}
                 onRefresh={loadData}
