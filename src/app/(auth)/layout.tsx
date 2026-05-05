@@ -30,15 +30,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </defs>
         
         <g transform="translate(288, 450)">
-          <rect x="-90" y="-90" width="180" height="180" rx="45" fill="black"/>
-          <circle cx="0" cy="-5" r="65" fill="#1E56A0"/>
-          <path 
-            d="M-22 8 Q0 26 22 8" 
-            stroke="black" 
-            strokeWidth="7" 
-            strokeLinecap="round" 
-            fill="none"
-          />
+          <foreignObject x="-90" y="-90" width="150" height="150">
+            <div className="w-full h-full flex items-center justify-center">
+              <img
+                src="/login/login.png"
+                alt="Logo"
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+              />
+            </div>
+          </foreignObject>
         </g>
       </svg>
       

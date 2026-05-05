@@ -10,7 +10,7 @@ export const BulkUploadForm: React.FC = () => {
          <div className="bg-[#11234D] w-[54px] h-[40px] rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
             <CloudUpload className="text-white w-5 h-5" />
          </div>
-         <p className="text-white text-[16px] font-light tracking-wide">Upload CVS File</p>
+         <p className="text-white text-[16px] font-light tracking-wide">Upload CSV File</p>
          
          <input type="file" accept=".csv" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
       </div>
@@ -23,9 +23,9 @@ export const BulkUploadForm: React.FC = () => {
 
          <div className="space-y-2 pl-1">
             <p className="text-[13px] text-[#333333] font-medium tracking-wide mb-1">Ensure Your CSV File Has These Columns In Order :</p>
-            <p className="text-[13px] text-[#333333] font-normal tracking-wide">Lead Name : <span className="text-[#4D4D4D]">eg. Jagan kid</span></p>
-            <p className="text-[13px] text-[#333333] font-normal tracking-wide">Lead Email : <span className="text-[#4D4D4D]">eg. jagankid2gmail.com</span></p>
-            <p className="text-[13px] text-[#333333] font-normal tracking-wide">Lead Mobile Number : <span className="text-[#4D4D4D]">9876677573</span></p>
+            <p className="text-[13px] text-[#333333] font-normal tracking-wide">Lead Name : <span className="text-[#4D4D4D]">eg. John Doe</span></p>
+            <p className="text-[13px] text-[#333333] font-normal tracking-wide">Lead Email : <span className="text-[#4D4D4D]">eg. john.doe@gmail.com</span></p>
+            <p className="text-[13px] text-[#333333] font-normal tracking-wide">Lead Mobile Number : <span className="text-[#4D4D4D]">1234567890</span></p>
             <p className="text-[13px] text-[#333333] font-normal tracking-wide">Lead Source: <span className="text-[#4D4D4D]">eg. Facebook</span></p>
          </div>
       </div>
