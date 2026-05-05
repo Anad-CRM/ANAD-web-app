@@ -57,7 +57,7 @@ export default function NotificationList() {
       } else {
         if (!isRefresh) setHasMore(false);
       }
-    } catch (e) {
+    } catch {
       if (!isRefresh) setHasMore(false);
     } finally {
       setIsLoading(false);
@@ -155,7 +155,7 @@ export default function NotificationList() {
             </svg>
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">No notifications yet</h2>
-          <p className="text-gray-500 max-w-sm">We'll let you know when something arrives or requires your attention.</p>
+          <p className="text-gray-500 max-w-sm">We&apos;ll let you know when something arrives or requires your attention.</p>
         </div>
       ) : (
         <div className="space-y-4">

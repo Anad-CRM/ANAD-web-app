@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { LeadCountsData } from "../types";
 import { COLORS } from "@/core/components/theme/colors";
@@ -35,9 +35,7 @@ function formatDate(d: Date): string {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function toIso(d: Date): string {
-  return d.toISOString().split("T")[0];
-}
+
 
 // ─── SVG Donut Chart ─────────────────────────────────────────────────────────
 
@@ -165,9 +163,11 @@ function FilterModal({
   // Sync when modal opens
   useEffect(() => {
     if (open) {
-      setSelFilter(currentFilter);
-      setStartDate(currentStartDate || "");
-      setEndDate(currentEndDate || "");
+      Promise.resolve().then(() => {
+        setSelFilter(currentFilter);
+        setStartDate(currentStartDate || "");
+        setEndDate(currentEndDate || "");
+      });
     }
   }, [open, currentFilter, currentStartDate, currentEndDate]);
 
@@ -325,7 +325,7 @@ export default function LeadStatsSection({
     { label: "Registered", count: counts?.registered ?? counts?.registerCount ?? 0, status: "Register", color: COLORS.anccent_green },
     { label: "Enrolled", count: counts?.closed ?? counts?.closedLeadCount ?? 0, status: "Closed", color: COLORS.muted },
     {
-      label: "RNR", count: (counts as any)?.rnr ?? (counts as any)?.rnrCount ?? 0, status: "RNR", color: COLORS.subtle
+      label: "RNR", count: (counts as { rnr?: number, rnrCount?: number })?.rnr ?? (counts as { rnr?: number, rnrCount?: number })?.rnrCount ?? 0, status: "RNR", color: COLORS.subtle
 
     },
   ];

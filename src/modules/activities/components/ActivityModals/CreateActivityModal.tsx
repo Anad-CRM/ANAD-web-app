@@ -36,8 +36,9 @@ export const CreateActivityModal: React.FC<Props> = ({ leadId, activityType, onC
       });
 
       onSuccess();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Something went wrong');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(axiosErr?.response?.data?.message || 'Something went wrong');
     } finally {
       setIsLoading(false);
     }

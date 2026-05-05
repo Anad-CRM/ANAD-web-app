@@ -3,7 +3,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { COLORS } from "@/core/components/theme/colors";
 
 interface BackButtonProps {
   onClick?: () => void;

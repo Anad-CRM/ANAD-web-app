@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Briefcase } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { AutoLeadCampaign } from '../types';
 import { TeamItem, getTeamsList, getTeamAutoAssignStatus, updateTeamAds } from '../api/autoLeadApi';
 import { DistributionAssignModal } from './DistributionAssignModal';
@@ -16,10 +16,6 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns }) => {
   const [modalLoading, setModalLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  useEffect(() => {
-    loadTeams();
-  }, []);
-
   const loadTeams = async () => {
     setLoading(true);
     const list = await getTeamsList();
@@ -35,6 +31,10 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns }) => {
     setTeamAdsMap(map);
     setLoading(false);
   };
+
+  useEffect(() => {
+    Promise.resolve().then(() => loadTeams());
+  }, []);
 
   const showToast = (msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });

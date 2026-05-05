@@ -3,9 +3,9 @@ import { API_ENDPOINTS } from "@/core/api/api";
 import { EodStaffMember } from "../types";
 import { getUser } from "@/core/utils/auth";
 
-export const getEodStaffSummary = async (params?: Record<string, any>): Promise<EodStaffMember[]> => {
+export const getEodStaffSummary = async (params?: Record<string, unknown>): Promise<EodStaffMember[]> => {
   try {
-    const user = getUser<any>();
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     const orgId = user?.organizationId || params?.organizationId;
 
     if (!orgId) return [];
@@ -15,13 +15,13 @@ export const getEodStaffSummary = async (params?: Record<string, any>): Promise<
     });
 
     if (response.data?.success) {
-      return response.data.data.map((item: any) => ({
+      return response.data.data.map((item: { eods: { userId: string, role: string, callStats: unknown, leadStats: unknown }[], userName: string, submitted: boolean }) => ({
         userId: item.eods[0]?.userId,
         userName: item.userName || "Unknown User",
         role: item.eods[0]?.role || "Staff",
         submitted: item.submitted,
-        callStats: item.eods[0]?.callStats,
-        leadStats: item.eods[0]?.leadStats,
+        callStats: item.eods[0]?.callStats as never,
+        leadStats: item.eods[0]?.leadStats as never,
       }));
     }
     return [];

@@ -2,7 +2,7 @@ import { api } from "@/core/api/axios";
 import { API_ENDPOINTS } from "@/core/api/api";
 
 export const activityService = {
-  fetchLeadActivities: async (leadId: string, assignedUserId?: string): Promise<any[]> => {
+  fetchLeadActivities: async (leadId: string, assignedUserId?: string): Promise<Record<string, unknown>[]> => {
     try {
       const userId = assignedUserId ?? '';
       const response = await api.post(API_ENDPOINTS.ACTIVITIES.GET, { leadId, userId });
@@ -16,7 +16,7 @@ export const activityService = {
     }
   },
 
-  createActivity: async (leadId: string, payload: { title: string; description: string; userId: string }): Promise<any> => {
+  createActivity: async (leadId: string, payload: { title: string; description: string; userId: string }): Promise<Record<string, unknown>> => {
     try {
       const response = await api.post(API_ENDPOINTS.ACTIVITIES.CREATE(leadId), payload);
       return response.data;

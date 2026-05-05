@@ -68,7 +68,7 @@ export function StaffListView() {
             All {pageTitle}s
           </Text>
           <Text size="custom" className="text-[14px] mt-1" style={{ color: COLORS.muted }}>
-            Directory of your organization's {pageTitle.toLowerCase()}s
+            Directory of your organization&apos;s {pageTitle.toLowerCase()}s
           </Text>
         </div>
       </div>

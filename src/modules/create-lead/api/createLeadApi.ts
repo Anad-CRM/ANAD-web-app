@@ -12,7 +12,7 @@ export interface CreateLeadPayload {
 }
 
 export const createSingleLead = async (data: CreateLeadPayload) => {
-  const user = getUser<any>();
+  const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
   if (!user || !user.organizationId) {
     throw new Error('Authentication error: Missing organization details.');
   }

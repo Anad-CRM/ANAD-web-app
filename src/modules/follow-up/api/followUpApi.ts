@@ -15,7 +15,7 @@ interface GetFollowUpsParams {
 
 export const getFollowUps = async (
   params: GetFollowUpsParams
-): Promise<{ data: FollowUp[]; meta: any }> => {
+): Promise<{ data: FollowUp[]; meta: Record<string, unknown> }> => {
   const response = await api.request({
     url: API_ENDPOINTS.FOLLOW_UP.GET_ALL,
     method: "GET",

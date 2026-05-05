@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Filter, X, ArrowLeft, Users } from "lucide-react";
+import { Search, Filter, X, Users } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
 import { LeadCard } from "./LeadCard";
@@ -156,7 +156,7 @@ export function LeadList() {
     });
 
     // Using user info to fetch teams if available
-    const user = getUser<any>();
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     if (user?.organizationId) {
       TeamsService.getAllTeams({ organizationId: user.organizationId }).then(res => {
         if (res.status === "success" && res.data) {
@@ -164,8 +164,8 @@ export function LeadList() {
         }
       }).catch(() => { });
 
-      getAllAds({ organizationId: user.organizationId }).then((data: any) => {
-        setAds((data || []).map((ad: any) => ({ ...ad, id: String(ad.id) })));
+      getAllAds({ organizationId: user.organizationId }).then((data) => {
+        setAds((data || []).map((ad) => ({ ...ad, id: String(ad.id) })));
       }).catch(() => { });
     }
   }, []);
@@ -192,7 +192,7 @@ export function LeadList() {
       );
       // Unassigned filter: pass isUnassigned flag to API
       if (isUnassignedRef.current) {
-        (payload as any).isUnassigned = true;
+        (payload as Record<string, unknown>).isUnassigned = true;
         delete payload.status;
       }
 
@@ -220,13 +220,8 @@ export function LeadList() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally empty — reads all query values from refs
 
-
-  // Trigger a reset fetch whenever the real query values change (debounced for search).
-  // Depends on the actual values — NOT loadLeads — so loading-more state updates
-  // never accidentally fire a full reset.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -295,11 +290,10 @@ export function LeadList() {
   };
 
 
-  // ── Active filter pills ────────────────────────────────────────────────
   const activePills: { label: string; onRemove: () => void }[] = [];
 
   if (statusParam && filters.statuses.length === 0) {
-    activePills.push({ label: statusParam, onRemove: () => { } }); // URL-driven, not removable here
+    activePills.push({ label: statusParam, onRemove: () => { } }); 
   }
 
   filters.statuses.forEach(s =>

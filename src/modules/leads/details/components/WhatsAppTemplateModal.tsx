@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { X, ExternalLink, Send, Loader2, SendHorizontal } from 'lucide-react';
+import { X, ExternalLink, Send } from 'lucide-react';
 import { Whatsapp } from '@thesvg/react';
-import { COLORS } from '@/core/components/theme/colors';
 import { activityService } from "@/modules/activities/services/activityService";
 import { getUser } from '@/core/utils/auth';
 

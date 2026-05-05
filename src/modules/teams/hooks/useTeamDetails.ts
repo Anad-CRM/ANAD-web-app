@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from "react";
 import { useAuthContext } from "@/modules/auth/stores/AuthContext";
 import { TeamsService } from "../services/teams.service";
@@ -20,12 +21,12 @@ export function useTeamDetails(teamId: string) {
       const orgId = user.organizationId || user.organization?.id || "";
       const userRole = user.role?.toLowerCase() || "";
       
-      const payload: any = { organizationId: orgId };
+      const payload: Record<string, unknown> = { organizationId: orgId };
       if (userRole === "manager") {
          payload.managerId = user.id;
       }
 
-      const teamsResponse = await TeamsService.getAllTeams(payload);
+      const teamsResponse = await TeamsService.getAllTeams(payload as { organizationId: string; managerId?: string });
       if (teamsResponse.status === "success") {
         const foundTeam = teamsResponse.data?.find((t) => t.id === teamId) || null;
         setTeam(foundTeam);

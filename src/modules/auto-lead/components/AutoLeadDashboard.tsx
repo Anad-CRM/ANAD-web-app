@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bot, CalendarCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bot, CalendarCheck } from 'lucide-react';
 import { CampaignSelectionArea } from './CampaignSelectionArea';
 import { TeamAssignmentSection } from './TeamAssignmentSection';
 import { ManagerAssignmentSection } from './ManagerAssignmentSection';

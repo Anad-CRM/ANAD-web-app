@@ -47,13 +47,13 @@ export default function ProfileForm() {
         userId: user.id || "",
         userName: user.userName || "",
         email: user.email || "",
-        mobileNumber: user.mobileNumber || "",
-        address: user.address || "",
+        mobileNumber: (user as { mobileNumber?: string }).mobileNumber || "",
+        address: (user as { address?: string }).address || "",
         organization: {
-          organizationName: user.organization?.organizationName || "",
-          businessCategory: user.organization?.businessCategory || "",
-          startTime: (user.organization as any)?.startTime || "09:00",
-          endTime: (user.organization as any)?.endTime || "17:00",
+          organizationName: (user.organization as { organizationName?: string })?.organizationName || "",
+          businessCategory: (user.organization as { businessCategory?: string })?.businessCategory || "",
+          startTime: (user.organization as { startTime?: string })?.startTime || "09:00",
+          endTime: (user.organization as { endTime?: string })?.endTime || "17:00",
         }
       });
     }
@@ -86,7 +86,7 @@ export default function ProfileForm() {
     try {
       await ProfileService.updateProfile(formData);
       setMessage("Profile updated successfully");
-    } catch (error) {
+    } catch {
       setMessage("Failed to update profile");
     } finally {
       setSaving(false);

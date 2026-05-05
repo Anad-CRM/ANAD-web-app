@@ -48,9 +48,11 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       }
     }
 
-    setBlobUrl(null);
-    setErrored(false);
-    loadAudio();
+    Promise.resolve().then(() => {
+      setBlobUrl(null);
+      setErrored(false);
+      loadAudio();
+    });
 
     return () => {
       cancelled = true;

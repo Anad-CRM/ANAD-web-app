@@ -2,7 +2,6 @@
 
 import { useTeamDetails } from "@/modules/teams/hooks/useTeamDetails";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { BackButton } from "@/core/components/ui/BackButton";
 

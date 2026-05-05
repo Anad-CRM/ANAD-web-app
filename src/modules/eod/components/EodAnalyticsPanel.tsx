@@ -34,7 +34,7 @@ export const EodAnalyticsPanel = ({ data }: { data: EodStaffMember | null }) => 
         <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-md flex flex-col items-center text-center max-w-[300px]">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-4 opacity-50"><path d="M21 21L15 15"/><circle cx="11" cy="11" r="8"/></svg>
           <h3 className="text-[18px] font-bold mb-2">No data recorded</h3>
-          <p className="text-[13px] text-white/60">This staff member hasn't recorded any activity leads or calls for today yet.</p>
+          <p className="text-[13px] text-white/60">This staff member hasn&apos;t recorded any activity leads or calls for today yet.</p>
         </div>
       </div>
     );

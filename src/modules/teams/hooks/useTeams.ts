@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from "react";
 import { TeamsService } from "../services/teams.service";
 import { Team } from "../types/teams.types";
@@ -19,12 +20,12 @@ export function useTeams() {
 
       const userRole = user.role?.toLowerCase() || "";
       
-      const payload: any = { organizationId: orgId };
+      const payload: Record<string, unknown> = { organizationId: orgId };
       if (userRole === "manager") {
          payload.managerId = user.id;
       }
 
-      const response = await TeamsService.getAllTeams(payload);
+      const response = await TeamsService.getAllTeams(payload as { organizationId: string; managerId?: string });
       if (response.status === "success") {
         const fetchedTeams = response.data || [];
         

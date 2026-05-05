@@ -11,7 +11,7 @@ import { StaffProfileCard } from "./StaffProfileCard";
 import { LeadStatsCard } from "./LeadStatsCard";
 import { ProfileDetailsCard } from "./ProfileDetailsCard";
 import { AttendanceCard } from "./AttendanceCard";
-import { Calendar, ChevronLeft } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { BackButton } from "@/core/components/ui/BackButton";
 
 function formatDate(iso?: string) {

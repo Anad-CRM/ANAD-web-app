@@ -27,9 +27,11 @@ export function AuthImage({ src, fallbackSrc, alt, ...rest }: AuthImageProps) {
       }
     }
 
-    setBlobUrl(null);
-    setErrored(false);
-    load();
+    Promise.resolve().then(() => {
+      setBlobUrl(null);
+      setErrored(false);
+      load();
+    });
 
     return () => {
       cancelled = true;

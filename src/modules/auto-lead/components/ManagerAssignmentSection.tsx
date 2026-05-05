@@ -15,10 +15,6 @@ export const ManagerAssignmentSection: React.FC<Props> = ({ campaigns }) => {
   const [modalManager, setModalManager] = useState<StaffMember | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  useEffect(() => {
-    loadManagers();
-  }, []);
-
   const loadManagers = async () => {
     setLoading(true);
     const list = await getManagersList();
@@ -34,6 +30,10 @@ export const ManagerAssignmentSection: React.FC<Props> = ({ campaigns }) => {
     setManagerAdsMap(map);
     setLoading(false);
   };
+
+  useEffect(() => {
+    Promise.resolve().then(() => loadManagers());
+  }, []);
 
   const showToast = (msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });

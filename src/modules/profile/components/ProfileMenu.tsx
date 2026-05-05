@@ -53,7 +53,7 @@ const SectionHeader = ({ title }: { title: string }) => (
 );
 
 export default function ProfileMenu() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   
   const role = user?.role || "User";
   const isAdmin = role === "Admin";

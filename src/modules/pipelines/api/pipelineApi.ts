@@ -7,11 +7,11 @@ const NON_ADMIN_ROLES = ["Staff Member", "Team Leader", "Manager"];
 
 export const getPipelineData = async (): Promise<PipelineData | null> => {
   try {
-    const user = getUser<any>();
-    const organizationId = user?.organization?.id || user?.organizationId;
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
+    const organizationId = user?.organizationId;
     if (!organizationId) return null;
 
-    const isNonAdmin = NON_ADMIN_ROLES.includes(user?.role);
+    const isNonAdmin = NON_ADMIN_ROLES.includes(user?.role as string);
 
     let lc: Record<string, number> | null = null;
 

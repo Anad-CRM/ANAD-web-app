@@ -3,14 +3,14 @@ import { API_ENDPOINTS } from "@/core/api/api";
 import { AdCampaign, AdWiseStatusResponse } from "../types";
 import { getUser } from "@/core/utils/auth";
 
-export const getAllAds = async (params?: Record<string, any>): Promise<AdCampaign[]> => {
+export const getAllAds = async (params?: Record<string, unknown>): Promise<AdCampaign[]> => {
   try {
-    const user = getUser<any>();
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     const orgId = user?.organizationId || params?.organizationId;
 
     if (!orgId) return [];
 
-    const response = await api.get(API_ENDPOINTS.DASHBOARD.GET_ALL_ADS(orgId));
+    const response = await api.get(API_ENDPOINTS.DASHBOARD.GET_ALL_ADS(orgId as string));
     return response.data?.data || [];
   } catch (error) {
     console.error("Failed to fetch ads:", error);
@@ -18,14 +18,14 @@ export const getAllAds = async (params?: Record<string, any>): Promise<AdCampaig
   }
 };
 
-export const getAdStatusBreakdown = async (adId: string, params?: Record<string, any>): Promise<AdWiseStatusResponse | null> => {
+export const getAdStatusBreakdown = async (adId: string, params?: Record<string, unknown>): Promise<AdWiseStatusResponse | null> => {
   try {
-    const user = getUser<any>();
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     const orgId = user?.organizationId || params?.organizationId;
 
     if (!orgId) return null;
 
-    const response = await api.post(API_ENDPOINTS.DASHBOARD.GET_AD_STATUS_COUNT(orgId), {
+    const response = await api.post(API_ENDPOINTS.DASHBOARD.GET_AD_STATUS_COUNT(orgId as string), {
       adId
     });
     return response.data?.data || null;

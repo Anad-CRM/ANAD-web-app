@@ -20,19 +20,21 @@ export interface StaffMember {
 export interface TeamItem {
   id: string;
   name: string;
-  [key: string]: any;
+  members?: Record<string, unknown>[];
+  membersCount?: number;
+  memberCount?: number;
 }
 
 export const getLiveAds = async (orgId?: number): Promise<AutoLeadCampaign[]> => {
   try {
-    const user = getUser<any>();
+    const user = getUser<{ organizationId?: number }>();
     const org = orgId || user?.organizationId;
     if (!org) return [];
     
     const response = await api.get(API_ENDPOINTS.AUTO_LEAD.GET_LIVE_ADS(org));
     
     if (response.data && response.data.data) {
-      return response.data.data.map((ad: any) => ({
+      return response.data.data.map((ad: Record<string, unknown>) => ({
         id: ad.adId,
         title: ad.adName || "Unnamed Campaign",
         leadsCount: ad.leadCount || 0,
@@ -49,7 +51,7 @@ export const getLiveAds = async (orgId?: number): Promise<AutoLeadCampaign[]> =>
 
 export const getAutoAssignParams = async (orgId?: number): Promise<AutoAssignState> => {
    try {
-      const user = getUser<any>();
+      const user = getUser<{ organizationId?: number }>();
       const org = orgId || user?.organizationId;
       if (!org) return { autoAssignLeads: false, attendanceRequired: false, selectedAdIds: [], managerAutoAssignEnabled: false };
 
@@ -60,7 +62,7 @@ export const getAutoAssignParams = async (orgId?: number): Promise<AutoAssignSta
       ]);
 
       const ads = autoAssignRes.data?.data?.ads || [];
-      const selectedAdIds = ads.filter((ad: any) => ad.autoAssignLeads === true).map((ad: any) => ad.adId);
+      const selectedAdIds = ads.filter((ad: Record<string, unknown>) => ad.autoAssignLeads === true).map((ad: Record<string, unknown>) => ad.adId);
 
       return {
          autoAssignLeads: autoAssignRes.data?.data?.organizationAutoAssign ?? false,
@@ -75,13 +77,13 @@ export const getAutoAssignParams = async (orgId?: number): Promise<AutoAssignSta
 };
 
 export const toggleGlobalAutoAssign = async (status: boolean, adIds: string[], orgId?: number) => {
-   const user = getUser<any>();
+   const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
    return api.post(API_ENDPOINTS.AUTO_LEAD.TOGGLE_AUTO_ASSIGN, { organizationId: org, autoAssign: status, adIds });
 };
 
 export const toggleGlobalAttendanceRequirement = async (status: boolean, orgId?: number) => {
-   const user = getUser<any>();
+   const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
    return api.post(API_ENDPOINTS.AUTO_LEAD.TOGGLE_ATTENDANCE, { organizationId: org, status: status });
 };
@@ -92,7 +94,7 @@ export const getTeamAutoAssignStatus = async (teamId: string) => {
    try {
       const res = await api.get(API_ENDPOINTS.AUTO_LEAD.TEAM_STATUS(teamId));
       const ads = res.data?.data?.ads || [];
-      const selectedAdIds: string[] = ads.filter((ad: any) => ad.autoAssignLeads === true).map((ad: any) => ad.adId);
+      const selectedAdIds: string[] = ads.filter((ad: Record<string, unknown>) => ad.autoAssignLeads === true).map((ad: Record<string, unknown>) => ad.adId);
       return { enabled: res.data?.data?.teamAutoAssign ?? false, selectedAdIds };
    } catch {
       return { enabled: false, selectedAdIds: [] };
@@ -100,7 +102,7 @@ export const getTeamAutoAssignStatus = async (teamId: string) => {
 };
 
 export const updateTeamAds = async (teamId: string, adIds: string[], orgId?: number) => {
-   const user = getUser<any>();
+   const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
    return api.post(API_ENDPOINTS.AUTO_LEAD.TEAM_UPDATE_ADS, {
       teamId,
@@ -113,7 +115,7 @@ export const updateTeamAds = async (teamId: string, adIds: string[], orgId?: num
 // ─── Manager-Based APIs ───────────────────────────────────────────────────────
 
 export const toggleManagerAutoAssign = async (status: boolean, orgId?: number) => {
-   const user = getUser<any>();
+   const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
    return api.post(API_ENDPOINTS.AUTO_LEAD.MANAGER_TOGGLE, { organizationId: org, autoAssignLeads: status });
 };
@@ -122,7 +124,7 @@ export const getManagerAdsStatus = async (managerId: string) => {
    try {
       const res = await api.get(API_ENDPOINTS.AUTO_LEAD.MANAGER_ADS_STATUS(managerId));
       const ads = res.data?.data?.ads || [];
-      const selectedAdIds: string[] = ads.filter((ad: any) => ad.autoAssignLeads === true).map((ad: any) => ad.adId);
+      const selectedAdIds: string[] = ads.filter((ad: Record<string, unknown>) => ad.autoAssignLeads === true).map((ad: Record<string, unknown>) => ad.adId);
       return { selectedAdIds };
    } catch {
       return { selectedAdIds: [] };
@@ -130,7 +132,7 @@ export const getManagerAdsStatus = async (managerId: string) => {
 };
 
 export const updateManagerAds = async (managerId: string, adIds: string[], orgId?: number) => {
-   const user = getUser<any>();
+   const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
    return api.post(API_ENDPOINTS.AUTO_LEAD.MANAGER_UPDATE_ADS, {
       managerId,
@@ -144,7 +146,7 @@ export const updateManagerAds = async (managerId: string, adIds: string[], orgId
 
 export const getManagersList = async (orgId?: number): Promise<StaffMember[]> => {
    try {
-      const user = getUser<any>();
+      const user = getUser<{ organizationId?: number }>();
       const org = orgId || user?.organizationId;
       const res = await api.post(API_ENDPOINTS.STAFF.GET_BY_ROLE, { organizationId: org, role: 'manager' });
       return res.data?.data || [];
@@ -155,7 +157,7 @@ export const getManagersList = async (orgId?: number): Promise<StaffMember[]> =>
 
 export const getTeamsList = async (orgId?: number): Promise<TeamItem[]> => {
    try {
-      const user = getUser<any>();
+      const user = getUser<{ organizationId?: number }>();
       const org = orgId || user?.organizationId;
       const res = await api.post(API_ENDPOINTS.TEAM.GET_ALL, { organizationId: org });
       return res.data?.data || [];
