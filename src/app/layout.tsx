@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 import { FeedbackProvider } from "@/core/contexts/FeedbackContext";
+import { GoogleProvider } from "@/core/contexts/GoogleProvider";
 
 export default function RootLayout({
   children,
@@ -26,7 +27,9 @@ export default function RootLayout({
     <html lang="en" className={`${roboto.variable} font-sans`}>
       <body>
         <FeedbackProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <GoogleProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </GoogleProvider>
         </FeedbackProvider>
       </body>
     </html>
