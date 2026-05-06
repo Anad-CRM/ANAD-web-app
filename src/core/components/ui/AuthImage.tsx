@@ -1,4 +1,5 @@
 import React, { useEffect, useState, ImgHTMLAttributes } from "react";
+import Image from "next/image";
 import { api } from "@/core/api/axios";
 
 interface AuthImageProps extends ImgHTMLAttributes<HTMLImageElement> {
@@ -27,9 +28,11 @@ export function AuthImage({ src, fallbackSrc, alt, ...rest }: AuthImageProps) {
       }
     }
 
-    setBlobUrl(null);
-    setErrored(false);
-    load();
+    Promise.resolve().then(() => {
+      setBlobUrl(null);
+      setErrored(false);
+      load();
+    });
 
     return () => {
       cancelled = true;
@@ -41,5 +44,14 @@ export function AuthImage({ src, fallbackSrc, alt, ...rest }: AuthImageProps) {
 
   if (!displaySrc) return null;
 
-  return <img src={displaySrc} alt={alt} {...rest} />;
+  return (
+    <Image
+      src={displaySrc}
+      alt={alt || ""}
+      width={100}
+      height={100}
+      {...(rest as Record<string, unknown>)}
+      unoptimized
+    />
+  );
 }

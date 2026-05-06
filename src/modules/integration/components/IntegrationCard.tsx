@@ -1,5 +1,5 @@
 import React from "react";
-import { MessageCircle, Globe, Facebook, Instagram, MousePointerClick, ChevronRight } from "lucide-react";
+import { MessageCircle, Globe, Facebook, Instagram, ChevronRight } from "lucide-react";
 import { IntegrationItem } from "../types";
 
 export const IntegrationIcons: Record<string, React.FC<{ active?: boolean }>> = {

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { AdCampaign } from "../types";
 import { Text } from "@/core/components/ui/Text";
 import { MousePointerClick, Eye, Users, Percent, ArrowRight } from "lucide-react";
@@ -21,7 +22,14 @@ export const CampaignCard = ({ data }: { data?: AdCampaign }) => {
         <div className="relative">
             {data?.thumbnailUrl ? (
                 <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                    <img src={data.thumbnailUrl} alt="Ad" className="w-full h-full object-cover" />
+                    <Image 
+                      src={data.thumbnailUrl} 
+                      alt={data?.adName || "Ad"} 
+                      width={64} 
+                      height={64} 
+                      className="w-full h-full object-cover" 
+                      unoptimized
+                    />
                 </div>
             ) : (
                 <div 

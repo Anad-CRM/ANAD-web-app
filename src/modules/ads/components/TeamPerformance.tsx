@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { TeamPerformanceMetrics } from "../types";
+import { TeamPerformanceMetrics, TeamMemberPerformance } from "../types";
 import { Text } from "@/core/components/ui/Text";
 import { Users, ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 
 interface TeamPerformanceProps {
   data?: TeamPerformanceMetrics;
-  teamMembers?: any[];
+  teamMembers?: TeamMemberPerformance[];
 }
+
+
 
 function getInitialColor(index: number): string {
   const palette = [

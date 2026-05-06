@@ -25,7 +25,7 @@ export default function FollowUpPage() {
   const [activeTab, setActiveTab] = useState("total");
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
 
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       const summaryData = await getFollowUpSummary();
       if (summaryData?.data) {
@@ -39,7 +39,7 @@ export default function FollowUpPage() {
         pending: "PENDING",
       };
 
-      const params: any = { status: statusMap[activeTab] };
+      const params: Record<string, unknown> = { status: statusMap[activeTab] };
       if (activeTab === "today") {
         params.date = new Date().toISOString().split('T')[0];
         delete params.status;
@@ -53,11 +53,11 @@ export default function FollowUpPage() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [activeTab]);
 
   useEffect(() => {
-    fetchData();
-  }, [activeTab]);
+    Promise.resolve().then(() => fetchData());
+  }, [fetchData]);
 
   const handleReschedule = (id: number) => {
     console.log("Reschedule prompt triggered for ID:", id);

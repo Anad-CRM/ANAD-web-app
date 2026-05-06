@@ -6,7 +6,7 @@ import { GlobalMetrics } from "@/modules/ads/components/GlobalMetrics";
 import { CampaignCard } from "@/modules/ads/components/CampaignCard";
 import { TeamPerformance } from "@/modules/ads/components/TeamPerformance";
 import { PerformanceGraph } from "@/modules/ads/components/PerformanceGraph";
-import { AdCampaign, GlobalAdMetrics } from "@/modules/ads/types";
+import { AdCampaign, GlobalAdMetrics, TeamMemberPerformance } from "@/modules/ads/types";
 import { getAllAds } from "@/modules/ads/api/adsApi";
 import { getLeadSummary } from "@/modules/overview/api/overviewApi";
 
@@ -143,7 +143,7 @@ export default function AdsAnalyticsPage() {
   const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null);
   const [globalCounts, setGlobalCounts] = useState<{ total: number; closed: number } | null>(null);
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMemberPerformance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

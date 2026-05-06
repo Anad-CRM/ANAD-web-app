@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { Pencil, Clock, CalendarDays, CheckCircle2 } from 'lucide-react';
 import { Text } from '@/core/components/ui/Text';
 import { COLORS } from '@/core/components/theme/colors';
 import { CreateFollowUpModal } from './CreateFollowUpModal';
 
-export const LeadFollowUpCard: React.FC<{ followups: any[], leadId?: string, assignedUserId?: string, onRefresh?: () => void }> = ({ followups, leadId, assignedUserId, onRefresh }) => {
+export const LeadFollowUpCard: React.FC<{ followups: Record<string, unknown>[], leadId?: string, assignedUserId?: string, onRefresh?: () => void }> = ({ followups, leadId, assignedUserId, onRefresh }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   return (
@@ -19,7 +20,7 @@ export const LeadFollowUpCard: React.FC<{ followups: any[], leadId?: string, ass
 
       {followups && followups.length > 0 ? (
         <div className="flex flex-col gap-4 overflow-y-auto pr-2">
-          {followups.map((fu, idx) => {
+          {followups.map((fu: any, idx) => {
             const fuDate = fu.date ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(fu.date)) : '';
             const fuTime = fu.time || '';
             const isCompleted = fu.status?.toLowerCase() === 'completed';
@@ -41,14 +42,14 @@ export const LeadFollowUpCard: React.FC<{ followups: any[], leadId?: string, ass
                   {fuTime && (
                     <div className="flex items-center gap-1.5 text-slate-500 bg-slate-50 px-2 py-1 rounded-md">
                       <Clock className="w-3.5 h-3.5" />
-                      <Text size="custom" weight="medium" className="text-[12px]">{fuTime}</Text>
+                      <Text size="custom" weight="medium" className="text-[12px]">{fuTime as string}</Text>
                     </div>
                   )}
                 </div>
 
-                {fu.description && (
+                {fu.description && typeof fu.description === 'string' && (
                   <Text size="sm" className="text-slate-600 mt-2 line-clamp-2">
-                    {fu.description}
+                    {fu.description as string}
                   </Text>
                 )}
               </div>

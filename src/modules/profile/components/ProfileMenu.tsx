@@ -53,7 +53,7 @@ const SectionHeader = ({ title }: { title: string }) => (
 );
 
 export default function ProfileMenu() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   
   const role = user?.role || "User";
   const isAdmin = role === "Admin";
@@ -163,7 +163,7 @@ export default function ProfileMenu() {
                   <>
                     <MenuItem 
                       icon={renderIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2")} 
-                      title="Auto Lead Assigning" 
+                      title="Lead Allocation" 
                       href="/auto-lead" 
                     />
                     <MenuItem 

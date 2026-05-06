@@ -22,7 +22,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
     : 'N/A';
 
   const assignedName = lead.assignedUser?.userName || 'Not Assigned';
-  const source = lead.source || (lead.ad as any)?.platform || 'Unknown';
+  const source = (lead.source || (lead.ad as { platform?: string } | null)?.platform || 'Unknown') as string;
   const adName = lead.ad?.adName || 'Unknown';
   const status = lead.status || 'Unknown';
   const phoneNumber = lead.mobileNumber || 'N/A';
@@ -166,7 +166,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   );
 };
 
-const InfoItem: React.FC<{ label: string; value: string; icon: React.ReactNode; valueColor?: string }> = ({ label, value, icon, valueColor }) => (
+const InfoItem: React.FC<{ label: string; value: string; icon: React.ReactNode; valueColor?: string }> = ({ label, value, icon }) => (
   <div className="flex flex-col gap-1.5 overflow-hidden">
     <Text as="span" size="custom" weight="normal" className="text-[14px] text-black">
       {label}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "@/core/api/axios";
 import { API_ENDPOINTS } from "@/core/api/api";
 import type {
@@ -9,7 +10,7 @@ import type {
 
 export const StaffService = {
   async getStaffList(payload: GetStaffListPayload): Promise<StaffListResponse> {
-    const response = await api.post<any>(
+    const response = await api.post<Record<string, unknown>>(
       API_ENDPOINTS.STAFF.GET_BY_ROLE,
       { organizationId: payload.organizationId, date: payload.date }
     );
@@ -18,7 +19,7 @@ export const StaffService = {
       return { status: "failed", data: [] } as unknown as StaffListResponse;
     }
 
-    const { managers, staffMembers, teamLeaders, students } = response.data.data;
+    const { managers, staffMembers, teamLeaders, students } = response.data.data as any;
 
     const roleMap: Record<string, unknown[]> = {
       "Manager": managers ?? [],
@@ -32,13 +33,13 @@ export const StaffService = {
   },
 
   async getStaffById(userId: string | number, organizationId: string | number): Promise<StaffListResponse> {
-    const response = await api.post<any>(
+    const response = await api.post<Record<string, unknown>>(
       API_ENDPOINTS.STAFF.GET_BY_ROLE,
       { organizationId }
     );
     
     if (response.data.status === "success" && response.data.data) {
-       const { managers, staffMembers, teamLeaders, students, managerOwn } = response.data.data;
+       const { managers, staffMembers, teamLeaders, students, managerOwn } = response.data.data as any;
        const allStaff = [
          ...(managers || []), 
          ...(staffMembers || []), 
@@ -47,7 +48,7 @@ export const StaffService = {
        ];
        if (managerOwn) allStaff.push(managerOwn);
        
-       const foundStaff = allStaff.find((s: any) => String(s.id) === String(userId));
+       const foundStaff = allStaff.find((s: Record<string, unknown>) => String(s.id) === String(userId));
        if (foundStaff) {
           return { status: "success", data: [foundStaff] } as unknown as StaffListResponse;
        }

@@ -1,7 +1,6 @@
 import React from 'react';
-import { Clock, FileText, MapPin, Edit3, User } from 'lucide-react';
+import { Clock, FileText, MapPin, Edit3 } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
-import { AuthImage } from '@/core/components/ui/AuthImage';
 import { Activity } from '../../types/activity.types';
 import { SmallAvatar } from '../ActivityCards';
 

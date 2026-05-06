@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { AuthImage } from "@/core/components/ui/AuthImage";
 import { getPlatformColor } from "@/core/components/theme/colors";
 import { 
@@ -23,7 +24,17 @@ export function AdImage({
 }) {
   const isExternal = src.startsWith("http://") || src.startsWith("https://");
   if (isExternal) {
-    return <img src={src} alt={alt ?? ""} className={className} style={style} />;
+    return (
+      <Image 
+        src={src} 
+        alt={alt ?? ""} 
+        className={className} 
+        style={style} 
+        width={32} 
+        height={32} 
+        unoptimized 
+      />
+    );
   }
   return (
     <AuthImage src={src} alt={alt} className={className} style={style} fallbackSrc={undefined} />

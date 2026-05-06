@@ -3,9 +3,9 @@ import { API_ENDPOINTS } from "@/core/api/api";
 import { CallAnalyticsResponse } from "../types";
 import { getUser } from "@/core/utils/auth";
 
-export const getCallAnalytics = async (params?: Record<string, any>): Promise<CallAnalyticsResponse | null> => {
+export const getCallAnalytics = async (params?: Record<string, unknown>): Promise<CallAnalyticsResponse | null> => {
   try {
-    const user = getUser<any>();
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     const orgId = user?.organizationId || params?.organizationId;
 
     const response = await api.post(API_ENDPOINTS.DASHBOARD.CALLS_ANALYTICS, {
@@ -19,9 +19,9 @@ export const getCallAnalytics = async (params?: Record<string, any>): Promise<Ca
   }
 };
 
-export const getStaffCallBreakdown = async (params?: Record<string, any>) => {
+export const getStaffCallBreakdown = async (params?: Record<string, unknown>) => {
   try {
-    const user = getUser<any>();
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     const orgId = user?.organizationId || params?.organizationId;
 
     const response = await api.get(API_ENDPOINTS.DASHBOARD.GET_AUTO_EOD, {
@@ -29,7 +29,7 @@ export const getStaffCallBreakdown = async (params?: Record<string, any>) => {
     });
 
     if (response.data.success) {
-      return response.data.data.map((user: any) => {
+      return response.data.data.map((user: { eods: { userId: string, callStats: { totalCalls: number, totalIncomingCalls: number, totalMissedCalls: number, totalDuration: number } }[], userName: string }) => {
         const stats = user.eods[0]?.callStats || {};
         return {
           id: user.eods[0]?.userId || Math.random().toString(),

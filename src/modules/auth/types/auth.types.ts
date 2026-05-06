@@ -19,7 +19,7 @@ export interface User {
     businessCategory?: string;
   } | null;
   avatar?: string | null;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface LoginPayload {

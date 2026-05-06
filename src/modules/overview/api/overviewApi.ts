@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "@/core/api/axios";
 import { API_ENDPOINTS } from "@/core/api/api";
 import { LeadCountsData, StaffEodSummary } from "../types";
@@ -11,11 +12,10 @@ export const getLeadSummary = async (params?: {
   staffId?: string;
 }): Promise<LeadCountsData | null> => {
   try {
-    const user = getUser<any>();
-    // Mirrors the Flutter model: prefer organization.id, fall back to organizationId
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; organization?: { id?: string } }>();
     const orgId = user?.organization?.id || user?.organizationId;
 
-    const queryParams: Record<string, any> = {
+    const queryParams: Record<string, unknown> = {
       filter: params?.filter || "Overall",
       organizationId: orgId,
     };
@@ -61,15 +61,15 @@ export const getLeadSummary = async (params?: {
         rnr: lc.rnrCount ?? 0,
       },
     };
-  } catch (error: any) {
-    console.error("[API Error] Failed to fetch lead counts:", error?.response?.status, error?.message);
+  } catch (error: unknown) {
+    console.error("[API Error] Failed to fetch lead counts:", (error as any)?.response?.status, (error as any)?.message);
     return null;
   }
 };
 
-export const getEodReports = async (params?: Record<string, any>): Promise<StaffEodSummary[]> => {
+export const getEodReports = async (params?: Record<string, Record<string, unknown>>): Promise<StaffEodSummary[]> => {
   try {
-    const user = getUser<any>();
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     const orgId = user?.organizationId;
 
     const response = await api.get(API_ENDPOINTS.DASHBOARD.GET_AUTO_EOD, {

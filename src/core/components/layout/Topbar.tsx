@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/modules/auth/hooks/useAuth";
-import { COLORS } from "@/core/components/theme/colors";
 import Link from "next/link";
 
 export default function Topbar() {

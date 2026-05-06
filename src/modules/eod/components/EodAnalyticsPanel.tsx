@@ -30,18 +30,30 @@ export const EodAnalyticsPanel = ({ data }: { data: EodStaffMember | null }) => 
 
   if (!data || (totalLeads === 0 && totalCalls === 0)) {
     return (
-      <div className="flex flex-col flex-1 h-full bg-[#233A78] rounded-[24px] p-6 text-white font-sans shadow-xl items-center justify-center opacity-90 border border-white/10">
-        <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-md flex flex-col items-center text-center max-w-[300px]">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-4 opacity-50"><path d="M21 21L15 15"/><circle cx="11" cy="11" r="8"/></svg>
-          <h3 className="text-[18px] font-bold mb-2">No data recorded</h3>
-          <p className="text-[13px] text-white/60">This staff member hasn't recorded any activity leads or calls for today yet.</p>
+      <div className="flex flex-col flex-1 min-h-[600px] bg-[#233A78] rounded-[24px] p-6 text-white font-sans shadow-xl items-center justify-center opacity-90 border border-white/10 relative overflow-hidden group">
+        {/* Animated background hint */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity" />
+        
+        <div className="bg-white/10 p-10 rounded-[32px] backdrop-blur-xl flex flex-col items-center text-center max-w-[340px] border border-white/10 shadow-2xl relative z-10">
+          <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 ring-8 ring-white/5">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/40"><path d="M21 21L15 15"/><circle cx="11" cy="11" r="8"/></svg>
+          </div>
+          <h3 className="text-[22px] font-bold mb-3 tracking-tight">No data recorded</h3>
+          <p className="text-[14px] text-white/50 leading-relaxed">
+            This staff member hasn&apos;t recorded any activity leads or calls for the selected period yet.
+          </p>
+          <div className="mt-8 flex gap-2">
+            <div className="w-2 h-2 rounded-full bg-white/20 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-white/20 animate-pulse delay-75" />
+            <div className="w-2 h-2 rounded-full bg-white/20 animate-pulse delay-150" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col flex-1 h-full bg-[#233A78] rounded-[24px] p-6 text-white font-sans shadow-xl overflow-y-auto">
+    <div className="flex flex-col min-h-[600px] bg-[#233A78] rounded-[24px] p-6 text-white font-sans shadow-xl">
       
       <div className="flex flex-col flex-1 mb-8">
         <div className="flex items-center gap-3 mb-8">
@@ -89,6 +101,21 @@ export const EodAnalyticsPanel = ({ data }: { data: EodStaffMember | null }) => 
         </div>
       </div>
 
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+      `}</style>
     </div>
   );
 };
