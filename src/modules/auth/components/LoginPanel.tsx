@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import { Eye, EyeOff } from "lucide-react";
+
 interface LoginPanelProps {
   onCreateAccount: () => void;
 }
