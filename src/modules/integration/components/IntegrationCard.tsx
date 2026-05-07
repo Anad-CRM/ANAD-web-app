@@ -54,11 +54,14 @@ export const IntegrationCard: React.FC<Props> = ({ item, isActive, onClick, inde
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-[178px] w-full flex-col justify-between overflow-hidden text-left transition-all duration-200 outline-none ${
+      className={`flex min-h-[178px] w-full flex-col justify-between overflow-hidden text-left transition-all duration-300 ease-in-out outline-none ${
         isActive
-          ? "border-none bg-[#233A78] text-white shadow-[0_18px_30px_rgba(35,58,120,0.16)] rounded-[28px] z-10 relative xl:-mr-[32px] xl:w-[calc(100%+32px)]"
+          ? `border-none bg-[#233A78] text-white shadow-[-12px_18px_30px_rgba(35,58,120,0.16)] rounded-l-[28px] z-10 relative xl:-mr-[50px] xl:w-[calc(100%+50px)] ${
+              index === 0 ? "rounded-tr-[28px]" : "rounded-tr-none"
+            } ${index === total - 1 ? "rounded-br-[28px]" : "rounded-br-none"}`
           : "border-white/80 bg-[#F8FAFE] text-[#1A1A1A] shadow-[0_14px_28px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_18px_32px_rgba(15,23,42,0.12)] rounded-[28px]"
       }`}
+      style={isActive ? { clipPath: 'inset(-100px 0 -100px -100px)' } : {}}
     >
       <div className="p-5 lg:p-6">
         <div className="mb-4">
