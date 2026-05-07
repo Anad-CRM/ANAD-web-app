@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Facebook, Instagram } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { connectFacebookWebhook, disconnectFacebookWebhook } from '../api/integrationApi';
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFacebookSdk } from '../hooks/useFacebookSdk';
@@ -96,23 +96,21 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
         "rounded-[28px]"
       }`}
       style={{ 
-        backgroundColor: COLORS.primaryDark,
+        backgroundColor: COLORS.primary,
         transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
       }}
     >
         <div className="flex items-start gap-4 mb-5">
           <div className="flex gap-2 shrink-0">
             <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
-              style={{ backgroundColor: COLORS.primaryDark }}
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg bg-white"
             >
-              <Facebook className="w-5 h-5 text-white fill-white" />
+              <img src="/fb.png" alt="Facebook" className="w-6 h-6 object-contain" />
             </div>
             <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
-              style={{ backgroundColor: COLORS.primaryDark }}
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg bg-white"
             >
-              <Instagram className="w-5 h-5 text-white" />
+              <img src="/instagram.png" alt="Instagram" className="w-6 h-6 object-contain" />
             </div>
           </div>
           <div>
@@ -151,7 +149,7 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
                 onClick={handleConnect}
                 disabled={loading}
                 className="w-full text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 flex justify-center items-center"
-                style={{ backgroundColor: COLORS.primaryDark }}
+                style={{ backgroundColor: COLORS.primary }}
               >
                 {loading ? (
                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

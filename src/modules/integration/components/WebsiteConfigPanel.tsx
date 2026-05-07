@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Rocket, Copy, Trash2, RefreshCw, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import { Copy, Trash2, RefreshCw, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
@@ -57,16 +57,15 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
         "rounded-[28px]"
       }`}
       style={{ 
-        backgroundColor: COLORS.primaryDark,
+        backgroundColor: COLORS.primary,
         transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
       }}
     >
       <div className="flex items-start gap-4 mb-5">
         <div 
-          className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
-          style={{ backgroundColor: COLORS.primaryDark }}
+          className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg bg-white"
         >
-          <Rocket className="w-5 h-5 text-white" strokeWidth={2.5} />
+          <img src="/website.png" alt="Website" className="w-7 h-7 object-contain" />
         </div>
         <div>
           <h2 className="text-white text-[17px] font-bold leading-tight mb-1">
@@ -137,7 +136,7 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
               onClick={handleGenerate}
               disabled={loading}
               className="w-full text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 flex items-center justify-center gap-2"
-              style={{ backgroundColor: COLORS.primaryDark }}
+              style={{ backgroundColor: COLORS.primary }}
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

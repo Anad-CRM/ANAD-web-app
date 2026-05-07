@@ -75,7 +75,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
         "rounded-[28px]"
       }`}
       style={{ 
-        backgroundColor: COLORS.primaryDark,
+        backgroundColor: COLORS.primary,
         transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
       }}
     >
@@ -83,7 +83,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
         <div className="flex items-center gap-4">
           <div 
             className="flex h-12 w-12 items-center justify-center rounded-full shadow-[0_8px_18px_rgba(35,58,120,0.25)]"
-            style={{ backgroundColor: COLORS.primaryDark }}
+            style={{ backgroundColor: COLORS.primary }}
           >
             <img src="/whatsapp.png" alt="WhatsApp" className="h-7 w-7 object-contain" />
           </div>
@@ -134,7 +134,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
               onClick={handleDisconnect}
               disabled={loading}
               className="flex h-[48px] w-full items-center justify-center rounded-full px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
-              style={{ backgroundColor: COLORS.primaryDark }}
+              style={{ backgroundColor: COLORS.primary }}
             >
               {loading ? (
                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -147,7 +147,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
               onClick={handleConnect}
               disabled={loading}
               className="flex h-[48px] w-full items-center justify-center rounded-full px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
-              style={{ backgroundColor: COLORS.primaryDark }}
+              style={{ backgroundColor: COLORS.primary }}
             >
               {loading ? (
                  <div className="flex items-center gap-3">

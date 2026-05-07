@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronRight, Facebook, Globe, Instagram, MessageCircle } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { IntegrationItem } from "../types";
 import { COLORS } from "@/core/components/theme/colors";
 
@@ -11,31 +11,27 @@ export const IntegrationIcons: Record<string, React.FC<{ active?: boolean }>> = 
   ),
   "whatsapp-green": () => (
     <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
-      <MessageCircle className="w-10 h-10 text-[#25D366]" fill="currentColor" />
+      <img src="/whatsapp.png" alt="WhatsApp" className="w-10 h-10 object-contain" />
     </div>
   ),
   "fb-insta": () => (
     <div className="flex items-center gap-4">
-      <div className="w-16 h-16 rounded-full bg-[#1877F2] flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
-        <Facebook className="w-10 h-10 text-white" fill="currentColor" />
+      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
+        <img src="/fb.png" alt="Facebook" className="w-9 h-9 object-contain" />
       </div>
-      <div className="w-16 h-16 rounded-[18px] bg-gradient-to-tr from-[#FFDC80] via-[#F56040] to-[#C13584] flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
-        <Instagram className="w-10 h-10 text-white" />
+      <div className="w-16 h-16 rounded-[18px] bg-white flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
+        <img src="/instagram.png" alt="Instagram" className="w-10 h-10 object-contain" />
       </div>
     </div>
   ),
   "google": () => (
-    <div className="w-16 h-16 flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)] rounded-full bg-white">
-      <div className="relative w-11 h-11">
-        <div className="absolute left-0 bottom-0 top-1/2 -mt-2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[28px] border-b-[#F4B400] rotate-[30deg]"></div>
-        <div className="absolute right-0 bottom-0 top-1/2 -mt-2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[28px] border-b-[#4285F4] -rotate-[30deg]"></div>
-        <div className="absolute left-1/2 -ml-[16px] bottom-0 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[28px] border-b-[#0F9D58]"></div>
-      </div>
+    <div className="w-16 h-16 flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)] rounded-full bg-white text-[#1A1A1A]">
+      <img src="/ads.png" alt="Google Ads" className="w-11 h-11 object-contain" />
     </div>
   ),
   "web": () => (
-    <div className="w-16 h-16 rounded-full bg-[#1D2FE8] flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
-      <Globe className="w-10 h-10 text-white" />
+    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
+      <img src="/website.png" alt="Website" className="w-10 h-10 object-contain" />
     </div>
   )
 };
@@ -63,7 +59,7 @@ export const IntegrationCard: React.FC<Props> = ({ item, isActive, onClick, inde
           : "border-white/80 bg-[#F8FAFE] text-[#1A1A1A] shadow-[0_14px_28px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_18px_32px_rgba(15,23,42,0.12)] rounded-tr-[28px] rounded-br-[28px]"
       }`}
       style={{ 
-        backgroundColor: isActive ? COLORS.primaryDark : undefined,
+        backgroundColor: isActive ? COLORS.primary : undefined,
         transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         ...(isActive ? { clipPath: 'inset(-100px 0 -100px -100px)' } : {}) 
       }}
