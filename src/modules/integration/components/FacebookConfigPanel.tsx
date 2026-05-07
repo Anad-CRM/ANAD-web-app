@@ -4,6 +4,7 @@ import { connectFacebookWebhook, disconnectFacebookWebhook } from '../api/integr
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFacebookSdk } from '../hooks/useFacebookSdk';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
+import { COLORS } from '@/core/components/theme/colors';
 
 type FacebookLoginResponse = {
   authResponse?: {
@@ -89,29 +90,34 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
 
   return (
     <div 
-      className={`bg-[#233A78] p-5 lg:p-6 flex h-full flex-col shadow-sm w-full xl:pl-[40px] animate-slide-up-fade ${
+      className={`p-5 lg:p-6 flex h-full flex-col shadow-sm w-full xl:pl-[40px] animate-slide-up-fade ${
         activeIndex === 0 ? "rounded-tr-[28px] rounded-bl-[28px] rounded-br-[28px] rounded-tl-0" : 
         activeIndex === total - 1 ? "rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0" : 
         "rounded-[28px]"
       }`}
-      style={{ transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+      style={{ 
+        backgroundColor: COLORS.primaryDark,
+        transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
+      }}
     >
         <div className="flex items-start gap-4 mb-5">
           <div className="flex gap-2 shrink-0">
-            <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
-              <Facebook className="w-6 h-6 text-white" fill="currentColor" />
+            <div 
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
+              style={{ backgroundColor: COLORS.primaryDark }}
+            >
+              <Facebook className="w-5 h-5 text-white fill-white" />
             </div>
-            <div className="w-10 h-10 rounded-[10px] bg-gradient-to-tr from-[#FFDC80] via-[#F56040] to-[#C13584] flex items-center justify-center">
-              <Instagram className="w-6 h-6 text-white" />
+            <div 
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
+              style={{ backgroundColor: COLORS.primaryDark }}
+            >
+              <Instagram className="w-5 h-5 text-white" />
             </div>
           </div>
           <div>
-            <h2 className="text-white text-[17px] font-bold leading-tight mb-2 tracking-wide">
-              Facebook & Instagram
-            </h2>
-            <div className="text-white/80 text-[13px] font-medium tracking-wide">
-               <p>Receive new leads from Facebook Forms securely into your CRM.</p>
-            </div>
+            <h2 className="text-white text-lg font-bold leading-tight">Facebook & Instagram</h2>
+            <p className="text-white/70 text-sm font-medium mt-1">Receive new leads from Facebook, Instagram in your account</p>
           </div>
         </div>
 
@@ -144,7 +150,8 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
               <button 
                 onClick={handleConnect}
                 disabled={loading}
-                className="w-full bg-[#233A78] text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 flex justify-center items-center"
+                className="w-full text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 flex justify-center items-center"
+                style={{ backgroundColor: COLORS.primaryDark }}
               >
                 {loading ? (
                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

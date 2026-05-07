@@ -95,3 +95,26 @@ export const disconnectGoogleAds = async () => {
     organizationId: user.organizationId
   });
 };
+
+export const generateSecretKey = async () => {
+  const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
+  if (!user || !user.organizationId) {
+     throw new Error("Authentication context missing");
+  }
+
+  return api.post(API_ENDPOINTS.INTEGRATION.GENERATE_KEY, {
+    organizationId: user.organizationId
+  });
+};
+
+export const disconnectSecretKey = async (secretKey: string) => {
+  const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
+  if (!user || !user.organizationId) {
+     throw new Error("Authentication context missing");
+  }
+
+  return api.post(API_ENDPOINTS.INTEGRATION.DISCONNECT_KEY, {
+    organizationId: user.organizationId,
+    secretKey
+  });
+};

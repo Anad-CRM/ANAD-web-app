@@ -67,6 +67,8 @@ export const API_ENDPOINTS = {
     DELETE_SUBSCRIPTION: "/webhook/deleteWebhookSubscription",
     CREATE_GOOGLE: "/ad/connectGoogleAds",
     DELETE_GOOGLE: "/ad/disconnectGoogleAds",
+    GENERATE_KEY: "/leads/generateKey",
+    DISCONNECT_KEY: "/leads/disconnectSecretKey",
   },
   CREATE_LEADS: {
     SINGLE: "/lead/createLead",

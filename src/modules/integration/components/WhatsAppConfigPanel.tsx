@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { ChevronDown, ClipboardList, Eye, KeyRound, MessageCircle } from 'lucide-react';
-import { disconnectWhatsAppIntegration } from '../api/integrationApi';
-import { fetchAndCreateAllWhatsAppIntegrations } from '../api/whatsappGraphApi';
+import { ChevronDown, ClipboardList, Eye, KeyRound } from 'lucide-react';
+import { COLORS } from "@/core/components/theme/colors";
+import { disconnectWhatsAppIntegration, connectWhatsAppIntegration } from "../api/integrationApi";
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
 
@@ -15,63 +15,64 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
   const isConnected = user?.isWhatsAppConnected === "Connected";
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
-  const [disconnecting, setDisconnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [loadingText, setLoadingText] = useState("Connecting...");
   const { showToast } = useFeedback();
 
   const handleConnect = async () => {
     if (!token) {
-      setError("Please paste your access token");
+      showToast("Please enter a valid access token", "error");
       return;
     }
-    setError("");
     setLoading(true);
-    setLoadingText("Fetching businesses...");
-
     try {
-      await fetchAndCreateAllWhatsAppIntegrations(token);
-      showToast("WhatsApp connected successfully! ", "success");
-      setToken("");
-    } catch (err: any) {
-      setError(err.message || "Failed to connect to WhatsApp. Please check token.");
-      showToast("Connection failed", "error");
+      await connectWhatsAppIntegration({
+        whatsappBusinessAccountId: "pending",
+        phoneNumberId: "pending",
+        displayPhoneNumber: "pending",
+        accessToken: token,
+      });
+      showToast("WhatsApp integrated successfully", "success");
+    } catch (err) {
+      showToast("Failed to integrate WhatsApp", "error");
     } finally {
       setLoading(false);
-      setLoadingText("Connecting...");
     }
   };
 
   const handleDisconnect = async () => {
-    setDisconnecting(true);
-    setError(null);
+    setLoading(true);
     try {
-       await disconnectWhatsAppIntegration();
-       alert("WhatsApp integration successfully disconnected!"); 
-    } catch (err: any) {
-       setError(err?.response?.data?.message || err.message || "Failed to disconnect integration");
+      await disconnectWhatsAppIntegration();
+      showToast("WhatsApp disconnected successfully", "success");
+    } catch (err) {
+      showToast("Failed to disconnect WhatsApp", "error");
     } finally {
-       setDisconnecting(false);
+      setLoading(false);
     }
   };
 
   return (
     <div 
-      className={`flex h-full w-full flex-col gap-4 bg-[#233A78] p-4 shadow-[0_18px_34px_rgba(35,58,120,0.18)] lg:p-5 xl:pl-[40px] animate-slide-up-fade ${
+      className={`flex h-full w-full flex-col gap-4 p-4 shadow-[0_18px_34px_rgba(35,58,120,0.18)] lg:p-5 xl:pl-[40px] animate-slide-up-fade ${
         activeIndex === 0 ? "rounded-tr-[28px] rounded-bl-[28px] rounded-br-[28px] rounded-tl-0" : 
         activeIndex === total - 1 ? "rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0" : 
         "rounded-[28px]"
       }`}
-      style={{ transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+      style={{ 
+        backgroundColor: COLORS.primaryDark,
+        transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
+      }}
     >
       <div className="rounded-[24px] bg-[#E2E8F0] px-5 py-5 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#233A78] shadow-[0_8px_18px_rgba(35,58,120,0.25)]">
-            <MessageCircle className="h-6 w-6 text-white" strokeWidth={2} />
+          <div 
+            className="flex h-12 w-12 items-center justify-center rounded-full shadow-[0_8px_18px_rgba(35,58,120,0.25)]"
+            style={{ backgroundColor: COLORS.primaryDark }}
+          >
+            <img src="/integrations/whatsapp.svg" alt="WhatsApp" className="h-6 w-6" />
           </div>
-          <div className="flex-1 text-center">
-            <h2 className="text-[20px] font-bold text-[#1a1a1a] lg:text-[22px]">WhatsApp Business API</h2>
+          <div>
+            <h2 className="text-[17px] font-bold leading-tight text-[#1A1A1A]">WhatsApp Business</h2>
+            <p className="text-[13px] font-medium text-[#64748B]">Receive new leads from Whatsapp Business in your account</p>
           </div>
         </div>
       </div>
@@ -87,9 +88,9 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             <input
               type="text"
               value={token}
-              onChange={(e) => { setToken(e.target.value); setError(null); }}
-              placeholder="paste your permanent access"
-              className={`min-w-0 flex-1 bg-transparent text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none ${error ? 'text-red-600 placeholder:text-red-300' : ''}`}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="paste your permanent access token"
+              className="min-w-0 flex-1 bg-transparent text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none"
             />
             <button type="button" className="flex h-9 w-9 items-center justify-center rounded-full text-black transition-opacity hover:opacity-70" aria-label="Show token">
               <Eye className="h-5 w-5" strokeWidth={2.5} />
@@ -100,16 +101,15 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
           </div>
         </div>
 
-        {error && <p className="mt-3 px-1 text-xs font-medium text-red-500">{error}</p>}
-
         <div className="mt-4">
           {isConnected ? (
             <button 
               onClick={handleDisconnect}
-              disabled={disconnecting}
-              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#233A78] px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
+              disabled={loading}
+              className="flex h-[48px] w-full items-center justify-center rounded-full px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
+              style={{ backgroundColor: COLORS.primaryDark }}
             >
-              {disconnecting ? (
+              {loading ? (
                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
                  "Disconnect WhatsApp Business"
@@ -119,12 +119,13 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             <button 
               onClick={handleConnect}
               disabled={loading}
-              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#233A78] px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
+              className="flex h-[48px] w-full items-center justify-center rounded-full px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
+              style={{ backgroundColor: COLORS.primaryDark }}
             >
               {loading ? (
                  <div className="flex items-center gap-3">
                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                   <span>{loadingText}</span>
+                   <span>Connecting...</span>
                  </div>
               ) : (
                  "Connect WhatsApp Business"

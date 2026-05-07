@@ -1,5 +1,9 @@
-import React from 'react';
-import { Rocket, Copy } from 'lucide-react';
+import React, { useState } from 'react';
+import { Rocket, Copy, Trash2, RefreshCw } from 'lucide-react';
+import { COLORS } from '@/core/components/theme/colors';
+import { useAuthContext } from '@/modules/auth/stores/AuthContext';
+import { useFeedback } from '@/core/contexts/FeedbackContext';
+import { generateSecretKey, disconnectSecretKey } from '../api/integrationApi';
 
 interface Props {
   activeIndex: number;
@@ -7,32 +11,129 @@ interface Props {
 }
 
 export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
+  const { user } = useAuthContext();
+  const secretKey = user?.organization?.secretKey;
+  const [loading, setLoading] = useState(false);
+  const { showToast } = useFeedback();
+
+  const handleGenerate = async () => {
+    setLoading(true);
+    try {
+      await generateSecretKey();
+      showToast(secretKey ? "Key regenerated successfully" : "Key generated successfully", "success");
+    } catch (err) {
+      showToast("Failed to generate key", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!secretKey) return;
+    setLoading(true);
+    try {
+      await disconnectSecretKey(secretKey);
+      showToast("Website integration disconnected", "success");
+    } catch (err) {
+      showToast("Failed to disconnect", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (secretKey) {
+      navigator.clipboard.writeText(secretKey);
+      showToast("Secret key copied to clipboard", "success");
+    }
+  };
+
   return (
     <div 
-      className={`bg-[#233A78] p-5 lg:p-6 flex h-full w-full flex-col shadow-sm transition-all xl:pl-[40px] animate-slide-up-fade ${
+      className={`p-5 lg:p-6 flex h-full w-full flex-col shadow-sm transition-all xl:pl-[40px] animate-slide-up-fade ${
         activeIndex === 0 ? "rounded-tr-[28px] rounded-bl-[28px] rounded-br-[28px] rounded-tl-0" : 
         activeIndex === total - 1 ? "rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0" : 
         "rounded-[28px]"
       }`}
-      style={{ transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+      style={{ 
+        backgroundColor: COLORS.primaryDark,
+        transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
+      }}
     >
       <div className="flex items-start gap-4 mb-5">
-        <Rocket className="w-10 h-10 text-white mt-1 shrink-0" strokeWidth={2} />
+        <div 
+          className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg"
+          style={{ backgroundColor: COLORS.primaryDark }}
+        >
+          <Rocket className="w-5 h-5 text-white" strokeWidth={2.5} />
+        </div>
         <div>
-          <h2 className="text-white text-[17px] font-bold leading-tight mb-2 tracking-wide">
-            Connect Your Website in<br />2 Simple Steps
+          <h2 className="text-white text-[17px] font-bold leading-tight mb-1">
+            Website & Webhooks
           </h2>
-          <div className="text-white/80 text-[13px] font-medium space-y-1 tracking-wide">
-             <p>1. Copy your unique key below</p>
-             <p>2. Share it with your website developer</p>
-          </div>
+          <p className="text-white/80 text-[13px] font-medium">
+            Receive leads from Website, LMS or any other source by using APIs
+          </p>
         </div>
       </div>
 
-      <div className="w-full flex-1 flex items-center justify-center relative bg-[#E2E8F0] rounded-[24px] p-8">
-          <div className="w-56 h-12 bg-[#233A78] rounded-xl flex items-center justify-end px-4 shadow-xl cursor-pointer hover:opacity-90 transition-all border border-white/10">
-             <Copy className="w-4 h-4 text-white" strokeWidth={2.5} />
+      <div className="p-4 lg:p-5 flex flex-col gap-4 bg-[#E2E8F0] rounded-[24px]">
+        {secretKey ? (
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl p-4 shadow-inner border border-gray-200">
+              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 block text-left">Your Unique Secret Key</label>
+              <div className="flex items-center justify-between gap-3">
+                <code className="text-sm font-mono text-gray-700 truncate flex-1">{secretKey}</code>
+                <button 
+                  onClick={copyToClipboard}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                  title="Copy Key"
+                >
+                  <Copy size={18} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button 
+                onClick={handleGenerate}
+                disabled={loading}
+                className="flex-1 h-[44px] rounded-full border-2 border-gray-300 text-gray-700 text-sm font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all disabled:opacity-50"
+              >
+                <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                Regenerate Key
+              </button>
+              <button 
+                onClick={handleDisconnect}
+                disabled={loading}
+                className="w-[44px] h-[44px] rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition-all disabled:opacity-50"
+                title="Disconnect"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
           </div>
+        ) : (
+          <div className="flex flex-col items-center py-4 text-center">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm border border-gray-100">
+              <Rocket size={32} className="text-gray-300" />
+            </div>
+            <h3 className="text-gray-800 font-bold mb-1">Scale your integration</h3>
+            <p className="text-gray-500 text-xs mb-5 max-w-[200px]">Generate a secret key to start receiving leads directly from your website.</p>
+            <button 
+              onClick={handleGenerate}
+              disabled={loading}
+              className="w-full text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 flex items-center justify-center gap-2"
+              style={{ backgroundColor: COLORS.primaryDark }}
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                "Generate Secret Key"
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
