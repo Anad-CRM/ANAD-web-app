@@ -53,7 +53,7 @@ export const WhatsAppConfigPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 rounded-r-[28px] rounded-l-none bg-[#233A78] p-4 shadow-[0_18px_34px_rgba(35,58,120,0.18)] lg:p-5">
+    <div className="flex h-full w-full flex-col gap-4 rounded-[28px] bg-[#233A78] p-4 shadow-[0_18px_34px_rgba(35,58,120,0.18)] lg:p-5">
       <div className="rounded-[24px] bg-[#E2E8F0] px-5 py-5 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#233A78] shadow-[0_8px_18px_rgba(35,58,120,0.25)]">

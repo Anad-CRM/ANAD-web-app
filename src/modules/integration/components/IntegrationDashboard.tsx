@@ -21,6 +21,8 @@ export const IntegrationDashboard: React.FC = () => {
               item={item}
               isActive={activeId === item.id}
               onClick={() => setActiveId(item.id)}
+              index={index}
+              total={INTEGRATION_LIST.length}
             />
           ))}
         </div>

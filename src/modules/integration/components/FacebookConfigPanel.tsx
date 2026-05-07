@@ -83,7 +83,7 @@ export const FacebookConfigPanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#233A78] rounded-r-[28px] rounded-l-none p-5 lg:p-6 flex h-full flex-col shadow-sm w-full">
+    <div className="bg-[#233A78] rounded-[28px] p-5 lg:p-6 flex h-full flex-col shadow-sm w-full">
         <div className="flex items-start gap-4 mb-5">
           <div className="flex gap-2 shrink-0">
             <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
