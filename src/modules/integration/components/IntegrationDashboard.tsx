@@ -28,10 +28,26 @@ export const IntegrationDashboard: React.FC = () => {
         </div>
 
         <div className="w-full self-stretch">
-          {(activeItem?.iconType === "whatsapp" || activeItem?.iconType === "whatsapp-green") && <WhatsAppConfigPanel />}
-          {activeItem?.iconType === "fb-insta" && <FacebookConfigPanel />}
-          {activeItem?.iconType === "google" && <GoogleConfigPanel />}
-          {activeItem?.iconType === "web" && <WebsiteConfigPanel />}
+          {(() => {
+            const activeIndex = INTEGRATION_LIST.findIndex(i => i.id === activeId);
+            const total = INTEGRATION_LIST.length;
+            return (
+              <>
+                {(activeItem?.iconType === "whatsapp" || activeItem?.iconType === "whatsapp-green") && (
+                  <WhatsAppConfigPanel activeIndex={activeIndex} total={total} />
+                )}
+                {activeItem?.iconType === "fb-insta" && (
+                  <FacebookConfigPanel activeIndex={activeIndex} total={total} />
+                )}
+                {activeItem?.iconType === "google" && (
+                  <GoogleConfigPanel activeIndex={activeIndex} total={total} />
+                )}
+                {activeItem?.iconType === "web" && (
+                  <WebsiteConfigPanel activeIndex={activeIndex} total={total} />
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>

@@ -1,9 +1,18 @@
 import React from 'react';
 import { Rocket, Copy } from 'lucide-react';
 
-export const WebsiteConfigPanel: React.FC = () => {
+interface Props {
+  activeIndex: number;
+  total: number;
+}
+
+export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
   return (
-    <div className="bg-[#233A78] rounded-[28px] p-5 lg:p-6 flex h-full w-full flex-col shadow-sm xl:pl-[40px]">
+    <div className={`bg-[#233A78] p-5 lg:p-6 flex h-full w-full flex-col shadow-sm transition-all duration-300 ease-in-out xl:pl-[40px] ${
+      activeIndex === 0 ? "rounded-tr-[28px] rounded-bl-[28px] rounded-br-[28px] rounded-tl-0" : 
+      activeIndex === total - 1 ? "rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0" : 
+      "rounded-[28px]"
+    }`}>
       <div className="flex items-start gap-4 mb-5">
         <Rocket className="w-10 h-10 text-white mt-1 shrink-0" strokeWidth={2} />
         <div>

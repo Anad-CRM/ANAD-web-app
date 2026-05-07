@@ -28,7 +28,12 @@ type FacebookSdk = {
   ) => void;
 };
 
-export const FacebookConfigPanel: React.FC = () => {
+interface Props {
+  activeIndex: number;
+  total: number;
+}
+
+export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
   const { user } = useAuthContext();
   const isConnected = user?.isFbConnected === "Connected";
   const [loading, setLoading] = useState(false);
@@ -83,7 +88,11 @@ export const FacebookConfigPanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#233A78] rounded-[28px] p-5 lg:p-6 flex h-full flex-col shadow-sm w-full xl:pl-[40px]">
+    <div className={`bg-[#233A78] p-5 lg:p-6 flex h-full flex-col shadow-sm w-full xl:pl-[40px] transition-all duration-300 ease-in-out ${
+      activeIndex === 0 ? "rounded-tr-[28px] rounded-bl-[28px] rounded-br-[28px] rounded-tl-0" : 
+      activeIndex === total - 1 ? "rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0" : 
+      "rounded-[28px]"
+    }`}>
         <div className="flex items-start gap-4 mb-5">
           <div className="flex gap-2 shrink-0">
             <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
