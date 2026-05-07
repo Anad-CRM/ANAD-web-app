@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { ChevronDown, ClipboardList, Eye, KeyRound } from 'lucide-react';
+import { ChevronDown, ClipboardList, Eye, EyeOff, Key } from 'lucide-react';
 import { COLORS } from "@/core/components/theme/colors";
 import { disconnectWhatsAppIntegration, connectWhatsAppIntegration } from "../api/integrationApi";
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
@@ -10,11 +9,20 @@ interface Props {
   activeIndex: number;
   total: number;
 }
+
+const HELP_TOPICS = [
+  "How to create Access token",
+  "Find your Phone Number ID",
+  "WhatsApp Business Account (WABA) ID",
+  "Setting up Webhook URL"
+];
+
 export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
   const { user } = useAuthContext();
   const isConnected = user?.isWhatsAppConnected === "Connected";
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showToken, setShowToken] = useState(false);
   const { showToast } = useFeedback();
 
   const handleConnect = async () => {
@@ -50,6 +58,15 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
     }
   };
 
+  const copyToClipboard = () => {
+    if (!token) {
+      showToast("No token to copy", "error");
+      return;
+    }
+    navigator.clipboard.writeText(token);
+    showToast("Access token copied to clipboard", "success");
+  };
+
   return (
     <div 
       className={`flex h-full w-full flex-col gap-4 p-4 shadow-[0_18px_34px_rgba(35,58,120,0.18)] lg:p-5 xl:pl-[40px] animate-slide-up-fade ${
@@ -79,24 +96,34 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
 
       <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 lg:px-5 lg:py-4">
         <div className="flex items-center gap-2.5">
-          <KeyRound className="h-5 w-5 text-[#111827]" strokeWidth={2.5} />
+          <Key className="h-5 w-5 text-[#111827]" strokeWidth={2.5} />
           <h3 className="text-[16px] font-bold text-[#111827]">Access Token</h3>
         </div>
 
-        <div className="mt-3 rounded-[16px] bg-white px-4 py-3.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">
-          <div className="flex items-center gap-3">
+        <div className="mt-3 rounded-[16px] bg-white px-4 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent focus-within:border-gray-200 transition-all">
+          <div className="flex items-center gap-1">
             <input
-              type="text"
+              type={showToken ? "text" : "password"}
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="paste your permanent access token"
-              className="min-w-0 flex-1 bg-transparent text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none"
+              className="min-w-0 flex-1 bg-transparent px-1 py-2 text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none"
             />
-            <button type="button" className="flex h-9 w-9 items-center justify-center rounded-full text-black transition-opacity hover:opacity-70" aria-label="Show token">
-              <Eye className="h-5 w-5" strokeWidth={2.5} />
+            <button 
+              type="button" 
+              onClick={() => setShowToken(!showToken)}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black" 
+              aria-label={showToken ? "Hide token" : "Show token"}
+            >
+              {showToken ? <EyeOff className="h-4 w-4" strokeWidth={2.5} /> : <Eye className="h-4 w-4" strokeWidth={2.5} />}
             </button>
-            <button type="button" className="flex h-9 w-9 items-center justify-center rounded-full text-black transition-opacity hover:opacity-70" aria-label="Copy token">
-              <ClipboardList className="h-5 w-5" strokeWidth={2.2} />
+            <button 
+              type="button" 
+              onClick={copyToClipboard}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black" 
+              aria-label="Copy token"
+            >
+              <ClipboardList className="h-4 w-4" strokeWidth={2.5} />
             </button>
           </div>
         </div>
@@ -136,19 +163,19 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
       </div>
 
       <div className="flex flex-col gap-3">
-        {[1, 2, 3, 4].map((i) => (
+        {HELP_TOPICS.map((topic, i) => (
           <button
             key={i}
             type="button"
-            className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-colors hover:bg-[#D4DEE9]"
+            className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:bg-[#D4DEE9] group"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-4 w-4 items-center justify-center rounded-full bg-black">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
                  <span className="text-[10px] font-bold text-white">?</span>
               </div>
-              <span className="text-[14px] font-medium text-[#111827]">How to create Access token</span>
+              <span className="text-[13px] font-semibold text-[#111827]">{topic}</span>
             </div>
-            <ChevronDown className="h-4 w-4 text-black" strokeWidth={2} />
+            <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
           </button>
         ))}
       </div>

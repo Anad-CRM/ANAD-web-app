@@ -164,16 +164,24 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
         </div>
 
         <div className="flex flex-col gap-3">
-          {[1, 2].map((i) => (
-            <div key={i} className="bg-[#E2E8F0] rounded-xl px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#D4DEE9] transition-colors shadow-sm">
+          {[
+            "How to get Facebook App ID",
+            "Setting up Facebook Webhook",
+            "Generating System User Access Token"
+          ].map((topic, i) => (
+            <button
+              key={i}
+              type="button"
+              className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:bg-[#D4DEE9] group"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded-full bg-black flex items-center justify-center">
-                   <span className="text-white text-[10px] font-bold">?</span>
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
+                   <span className="text-[10px] font-bold text-white">?</span>
                 </div>
-                <span className="text-[#1A1A1A] text-[14px] font-medium">How to connect Facebook</span>
+                <span className="text-[13px] font-semibold text-[#111827]">{topic}</span>
               </div>
-              <ChevronDown className="w-5 h-5 text-black" strokeWidth={2} />
-            </div>
+              <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
+            </button>
           ))}
         </div>
     </div>

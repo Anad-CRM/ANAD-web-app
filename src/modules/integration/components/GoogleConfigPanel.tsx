@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { connectGoogleAds, disconnectGoogleAds } from '../api/integrationApi';
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
@@ -110,6 +111,8 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
           </p>
         </div>
         
+        {error && <p className="text-red-500 text-xs font-medium px-1">{error}</p>}
+
         <div className="flex gap-4">
           {isConnected ? (
             <button 
@@ -138,6 +141,28 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-3 mt-5">
+        {[
+          "How to get Google Ads Customer ID",
+          "Setting up Google Cloud Project",
+          "Generating OAuth 2.0 Credentials"
+        ].map((topic, i) => (
+          <button
+            key={topic}
+            type="button"
+            className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:bg-[#D4DEE9] group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
+                 <span className="text-[10px] font-bold text-white">?</span>
+              </div>
+              <span className="text-[13px] font-semibold text-[#111827]">{topic}</span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
+          </button>
+        ))}
       </div>
     </div>
   );

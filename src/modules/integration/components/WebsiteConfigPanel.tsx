@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Rocket, Copy, Trash2, RefreshCw } from 'lucide-react';
+import { Rocket, Copy, Trash2, RefreshCw, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
@@ -14,6 +14,7 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
   const { user } = useAuthContext();
   const secretKey = user?.organization?.secretKey;
   const [loading, setLoading] = useState(false);
+  const [showKey, setShowKey] = useState(false);
   const { showToast } = useFeedback();
 
   const handleGenerate = async () => {
@@ -80,13 +81,25 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
       <div className="p-4 lg:p-5 flex flex-col gap-4 bg-[#E2E8F0] rounded-[24px]">
         {secretKey ? (
           <div className="space-y-4">
-            <div className="bg-white rounded-xl p-4 shadow-inner border border-gray-200">
+            <div className="bg-white rounded-[16px] p-4 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent">
               <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 block text-left">Your Unique Secret Key</label>
-              <div className="flex items-center justify-between gap-3">
-                <code className="text-sm font-mono text-gray-700 truncate flex-1">{secretKey}</code>
+              <div className="flex items-center justify-between gap-1">
+                <input 
+                  type={showKey ? "text" : "password"}
+                  value={secretKey}
+                  readOnly
+                  className="text-sm font-mono text-gray-700 bg-transparent flex-1 focus:outline-none py-1"
+                />
+                <button 
+                  onClick={() => setShowKey(!showKey)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+                  title={showKey ? "Hide Key" : "Show Key"}
+                >
+                  {showKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
                 <button 
                   onClick={copyToClipboard}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
                   title="Copy Key"
                 >
                   <Copy size={18} />
@@ -134,6 +147,28 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="flex flex-col gap-3 mt-5">
+        {[
+          "How to integrate API",
+          "Webhook security best practices",
+          "Testing your website integration"
+        ].map((topic, i) => (
+          <button
+            key={i}
+            type="button"
+            className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:bg-[#D4DEE9] group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
+                 <span className="text-[10px] font-bold text-white">?</span>
+              </div>
+              <span className="text-[13px] font-semibold text-[#111827]">{topic}</span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
+          </button>
+        ))}
       </div>
     </div>
   );
