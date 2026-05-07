@@ -85,7 +85,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             className="flex h-12 w-12 items-center justify-center rounded-full shadow-[0_8px_18px_rgba(35,58,120,0.25)]"
             style={{ backgroundColor: COLORS.primaryDark }}
           >
-            <img src="/integrations/whatsapp.svg" alt="WhatsApp" className="h-6 w-6" />
+            <img src="/whatsapp.png" alt="WhatsApp" className="h-7 w-7 object-contain" />
           </div>
           <div>
             <h2 className="text-[17px] font-bold leading-tight text-[#1A1A1A]">WhatsApp Business</h2>

@@ -86,10 +86,13 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
     >
       <div className="flex items-start gap-4 mb-5">
         <div 
-          className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: COLORS.primaryDark }}
+          className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-white shadow-sm"
         >
-          <img src="/integrations/google_ads.svg" alt="Google Ads" className="w-6 h-6" />
+          <div className="relative w-7 h-7">
+            <div className="absolute left-0 bottom-0 top-1/2 -mt-1 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[18px] border-b-[#F4B400] rotate-[30deg]"></div>
+            <div className="absolute right-0 bottom-0 top-1/2 -mt-1 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[18px] border-b-[#4285F4] -rotate-[30deg]"></div>
+            <div className="absolute left-1/2 -ml-[10px] bottom-0 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[18px] border-b-[#0F9D58]"></div>
+          </div>
         </div>
         <div>
           <h2 className="text-white text-[17px] font-bold leading-tight mb-1">

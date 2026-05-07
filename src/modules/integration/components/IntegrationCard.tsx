@@ -6,7 +6,7 @@ import { COLORS } from "@/core/components/theme/colors";
 export const IntegrationIcons: Record<string, React.FC<{ active?: boolean }>> = {
   "whatsapp": ({ active }) => (
     <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)] ${active ? "bg-white/15" : "bg-white"}`}>
-      <MessageCircle className={`w-10 h-10 ${active ? "text-[#25D366]" : "text-[#25D366]"}`} fill="currentColor" />
+      <img src="/whatsapp.png" alt="WhatsApp" className="w-10 h-10 object-contain" />
     </div>
   ),
   "whatsapp-green": () => (
