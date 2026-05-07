@@ -70,28 +70,34 @@ export const CallTypeFilters = ({
   ];
 
   return (
-    <div className="flex flex-wrap gap-4 mb-8 font-sans">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3 mb-8">
       {filters.map((filter) => {
         const isActive = activeFilter === filter.type;
         return (
           <button
             key={filter.type}
             onClick={() => onFilterChange(filter.type)}
-            className={`flex items-center gap-3 px-5 py-2.5 rounded-full transition-all border-none ${
+            className={`bg-white border rounded-2xl p-4 flex flex-col items-center justify-center transition-all group relative ${
               isActive 
-                ? "bg-[#3561A5] shadow-lg shadow-blue-900/20 scale-[1.05]" 
-                : "bg-[#3561A5]/40 hover:bg-[#3561A5]/60"
+                ? "border-[#233A78] shadow-md ring-1 ring-[#233A78]/20 bg-[#F8FAFC]" 
+                : "border-[#E2E8F0] shadow-sm hover:shadow-md hover:border-[#A5BCD1]"
             }`}
           >
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#3561A5] shadow-sm flex-shrink-0">
-                {filter.icon}
-            </div>
-            <span className="text-white text-[15px] font-semibold whitespace-nowrap flex items-center gap-2">
-              {filter.label || filter.type}
-              <span className={`text-[12px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-white/20' : 'bg-black/10'}`}>
-                {getCount(filter.type)}
-              </span>
+            <span 
+              className={`text-[24px] font-black leading-none mb-1.5 transition-transform group-hover:scale-110 inline-block ${
+                isActive ? "text-[#233A78]" : "text-slate-800"
+              }`}
+            >
+              {getCount(filter.type)}
             </span>
+            <span className={`text-[11px] font-bold text-center leading-tight uppercase tracking-wider ${
+              isActive ? "text-[#233A78]" : "text-slate-500"
+            }`}>
+              {filter.label || filter.type}
+            </span>
+            {isActive && (
+              <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#233A78]"></div>
+            )}
           </button>
         );
       })}

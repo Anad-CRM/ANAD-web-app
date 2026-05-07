@@ -80,56 +80,15 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
 
   return (
     <div className="flex flex-col gap-6 mb-8 w-full font-sans">
-      {/* Top Navigation Row */}
       <div className="flex items-center justify-between w-full">
-        {/* Breadcrumb Pill */}
-        <div className="bg-[#233A78] text-white px-8 py-2.5 rounded-tr-[24px] rounded-bl-[2px] rounded-tl-[24px] rounded-br-[2px] text-[15px] font-semibold shadow-md inline-block">
-          Call Analytics
+        <div>
+          <h2 className="text-[28px] font-extrabold text-black leading-tight tracking-tight whitespace-nowrap">
+            Call Analytics
+          </h2>
         </div>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          {/* Calendar Picker Trigger */}
-          <div className="relative">
-            <button 
-              onClick={() => setShowDateDropdown(!showDateDropdown)}
-              className="flex items-center justify-center w-11 h-11 bg-[#233A78] text-white rounded-xl shadow-lg hover:opacity-95 transition-all active:scale-95"
-            >
-              <Calendar size={20} />
-            </button>
-            
-            {showDateDropdown && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                {dateOptions.map((opt) => (
-                  <button
-                    key={opt.label}
-                    onClick={() => handleDateSelect(opt)}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedDateLabel === opt.label ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button className="flex items-center gap-2 px-6 h-11 bg-[#233A78] text-white rounded-xl shadow-lg text-[14px] font-bold transition-all hover:opacity-95 hover:scale-[1.02] active:scale-[0.98]">
-            <Download size={18} className="rotate-180" />
-            <span>Export Report</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Secondary Filter Row */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          {/* Active Date Label Display */}
-          <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium shadow-sm flex items-center gap-2">
-            <Calendar size={14} className="text-[#233A78]" />
-            {selectedDateLabel}
-          </div>
-
-          {/* Staff Filter (Role Based) */}
           {isAdminOrTL && (
             <div className="relative">
               <button 
@@ -142,7 +101,7 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
               </button>
               
               {showStaffDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
                   <button
                     onClick={() => handleStaffSelect(null)}
                     className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedStaffName === "All Staff" ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
@@ -162,6 +121,30 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
               )}
             </div>
           )}
+
+          <div className="relative">
+            <button 
+              onClick={() => setShowDateDropdown(!showDateDropdown)}
+              className="flex items-center gap-2 px-5 h-11 bg-[#233A78] text-white rounded-xl shadow-lg hover:opacity-95 transition-all active:scale-95 text-[14px] font-bold"
+            >
+              <Calendar size={18} />
+              <span>{selectedDateLabel}</span>
+            </button>
+            
+            {showDateDropdown && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                {dateOptions.map((opt) => (
+                  <button
+                    key={opt.label}
+                    onClick={() => handleDateSelect(opt)}
+                    className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedDateLabel === opt.label ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

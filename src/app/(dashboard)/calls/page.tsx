@@ -104,7 +104,7 @@ export default function CallAnalyticsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-2 min-h-screen pb-12 bg-[#F7F8FA] animate-slide-up-fade">
+    <div className="flex flex-col gap-[22px] min-h-screen pb-12 animate-slide-up-fade">
       
       <div className="px-1 pt-2">
         <CallsHeader 
@@ -125,16 +125,16 @@ export default function CallAnalyticsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-10 mb-8 items-stretch">
-          <div className="bg-white rounded-[32px] p-2 shadow-sm border border-slate-100 flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-10 mb-8 items-stretch pt-2">
+          <div className="flex flex-col">
             <CallsOverTimeChart />
           </div>
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 flex flex-col justify-center">
+          <div className="flex flex-col justify-center">
             <CallsStatusChart analytics={analytics} />
           </div>
       </div>
 
-      <div className="bg-white rounded-[40px] p-8 shadow-sm border border-slate-100">
+      <div className="pt-4">
         <DetailedCallBreakdown data={tableData} isLoading={isLoading} />
       </div>
 
