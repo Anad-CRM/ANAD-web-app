@@ -53,25 +53,25 @@ export const WhatsAppConfigPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full flex-col gap-4 rounded-r-[30px] rounded-l-none bg-[#2B5299] p-4 shadow-[0_18px_34px_rgba(35,58,120,0.18)] lg:p-5">
-      <div className="rounded-[28px] bg-[#D9E6F2] px-5 py-5 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
+    <div className="flex h-full w-full flex-col gap-4 rounded-r-[28px] rounded-l-none bg-[#233A78] p-4 shadow-[0_18px_34px_rgba(35,58,120,0.18)] lg:p-5">
+      <div className="rounded-[24px] bg-[#E2E8F0] px-5 py-5 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1C57A6] shadow-[0_8px_18px_rgba(28,87,166,0.25)]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#233A78] shadow-[0_8px_18px_rgba(35,58,120,0.25)]">
             <MessageCircle className="h-6 w-6 text-white" strokeWidth={2} />
           </div>
           <div className="flex-1 text-center">
-            <h2 className="text-[20px] font-medium text-[#121212] lg:text-[22px]">WhatsApp Business API</h2>
+            <h2 className="text-[20px] font-bold text-[#1a1a1a] lg:text-[22px]">WhatsApp Business API</h2>
           </div>
         </div>
       </div>
 
-      <div className="rounded-[24px] bg-[#D9E6F2] px-4 py-4 lg:px-5 lg:py-4">
+      <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 lg:px-5 lg:py-4">
         <div className="flex items-center gap-2.5">
           <KeyRound className="h-5 w-5 text-[#111827]" strokeWidth={2.5} />
-          <h3 className="text-[16px] font-medium text-[#111827]">Access Token</h3>
+          <h3 className="text-[16px] font-bold text-[#111827]">Access Token</h3>
         </div>
 
-        <div className="mt-3 rounded-[18px] bg-white px-4 py-3.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">
+        <div className="mt-3 rounded-[16px] bg-white px-4 py-3.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)]">
           <div className="flex items-center gap-3">
             <input
               type="text"
@@ -96,7 +96,7 @@ export const WhatsAppConfigPanel: React.FC = () => {
             <button 
               onClick={handleDisconnect}
               disabled={disconnecting}
-              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#1C3A76] px-5 text-[15px] font-medium text-white transition-colors hover:bg-[#11234D] disabled:opacity-70"
+              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#233A78] px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
             >
               {disconnecting ? (
                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -108,7 +108,7 @@ export const WhatsAppConfigPanel: React.FC = () => {
             <button 
               onClick={handleConnect}
               disabled={loading}
-              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#1C3A76] px-5 text-[15px] font-medium text-white transition-colors hover:bg-[#11234D] disabled:opacity-70"
+              className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#233A78] px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
             >
               {loading ? (
                  <div className="flex items-center gap-3">
@@ -128,13 +128,13 @@ export const WhatsAppConfigPanel: React.FC = () => {
           <button
             key={i}
             type="button"
-            className="flex items-center justify-between rounded-[16px] bg-[#D9E6F2] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-colors hover:bg-[#d1deeb]"
+            className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-colors hover:bg-[#D4DEE9]"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-4 w-4 items-center justify-center rounded-full bg-black">
                  <span className="text-[10px] font-bold text-white">?</span>
               </div>
-              <span className="text-[14px] font-normal text-[#111827]">How to create Access taken</span>
+              <span className="text-[14px] font-medium text-[#111827]">How to create Access token</span>
             </div>
             <ChevronDown className="h-4 w-4 text-black" strokeWidth={2} />
           </button>

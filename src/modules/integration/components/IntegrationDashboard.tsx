@@ -13,7 +13,7 @@ export const IntegrationDashboard: React.FC = () => {
 
   return (
     <div className="w-full font-sans tracking-tight">
-      <div className="flex w-full flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_460px] xl:items-stretch xl:gap-0">
+      <div className="flex w-full flex-col gap-5 xl:grid xl:grid-cols-2 xl:items-stretch xl:gap-5">
         <div className="flex min-w-0 flex-1 flex-col gap-3 self-stretch">
           {INTEGRATION_LIST.map((item, index) => (
             <IntegrationCard
