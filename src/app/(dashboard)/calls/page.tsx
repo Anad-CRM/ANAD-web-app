@@ -144,6 +144,12 @@ export default function CallAnalyticsPage() {
         title={modalTitle}
         calls={modalCalls}
         isLoading={isModalLoading}
+        filters={{
+          callType: activeFilter,
+          startDate: dateRange.startDate ?? undefined,
+          endDate: dateRange.endDate ?? undefined,
+          staffId: staffId ?? undefined
+        }}
       />
 
     </div>

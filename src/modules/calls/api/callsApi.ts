@@ -24,6 +24,7 @@ export const getSpecificCallLogs = async (params: {
     startDate?: string; 
     endDate?: string; 
     staffIds?: string[];
+    limit?: number;
 }): Promise<CallLog[]> => {
     try {
       const user = getUser<{ organizationId?: string }>();

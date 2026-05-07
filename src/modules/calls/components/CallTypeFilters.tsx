@@ -86,8 +86,11 @@ export const CallTypeFilters = ({
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#3561A5] shadow-sm flex-shrink-0">
                 {filter.icon}
             </div>
-            <span className="text-white text-[15px] font-semibold whitespace-nowrap">
+            <span className="text-white text-[15px] font-semibold whitespace-nowrap flex items-center gap-2">
               {filter.label || filter.type}
+              <span className={`text-[12px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-white/20' : 'bg-black/10'}`}>
+                {getCount(filter.type)}
+              </span>
             </span>
           </button>
         );

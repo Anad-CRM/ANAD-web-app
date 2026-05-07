@@ -1,5 +1,5 @@
-import React from "react";
-import { X, User, PhoneIncoming, Search } from "lucide-react";
+import { X, User, PhoneIncoming, Search, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { CallLog } from "../types";
 import { AudioPlayer } from "@/core/components/ui/AudioPlayer";
 import { API_ENDPOINTS } from "@/core/api/api";
@@ -10,6 +10,12 @@ interface CallDetailsModalProps {
   title: string;
   calls: CallLog[];
   isLoading: boolean;
+  filters?: {
+    callType: string;
+    startDate?: string;
+    endDate?: string;
+    staffId?: string;
+  };
 }
 
 const formatDate = (dateString: string) => {
@@ -31,8 +37,25 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
   title,
   calls,
   isLoading,
+  filters,
 }) => {
+  const router = useRouter();
   if (!isOpen) return null;
+
+  const displayedCalls = calls.slice(0, 4);
+  const showSeeMore = calls.length > 4;
+
+  const handleSeeMore = () => {
+    const params = new URLSearchParams();
+    if (filters) {
+      params.set("callType", filters.callType);
+      if (filters.startDate) params.set("startDate", filters.startDate);
+      if (filters.endDate) params.set("endDate", filters.endDate);
+      if (filters.staffId) params.set("staffId", filters.staffId);
+    }
+    router.push(`/calls/logs?${params.toString()}`);
+    onClose();
+  };
 
   return (
     <div 
@@ -43,8 +66,6 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
         className="bg-white w-full max-w-xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300 relative mb-10"
         onClick={(e) => e.stopPropagation()}
       >
-        
-        {/* Premium Dark Header */}
         <div className="bg-[#233A78] px-8 py-6 text-white relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -54,7 +75,7 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
                <div>
                   <h3 className="text-[22px] font-bold tracking-tight">{title}</h3>
                   <p className="text-blue-100/70 text-sm font-medium mt-0.5">
-                    {calls.length} logs found
+                    Recent {displayedCalls.length} of {calls.length} logs
                   </p>
                </div>
             </div>
@@ -67,7 +88,6 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
           </div>
         </div>
 
-        {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#F8FAFC]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -84,7 +104,7 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {calls.map((call, idx) => (
+              {displayedCalls.map((call, idx) => (
                 <div 
                   key={idx} 
                   className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all group"
@@ -121,7 +141,6 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Audio Player Integration */}
                   <div className="mt-5">
                     {call.recordingFile ? (
                       <div className="bg-slate-50 rounded-2xl p-2 border border-slate-100">
@@ -136,6 +155,16 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
                   </div>
                 </div>
               ))}
+
+              {showSeeMore && (
+                <button 
+                  onClick={handleSeeMore}
+                  className="w-full mt-2 py-4 bg-white border-2 border-dashed border-slate-200 rounded-[32px] text-slate-500 font-bold hover:border-[#233A78] hover:text-[#233A78] hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group"
+                >
+                  <span>View All {calls.length} Records</span>
+                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              )}
             </div>
           )}
         </div>
