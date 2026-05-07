@@ -22,11 +22,18 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
     return val;
   }
 
+  function generateUUID() {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const deviceId = getOrCreate("deviceId", () => crypto.randomUUID());
-    const signinId = getOrCreate("signinId", () => crypto.randomUUID());
-    const fcmToken = getOrCreate("fcmToken", () => "web-token-" + crypto.randomUUID());
+    const deviceId = getOrCreate("deviceId", generateUUID);
+    const signinId = getOrCreate("signinId", generateUUID);
+    const fcmToken = getOrCreate("fcmToken", () => "web-token-" + generateUUID());
     await login({
       email,
       password,
