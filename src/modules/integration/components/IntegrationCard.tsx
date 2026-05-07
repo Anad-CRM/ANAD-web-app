@@ -52,10 +52,10 @@ export const IntegrationCard: React.FC<Props> = ({ item, isActive, onClick }) =>
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-[178px] w-full flex-col justify-between overflow-hidden rounded-[28px] border text-left transition-all duration-200 outline-none ${
+      className={`flex min-h-[178px] w-full flex-col justify-between overflow-hidden text-left transition-all duration-200 outline-none ${
         isActive
-          ? "border-transparent bg-[#2B5299] text-white shadow-[0_18px_30px_rgba(35,58,120,0.16)]"
-          : "border-white/80 bg-[#F8FAFE] text-[#1A1A1A] shadow-[0_14px_28px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_18px_32px_rgba(15,23,42,0.12)]"
+          ? "border-transparent bg-[#2B5299] text-white shadow-[0_18px_30px_rgba(35,58,120,0.16)] rounded-l-[28px] rounded-r-none z-10"
+          : "border-white/80 bg-[#F8FAFE] text-[#1A1A1A] shadow-[0_14px_28px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_18px_32px_rgba(15,23,42,0.12)] rounded-[28px] xl:mr-6"
       }`}
     >
       <div className="p-5 lg:p-6">

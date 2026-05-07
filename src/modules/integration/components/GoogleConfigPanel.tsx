@@ -66,7 +66,7 @@ export const GoogleConfigPanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#2B5299] rounded-3xl p-5 lg:p-6 flex flex-col shadow-sm h-full">
+    <div className="bg-[#2B5299] rounded-r-3xl rounded-l-none p-5 lg:p-6 flex flex-col shadow-sm h-full">
       <div className="flex items-start gap-4 mb-5">
         <div className="w-10 h-10 shrink-0">
           <div className="relative w-8 h-8 mt-1">
