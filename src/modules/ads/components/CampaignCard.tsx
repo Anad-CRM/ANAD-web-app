@@ -51,9 +51,13 @@ export const CampaignCard = ({ data }: { data?: AdCampaign }) => {
             {data?.adName || "Campaign Name"}
           </Text>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-lg text-xs font-semibold" style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primaryDark }}>
+            <Text 
+              weight="semibold" 
+              className="px-2.5 py-1 rounded-lg" 
+              style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primaryDark, fontSize: '12px' }}
+            >
               {data?.platform || "Platform"}
-            </span>
+            </Text>
           </div>
         </div>
         

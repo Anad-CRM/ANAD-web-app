@@ -218,9 +218,9 @@ export default function AdsAnalyticsPage() {
                   className="flex items-center gap-1.5 hover:opacity-70 transition-opacity border px-3 py-1.5 rounded-full shadow-sm"
                   style={{ backgroundColor: COLORS.surface, borderColor: COLORS.grey }}
                 >
-                  <Text size="xs" weight="bold" style={{ color: COLORS.text }}>
+                   <Text weight="bold" style={{ color: COLORS.text, fontSize: '12px' }}>
                     View All Ads
-                  </Text>
+                   </Text>
                   <svg
                     width="12"
                     height="12"

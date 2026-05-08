@@ -127,8 +127,8 @@ export default function AdDetailsPage() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
             </div>
             <div className="flex flex-col">
-              <Text as="span" size="lg" weight="bold" className="font-extrabold block" style={{ color: COLORS.text }}>{conversionRate ? `${conversionRate}%` : '--'}</Text>
-              <Text as="span" size="xs" weight="bold" className="block" style={{ color: COLORS.subtle }}>Conversion</Text>
+              <Text weight="bold" size="lg" className="font-extrabold block" style={{ color: COLORS.text }}>{conversionRate ? `${conversionRate}%` : '--'}</Text>
+              <Text weight="bold" size="xs" className="block" style={{ color: COLORS.subtle }}>Conversion</Text>
             </div>
           </div>
           <div className="w-[1px]" style={{ backgroundColor: COLORS.border }}></div>
@@ -137,8 +137,8 @@ export default function AdDetailsPage() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /></svg>
             </div>
             <div className="flex flex-col">
-              <Text as="span" size="lg" weight="bold" className="font-extrabold block" style={{ color: COLORS.text }}>{disqualifiedRate ? `${disqualifiedRate}%` : '--'}</Text>
-              <Text as="span" size="xs" weight="bold" className="block" style={{ color: COLORS.subtle }}>Disqualified</Text>
+              <Text weight="bold" size="lg" className="font-extrabold block" style={{ color: COLORS.text }}>{disqualifiedRate ? `${disqualifiedRate}%` : '--'}</Text>
+              <Text weight="bold" size="xs" className="block" style={{ color: COLORS.subtle }}>Disqualified</Text>
             </div>
           </div>
         </div>
@@ -179,8 +179,8 @@ export default function AdDetailsPage() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: COLORS.border }}><polyline points="9 18 15 12 9 6" /></svg>
             </div>
             <div className="flex flex-col mt-2">
-              <Text as="span" size="2xl" weight="bold" className="font-extrabold leading-none block" style={{ color: COLORS.text }}>{card.value != null ? card.value : '--'}</Text>
-              <Text as="span" size="xs" weight="bold" className="mt-1 truncate block" style={{ color: COLORS.muted }}>{card.title}</Text>
+              <Text weight="bold" size="2xl" className="font-extrabold leading-none block" style={{ color: COLORS.text }}>{card.value != null ? card.value : '--'}</Text>
+              <Text weight="bold" size="xs" className="mt-1 truncate block" style={{ color: COLORS.muted }}>{card.title}</Text>
             </div>
           </div>
         ))}
