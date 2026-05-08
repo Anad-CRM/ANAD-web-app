@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, Download, Users, ChevronDown } from "lucide-react";
+import { Text } from "@/core/components/ui/Text";
 import { getUser } from "@/core/utils/auth";
 import { StaffService } from "@/modules/staffs/services/staff.service";
 import { Staff } from "@/modules/staffs/types/staff.types";
@@ -82,9 +83,9 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
     <div className="flex flex-col gap-6 mb-8 w-full font-sans">
       <div className="flex items-center justify-between w-full">
         <div>
-          <h2 className="text-[28px] font-extrabold text-black leading-tight tracking-tight whitespace-nowrap">
+          <Text as="h2" weight="bold" size="custom" style={{ fontSize: '28px' }} className="text-black leading-tight tracking-tight whitespace-nowrap">
             Call Analytics
-          </h2>
+          </Text>
         </div>
 
         {/* Action Buttons */}
@@ -96,7 +97,7 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
                 className="flex items-center gap-2 px-5 h-11 bg-white border border-slate-200 rounded-xl shadow-sm text-[14px] font-semibold text-slate-700 hover:bg-slate-50 transition-all"
               >
                 <Users size={18} className="text-[#233A78]" />
-                <span>{selectedStaffName}</span>
+                <Text weight="semibold" size="custom" style={{ fontSize: '14px' }}>{selectedStaffName}</Text>
                 <ChevronDown size={16} className={`ml-1 transition-transform ${showStaffDropdown ? 'rotate-180' : ''}`} />
               </button>
               
@@ -128,7 +129,7 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
               className="flex items-center gap-2 px-5 h-11 bg-[#233A78] text-white rounded-xl shadow-lg hover:opacity-95 transition-all active:scale-95 text-[14px] font-bold"
             >
               <Calendar size={18} />
-              <span>{selectedDateLabel}</span>
+              <Text weight="bold" size="custom" style={{ fontSize: '14px' }}>{selectedDateLabel}</Text>
             </button>
             
             {showDateDropdown && (

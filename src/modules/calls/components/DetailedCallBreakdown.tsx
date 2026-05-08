@@ -1,30 +1,31 @@
 import React from "react";
 import Image from "next/image";
+import { Text } from "@/core/components/ui/Text";
 import { CallTeamRow } from "../types";
 
 export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[], isLoading: boolean }) => {
   return (
     <div className="flex flex-col w-full mt-6 font-sans">
-      <h2 className="text-[18px] font-medium text-black mb-4">Detailed Call Breakdown</h2>
+      <Text as="h2" weight="medium" className="text-black mb-4" style={{ fontSize: '18px' }}>Detailed Call Breakdown</Text>
       
       <div className="w-full">
          
-         <div className="bg-[#1E3A8A] text-white rounded-full px-10 py-4 mb-6 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center shadow-lg text-[14px] font-bold tracking-wide uppercase">
-            <div className="text-left">Sales Team</div>
-            <div>Call made</div>
-            <div>Received</div>
-            <div>Missed</div>
-            <div>Avg Duration</div>
+         <div className="bg-[#1E3A8A] text-white rounded-full px-10 py-4 mb-6 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center shadow-lg tracking-wide uppercase">
+            <Text weight="bold" className="text-left" style={{ fontSize: '14px' }}>Sales Team</Text>
+            <Text weight="bold" style={{ fontSize: '14px' }}>Call made</Text>
+            <Text weight="bold" style={{ fontSize: '14px' }}>Received</Text>
+            <Text weight="bold" style={{ fontSize: '14px' }}>Missed</Text>
+            <Text weight="bold" style={{ fontSize: '14px' }}>Avg Duration</Text>
          </div>
 
          <div className="flex flex-col gap-4 pb-4 max-h-[380px] overflow-y-auto custom-scrollbar-table pr-2">
             {isLoading ? (
               <div className="h-40 flex items-center justify-center text-slate-400 bg-slate-100/50 rounded-[32px] animate-pulse border border-dashed border-slate-200">
-                <span className="text-sm font-medium">Fetching call metrics...</span>
+                <Text weight="medium" size="sm">Fetching call metrics...</Text>
               </div>
             ) : data.length === 0 ? (
               <div className="h-40 flex items-center justify-center text-slate-400 bg-slate-100/50 rounded-[32px] border border-dashed border-slate-200">
-                <span className="text-sm font-medium">No call data found for this period.</span>
+                <Text weight="medium" size="sm">No call data found for this period.</Text>
               </div>
             ) : (
               data.map((row) => (
@@ -40,13 +41,13 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
                                 </div>
                               )}
                           </div>
-                          <span className="text-[18px] font-semibold tracking-wide group-hover:text-blue-100 transition-colors">{row.name}</span>
+                          <Text weight="semibold" className="tracking-wide group-hover:text-blue-100 transition-colors" style={{ fontSize: '18px' }}>{row.name}</Text>
                       </div>
 
-                      <div className="text-[18px] font-bold">{row.callsMade}</div>
-                      <div className="text-[18px] font-bold">{row.received}</div>
-                      <div className="text-[18px] font-bold">{row.missed}</div>
-                      <div className="text-[18px] font-bold tabular-nums tracking-tighter">{row.avgDuration}</div>
+                      <Text weight="bold" style={{ fontSize: '18px' }}>{row.callsMade}</Text>
+                      <Text weight="bold" style={{ fontSize: '18px' }}>{row.received}</Text>
+                      <Text weight="bold" style={{ fontSize: '18px' }}>{row.missed}</Text>
+                      <Text weight="bold" className="tabular-nums tracking-tighter" style={{ fontSize: '18px' }}>{row.avgDuration}</Text>
                   </div>
               ))
             )}

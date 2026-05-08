@@ -1,4 +1,5 @@
 import { X, User, PhoneIncoming, Search, ArrowRight } from "lucide-react";
+import { Text } from "@/core/components/ui/Text";
 import { useRouter } from "next/navigation";
 import { CallLog } from "../types";
 import { AudioPlayer } from "@/core/components/ui/AudioPlayer";
@@ -72,12 +73,12 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
                   <PhoneIncoming size={24} className="text-white" />
                </div>
-               <div>
-                  <h3 className="text-[22px] font-bold tracking-tight">{title}</h3>
-                  <p className="text-blue-100/70 text-sm font-medium mt-0.5">
-                    Recent {displayedCalls.length} of {calls.length} logs
-                  </p>
-               </div>
+                <div>
+                   <Text as="h3" weight="bold" className="tracking-tight" style={{ fontSize: '22px' }}>{title}</Text>
+                   <Text weight="medium" size="sm" className="text-blue-100/70 mt-0.5">
+                     Recent {displayedCalls.length} of {calls.length} logs
+                   </Text>
+                </div>
             </div>
             <button 
               onClick={onClose}
@@ -91,16 +92,16 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#F8FAFC]">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="w-12 h-12 border-4 border-[#233A78]/20 border-t-[#233A78] rounded-full animate-spin"></div>
-              <p className="text-slate-500 font-medium">Fetching details...</p>
+               <div className="w-12 h-12 border-4 border-[#233A78]/20 border-t-[#233A78] rounded-full animate-spin"></div>
+              <Text weight="medium" className="text-slate-500">Fetching details...</Text>
             </div>
           ) : calls.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center px-10">
               <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                <Search size={32} className="text-slate-300" />
+                 <Search size={32} className="text-slate-300" />
               </div>
-              <h4 className="text-slate-900 font-bold text-lg">No logs found</h4>
-              <p className="text-slate-500 text-sm mt-1">There are no call records matching the current filters.</p>
+              <Text as="h4" weight="bold" size="lg" className="text-slate-900">No logs found</Text>
+              <Text size="sm" className="text-slate-500 mt-1">There are no call records matching the current filters.</Text>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -114,29 +115,29 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
                       <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#233A78] group-hover:bg-[#233A78] group-hover:text-white transition-colors duration-300">
                         <User size={22} />
                       </div>
-                      <div className="min-w-0">
-                        <p className={`text-[17px] font-bold truncate tracking-tight ${call.name === "Unknown Lead" ? "text-slate-400" : "text-slate-900"}`}>
+                       <div className="min-w-0">
+                        <Text weight="bold" className={`truncate tracking-tight ${call.name === "Unknown Lead" ? "text-slate-400" : "text-slate-900"}`} style={{ fontSize: '17px' }}>
                           {call.name}
-                        </p>
-                        <p className="text-sm font-semibold text-[#1E40AF] mt-0.5">{call.number}</p>
+                        </Text>
+                        <Text weight="semibold" size="sm" className="text-[#1E40AF] mt-0.5">{call.number}</Text>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-slate-900">{formatDate(call.timestamp)}</p>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                     <div className="text-right">
+                      <Text weight="bold" size="sm" className="text-slate-900">{formatDate(call.timestamp)}</Text>
+                      <Text weight="bold" className="text-slate-400 uppercase tracking-widest mt-1" style={{ fontSize: '11px' }}>
                         {new Date(call.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                      </Text>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                     <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
+                       <div className="flex items-center gap-2">
                          <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                         <span className="text-[13px] font-bold text-slate-500">Duration: {call.duration}</span>
+                         <Text weight="bold" className="text-slate-500" style={{ fontSize: '13px' }}>Duration: {call.duration}</Text>
                       </div>
                       <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full">
-                         <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">{call.userName || "System"}</span>
+                         <Text weight="bold" className="text-slate-600 uppercase tracking-wider" style={{ fontSize: '11px' }}>{call.userName || "System"}</Text>
                       </div>
                     </div>
                   </div>
@@ -147,9 +148,9 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
                          <AudioPlayer src={API_ENDPOINTS.CALLS.RECORDING(call.recordingFile)} />
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 px-4 py-3 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                       <div className="flex items-center gap-2 px-4 py-3 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                         <div className="w-2 h-2 rounded-full bg-slate-300" />
-                        <span className="text-[12px] font-medium text-slate-400">No recording available</span>
+                        <Text weight="medium" className="text-slate-400" style={{ fontSize: '12px' }}>No recording available</Text>
                       </div>
                     )}
                   </div>
@@ -157,11 +158,11 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
               ))}
 
               {showSeeMore && (
-                <button 
+                 <button 
                   onClick={handleSeeMore}
                   className="w-full mt-2 py-4 bg-white border-2 border-dashed border-slate-200 rounded-[32px] text-slate-500 font-bold hover:border-[#233A78] hover:text-[#233A78] hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group"
                 >
-                  <span>View All {calls.length} Records</span>
+                  <Text weight="bold">View All {calls.length} Records</Text>
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               )}
