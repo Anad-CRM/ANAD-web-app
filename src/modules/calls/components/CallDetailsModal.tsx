@@ -64,7 +64,7 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
       onClick={onClose}
     >
       <div 
-        className="bg-white w-full max-w-xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300 relative mb-10"
+        className="bg-white w-full max-w-5xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 relative mb-10"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-[#233A78] px-8 py-6 text-white relative">
@@ -104,53 +104,51 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
               <Text size="sm" className="text-slate-500 mt-1">There are no call records matching the current filters.</Text>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-max">
               {displayedCalls.map((call, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all group"
+                  className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group flex flex-col h-full"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#233A78] group-hover:bg-[#233A78] group-hover:text-white transition-colors duration-300">
+                  <div className="flex items-start justify-between mb-5">
+                    <div className="flex items-start gap-4 min-w-0">
+                      <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-[#233A78] group-hover:bg-[#233A78] group-hover:text-white transition-all duration-300 shadow-inner flex-shrink-0">
                         <User size={22} />
                       </div>
-                       <div className="min-w-0">
+                       <div className="min-w-0 overflow-hidden">
                         <Text weight="bold" className={`truncate tracking-tight ${call.name === "Unknown Lead" ? "text-slate-400" : "text-slate-900"}`} style={{ fontSize: '17px' }}>
                           {call.name}
                         </Text>
-                        <Text weight="semibold" size="sm" className="text-[#1E40AF] mt-0.5">{call.number}</Text>
+                        <Text weight="semibold" size="sm" className="text-[#1E40AF] mt-0.5 block truncate">{call.number}</Text>
                       </div>
                     </div>
-                     <div className="text-right">
+                     <div className="text-right flex-shrink-0">
                       <Text weight="bold" size="sm" className="text-slate-900">{formatDate(call.timestamp)}</Text>
-                      <Text weight="bold" className="text-slate-400 uppercase tracking-widest mt-1" style={{ fontSize: '11px' }}>
+                      <Text weight="bold" className="text-slate-400 uppercase tracking-widest mt-1 block" style={{ fontSize: '10px' }}>
                         {new Date(call.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </Text>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                    <div className="flex items-center gap-4">
-                       <div className="flex items-center gap-2">
-                         <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                         <Text weight="bold" className="text-slate-500" style={{ fontSize: '13px' }}>Duration: {call.duration}</Text>
-                      </div>
-                      <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full">
-                         <Text weight="bold" className="text-slate-600 uppercase tracking-wider" style={{ fontSize: '11px' }}>{call.userName || "System"}</Text>
-                      </div>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-xl border border-blue-100/50">
+                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                       <Text weight="bold" className="text-[#1E40AF]" style={{ fontSize: '12px' }}>{call.duration}</Text>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100/80 rounded-xl">
+                       <Text weight="bold" className="text-slate-600 uppercase tracking-wider" style={{ fontSize: '10px' }}>{call.userName || "System"}</Text>
                     </div>
                   </div>
 
-                  <div className="mt-5">
+                  <div className="mt-auto">
                     {call.recordingFile ? (
                       <div className="bg-slate-50 rounded-2xl p-2 border border-slate-100">
                          <AudioPlayer src={API_ENDPOINTS.CALLS.RECORDING(call.recordingFile)} />
                       </div>
                     ) : (
-                       <div className="flex items-center gap-2 px-4 py-3 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                        <div className="w-2 h-2 rounded-full bg-slate-300" />
-                        <Text weight="medium" className="text-slate-400" style={{ fontSize: '12px' }}>No recording available</Text>
+                       <div className="flex items-center gap-3 px-4 py-3 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                        <Text weight="medium" className="text-slate-400 italic" style={{ fontSize: '12px' }}>No recording available</Text>
                       </div>
                     )}
                   </div>
@@ -160,10 +158,10 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
               {showSeeMore && (
                  <button 
                   onClick={handleSeeMore}
-                  className="w-full mt-2 py-4 bg-white border-2 border-dashed border-slate-200 rounded-[32px] text-slate-500 font-bold hover:border-[#233A78] hover:text-[#233A78] hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group"
+                  className="md:col-span-2 w-full mt-2 py-4 bg-white border-2 border-dashed border-slate-200 rounded-[32px] text-slate-500 font-bold hover:border-[#233A78] hover:text-[#233A78] hover:bg-blue-50 transition-all flex items-center justify-center gap-3 group"
                 >
-                  <Text weight="bold">View All {calls.length} Records</Text>
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  <Text weight="bold" style={{ fontSize: '15px' }}>View All {calls.length} Records</Text>
+                  <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               )}
             </div>
