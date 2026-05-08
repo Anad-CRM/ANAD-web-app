@@ -1,6 +1,7 @@
 import React from 'react';
 import { User } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
 import { AuthImage } from '@/core/components/ui/AuthImage';
 import { AudioPlayer } from '@/core/components/ui/AudioPlayer';
 import { Activity, FollowupConfig, StatusConfig } from '../types/activity.types';
@@ -23,15 +24,16 @@ export const SmallAvatar: React.FC<{ user: { avatar?: string, userName?: string 
 };
 
 export const Chip: React.FC<{ label: string; color: string; grey?: boolean }> = ({ label, color, grey }) => (
-  <span
-    className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap"
+   <Text
+    weight="semibold"
+    className="inline-flex items-center px-2 py-0.5 rounded-full whitespace-nowrap"
     style={grey
-      ? { color: '#475569', backgroundColor: '#F1F5F9' }
-      : { color, backgroundColor: `${color}1A` }
+      ? { color: '#475569', backgroundColor: '#F1F5F9', fontSize: '11px' }
+      : { color, backgroundColor: `${color}1A`, fontSize: '11px' }
     }
   >
     {label}
-  </span>
+  </Text>
 );
 
 export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) => {
@@ -41,12 +43,12 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
   const user = activity.user;
   return (
     <div className="flex flex-col">
-      <span className="text-[14px] font-bold text-black leading-tight">
+      <Text weight="bold" className="text-black leading-tight" style={{ fontSize: '14px' }}>
         {title}
-      </span>
-      <span className="text-[12px] text-gray-500 mt-0.5 font-medium">
+      </Text>
+      <Text weight="medium" className="text-gray-500 mt-0.5" style={{ fontSize: '12px' }}>
         By {user?.userName ?? 'test organization'}
-      </span>
+      </Text>
 
       {activity.fileName && (
         <div className="mt-2 text-left">
@@ -68,12 +70,12 @@ export const ManualCard: React.FC<{ activity: Activity; cfg: FollowupConfig }> =
 
   return (
     <div className="flex flex-col">
-      <span className="text-[14px] font-bold text-black leading-tight">
+      <Text weight="bold" className="text-black leading-tight" style={{ fontSize: '14px' }}>
         {title}
-      </span>
-      <span className="text-[12px] text-gray-500 mt-0.5 font-medium">
+      </Text>
+      <Text weight="medium" className="text-gray-500 mt-0.5" style={{ fontSize: '12px' }}>
         By {user?.userName ?? 'test organization'}
-      </span>
+      </Text>
     </div>
   );
 };
@@ -86,12 +88,12 @@ export const StatusCard: React.FC<{ activity: Activity; cfg: StatusConfig }> = (
 
   return (
     <div className="flex flex-col">
-      <span className="text-[14px] font-bold text-black leading-tight">
+      <Text weight="bold" className="text-black leading-tight" style={{ fontSize: '14px' }}>
         {displayTitle}
-      </span>
-      <span className="text-[12px] text-gray-500 mt-0.5 font-medium">
+      </Text>
+      <Text weight="medium" className="text-gray-500 mt-0.5" style={{ fontSize: '12px' }}>
         By {user?.userName ?? 'test organization'}
-      </span>
+      </Text>
     </div>
   );
 };

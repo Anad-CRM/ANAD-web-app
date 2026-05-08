@@ -1,6 +1,7 @@
 import React from 'react';
 import { Phone, MessageCircle, Users, FileText, ChevronRight, X } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
 
 const ACTIVITY_TYPES = [
   { label: 'Phone Call', icon: <Phone size={18} />,        color: COLORS.anccent_green },
@@ -25,7 +26,7 @@ export const AddActivityModal: React.FC<Props> = ({ onClose, onSelectType }) => 
       onClick={e => e.stopPropagation()}
     >
       <div className="flex justify-between items-center px-5 py-4 border-b border-slate-100">
-        <span className="text-[18px] font-semibold text-slate-800">Add Activity</span>
+        <Text weight="semibold" className="text-slate-800" style={{ fontSize: '18px' }}>Add Activity</Text>
         <button
           onClick={onClose}
           className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors"
@@ -50,7 +51,7 @@ export const AddActivityModal: React.FC<Props> = ({ onClose, onSelectType }) => 
             >
               {t.icon}
             </div>
-            <span className="flex-1 text-[15px] font-medium text-slate-800">{t.label}</span>
+            <Text weight="medium" className="flex-1 text-slate-800" style={{ fontSize: '15px' }}>{t.label}</Text>
             <ChevronRight size={16} className="text-slate-400" />
           </button>
         ))}
