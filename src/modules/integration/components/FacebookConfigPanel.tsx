@@ -5,6 +5,7 @@ import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFacebookSdk } from '../hooks/useFacebookSdk';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
 import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
 
 type FacebookLoginResponse = {
   authResponse?: {
@@ -114,8 +115,8 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             </div>
           </div>
           <div>
-            <h2 className="text-white text-lg font-bold leading-tight">Facebook & Instagram</h2>
-            <p className="text-white/70 text-sm font-medium mt-1">Receive new leads from Facebook, Instagram in your account</p>
+            <Text as="h2" className="text-white" weight="bold" style={{ fontSize: '1.125rem', lineHeight: '1.25' }}>Facebook & Instagram</Text>
+            <Text className="text-white/70" size="sm" weight="medium" style={{ marginTop: '4px' }}>Receive new leads from Facebook, Instagram in your account</Text>
           </div>
         </div>
 
@@ -124,12 +125,12 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             <div className="text-[#E65100] mt-0.5">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </div>
-            <p className="text-[12px] text-[#E65100] leading-snug font-medium">
+            <Text className="text-[#E65100]" size="custom" weight="medium" style={{ fontSize: '12px', lineHeight: '1.25' }}>
               Important: You will be asked to grant permissions for Lead Access, Pages, and Ads Management to complete the integration setup accurately.
-            </p>
+            </Text>
           </div>
           
-          {error && <p className="text-red-500 text-xs font-medium px-1 mb-4">{error}</p>}
+          {error && <Text className="text-red-500 font-medium px-1 mb-4" size="xs">{error}</Text>}
 
           <div className="flex gap-4">
             {isConnected ? (
@@ -174,9 +175,9 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
-                   <span className="text-[10px] font-bold text-white">?</span>
+                   <Text weight="bold" className="text-white" size="custom" style={{ fontSize: '10px' }}>?</Text>
                 </div>
-                <span className="text-[13px] font-semibold text-[#111827]">{topic}</span>
+                <Text weight="semibold" className="text-[#111827]" size="xs">{topic}</Text>
               </div>
               <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
             </button>

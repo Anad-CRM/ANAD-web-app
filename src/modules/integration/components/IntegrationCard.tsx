@@ -2,6 +2,7 @@ import React from "react";
 import { ChevronRight } from "lucide-react";
 import { IntegrationItem } from "../types";
 import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 export const IntegrationIcons: Record<string, React.FC<{ active?: boolean }>> = {
   "whatsapp": ({ active }) => (
@@ -68,16 +69,27 @@ export const IntegrationCard: React.FC<Props> = ({ item, isActive, onClick, inde
         <div className="mb-4">
           <IconComponent active={isActive} />
         </div>
-        <p className={`max-w-[560px] text-[15px] leading-6 font-medium ${isActive ? "text-white/90" : "text-[#1F2937]"}`}>
+        <Text 
+          className={isActive ? "text-white/90" : "text-[#1F2937]"}
+          size="custom"
+          weight="medium"
+          style={{ fontSize: '15px', lineHeight: '1.5rem' }}
+        >
           {item.description}
-        </p>
+        </Text>
       </div>
 
       <div className="flex justify-end px-5 pb-5 lg:px-6 lg:pb-6">
-        <span className="inline-flex items-center gap-2 rounded-full bg-[#1C3A76] px-5 py-2 text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(15,23,42,0.18)]">
+        <Text 
+          as="span"
+          className="inline-flex items-center gap-2 rounded-full bg-[#1C3A76] px-5 py-2 text-white shadow-[0_10px_20px_rgba(15,23,42,0.18)]"
+          size="custom"
+          weight="semibold"
+          style={{ fontSize: '15px' }}
+        >
           {item.actionText}
           <ChevronRight className="w-4 h-4" strokeWidth={3} />
-        </span>
+        </Text>
       </div>
     </button>
   );

@@ -5,6 +5,7 @@ import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
 import { useGoogleLogin } from '@react-oauth/google';
 import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
 
 type GoogleCodeResponse = {
   code: string;
@@ -91,12 +92,12 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
           <img src="/ads.png" alt="Google Ads" className="w-7 h-7 object-contain" />
         </div>
         <div>
-          <h2 className="text-white text-[17px] font-bold leading-tight mb-1">
+          <Text as="h2" weight="bold" className="text-white mb-1" style={{ fontSize: '17px', lineHeight: '1.25' }}>
             Google Ads
-          </h2>
-          <p className="text-white/80 text-[13px] font-medium">
+          </Text>
+          <Text weight="medium" className="text-white/80" size="xs">
             Receive new leads from Google Ads Lead Form Assets in your account
-          </p>
+          </Text>
         </div>
       </div>
 
@@ -105,12 +106,12 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
           <div className="text-[#1565C0] mt-0.5">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           </div>
-          <p className="text-[12px] text-[#1565C0] leading-snug font-medium">
+          <Text weight="medium" className="text-[#1565C0]" size="custom" style={{ fontSize: '12px', lineHeight: '1.25' }}>
             Linking your Google Ads account allows the CRM to automatically capture leads from Lead Form Extensions without manual exports.
-          </p>
+          </Text>
         </div>
         
-        {error && <p className="text-red-500 text-xs font-medium px-1">{error}</p>}
+        {error && <Text className="text-red-500 font-medium px-1" size="xs">{error}</Text>}
 
         <div className="flex gap-4">
           {isConnected ? (
@@ -155,9 +156,9 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
           >
             <div className="flex items-center gap-3">
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
-                 <span className="text-[10px] font-bold text-white">?</span>
+                 <Text weight="bold" className="text-white" size="custom" style={{ fontSize: '10px' }}>?</Text>
               </div>
-              <span className="text-[13px] font-semibold text-[#111827]">{topic}</span>
+              <Text weight="semibold" className="text-[#111827]" size="xs">{topic}</Text>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
           </button>
