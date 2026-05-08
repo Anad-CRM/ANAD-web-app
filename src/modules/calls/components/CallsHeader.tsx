@@ -25,15 +25,12 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
   const isAdminOrTL = user?.role === "Admin" || user?.role === "Manager" || user?.role === "Team Leader";
 
   useEffect(() => {
-    if (isAdminOrTL) {
+    if (isAdminOrTL && user?.organizationId) {
       const fetchStaff = async () => {
-        const response = await StaffService.getStaffList({
-          organizationId: user.organizationId,
-          role: "Staff Member",
-          date: new Date().toISOString()
-        });
+        const response = await StaffService.getAllStaff(user.organizationId, user.role);
         if (response.status === "success") {
-          setStaff(response.data);
+          const filteredStaff = response.data.filter((s: Staff) => s.id !== (user as any).id);
+          setStaff(filteredStaff);
         }
       };
       fetchStaff();
