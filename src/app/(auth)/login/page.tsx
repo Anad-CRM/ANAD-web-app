@@ -21,17 +21,16 @@ export default function LoginPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  if (isLoading || isAuthenticated) {
-    return <FullScreenLoader />;
-  }
-
   return (
-    <AuthPanel>
-      {view === "login" ? (
-        <LoginPanel onCreateAccount={() => setView("category")} />
-      ) : (
-        <CategorySelectPanel onBack={() => setView("login")} />
-      )}
-    </AuthPanel>
+    <>
+      {(isLoading || isAuthenticated) && <FullScreenLoader />}
+      <AuthPanel>
+        {view === "login" ? (
+          <LoginPanel onCreateAccount={() => setView("category")} />
+        ) : (
+          <CategorySelectPanel onBack={() => setView("login")} />
+        )}
+      </AuthPanel>
+    </>
   );
 }
