@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
-import { Eye, EyeOff } from "lucide-react";
+import { User, Lock, Eye, EyeOff } from "lucide-react";
+import Button from "@/core/components/ui/Button";
+import TextField from "@/core/components/ui/TextField";
+import { Text } from "@/core/components/ui/Text";
 
 interface LoginPanelProps {
   onCreateAccount: () => void;
@@ -14,6 +16,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
   const { login, isPending, error } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   function getOrCreate(key: string, generate: () => string): string {
     if (typeof window === "undefined") return "";
@@ -43,96 +46,75 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
       signinId,
     });
   }
-  const [showPassword, setShowPassword] = useState(false);
+
   return (
-    <>
-      <div className="px-[30px] pt-[50px] pb-[20px]">
-        <h2 className="text-[22px] font-bold text-[#0D1B3E] mb-[4px]">
-          Welcome Back
-        </h2>
-        <p className="text-[14px] text-[#5A7190] font-medium">Login here</p>
-      </div>
+    <div className="flex flex-col items-center w-full">
+      <Text as="h2" weight="bold" size="lg" className="text-white mb-3 opacity-90 tracking-wide uppercase">
+        User Login
+      </Text>
 
-      <div className="w-full h-[1px] bg-[#C8D6E5]" />
+      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3.5 max-w-[380px]">
+        <TextField
+          type="email"
+          placeholder="User Name"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          icon={<User size={16} />}
+          className="rounded-full shadow-sm h-[42px]"
+        />
 
-      <div className="bg-[#D6E4F0] px-[30px] pt-[20px] pb-[30px]">
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <label className="text-[13px] font-semibold text-[#0D1B3E] mb-[6px]">
-            Email
-          </label>
-          <input
-            type="email"
+        <div className="relative w-full">
+          <TextField
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-[42px] rounded-[12px] bg-white px-[16px] text-[14px] outline-none mb-[16px] focus:ring-2 focus:ring-[#1E56A0]/40"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            icon={<Lock size={16} />}
+            className="rounded-full shadow-sm h-[42px]"
           />
-
-          <label className="text-[13px] font-semibold text-[#0D1B3E] mb-[6px]">
-            Password
-          </label>
-          <div className="relative mb-[10px]">
-            <input
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-[42px] rounded-[12px] bg-white px-[16px] text-[14px] outline-none pr-[40px] focus:ring-2 focus:ring-[#1E56A0]/40"
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#163172]"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-
-          <div className="flex justify-end mb-[24px]">
-            <Link
-              href="/forgot-password"
-              className="text-[13px] font-semibold text-[#163172]"
-            >
-              Forgot Password
-            </Link>
-          </div>
-
-          {error && (
-            <p className="text-[12px] text-red-500 mb-3 text-center">
-              {error}
-            </p>
-          )}
-
-          <button
-            disabled={isPending}
-            className="h-[44px] rounded-full bg-[#163172] text-white text-[14px] font-bold shadow-[0_4px_12px_rgba(22,49,114,0.3)] mb-[8px]"
-          >
-            {isPending ? "Signing in…" : "Sign in"}
-          </button>
-
-          <div className="flex items-center justify-center gap-[12px] my-[8px]">
-            <span className="text-[12px] text-[#5A7190] italic">Or</span>
-          </div>
-
           <button
             type="button"
-            className="h-[44px] rounded-full bg-[#163172] text-white text-[14px] font-bold shadow-[0_4px_12px_rgba(30,86,160,0.3)]"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1E56A0] transition-colors z-10"
           >
-            Login With Google
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
+        </div>
 
-          <div className="text-center mt-[28px] mb-[10px]">
-            <button
-              type="button"
-              onClick={onCreateAccount}
-              className="text-[15px] font-bold text-[#0D1B3E] bg-transparent border-none cursor-pointer"
-            >
-              Create New Account
-            </button>
-          </div>
-        </form>
-      </div>
-    </>
+        <div className="flex items-center justify-between px-2">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              className="w-3 h-3 rounded-sm border-white/40 bg-transparent text-[#1E56A0] focus:ring-0 cursor-pointer" 
+            />
+            <span className="text-[10px] text-white/80 group-hover:text-white transition-colors">Remember me</span>
+          </label>
+          <Link
+            href="/forgot-password"
+            className="text-[10px] font-medium text-white/80 hover:text-white transition-all underline underline-offset-2"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        {error && (
+          <p className="text-[10px] text-red-300 text-center">
+            {error}
+          </p>
+        )}
+
+        <Button
+          type="submit"
+          variant="white"
+          size="md"
+          disabled={isPending}
+          className="mt-3 w-[180px] self-center rounded-full text-[#1E56A0] hover:scale-105 transition-transform font-bold"
+        >
+          {isPending ? "Logging in..." : "Login"}
+        </Button>
+      </form>
+    </div>
   );
 }

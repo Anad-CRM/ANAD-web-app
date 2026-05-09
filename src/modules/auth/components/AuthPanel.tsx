@@ -4,13 +4,18 @@ interface AuthPanelProps {
   children: React.ReactNode;
 }
 
-export default function AuthPanel({ children }: AuthPanelProps) {
+export default function AuthPanel({
+  children,
+}: AuthPanelProps) {
   return (
-    <div className="relative w-[420px]">
-      <div className="absolute w-[100px] h-[100px] border border-white/30 rounded-full -top-[50px] -left-[50px] z-20" />
-
-      <div className="relative w-[420px] rounded-[20px] bg-white shadow-[0_8px_24px_rgba(27,58,122,0.18)] overflow-hidden font-['Inter']">
-        <div className="absolute w-[100px] h-[100px] rounded-full bg-[#9DB2CE] opacity-40 -top-[50px] -left-[50px] z-10" />
+    <div 
+      className="relative w-[560px] h-[355px] rounded-[10px] overflow-hidden flex items-center justify-center transform transition-all duration-300 shadow-2xl"
+      style={{
+        background: 'linear-gradient(90deg, #1E56A0 0%, #D6E4F0 100%)',
+        boxShadow: '0px 13px 43px 0px #78787838'
+      }}
+    >
+      <div className="relative z-10 w-full px-10 py-6">
         {children}
       </div>
     </div>
