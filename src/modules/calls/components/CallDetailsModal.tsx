@@ -3,7 +3,7 @@ import { Text } from "@/core/components/ui/Text";
 import { useRouter } from "next/navigation";
 import { CallLog } from "../types";
 import { AudioPlayer } from "@/core/components/ui/AudioPlayer";
-import { API_ENDPOINTS } from "@/core/api/api";
+import { getRecordingUrl } from "../api/callsApi";
 
 interface CallDetailsModalProps {
   isOpen: boolean;
@@ -142,13 +142,17 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="mt-auto">
+                  <div className="mt-4">
                     {call.recordingFile ? (
-                      <div className="bg-slate-50 rounded-2xl p-1.5 border border-slate-100 group-hover:border-slate-200 transition-colors">
-                         <AudioPlayer src={API_ENDPOINTS.CALLS.RECORDING(call.recordingFile)} />
+                      <div className="space-y-1.5">
+                        <Text weight="bold" className="text-slate-800" style={{ fontSize: '13px' }}>Call Recording</Text>
+                        <AudioPlayer 
+                          src={getRecordingUrl(call.recordingFile)} 
+                          className="w-full !bg-transparent !p-0 !border-0"
+                        />
                       </div>
                     ) : (
-                       <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                       <div className="flex items-center gap-3 px-4 py-3 bg-white/40 rounded-2xl border border-dashed border-slate-200">
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                         <Text weight="medium" className="text-slate-400 italic" style={{ fontSize: '11px' }}>No recording available</Text>
                       </div>
@@ -160,9 +164,9 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
               {showSeeMore && (
                  <button 
                   onClick={handleSeeMore}
-                  className="md:col-span-2 w-full mt-4 py-5 bg-[#233A78] text-white rounded-[32px] font-bold hover:bg-[#1a2b59] hover:shadow-xl shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-3 group active:scale-[0.98]"
+                  className="md:col-span-2 w-full mt-4 py-5 bg-[#233A78] text-white rounded-[32px] hover:bg-[#1a2b59] hover:shadow-xl shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-3 group active:scale-[0.98]"
                 >
-                  <span className="text-[16px] tracking-tight">View All {effectiveTotalCount} Records</span>
+                  <Text weight="bold" size="custom" className="tracking-tight" style={{ fontSize: '16px' }}>View All {effectiveTotalCount} Records</Text>
                   <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               )}

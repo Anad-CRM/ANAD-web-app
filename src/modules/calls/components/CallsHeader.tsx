@@ -102,17 +102,21 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
                 <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
                   <button
                     onClick={() => handleStaffSelect(null)}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedStaffName === "All Staff" ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
+                    className={`w-full text-left px-4 py-3 transition-colors ${selectedStaffName === "All Staff" ? 'bg-slate-50' : ''}`}
                   >
-                    All Staff
+                    <Text size="sm" weight={selectedStaffName === "All Staff" ? "bold" : "normal"} className={selectedStaffName === "All Staff" ? 'text-[#233A78]' : 'text-slate-600'}>
+                      All Staff
+                    </Text>
                   </button>
                   {staff.map((s) => (
                     <button
                       key={s.id}
                       onClick={() => handleStaffSelect(s)}
-                      className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedStaffName === s.userName ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
+                      className={`w-full text-left px-4 py-3 transition-colors ${selectedStaffName === s.userName ? 'bg-slate-50' : ''}`}
                     >
-                      {s.userName}
+                      <Text size="sm" weight={selectedStaffName === s.userName ? "bold" : "normal"} className={selectedStaffName === s.userName ? 'text-[#233A78]' : 'text-slate-600'}>
+                        {s.userName}
+                      </Text>
                     </button>
                   ))}
                 </div>
@@ -135,9 +139,11 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
                   <button
                     key={opt.label}
                     onClick={() => handleDateSelect(opt)}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedDateLabel === opt.label ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
+                    className={`w-full text-left px-4 py-3 transition-colors ${selectedDateLabel === opt.label ? 'bg-slate-50' : ''}`}
                   >
-                    {opt.label}
+                    <Text size="sm" weight={selectedDateLabel === opt.label ? "bold" : "normal"} className={selectedDateLabel === opt.label ? 'text-[#233A78]' : 'text-slate-600'}>
+                      {opt.label}
+                    </Text>
                   </button>
                 ))}
               </div>

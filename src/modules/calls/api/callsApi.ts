@@ -49,7 +49,7 @@ export const getSpecificCallLogs = async (params: {
             userName: item.lead.userName,
             mobileNumber: item.lead.mobileNumber
           } : undefined,
-          name: item.lead?.userName || "Unknown Lead"
+          name: item.lead?.userName || item.lead?.name || item.name || item.leadName || item.customerName || "Unknown Lead"
         }));
 
         return {
@@ -94,4 +94,7 @@ export const getStaffCallBreakdown = async (params?: Record<string, unknown>) =>
     console.error("Failed to fetch staff call breakdown:", error);
     return [];
   }
+};
+export const getRecordingUrl = (fileName: string): string => {
+  return API_ENDPOINTS.CALLS.RECORDING(fileName);
 };
