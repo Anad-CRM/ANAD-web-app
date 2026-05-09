@@ -49,51 +49,62 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <Text as="h2" weight="bold" size="lg" className="text-white mb-3 opacity-90 tracking-wide uppercase">
+      <h2 
+        className="text-white font-semibold opacity-100 tracking-normal mb-8"
+        style={{ fontSize: '19.31px', lineHeight: '19.31px' }}
+      >
         User Login
-      </Text>
+      </h2>
 
-      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3.5 max-w-[380px]">
-        <TextField
-          type="email"
-          placeholder="User Name"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          icon={<User size={16} />}
-          className="rounded-full shadow-sm h-[42px]"
-        />
+      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5 items-center">
+        <div className="w-[350px]">
+          <TextField
+            type="email"
+            placeholder="User Name"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            icon={<User size={18} color="#5E5E5E" />}
+            className="rounded-full shadow-sm h-[64px] text-[15px]"
+          />
+        </div>
 
-        <div className="relative w-full">
+        <div className="relative w-[350px]">
           <TextField
             type={showPassword ? "text" : "password"}
             placeholder="Password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock size={16} />}
-            className="rounded-full shadow-sm h-[42px]"
+            icon={<Lock size={18} color="#5E5E5E" />}
+            className="rounded-full shadow-sm h-[64px] text-[15px]"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1E56A0] transition-colors z-10"
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-[#5E5E5E] hover:text-[#1E56A0] transition-colors z-10"
           >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
 
-        <div className="flex items-center justify-between px-2">
+        <div className="flex items-center justify-between w-[350px] px-2 mt-1">
           <label className="flex items-center gap-2 cursor-pointer group">
             <input 
               type="checkbox" 
-              className="w-3 h-3 rounded-sm border-white/40 bg-transparent text-[#1E56A0] focus:ring-0 cursor-pointer" 
+              className="w-3.5 h-3.5 rounded-sm border-white/40 bg-transparent text-[#1E56A0] focus:ring-0 cursor-pointer" 
             />
-            <span className="text-[10px] text-white/80 group-hover:text-white transition-colors">Remember me</span>
+            <span 
+              className="text-white/80 group-hover:text-white transition-colors font-medium font-poppins"
+              style={{ fontSize: '13px', lineHeight: '12px' }}
+            >
+              Remember me
+            </span>
           </label>
           <Link
             href="/forgot-password"
-            className="text-[10px] font-medium text-white/80 hover:text-white transition-all underline underline-offset-2"
+            className="font-medium text-white/80 hover:text-white transition-all underline underline-offset-2 font-poppins"
+            style={{ fontSize: '13px', lineHeight: '12px' }}
           >
             Forgot password?
           </Link>
@@ -105,15 +116,19 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
           </p>
         )}
 
-        <Button
+        <button
           type="submit"
-          variant="white"
-          size="md"
           disabled={isPending}
-          className="mt-3 w-[180px] self-center rounded-full text-[#1E56A0] hover:scale-105 transition-transform font-bold"
+          className="mt-6 w-[200px] h-[50px] rounded-full font-medium hover:bg-gray-50 transition-all flex items-center justify-center font-poppins shadow-lg"
+          style={{ 
+            backgroundColor: '#FFFFFF',
+            color: '#5E5E5E',
+            fontSize: '20px',
+            lineHeight: '20px'
+          }}
         >
           {isPending ? "Logging in..." : "Login"}
-        </Button>
+        </button>
       </form>
     </div>
   );
