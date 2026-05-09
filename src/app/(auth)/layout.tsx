@@ -23,8 +23,9 @@ export default function AuthLayout({
       <DecorativeSphere 
         size="450px" 
         className="bottom-[-150px] left-[-100px]" 
-        color="rgba(169, 200, 243, 0.2)"
-        blur="100px"
+        color="rgba(169, 200, 243, 0.25)"
+        blur="60px"
+        backdropBlur="10px"
       />
 
       <div className="relative z-10 flex flex-col items-center w-full px-4">
