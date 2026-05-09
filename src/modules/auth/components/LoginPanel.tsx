@@ -64,7 +64,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            icon={<User size={18} color="#5E5E5E" />}
+            icon={<User size={18} color="#5E5E5E" strokeWidth={2.5} />}
             className="rounded-full shadow-sm h-[64px] text-[15px]"
           />
         </div>
@@ -76,7 +76,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock size={18} color="#5E5E5E" />}
+            icon={<Lock size={18} color="#5E5E5E" strokeWidth={2.5} />}
             className="rounded-full shadow-sm h-[64px] text-[15px]"
           />
           <button
@@ -103,7 +103,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
           </label>
           <Link
             href="/forgot-password"
-            className="font-medium text-white/80 hover:text-white transition-all underline underline-offset-2 font-poppins"
+            className="font-medium text-white/80 hover:text-white transition-all font-poppins"
             style={{ fontSize: '13px', lineHeight: '12px' }}
           >
             Forgot password?

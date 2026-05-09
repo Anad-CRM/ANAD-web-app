@@ -25,14 +25,14 @@ export default function TextField({
       )}
       <div className="relative group">
         {icon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1E56A0] transition-colors group-focus-within:text-[#0D1B3E]">
+          <div className="absolute left-10 top-1/2 -translate-y-1/2 transition-colors">
             {icon}
           </div>
         )}
         <input
           className={clsx(
             "w-full h-[48px] rounded-[14px] bg-white text-[15px] text-[#0D1B3E] outline-none transition-all duration-200 placeholder:text-gray-400",
-            icon ? "pl-12 pr-4" : "px-4",
+            icon ? "pl-18 pr-4" : "px-4",
             error ? "ring-2 ring-red-500" : "focus:ring-2 focus:ring-white/20",
             className
           )}

@@ -29,7 +29,7 @@ export default function AuthLayout({
         <div className="mt-14 flex items-center justify-center">
           <p 
             className="text-white font-medium text-center"
-            style={{ fontSize: '20px', lineHeight: '20px' }}
+            style={{ fontSize: '18px', lineHeight: '18px' }}
           >
             To create a new account.
             <span className="underline cursor-pointer ml-1 hover:text-white/80 transition-colors">
