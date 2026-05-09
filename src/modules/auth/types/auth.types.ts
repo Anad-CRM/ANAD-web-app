@@ -17,7 +17,11 @@ export interface User {
     id: string;
     organizationName: string;
     businessCategory?: string;
+    secretKey?: string;
   } | null;
+  isWhatsAppConnected?: string;
+  isFacebookConnected?: string;
+  isGoogleConnected?: string;
   avatar?: string | null;
   [key: string]: unknown;
 }

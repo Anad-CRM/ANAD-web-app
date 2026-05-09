@@ -1,94 +1,183 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { KeyRound, Eye, ClipboardList, ChevronDown } from 'lucide-react';
-import { connectWhatsAppIntegration } from '../api/integrationApi';
+import { ChevronDown, ClipboardList, Eye, EyeOff, Key } from 'lucide-react';
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
+import { disconnectWhatsAppIntegration, connectWhatsAppIntegration } from "../api/integrationApi";
+import { useAuthContext } from '@/modules/auth/stores/AuthContext';
+import { useFeedback } from '@/core/contexts/FeedbackContext';
 
-export const WhatsAppConfigPanel: React.FC = () => {
+interface Props {
+  activeIndex: number;
+  total: number;
+}
+
+const HELP_TOPICS = [
+  "How to create Access token",
+  "Find your Phone Number ID",
+  "WhatsApp Business Account (WABA) ID",
+  "Setting up Webhook URL"
+];
+
+export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
+  const { user } = useAuthContext();
+  const isConnected = user?.isWhatsAppConnected === "Connected";
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [showToken, setShowToken] = useState(false);
+  const { showToast } = useFeedback();
 
   const handleConnect = async () => {
-    if (!token.trim()) {
-       setError("Access Token is required");
-       return;
+    if (!token) {
+      showToast("Please enter a valid access token", "error");
+      return;
     }
-    
     setLoading(true);
-    setError(null);
     try {
-       await connectWhatsAppIntegration({
-           whatsappBusinessAccountId: "DUMMY_ACCOUNT_ID",
-           phoneNumberId: "DUMMY_PHONE_ID",
-           displayPhoneNumber: "DUMMY_PHONE",
-           accessToken: token
-       });
-       setToken("");
-       alert("WhatsApp integration successfully saved!"); 
-    } catch (err: any) {
-       setError(err?.response?.data?.message || err.message || "Failed to connect integration");
+      await connectWhatsAppIntegration({
+        whatsappBusinessAccountId: "pending",
+        phoneNumberId: "pending",
+        displayPhoneNumber: "pending",
+        accessToken: token,
+      });
+      showToast("WhatsApp integrated successfully", "success");
+    } catch (err) {
+      showToast("Failed to integrate WhatsApp", "error");
     } finally {
-       setLoading(false);
+      setLoading(false);
     }
   };
 
+  const handleDisconnect = async () => {
+    setLoading(true);
+    try {
+      await disconnectWhatsAppIntegration();
+      showToast("WhatsApp disconnected successfully", "success");
+    } catch (err) {
+      showToast("Failed to disconnect WhatsApp", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (!token) {
+      showToast("No token to copy", "error");
+      return;
+    }
+    navigator.clipboard.writeText(token);
+    showToast("Access token copied to clipboard", "success");
+  };
+
   return (
-    <div className="bg-[#2B5299] rounded-3xl p-6 lg:p-8 flex flex-col gap-5 shadow-sm">
-      <div className="bg-[#E5ECF4] rounded-2xl p-4 flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-[#1C3A76] flex items-center justify-center flex-shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C6.48 2 2 6.48 2 12C2 13.96 2.56 15.78 3.53 17.33L2 22L6.87 20.49C8.36 21.46 10.11 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM17.15 15.68C16.92 16.32 15.82 16.85 15.17 16.96C14.65 17.05 13.9 17.16 11.45 16.14C8.5 14.92 6.58 11.9 6.43 11.69C6.28 11.49 5.2 10.05 5.2 8.56C5.2 7.07 5.96 6.34 6.27 6.03C6.58 5.72 7.04 5.6 7.42 5.6C7.54 5.6 7.65 5.61 7.75 5.61C8.06 5.61 8.21 5.63 8.42 6.13C8.65 6.68 9.22 8.08 9.29 8.23C9.37 8.38 9.45 8.58 9.33 8.81C9.22 9.04 9.14 9.15 8.95 9.35C8.76 9.56 8.57 9.82 8.4 9.98C8.21 10.16 8.02 10.36 8.24 10.74C8.46 11.12 9.2 12.33 10.3 13.31C11.72 14.58 12.87 14.98 13.29 15.15C13.71 15.32 13.94 15.3 14.17 15.06C14.4 14.82 15.06 14 15.32 13.62C15.59 13.24 15.86 13.31 16.24 13.44C16.63 13.57 18.06 14.28 18.37 14.43C18.67 14.58 18.86 14.66 18.94 14.79C19.01 14.92 19.01 15.53 18.78 16.17V15.68H17.15Z" fill="white"/>
-          </svg>
-        </div>
-        <span className="text-[#1A1A1A] text-[15px] font-medium tracking-wide">WhatsApp Business API</span>
-      </div>
-
-      <div className="bg-[#E5ECF4] rounded-3xl p-5 lg:p-6 flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <KeyRound className="w-5 h-5 text-black" strokeWidth={2.5} />
-          <h3 className="text-[#1A1A1A] text-[15px] font-semibold tracking-wide">Access Token</h3>
-        </div>
-
-        <div className="relative">
-          <input
-            type="text"
-            value={token}
-            onChange={(e) => { setToken(e.target.value); setError(null); }}
-            placeholder="paste your permanent access"
-            className={`w-full bg-white rounded-xl py-3.5 px-4 pr-16 text-sm focus:outline-none placeholder:text-[#64748B] text-black shadow-sm ${error ? 'border border-red-500' : ''}`}
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2.5">
-            <Eye className="w-5 h-5 text-black cursor-pointer" strokeWidth={2.5} />
-            <ClipboardList className="w-5 h-5 text-black cursor-pointer" strokeWidth={2} />
+    <div 
+      className={`flex h-full w-full flex-col gap-4 p-4 shadow-[0_18px_34px_rgba(35,58,120,0.18)] lg:p-5 xl:pl-[40px] animate-slide-up-fade ${
+        activeIndex === 0 ? "rounded-tr-[28px] rounded-bl-[28px] rounded-br-[28px] rounded-tl-0" : 
+        activeIndex === total - 1 ? "rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0" : 
+        "rounded-[28px]"
+      }`}
+      style={{ 
+        backgroundColor: COLORS.primary,
+        transition: 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1)' 
+      }}
+    >
+      <div className="rounded-[24px] bg-[#E2E8F0] px-5 py-5 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
+        <div className="flex items-center gap-4">
+          <div 
+            className="flex h-12 w-12 items-center justify-center rounded-full shadow-[0_8px_18px_rgba(35,58,120,0.25)]"
+            style={{ backgroundColor: COLORS.primary }}
+          >
+            <img src="/whatsapp.png" alt="WhatsApp" className="h-7 w-7 object-contain" />
+          </div>
+          <div>
+            <Text as="h2" weight="bold" style={{ fontSize: '17px', lineHeight: '1.25' }} className="text-[#1A1A1A]">WhatsApp Business</Text>
+            <Text className="text-[#64748B]" size="xs" weight="medium">Receive new leads from Whatsapp Business in your account</Text>
           </div>
         </div>
-        
-        {error && <p className="text-red-500 text-xs font-medium px-1">{error}</p>}
+      </div>
 
-        <button 
-          onClick={handleConnect}
-          disabled={loading}
-          className="w-full bg-[#1C3A76] text-white py-3.5 rounded-[14px] text-[15px] font-medium transition-colors hover:bg-[#11234D] disabled:opacity-70 flex justify-center items-center h-[52px]"
-        >
-          {loading ? (
-             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 lg:px-5 lg:py-4">
+        <div className="flex items-center gap-2.5">
+          <Key className="h-5 w-5 text-[#111827]" strokeWidth={2.5} />
+          <Text as="h3" weight="bold" className="text-[#111827]" style={{ fontSize: '16px' }}>Access Token</Text>
+        </div>
+
+        <div className="mt-3 rounded-[16px] bg-white px-4 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent focus-within:border-gray-200 transition-all">
+          <div className="flex items-center gap-1">
+            <input
+              type={showToken ? "text" : "password"}
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="paste your permanent access token"
+              className="min-w-0 flex-1 bg-transparent px-1 py-2 text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none"
+            />
+            <button 
+              type="button" 
+              onClick={() => setShowToken(!showToken)}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black" 
+              aria-label={showToken ? "Hide token" : "Show token"}
+            >
+              {showToken ? <EyeOff className="h-4 w-4" strokeWidth={2.5} /> : <Eye className="h-4 w-4" strokeWidth={2.5} />}
+            </button>
+            <button 
+              type="button" 
+              onClick={copyToClipboard}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black" 
+              aria-label="Copy token"
+            >
+              <ClipboardList className="h-4 w-4" strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          {isConnected ? (
+            <button 
+              onClick={handleDisconnect}
+              disabled={loading}
+              className="flex h-[48px] w-full items-center justify-center rounded-full px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
+              style={{ backgroundColor: COLORS.primary }}
+            >
+              {loading ? (
+                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                 <Text weight="bold" size="custom" style={{ fontSize: '15px' }}>Disconnect WhatsApp Business</Text>
+              )}
+            </button>
           ) : (
-             "Connect WhatsApp Business"
+            <button 
+              onClick={handleConnect}
+              disabled={loading}
+              className="flex h-[48px] w-full items-center justify-center rounded-full px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
+              style={{ backgroundColor: COLORS.primary }}
+            >
+              {loading ? (
+                 <div className="flex items-center gap-3">
+                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                   <span>Connecting...</span>
+                 </div>
+              ) : (
+                 <Text weight="bold" size="custom" style={{ fontSize: '15px' }}>Connect WhatsApp Business</Text>
+              )}
+            </button>
           )}
-        </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-[#E5ECF4] rounded-xl px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-[#D9E3F0] transition-colors">
+        {HELP_TOPICS.map((topic, i) => (
+          <button
+            key={i}
+            type="button"
+            className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:bg-[#D4DEE9] group"
+          >
             <div className="flex items-center gap-3">
-              <div className="w-4 h-4 rounded-full bg-black flex items-center justify-center">
-                 <span className="text-white text-[10px] font-bold">?</span>
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
+                 <Text weight="bold" className="text-white" size="custom" style={{ fontSize: '10px' }}>?</Text>
               </div>
-              <span className="text-[#1A1A1A] text-[14px] font-medium">How to create Access taken</span>
+              <Text weight="semibold" className="text-[#111827]" size="xs">{topic}</Text>
             </div>
-            <ChevronDown className="w-5 h-5 text-black" strokeWidth={2} />
-          </div>
+            <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
+          </button>
         ))}
       </div>
     </div>

@@ -10,6 +10,7 @@ import { LeadActivityLog } from '@/modules/activities/components/LeadActivityLog
 import { Lead } from '@/modules/leads/types/lead.types';
 import { Activity } from '@/modules/activities/types/activity.types';
 import { getUser } from '@/core/utils/auth';
+import { Text } from '@/core/components/ui/Text';
 
 export const LeadDetailsDashboard: React.FC = () => {
   const router = useRouter();
@@ -95,7 +96,7 @@ export const LeadDetailsDashboard: React.FC = () => {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold text-slate-800">Lead Details</h1>
+          <Text as="h1" weight="semibold" className="text-slate-800" style={{ fontSize: '20px' }}>Lead Details</Text>
         </div>
 
         {isLoading ? (
@@ -104,7 +105,7 @@ export const LeadDetailsDashboard: React.FC = () => {
           </div>
         ) : !lead ? (
           <div className="flex items-center justify-center h-[50vh] text-slate-500 font-medium">
-            Lead not found.
+            <Text weight="medium" style={{ color: '#64748B' }}>Lead not found.</Text>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-6 items-stretch h-full">

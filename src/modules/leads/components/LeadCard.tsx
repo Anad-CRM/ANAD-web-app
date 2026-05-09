@@ -96,7 +96,7 @@ function StatusModal({ currentStatus, onSelect, onClose }: { currentStatus: Lead
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}80` }}
                 />
-                <span className="truncate">{opt === "Closed" ? "Enrolled" : opt}</span>
+                <Text className="truncate" style={{ fontSize: '13px' }}>{opt === "Closed" ? "Enrolled" : opt}</Text>
               </button>
             );
           })}
@@ -253,7 +253,7 @@ export function LeadCard({
                   }}
                 >
                   <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: statusColor }} />
-                  <Text as="span" size="custom" weight="bold" className="text-[9px] uppercase tracking-wider" style={{ color: statusColor }}>
+                  <Text weight="bold" className="text-[9px] uppercase tracking-wider" style={{ color: statusColor }}>
                     {statusLabel}
                   </Text>
                 </div>
@@ -262,14 +262,14 @@ export function LeadCard({
 
             <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
               <div className="p-1 rounded-md bg-white/10"><Mail size={12} /></div>
-              <Text as="span" size="custom" weight="medium" className="text-[11.5px] truncate">
+              <Text weight="medium" style={{ fontSize: '11.5px' }} className="truncate">
                 {searchKeyword ? highlight(email, searchKeyword) : email}
               </Text>
             </div>
 
             <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
               <div className="p-1 rounded-md bg-white/10"><Phone size={12} /></div>
-              <Text as="span" size="custom" weight="medium" className="text-[11.5px] truncate">
+              <Text weight="medium" style={{ fontSize: '11.5px' }} className="truncate">
                 {searchKeyword ? highlight(mobile, searchKeyword) : mobile}
               </Text>
             </div>
@@ -278,7 +278,7 @@ export function LeadCard({
             {adName && (
               <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
                 <div className="p-1 rounded-md bg-white/10"><User size={12} /></div>
-                <Text as="span" size="custom" weight="medium" className="text-[11.5px] truncate">
+                <Text weight="medium" style={{ fontSize: '11.5px' }} className="truncate">
                   {adName}
                 </Text>
               </div>
@@ -287,7 +287,7 @@ export function LeadCard({
             {createdAt && (
               <div className="flex items-center gap-2 text-white/60 mt-1">
                 <CalendarDays size={12} className="flex-shrink-0" />
-                <Text as="span" size="custom" weight="medium" className="text-[10px] tracking-wide">
+                <Text weight="medium" className="tracking-wide" style={{ fontSize: '10px' }}>
                   CREATED {createdAt}
                 </Text>
               </div>
@@ -311,7 +311,7 @@ export function LeadCard({
                     <User size={10} color="#fff" />
                   </span>
                 )}
-                <Text as="span" size="custom" weight="semibold" className="text-[11px] truncate">
+                <Text weight="semibold" className="truncate" style={{ fontSize: '11px' }}>
                   {assignedName}
                 </Text>
               </div>
@@ -319,7 +319,7 @@ export function LeadCard({
               {/* Source */}
               <div className="flex items-center gap-2 text-white/80 truncate px-2">
                 <SourceIcon source={source} />
-                <Text as="span" size="custom" weight="medium" className="text-[11px] truncate capitalize">
+                <Text weight="medium" className="truncate capitalize" style={{ fontSize: '11px' }}>
                   {source}
                 </Text>
               </div>
@@ -328,7 +328,7 @@ export function LeadCard({
               {lead.isDuplicated && (
                 <div className="flex items-center gap-2 text-orange-300 truncate px-2">
                   <RefreshCw size={12} />
-                  <Text as="span" size="custom" weight="semibold" className="text-[11px] truncate uppercase tracking-wider">
+                  <Text weight="semibold" className="truncate uppercase tracking-wider" style={{ fontSize: '11px' }}>
                     Recaptured
                   </Text>
                 </div>

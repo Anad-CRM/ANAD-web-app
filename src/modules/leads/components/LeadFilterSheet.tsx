@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { X, Calendar, ChevronDown, ChevronUp, Check, SlidersHorizontal } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -86,26 +87,26 @@ function SelectedChips({ labels }: { labels: string[] }) {
       {shown.map(label => (
         <span
           key={label}
-          className="text-[10px] font-semibold px-2.5 py-1.5 rounded-full truncate max-w-[90px]"
+          className="px-2.5 py-1.5 rounded-full truncate max-w-[90px]"
           style={{
             backgroundColor: COLORS.primaryXlight,
             color: COLORS.primary,
             border: `1px solid ${COLORS.primaryLight}`,
           }}
         >
-          {label}
+          <Text weight="semibold" style={{ fontSize: '10px' }}>{label}</Text>
         </span>
       ))}
       {extra > 0 && (
         <span
-          className="text-[10px] font-semibold px-2.5 py-1.5 rounded-full"
+          className="px-2.5 py-1.5 rounded-full"
           style={{
             backgroundColor: COLORS.primaryXlight,
             color: COLORS.primary,
             border: `1px solid ${COLORS.primaryLight}`,
           }}
         >
-          +{extra} more
+          <Text weight="semibold" style={{ fontSize: '10px' }}>+{extra} more</Text>
         </span>
       )}
     </div>
@@ -128,15 +129,15 @@ function SectionRow({
       className="w-full flex items-center justify-between py-3"
     >
       <div className="flex items-center gap-2">
-        <span className="text-[15px] font-semibold" style={{ color: COLORS.text }}>
+        <Text weight="semibold" style={{ color: COLORS.text, fontSize: '15px' }}>
           {title}
-        </span>
+        </Text>
         {count > 0 && (
           <span
-            className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+            className="px-2 py-0.5 rounded-full"
             style={{ backgroundColor: COLORS.primaryLight, color: COLORS.primary }}
           >
-            {count}
+            <Text weight="bold" style={{ fontSize: '11px' }}>{count}</Text>
           </span>
         )}
       </div>
@@ -338,9 +339,9 @@ export function LeadFilterSheet({
         <div className="flex items-center justify-between px-6 pt-5 pb-1">
           <div className="flex items-center gap-2">
             <SlidersHorizontal size={20} style={{ color: COLORS.primary }} />
-            <span className="text-[20px] font-bold" style={{ color: "#1a1a1a" }}>
+            <Text weight="bold" style={{ color: "#1a1a1a", fontSize: '20px' }}>
               Filter Options
-            </span>
+            </Text>
           </div>
           <button
             onClick={onClose}
@@ -352,14 +353,15 @@ export function LeadFilterSheet({
 
         {/* Summary line */}
         <div className="px-6 pt-2 pb-3">
-          <p
-            className="text-[14px] font-bold text-center"
-            style={{ color: summaryCount > 0 ? "#c0392b" : "#9ca3af" }}
+          <Text
+            weight="bold"
+            className="text-center"
+            style={{ color: summaryCount > 0 ? "#c0392b" : "#9ca3af", fontSize: '14px' }}
           >
             {summaryCount > 0
               ? `${summaryCount} filter${summaryCount > 1 ? "s" : ""} active: ${summaryParts.join(", ")}`
               : "No filters currently active"}
-          </p>
+          </Text>
         </div>
 
         {/* Scrollable body */}
@@ -378,14 +380,14 @@ export function LeadFilterSheet({
           {expandedKey !== "date" && dateLabel && (
             <div className="flex flex-wrap gap-2 pb-3">
               <span
-                className="text-[10px] font-semibold px-2.5 py-1.5 rounded-full"
+                className="px-2.5 py-1.5 rounded-full"
                 style={{
                   backgroundColor: COLORS.primaryXlight,
                   color: COLORS.primary,
                   border: `1px solid ${COLORS.primaryLight}`,
                 }}
               >
-                {dateLabel}
+                <Text weight="semibold" style={{ fontSize: '10px' }}>{dateLabel}</Text>
               </span>
             </div>
           )}
@@ -445,12 +447,12 @@ export function LeadFilterSheet({
                   }}
                 >
                   <Calendar size={15} style={{ color: COLORS.primary }} />
-                  <span className="text-[12px] font-semibold" style={{ color: COLORS.primary }}>
+                  <Text weight="semibold" style={{ color: COLORS.primary, fontSize: '12px' }}>
                     {(() => {
                       const r = rangeForPreset(datePreset);
                       return `${r.startDate} – ${r.endDate}`;
                     })()}
-                  </span>
+                  </Text>
                 </div>
               )}
 
@@ -458,7 +460,7 @@ export function LeadFilterSheet({
               {datePreset === "Custom" && (
                 <div className="mt-3 flex gap-2">
                   <div className="flex-1">
-                    <label className="text-[11px] font-medium mb-1 block text-gray-500">From</label>
+                    <Text weight="medium" className="mb-1 block text-gray-500" style={{ fontSize: '11px' }}>From</Text>
                     <input
                       type="date"
                       value={customStart}
@@ -469,7 +471,7 @@ export function LeadFilterSheet({
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[11px] font-medium mb-1 block text-gray-500">To</label>
+                    <Text weight="medium" className="mb-1 block text-gray-500" style={{ fontSize: '11px' }}>To</Text>
                     <input
                       type="date"
                       value={customEnd}
@@ -502,9 +504,9 @@ export function LeadFilterSheet({
           {expandedKey === "status" && (
             <div className="pb-4">
               {lockedStatus ? (
-                <p className="text-[12px]" style={{ color: COLORS.muted }}>
+                <Text style={{ color: COLORS.muted, fontSize: '12px' }}>
                   Status is locked for this view.
-                </p>
+                </Text>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {STATUS_OPTIONS.map(s => {
@@ -557,9 +559,9 @@ export function LeadFilterSheet({
               />
               <div className="flex flex-col gap-1 max-h-52 overflow-y-auto custom-scrollbar">
                 {staffMembers.length === 0 ? (
-                  <p className="text-[12px] text-center py-4 text-gray-400">No staff members found</p>
+                  <Text className="text-center py-4 text-gray-400" style={{ fontSize: '12px' }}>No staff members found</Text>
                 ) : filteredStaff.length === 0 ? (
-                  <p className="text-[12px] text-center py-4 text-gray-400">No results for &quot;{staffSearch}&quot;</p>
+                  <Text className="text-center py-4 text-gray-400" style={{ fontSize: '12px' }}>No results for &quot;{staffSearch}&quot;</Text>
                 ) : (
                   filteredStaff.map(staff => {
                     const isActive = tempStaffIds.includes(staff.id);
@@ -579,9 +581,9 @@ export function LeadFilterSheet({
                         >
                           {staff.userName?.charAt(0)?.toUpperCase() ?? "?"}
                         </div>
-                        <span className="flex-1 text-[13px] font-medium truncate" style={{ color: "#1a1a1a" }}>
+                        <Text weight="medium" className="flex-1 truncate" style={{ color: "#1a1a1a", fontSize: '13px' }}>
                           {staff.userName}
-                        </span>
+                        </Text>
                         {isActive && (
                           <div
                             className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
@@ -627,9 +629,9 @@ export function LeadFilterSheet({
                   />
                   <div className="flex flex-col gap-1 max-h-52 overflow-y-auto custom-scrollbar">
                     {filteredAds.length === 0 ? (
-                      <p className="text-[12px] text-center py-4 text-gray-400">
+                      <Text className="text-center py-4 text-gray-400" style={{ fontSize: '12px' }}>
                         {adSearch ? `No results for "${adSearch}"` : "No ads found"}
-                      </p>
+                      </Text>
                     ) : (
                       filteredAds.map(ad => {
                         const isActive = tempAdIds.includes(ad.id);
@@ -649,9 +651,9 @@ export function LeadFilterSheet({
                             >
                               {ad.platform?.charAt(0)?.toUpperCase() ?? "A"}
                             </div>
-                            <span className="flex-1 text-[13px] font-medium truncate" style={{ color: "#1a1a1a" }}>
+                            <Text weight="medium" className="flex-1 truncate" style={{ color: "#1a1a1a", fontSize: '13px' }}>
                               {ad.adName}
-                            </span>
+                            </Text>
                             {isActive && (
                               <div
                                 className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
@@ -677,19 +679,19 @@ export function LeadFilterSheet({
         <div className="px-6 py-4 flex gap-3 border-t border-gray-200">
           <button
             onClick={handleClear}
-            className="flex-1 py-3 rounded-xl text-[14px] font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all border border-gray-200"
+            className="flex-1 py-3 rounded-xl text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all border border-gray-200"
           >
-            Clear All
+            <Text weight="bold" style={{ fontSize: '14px' }}>Clear All</Text>
           </button>
           <button
             onClick={handleApply}
-            className="flex-1 py-3 rounded-xl text-[14px] font-bold text-white transition-all hover:opacity-90 active:scale-95"
+            className="flex-1 py-3 rounded-xl text-white transition-all hover:opacity-90 active:scale-95"
             style={{
               background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryDark})`,
               boxShadow: `0 4px 14px ${COLORS.primary}50`,
             }}
           >
-            Apply Filter
+            <Text weight="bold" style={{ fontSize: '14px' }}>Apply Filter</Text>
           </button>
         </div>
       </div>

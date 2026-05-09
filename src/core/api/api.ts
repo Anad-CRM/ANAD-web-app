@@ -63,6 +63,12 @@ export const API_ENDPOINTS = {
   INTEGRATION: {
     CREATE_WHATSAPP: "/webhook/createWhatsappIntegration",
     DELETE_WHATSAPP: "/webhook/deleteWhatsappIntegration",
+    CREATE_SUBSCRIPTION: "/webhook/createSubscription",
+    DELETE_SUBSCRIPTION: "/webhook/deleteWebhookSubscription",
+    CREATE_GOOGLE: "/ad/connectGoogleAds",
+    DELETE_GOOGLE: "/ad/disconnectGoogleAds",
+    GENERATE_KEY: "/leads/generateKey",
+    DISCONNECT_KEY: "/leads/disconnectSecretKey",
   },
   CREATE_LEADS: {
     SINGLE: "/lead/createLead",

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { PlayCircle, PauseCircle, Headphones, Loader2 } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 import { api } from "@/core/api/axios";
+import { Text } from "@/core/components/ui/Text";
 
 interface AudioPlayerProps {
   src: string;
@@ -176,15 +177,15 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
         {/* Timestamps and Size */}
         <div className="flex justify-between items-center mt-1">
-          <span className="text-[10px] font-medium" style={{ color: COLORS.primaryDark || COLORS.primary }}>
+          <Text weight="medium" style={{ fontSize: '10px', color: COLORS.primaryDark || COLORS.primary }}>
             {errored
               ? "Failed to load audio"
               : `${fmtTime(currentTime)} / ${fmtTime(audioDuration)}`}
-          </span>
+          </Text>
           {Number(fileSize) > 0 && (
-            <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+            <Text weight="medium" className="text-slate-400 tracking-wide" style={{ fontSize: '10px' }}>
               {fmtFileSize(fileSize)}
-            </span>
+            </Text>
           )}
         </div>
       </div>

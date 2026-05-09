@@ -168,14 +168,14 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
 
 const InfoItem: React.FC<{ label: string; value: string; icon: React.ReactNode; valueColor?: string }> = ({ label, value, icon }) => (
   <div className="flex flex-col gap-1.5 overflow-hidden">
-    <Text as="span" size="custom" weight="normal" className="text-[14px] text-black">
+    <Text weight="normal" className="text-black" style={{ fontSize: '14px' }}>
       {label}
     </Text>
     <div className="flex items-center gap-2.5 overflow-hidden">
       <div className="flex items-center justify-center w-9 h-9 rounded-full bg-red border border-black/[0.03] shrink-0" style={{ backgroundColor: COLORS.grey }}>
         {icon}
       </div>
-      <Text as="span" size="custom" weight="light" className="text-[13px] truncate" style={{ color: 'black' }}>
+      <Text weight="light" className="truncate" style={{ fontSize: '13px', color: 'black' }}>
         {value}
       </Text>
     </div>

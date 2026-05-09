@@ -3,6 +3,7 @@ import { X, ExternalLink, Send } from 'lucide-react';
 import { Whatsapp } from '@thesvg/react';
 import { activityService } from "@/modules/activities/services/activityService";
 import { getUser } from '@/core/utils/auth';
+import { Text } from '@/core/components/ui/Text';
 
 interface Props {
   leadId: string;
@@ -92,15 +93,17 @@ export const WhatsAppTemplateModal: React.FC<Props> = ({ leadId, leadName, phone
         <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100">
             <div className="text-green-500"><Whatsapp width={24} height={24} /></div>
-            <span className="text-[16px] font-semibold text-slate-800">{previewTemplate.title}</span>
+            <Text weight="semibold" className="text-slate-800" style={{ fontSize: '16px' }}>{previewTemplate.title}</Text>
           </div>
           <div className="p-6 bg-slate-50">
-            <p className="text-[14px] text-slate-700 whitespace-pre-wrap leading-relaxed">{previewTemplate.message}</p>
+            <Text className="text-slate-700 whitespace-pre-wrap leading-relaxed" style={{ fontSize: '14px' }}>{previewTemplate.message}</Text>
           </div>
           <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-white">
-            <button onClick={() => setPreviewTemplate(null)} className="px-4 py-2 rounded-xl font-semibold text-slate-600 hover:bg-slate-100 transition-colors">Close</button>
-            <button onClick={() => handleSend(previewTemplate.message)} className="px-4 py-2 rounded-xl font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center gap-2">
-              <Send size={16} /> Send
+            <button onClick={() => setPreviewTemplate(null)} className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
+              <Text weight="semibold">Close</Text>
+            </button>
+            <button onClick={() => handleSend(previewTemplate.message)} className="px-4 py-2 rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center gap-2">
+              <Send size={16} /> <Text weight="semibold">Send</Text>
             </button>
           </div>
         </div>
@@ -115,7 +118,7 @@ export const WhatsAppTemplateModal: React.FC<Props> = ({ leadId, leadName, phone
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 flex-shrink-0">
-          <span className="text-[18px] font-semibold text-slate-800">Select WhatsApp Template</span>
+          <Text weight="semibold" className="text-slate-800" style={{ fontSize: '18px' }}>Select WhatsApp Template</Text>
           <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
             <X size={18} />
           </button>
@@ -126,7 +129,7 @@ export const WhatsAppTemplateModal: React.FC<Props> = ({ leadId, leadName, phone
           <div className={`p-4 rounded-xl border ${error ? 'border-red-300 bg-red-50/30' : 'border-green-200 bg-green-50/30'}`}>
             <div className="flex items-center gap-2 mb-3">
               <div className="text-green-600"><Whatsapp width={20} height={20} /></div>
-              <span className="text-[14px] font-semibold text-slate-800">Write Your Message</span>
+              <Text weight="semibold" className="text-slate-800" style={{ fontSize: '14px' }}>Write Your Message</Text>
             </div>
             <textarea
               className={`w-full h-24 p-3 rounded-lg border ${error ? 'border-red-300 focus:ring-red-200' : 'border-slate-300 focus:ring-green-200'} focus:outline-none focus:ring-2 bg-white text-[14px] resize-none`}
@@ -137,33 +140,33 @@ export const WhatsAppTemplateModal: React.FC<Props> = ({ leadId, leadName, phone
                 if (error && e.target.value.trim()) setError(false);
               }}
             />
-            {error && <span className="text-[12px] text-red-500 font-medium mt-1 block">Please enter a message to continue</span>}
+            {error && <Text weight="medium" className="text-red-500 mt-1 block" style={{ fontSize: '12px' }}>Please enter a message to continue</Text>}
             
-            <button onClick={handleCustomSend} className="w-full mt-3 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-[13px] transition-colors">
-              Send via WhatsApp
+            <button onClick={handleCustomSend} className="w-full mt-3 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+              <Text weight="semibold" style={{ fontSize: '13px' }}>Send via WhatsApp</Text>
             </button>
-            <button onClick={handleOpenDirectly} className="w-full mt-2 py-2 flex items-center justify-center gap-1.5 text-green-700 hover:bg-green-100/50 rounded-lg font-medium text-[13px] transition-colors">
-              Or open WhatsApp directly <ExternalLink size={14} />
+            <button onClick={handleOpenDirectly} className="w-full mt-2 py-2 flex items-center justify-center gap-1.5 text-green-700 hover:bg-green-100/50 rounded-lg transition-colors">
+              <Text weight="medium" style={{ fontSize: '13px' }}>Or open WhatsApp directly</Text> <ExternalLink size={14} />
             </button>
           </div>
 
           <div>
-            <span className="text-[13px] font-medium text-slate-500 mb-3 block">Choose a template</span>
+            <Text className="text-slate-500 mb-3 block" style={{ fontSize: '13px' }}>Choose a template</Text>
             <div className="flex flex-col gap-2">
               {templates.map((t, idx) => (
                 <div key={idx} className="flex gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors" onClick={() => handleSend(t.message)}>
                   <div className="text-green-500 mt-0.5"><Whatsapp width={24} height={24} /></div>
                   <div className="flex-1">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-[14px] font-semibold text-slate-800">{t.title}</span>
+                      <Text weight="semibold" className="text-slate-800" style={{ fontSize: '14px' }}>{t.title}</Text>
                       <button 
                         onClick={(e) => { e.stopPropagation(); setPreviewTemplate(t); }}
-                        className="flex items-center gap-1 text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded"
+                        className="flex items-center gap-1 text-slate-500 bg-slate-100 px-2 py-1 rounded"
                       >
-                        Preview
+                        <Text weight="medium" style={{ fontSize: '10px' }}>Preview</Text>
                       </button>
                     </div>
-                    <p className="text-[12px] text-slate-500 line-clamp-2">{t.message}</p>
+                    <Text className="text-slate-500 line-clamp-2" style={{ fontSize: '12px' }}>{t.message}</Text>
                   </div>
                 </div>
               ))}

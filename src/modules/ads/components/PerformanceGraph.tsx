@@ -86,7 +86,7 @@ export const PerformanceGraph = ({ adId }: { adId?: string }) => {
                   </div>
 
                   {/* X Axis Label */}
-                  <span className="absolute -bottom-8 text-xs font-semibold whitespace-nowrap transition-colors" style={{ color: COLORS.muted }}>{stat.label}</span>
+                  <Text weight="semibold" className="absolute -bottom-8 whitespace-nowrap transition-colors" style={{ color: COLORS.muted, fontSize: '12px' }}>{stat.label}</Text>
                 </div>
               );
             })}

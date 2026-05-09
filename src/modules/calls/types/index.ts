@@ -1,4 +1,20 @@
-export type CallFilterType = "Total" | "Incoming" | "Outgoing" | "Missed" | "Connected";
+export type CallFilterType = "Total" | "Incoming" | "Outgoing" | "Missed" | "Connected" | "Rejected" | "Personal" | "New" | "NotPickedUp";
+
+export interface CallLog {
+  id: string;
+  number: string;
+  name?: string;
+  callType: string;
+  duration: string;
+  timestamp: string;
+  recordingFile?: string;
+  userName?: string; 
+  lead?: {
+    id: string;
+    userName?: string;
+    mobileNumber?: string;
+  };
+}
 
 export interface CallTeamRow {
   id: string;

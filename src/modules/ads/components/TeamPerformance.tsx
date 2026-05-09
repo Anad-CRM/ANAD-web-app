@@ -56,9 +56,9 @@ export const TeamPerformance = ({ teamMembers = [] }: TeamPerformanceProps) => {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-1 text-xs font-semibold" style={{ color: COLORS.subtle }}>
+        <div className="flex items-center gap-1" style={{ color: COLORS.subtle }}>
           <TrendingUp className="w-3.5 h-3.5" />
-          Sorted by completion
+          <Text weight="semibold" style={{ fontSize: '12px' }}>Sorted by completion</Text>
         </div>
       </div>
 
@@ -148,13 +148,14 @@ export const TeamPerformance = ({ teamMembers = [] }: TeamPerformanceProps) => {
 
                   {/* Completion rate */}
                   <div
-                    className="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold"
+                    className="flex-shrink-0 px-3 py-1.5 rounded-xl"
                     style={{
                       backgroundColor: isHigh ? "#DCFCE7" : "#DBEAFE",
-                      color: isHigh ? COLORS.success : COLORS.info,
                     }}
                   >
-                    {completionRate.toFixed(0)}%
+                    <Text weight="bold" style={{ fontSize: '12px', color: isHigh ? COLORS.success : COLORS.info }}>
+                      {completionRate.toFixed(0)}%
+                    </Text>
                   </div>
                 </div>
               );

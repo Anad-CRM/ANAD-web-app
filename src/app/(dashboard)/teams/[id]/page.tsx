@@ -2,8 +2,9 @@
 
 import { useTeamDetails } from "@/modules/teams/hooks/useTeamDetails";
 import { useParams, useRouter } from "next/navigation";
-
 import { BackButton } from "@/core/components/ui/BackButton";
+import { Text } from "@/core/components/ui/Text";
+import { Users, Filter, User, Target, TrendingUp, ChevronRight } from "lucide-react";
 
 export default function TeamDetailsPage() {
   const params = useParams();
@@ -27,99 +28,126 @@ export default function TeamDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-[50vh] flex justify-center items-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A8A]"></div>
+      <div className="w-full h-[60vh] flex flex-col justify-center items-center gap-4">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#233A78]"></div>
+        <Text weight="medium" className="text-slate-500">Retrieving team data...</Text>
       </div>
     );
   }
 
   if (error || !team) {
     return (
-      <div className="text-red-500 bg-red-50 p-6 rounded-xl flex flex-col gap-4 items-start">
-        {error || "Team not found."}
-        <BackButton onClick={() => router.push('/teams')} className="mt-2" />
+      <div className="bg-red-50 border border-red-100 p-8 rounded-[32px] flex flex-col gap-6 items-center text-center max-w-md mx-auto mt-10">
+        <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+           <Target size={32} />
+        </div>
+        <div>
+           <Text weight="bold" size="lg" className="text-red-900 block mb-2">Team Not Found</Text>
+           <Text className="text-red-700/80">{error || "The requested team could not be found or has been deleted."}</Text>
+        </div>
+        <BackButton onClick={() => router.push('/teams')} />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-[22px]">
-      <div className="flex items-center gap-4 mb-4">
+    <div className="flex flex-col gap-8 pb-20 animate-in fade-in duration-700">
+      <div className="flex items-center gap-4">
         <BackButton onClick={() => router.push('/teams')} />
-        <h1 className="text-[24px] font-bold text-black">{team.name} Details</h1>
+        <div className="h-6 w-px bg-slate-200 mx-1"></div>
+        <Text as="h1" weight="bold" size="xl" className="text-slate-900">{team.name} Overview</Text>
       </div>
 
-      <div className="bg-white border rounded-[24px] p-6 shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <div className="bg-[#1E3A8A] text-white w-14 h-14 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-sm">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+      <div className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -z-10 translate-x-12 -translate-y-12"></div>
+        
+        <div className="flex items-center gap-6">
+          <div className="bg-[#233A78] text-white w-16 h-16 rounded-[22px] flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-900/10">
+            <Users size={28} />
           </div>
           <div>
-            <h3 className="text-[20px] font-bold text-black">{team.name}</h3>
-            <p className="text-gray-500 text-sm mt-1">{team.users?.length || 0} Members assigned</p>
+            <Text as="h3" weight="bold" size="xl" className="text-slate-900 mb-1 leading-none">{team.name}</Text>
+            <Text weight="medium" className="text-slate-500 block">{team.users?.length || 0} Members active in this team</Text>
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 w-full md:w-auto">
           <button 
             onClick={() => router.push(`/leads_list?teamId=${teamId}`)}
-            className="flex items-center gap-2 bg-[#E2E8F0] hover:bg-[#cbd5e1] shadow-sm text-black px-5 py-2.5 rounded-full font-medium transition-all text-sm"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2.5 h-12 px-7 bg-white border border-slate-200 rounded-full text-slate-700 hover:bg-slate-50 shadow-sm transition-all active:scale-95 group font-bold"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="7" y1="12" x2="17" y2="12" /><line x1="10" y1="18" x2="14" y2="18" /></svg>
-            Filter Leads
+            <Filter size={18} className="text-[#233A78]" />
+            <Text weight="bold" size="sm">View Team Leads</Text>
           </button>
         </div>
       </div>
 
       <div>
-        <h2 className="text-[18px] font-bold text-black mb-4">Leads Summary</h2>
+        <div className="flex items-center gap-3 mb-6">
+           <div className="w-1.5 h-5 bg-[#233A78] rounded-full"></div>
+           <Text weight="bold" size="lg" className="text-slate-900">Performance Metrics</Text>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {leadStatuses.map((status, idx) => (
             <div 
               key={idx} 
               onClick={() => router.push(`/leads_list?teamId=${teamId}${status.name !== "All Leads" ? `&status=${status.name}` : ""}`)}
-              className="bg-[#EAF1F8] border border-white rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 shadow-[0px_2px_12px_rgba(0,0,0,0.02)] transition hover:shadow-md cursor-pointer"
+              className="bg-white border border-slate-100 rounded-[24px] p-5 flex flex-col items-center justify-center gap-1 shadow-sm transition-all hover:shadow-md hover:border-blue-100 cursor-pointer group active:scale-95"
             >
-              <span className="text-[24px] font-bold text-[#1E3A8A]">
+              <Text weight="bold" size="custom" className="text-[#233A78] group-hover:scale-110 transition-transform" style={{ fontSize: '24px' }}>
                 {status.count.toLocaleString()}
-              </span>
-              <span className="text-[11px] font-medium text-gray-600 text-center uppercase tracking-wide">
+              </Text>
+              <Text weight="bold" className="text-slate-500 text-center uppercase tracking-widest group-hover:text-slate-700" style={{ fontSize: '9px' }}>
                 {status.name}
-              </span>
+              </Text>
             </div>
           ))}
         </div>
       </div>
 
       <div className="mt-4">
-        <h2 className="text-[18px] font-bold text-black mb-4 flex items-center justify-between">
-          Team Members
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+           <div className="flex items-center gap-3">
+              <div className="w-1.5 h-5 bg-[#233A78] rounded-full"></div>
+              <Text weight="bold" size="lg" className="text-slate-900">Assigned Members</Text>
+           </div>
+           <Text size="sm" weight="medium" className="text-slate-500">{team.users?.length || 0} active</Text>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {team.users?.map((member) => (
             <div 
               key={member.id} 
               onClick={() => router.push(`/staffs/${member.id}`)}
-              className="bg-white border hover:border-gray-300 transition-colors rounded-[16px] p-5 shadow-[0px_2px_12px_rgba(0,0,0,0.02)] flex items-center gap-4 cursor-pointer"
+              className="bg-white border border-slate-100 hover:border-slate-200 transition-all rounded-[28px] p-5 shadow-sm flex items-center gap-5 cursor-pointer group hover:shadow-xl hover:-translate-y-1"
             >
-              <div className="w-12 h-12 rounded-full bg-[#EAF1F8] flex items-center justify-center text-lg font-bold text-[#1E3A8A] relative">
+              <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-xl font-bold text-[#233A78] shadow-inner group-hover:bg-[#233A78] group-hover:text-white transition-all duration-500 border border-slate-100">
                 {member.userName?.charAt(0).toUpperCase() || 'U'}
               </div>
-              <div className="flex-1">
-                <div className="font-semibold text-[15px] truncate max-w-[150px]">{member.userName}</div>
-                <div className="text-xs text-gray-500 mt-1 flex flex-col gap-1">
-                  <span>Total Leads: <strong className="text-black">{member.leadCounts?.totalLeads || 0}</strong></span>
+              <div className="flex-1 overflow-hidden">
+                <Text weight="bold" size="sm" className="text-slate-900 truncate block group-hover:text-[#233A78] transition-colors">{member.userName}</Text>
+                <div className="flex items-center gap-1.5 mt-1">
+                   <Target size={12} className="text-slate-400" />
+                   <Text size="xs" weight="medium" className="text-slate-500">
+                     Leads: <strong className="text-slate-700">{member.leadCounts?.totalLeads || 0}</strong>
+                   </Text>
                 </div>
               </div>
-              <div className="flex flex-col items-end pl-2 border-l">
-                <span className="text-[10px] text-gray-400 font-medium">CLOSED</span>
-                <span className="text-lg font-bold text-green-600 mt-0.5">{member.leadCounts?.closedCount || 0}</span>
+              <div className="flex flex-col items-end pl-4 border-l border-slate-50">
+                <Text weight="bold" className="text-slate-400 uppercase tracking-widest" style={{ fontSize: '9px' }}>CLOSED</Text>
+                <div className="flex items-center gap-1 mt-0.5">
+                   <Text weight="bold" size="lg" className="text-emerald-600 leading-none">{member.leadCounts?.closedCount || 0}</Text>
+                   <TrendingUp size={14} className="text-emerald-400" />
+                </div>
               </div>
+              <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500 group-hover:translate-x-1 transition-all" />
             </div>
           ))}
           {(!team.users || team.users.length === 0) && (
-            <div className="col-span-full bg-white p-6 rounded-xl border text-center text-gray-500 font-medium">
-              No members assigned to this team.
+            <div className="col-span-full bg-slate-50/50 p-12 rounded-[32px] border border-dashed border-slate-200 text-center">
+              <User size={40} className="mx-auto text-slate-300 mb-4" />
+              <Text weight="bold" size="lg" className="text-slate-900 block mb-1">No Members Assigned</Text>
+              <Text className="text-slate-500 max-w-xs mx-auto">This team is currently empty. Invite members to start tracking their performance.</Text>
             </div>
           )}
         </div>

@@ -4,6 +4,8 @@ import { X } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 import { InviteService } from "@/modules/invite/services/invite.service";
 import { useFeedback } from "@/core/contexts/FeedbackContext";
+import { Text } from "@/core/components/ui/Text";
+import { Mail, Shield, Users, Layers, Info } from "lucide-react";
 
 interface InviteMemberModalProps {
   isOpen: boolean;
@@ -138,15 +140,15 @@ export function InviteMemberModal({
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-4 pb-2 border-b border-gray-100">
-          <span className="text-[20px] font-bold text-gray-900">
-            {role === "Students" ? "Invite Student" : "Invite new member"}
-          </span>
+        <div className="flex items-center justify-between px-7 pt-5 pb-3 border-b border-slate-50 bg-slate-50/30">
+          <Text as="h3" weight="bold" size="lg" className="text-slate-900 tracking-tight">
+            {role === "Students" ? "Invite Student" : "Invite Member"}
+          </Text>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors"
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-white/50 hover:bg-white transition-colors border border-slate-100 shadow-sm"
           >
-            <X size={18} color="#555" />
+            <X size={18} className="text-slate-500" />
           </button>
         </div>
 
@@ -154,7 +156,10 @@ export function InviteMemberModal({
         <div className="px-6 py-5 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
           {/* Email */}
           <div>
-            <label className="text-[13px] font-bold mb-2 block" style={{ color: COLORS.text }}>Email Address *</label>
+            <div className="flex items-center gap-2 mb-2">
+               <Mail size={14} className="text-slate-400" />
+               <Text weight="bold" size="custom" className="text-slate-700" style={{ fontSize: '13px' }}>Email Address *</Text>
+            </div>
             <input
               type="email"
               value={email}
@@ -163,34 +168,46 @@ export function InviteMemberModal({
                 if (errors.email) setErrors({ ...errors, email: "" });
               }}
               placeholder="e.g. user@example.com"
-              className="w-full rounded-xl px-4 py-3 text-[14px] border outline-none focus:ring-1 transition-all"
-              style={{ borderColor: errors.email ? "red" : "#d1d5db", outlineColor: errors.email ? "red" : COLORS.primary }}
+              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium placeholder:text-slate-400"
+              style={{ borderColor: errors.email ? "#EF4444" : "#E2E8F0" }}
             />
-            {errors.email && <p className="text-red-500 text-[12px] mt-1.5">{errors.email}</p>}
+            {errors.email && (
+               <div className="flex items-center gap-1.5 mt-2 ml-1">
+                 <div className="w-1 h-1 rounded-full bg-red-500"></div>
+                 <Text weight="medium" size="xs" className="text-red-500">{errors.email}</Text>
+               </div>
+            )}
           </div>
 
           {/* Role */}
           <div>
-            <label className="text-[13px] font-bold mb-2 block" style={{ color: COLORS.text }}>Select Role *</label>
+            <div className="flex items-center gap-2 mb-2">
+               <Shield size={14} className="text-slate-400" />
+               <Text weight="bold" size="custom" className="text-slate-700" style={{ fontSize: '13px' }}>Select Role *</Text>
+            </div>
             <select
               value={role}
               onChange={e => {
                 setRole(e.target.value);
                 if (errors.role) setErrors({ ...errors, role: "" });
               }}
-              className="w-full rounded-xl px-4 py-3 text-[14px] border outline-none focus:ring-1 transition-all bg-white"
-              style={{ borderColor: errors.role ? "red" : "#d1d5db", outlineColor: errors.role ? "red" : COLORS.primary }}
+              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-white font-medium text-slate-900 border-[#E2E8F0]"
             >
               <option value="" disabled>Select Role</option>
               {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
-            {errors.role && <p className="text-red-500 text-[12px] mt-1.5">{errors.role}</p>}
+            {errors.role && (
+               <div className="flex items-center gap-1.5 mt-2 ml-1">
+                 <div className="w-1 h-1 rounded-full bg-red-500"></div>
+                 <Text weight="medium" size="xs" className="text-red-500">{errors.role}</Text>
+               </div>
+            )}
           </div>
 
           {/* Batch Name (for Students) */}
           {role === "Students" && (
             <div>
-              <label className="text-[13px] font-bold mb-2 block" style={{ color: COLORS.text }}>Enter Batch Name *</label>
+              <Text weight="bold" size="custom" className="text-slate-700 mb-2 block" style={{ fontSize: '13px' }}>Enter Batch Name *</Text>
               <input
                 type="text"
                 value={batchName}
@@ -199,67 +216,87 @@ export function InviteMemberModal({
                   if (errors.batchName) setErrors({ ...errors, batchName: "" });
                 }}
                 placeholder="e.g. Jan2025"
-                className="w-full rounded-xl px-4 py-3 text-[14px] border outline-none focus:ring-1 transition-all"
-                style={{ borderColor: errors.batchName ? "red" : "#d1d5db", outlineColor: errors.batchName ? "red" : COLORS.primary }}
+                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium placeholder:text-slate-400"
+                style={{ borderColor: errors.batchName ? "#EF4444" : "#E2E8F0" }}
               />
-              {errors.batchName && <p className="text-red-500 text-[12px] mt-1.5">{errors.batchName}</p>}
+              {errors.batchName && (
+                 <div className="flex items-center gap-1.5 mt-2 ml-1">
+                   <div className="w-1 h-1 rounded-full bg-red-500"></div>
+                   <Text weight="medium" size="xs" className="text-red-500">{errors.batchName}</Text>
+                 </div>
+              )}
             </div>
           )}
 
           {/* Team Selection (for Team Leader / Staff) */}
           {(role === "Team Leader" || role === "Staff Member") && (
             <div>
-              <label className="text-[13px] font-bold mb-2 block" style={{ color: COLORS.text }}>Select Team *</label>
+              <div className="flex items-center gap-2 mb-2">
+                 <Users size={14} className="text-slate-400" />
+                 <Text weight="bold" size="custom" className="text-slate-700" style={{ fontSize: '13px' }}>Select Team *</Text>
+              </div>
               <select
                 value={teamId}
                 onChange={e => {
                   setTeamId(e.target.value);
                   if (errors.teamId) setErrors({ ...errors, teamId: "" });
                 }}
-                className="w-full rounded-xl px-4 py-3 text-[14px] border outline-none focus:ring-1 transition-all bg-white"
-                style={{ borderColor: errors.teamId ? "red" : "#d1d5db", outlineColor: errors.teamId ? "red" : COLORS.primary }}
+                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-white font-medium text-slate-900 border-[#E2E8F0]"
               >
                 <option value="" disabled>Select Team</option>
                 {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
-              {errors.teamId && <p className="text-red-500 text-[12px] mt-1.5">{errors.teamId}</p>}
+              {errors.teamId && (
+                 <div className="flex items-center gap-1.5 mt-2 ml-1">
+                   <div className="w-1 h-1 rounded-full bg-red-500"></div>
+                   <Text weight="medium" size="xs" className="text-red-500">{errors.teamId}</Text>
+                 </div>
+              )}
             </div>
           )}
 
           {/* Skill Level (for Staff Member) */}
           {role === "Staff Member" && (
-            <div>
-              <label className="text-[13px] font-bold mb-2 block" style={{ color: COLORS.text }}>Select Skill Level *</label>
+            <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+              <div className="flex items-center gap-2 mb-3">
+                 <Layers size={14} className="text-slate-400" />
+                 <Text weight="bold" size="custom" className="text-slate-700" style={{ fontSize: '13px' }}>Skill Level *</Text>
+              </div>
               <select
                 value={skillLevel}
                 onChange={e => setSkillLevel(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-[14px] border outline-none focus:ring-1 transition-all bg-white mb-2"
-                style={{ borderColor: "#d1d5db", outlineColor: COLORS.primary }}
+                className="w-full rounded-xl px-3 py-2.5 text-[14px] border border-slate-200 outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-white font-medium text-slate-900 mb-3"
               >
                 {SKILL_LEVELS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
-              <p className="text-[12px] text-gray-500">
-                {skillLevel === 'None' && "Tip: Staffs added under None Skill Level, will get 0 leads."}
-                {skillLevel === 'Beginner' && "Tip: Staffs added under Beginner Skill Level will get 1 lead at a time."}
-                {skillLevel === 'Intermediate' && "Tip: Staffs added under Intermediate Skill Level will get 2 lead at a time."}
-                {skillLevel === 'Expert' && "Tip: Staffs added under Expert Skill Level will get 3 lead at a time."}
-              </p>
+              <div className="flex items-start gap-2 pt-1 border-t border-slate-100 mt-1">
+                 <Info size={12} className="text-blue-400 mt-0.5" />
+                 <Text className="text-[11px] text-slate-500 leading-relaxed italic">
+                  {skillLevel === 'None' && "Staffs with 'None' skill level will receive 0 automated leads."}
+                  {skillLevel === 'Beginner' && "Beginner staff will receive 1 lead at a time."}
+                  {skillLevel === 'Intermediate' && "Intermediate staff will receive 2 leads at a time."}
+                  {skillLevel === 'Expert' && "Expert staff will receive 3 leads at a time."}
+                </Text>
+              </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100">
+        <div className="px-7 py-5 bg-slate-50/50 border-t border-slate-100">
           <button
             onClick={handleInvite}
             disabled={loading}
-            className="w-full py-3.5 rounded-xl text-[14px] font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryDark})`,
-              boxShadow: `0 4px 14px ${COLORS.primary}50`,
-            }}
+            className="w-full h-12 rounded-2xl flex items-center justify-center bg-[#233A78] text-white shadow-lg shadow-blue-900/20 hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
-            {loading ? "Sending Invitation..." : "Invite"}
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <Text weight="bold" size="sm">Sending Invitation...</Text>
+              </div>
+            ) : (
+              <Text weight="bold" size="sm">Send Invitation</Text>
+            )}
           </button>
         </div>
       </div>
