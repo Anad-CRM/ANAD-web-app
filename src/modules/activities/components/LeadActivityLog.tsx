@@ -38,10 +38,10 @@ export const LeadActivityLog: React.FC<Props> = ({ activities, leadId, onRefresh
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-10 h-full">
             <History size={52} strokeWidth={1.3} className="text-slate-300" />
             <div className="text-center">
-              <p className="font-semibold text-slate-500 text-[15px]">No Activities Yet</p>
-              <p className="text-[13px] text-slate-400 mt-1 max-w-[200px] mx-auto">
+              <Text weight="semibold" className="text-slate-500" style={{ fontSize: '15px' }}>No Activities Yet</Text>
+              <Text className="text-slate-400 mt-1 max-w-[200px] mx-auto" style={{ fontSize: '13px' }}>
                 Start tracking your interactions with this lead
-              </p>
+              </Text>
             </div>
           </div>
         ) : (

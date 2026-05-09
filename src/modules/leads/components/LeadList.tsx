@@ -11,6 +11,7 @@ import { Lead } from "../types/lead.types";
 import { TeamsService } from "../../teams/services/teams.service";
 import { getAllAds } from "../../ads/api/adsApi";
 import { getUser } from "@/core/utils/auth";
+import { Text } from "@/core/components/ui/Text";
 
 // ── Helper: build API payload from filter state ─────────────────────────────
 
@@ -327,7 +328,7 @@ export function LeadList() {
         {/* <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6"> */}
         <div className="flex items-center gap-4 mb-4">
           <BackButton onClick={() => router.back()} />
-          <h1 className="text-xl font-semibold text-slate-800">
+          <Text as="h1" weight="semibold" className="text-slate-800" style={{ fontSize: '20px' }}>
             {isUnassigned
               ? "Unassigned Leads"
               : statusParam
@@ -337,7 +338,7 @@ export function LeadList() {
                     ? "Follow Ups"
                     : statusParam
                 : "Leads List"}
-          </h1>
+          </Text>
         </div>
 
         {/* ── Search + Filter Row ── */}
@@ -406,7 +407,7 @@ export function LeadList() {
                   border: `1px solid ${COLORS.primaryLight}`,
                 }}
               >
-                {pill.label}
+                <Text weight="semibold" style={{ fontSize: '11px' }}>{pill.label}</Text>
                 <button onClick={pill.onRemove} className="hover:opacity-70">
                   <X size={11} />
                 </button>
@@ -425,10 +426,10 @@ export function LeadList() {
         {/* ── Selection Action Bar ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {!isLoading && (
-            <p className="text-[12px] font-medium" style={{ color: COLORS.muted }}>
+            <Text weight="medium" style={{ color: COLORS.muted, fontSize: '12px' }}>
               {leads.length} lead{leads.length !== 1 ? "s" : ""} found
               {statusParam && filters.statuses.length === 0 ? ` · ${statusParam}` : ""}
-            </p>
+            </Text>
           )}
 
           {leads.length > 0 && (
@@ -447,7 +448,8 @@ export function LeadList() {
                     className="flex items-center gap-1.5 text-[12px] font-bold text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                     style={{ backgroundColor: COLORS.primary }}
                   >
-                    <Users size={14} /> Assign ({selectedLeadIds.length})
+                    <Users size={14} /> 
+                    <Text weight="bold" style={{ fontSize: '12px' }}>Assign ({selectedLeadIds.length})</Text>
                   </button>
                 </>
               )}
@@ -487,7 +489,7 @@ export function LeadList() {
                   className="animate-spin rounded-full h-9 w-9 border-[3px] border-t-transparent"
                   style={{ borderColor: `${COLORS.primary}40`, borderTopColor: COLORS.primary }}
                 />
-                <p className="text-[13px]" style={{ color: COLORS.muted }}>Loading leads...</p>
+                <Text style={{ color: COLORS.muted, fontSize: '13px' }}>Loading leads...</Text>
               </div>
             </div>
           ) : leads.length === 0 ? (
@@ -498,17 +500,17 @@ export function LeadList() {
               >
                 <Search size={28} style={{ color: COLORS.primary }} />
               </div>
-              <p className="text-[15px] font-semibold" style={{ color: COLORS.text }}>No leads found</p>
-              <p className="text-[12px]" style={{ color: COLORS.muted }}>
+              <Text weight="semibold" style={{ color: COLORS.text, fontSize: '15px' }}>No leads found</Text>
+              <Text style={{ color: COLORS.muted, fontSize: '12px' }}>
                 {hasActiveFilters ? "Try adjusting your filters" : "No leads available yet"}
-              </p>
+              </Text>
               {hasActiveFilters && (
                 <button
                   onClick={handleClearAll}
-                  className="text-[12px] font-bold underline"
+                  className="underline"
                   style={{ color: COLORS.primary }}
                 >
-                  Clear Filters
+                  <Text weight="bold" style={{ fontSize: '12px' }}>Clear Filters</Text>
                 </button>
               )}
             </div>
@@ -559,9 +561,9 @@ export function LeadList() {
                       className="animate-spin rounded-full h-5 w-5 border-[2px] border-t-transparent"
                       style={{ borderColor: `${COLORS.primary}40`, borderTopColor: COLORS.primary }}
                     />
-                    <span className="text-[13px] font-medium" style={{ color: COLORS.primary }}>
+                    <Text weight="medium" style={{ color: COLORS.primary, fontSize: '13px' }}>
                       Loading more...
-                    </span>
+                    </Text>
                   </div>
                 </div>
               )}
@@ -588,13 +590,13 @@ export function LeadList() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(13,27,62,0.55)", backdropFilter: "blur(3px)" }}>
           <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="p-5 border-b border-gray-100">
-              <h3 className="text-[16px] font-bold text-gray-900">Assign Leads</h3>
-              <p className="text-[13px] text-gray-500 mt-1">
+              <Text as="h3" weight="bold" className="text-gray-900" style={{ fontSize: '16px' }}>Assign Leads</Text>
+              <Text className="text-gray-500 mt-1" style={{ fontSize: '13px' }}>
                 Select a staff member to assign {selectedLeadIds.length} lead{selectedLeadIds.length !== 1 ? 's' : ''} to.
-              </p>
+              </Text>
             </div>
             <div className="p-5">
-              <label className="block text-[13px] font-semibold text-gray-700 mb-2">Staff Member</label>
+              <Text className="block font-semibold text-gray-700 mb-2" style={{ fontSize: '13px' }}>Staff Member</Text>
               <select
                 value={staffToAssign}
                 onChange={(e) => setStaffToAssign(e.target.value)}
@@ -612,18 +614,20 @@ export function LeadList() {
                   setIsAssignModalOpen(false);
                   if (!isSelectionMode) setSelectedLeadIds([]); // Clear if it was a single assign
                 }}
-                className="px-5 py-2.5 rounded-xl text-[13px] font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
+                className="px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-200 transition-colors"
                 disabled={isAssigning}
               >
-                Cancel
+                <Text weight="semibold" style={{ fontSize: '13px' }}>Cancel</Text>
               </button>
               <button
                 onClick={handleAssign}
                 disabled={!staffToAssign || isAssigning}
-                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-white transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl text-white transition-colors disabled:opacity-50 flex items-center gap-2"
                 style={{ backgroundColor: COLORS.primary }}
               >
-                {isAssigning ? "Assigning..." : "Confirm Assignment"}
+                <Text weight="bold" style={{ fontSize: '13px' }}>
+                  {isAssigning ? "Assigning..." : "Confirm Assignment"}
+                </Text>
               </button>
             </div>
           </div>

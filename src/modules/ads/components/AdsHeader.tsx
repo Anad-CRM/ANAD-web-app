@@ -1,4 +1,5 @@
 import React from "react";
+import { Text } from "@/core/components/ui/Text";
 
 export const AdsHeader = () => {
   return (

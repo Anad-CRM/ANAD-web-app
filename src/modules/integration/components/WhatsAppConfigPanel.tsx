@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ClipboardList, Eye, EyeOff, Key } from 'lucide-react';
 import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 import { disconnectWhatsAppIntegration, connectWhatsAppIntegration } from "../api/integrationApi";
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
@@ -88,8 +89,8 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             <img src="/whatsapp.png" alt="WhatsApp" className="h-7 w-7 object-contain" />
           </div>
           <div>
-            <h2 className="text-[17px] font-bold leading-tight text-[#1A1A1A]">WhatsApp Business</h2>
-            <p className="text-[13px] font-medium text-[#64748B]">Receive new leads from Whatsapp Business in your account</p>
+            <Text as="h2" weight="bold" style={{ fontSize: '17px', lineHeight: '1.25' }} className="text-[#1A1A1A]">WhatsApp Business</Text>
+            <Text className="text-[#64748B]" size="xs" weight="medium">Receive new leads from Whatsapp Business in your account</Text>
           </div>
         </div>
       </div>
@@ -97,7 +98,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
       <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 lg:px-5 lg:py-4">
         <div className="flex items-center gap-2.5">
           <Key className="h-5 w-5 text-[#111827]" strokeWidth={2.5} />
-          <h3 className="text-[16px] font-bold text-[#111827]">Access Token</h3>
+          <Text as="h3" weight="bold" className="text-[#111827]" style={{ fontSize: '16px' }}>Access Token</Text>
         </div>
 
         <div className="mt-3 rounded-[16px] bg-white px-4 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent focus-within:border-gray-200 transition-all">
@@ -139,7 +140,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
               {loading ? (
                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
-                 "Disconnect WhatsApp Business"
+                 <Text weight="bold" size="custom" style={{ fontSize: '15px' }}>Disconnect WhatsApp Business</Text>
               )}
             </button>
           ) : (
@@ -155,7 +156,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
                    <span>Connecting...</span>
                  </div>
               ) : (
-                 "Connect WhatsApp Business"
+                 <Text weight="bold" size="custom" style={{ fontSize: '15px' }}>Connect WhatsApp Business</Text>
               )}
             </button>
           )}
@@ -171,9 +172,9 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
           >
             <div className="flex items-center gap-3">
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
-                 <span className="text-[10px] font-bold text-white">?</span>
+                 <Text weight="bold" className="text-white" size="custom" style={{ fontSize: '10px' }}>?</Text>
               </div>
-              <span className="text-[13px] font-semibold text-[#111827]">{topic}</span>
+              <Text weight="semibold" className="text-[#111827]" size="xs">{topic}</Text>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
           </button>

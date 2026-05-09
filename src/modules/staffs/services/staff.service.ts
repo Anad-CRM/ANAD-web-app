@@ -32,6 +32,32 @@ export const StaffService = {
     return { status: "success", data: filtered } as unknown as StaffListResponse;
   },
 
+  async getAllStaff(organizationId: string, currentUserRole?: string, date?: string): Promise<StaffListResponse> {
+    const response = await api.post<Record<string, unknown>>(
+      API_ENDPOINTS.STAFF.GET_BY_ROLE,
+      { organizationId, date: date ?? new Date().toISOString().split('T')[0] }
+    );
+
+    if (response.data.status !== "success" || !response.data.data) {
+      return { status: "failed", data: [] } as unknown as StaffListResponse;
+    }
+
+    const { managers, staffMembers, teamLeaders, students, admins } = response.data.data as any;
+    const combined: any[] = [];
+    
+    if (currentUserRole === "Admin" || currentUserRole === "Manager") {
+      if (admins) combined.push(...admins);
+      if (managers) combined.push(...managers);
+    }
+    
+    if (teamLeaders) combined.push(...teamLeaders);
+    if (staffMembers) combined.push(...staffMembers);
+
+    const unique = Array.from(new Map(combined.map(s => [s.id, s])).values());
+    
+    return { status: "success", data: unique } as unknown as StaffListResponse;
+  },
+
   async getStaffById(userId: string | number, organizationId: string | number): Promise<StaffListResponse> {
     const response = await api.post<Record<string, unknown>>(
       API_ENDPOINTS.STAFF.GET_BY_ROLE,

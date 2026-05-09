@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, FileText, MapPin, Edit3 } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
 import { Activity } from '../../types/activity.types';
 import { SmallAvatar } from '../ActivityCards';
 
@@ -21,7 +22,7 @@ const DetailSection: React.FC<{
   <div className="mb-2.5">
     <div className="flex items-center gap-1.5 mb-1.5">
       <span style={{ color }}>{icon}</span>
-      <span className="text-[11px] font-semibold tracking-wide" style={{ color }}>{label}</span>
+      <Text weight="semibold" className="tracking-wide" style={{ color, fontSize: '11px' }}>{label}</Text>
     </div>
     {children}
   </div>
@@ -58,11 +59,11 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
         onClick={e => e.stopPropagation()}
       >
         <div className="overflow-y-auto custom-scrollbar flex-1 pr-2" style={{ scrollbarWidth: 'thin' }}>
-          <p className="text-[20px] font-bold text-slate-800">{displayTitle}</p>
+          <Text weight="bold" className="text-slate-800" style={{ fontSize: '20px' }}>{displayTitle}</Text>
 
           <div className="flex items-center gap-1.5 mt-2">
             <Clock size={14} className="text-slate-400" />
-            <span className="text-[14px] text-slate-500">{fullStr}</span>
+            <Text className="text-slate-500" style={{ fontSize: '14px' }}>{fullStr}</Text>
           </div>
 
           <div className="h-px bg-slate-100 my-5" />
@@ -76,7 +77,7 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
                   border: '1px solid rgba(2,132,199,0.2)',
                 }}
               >
-                <p className="text-[14.5px] leading-relaxed" style={{ color: `${COLORS.primary}E6` }}>{desc}</p>
+                <Text className="leading-relaxed" style={{ color: `${COLORS.primary}E6`, fontSize: '14.5px' }}>{desc}</Text>
               </div>
             </DetailSection>
           )}
@@ -85,7 +86,7 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
             <DetailSection icon={<MapPin size={13} />} color={COLORS.primaryDark} label="Assigned to">
               <div className="flex items-center gap-2.5 mt-2">
                 <SmallAvatar user={assigned} size={32} />
-                <span className="text-[15px] font-medium">{assigned.userName ?? 'Unknown'}</span>
+                <Text weight="medium" style={{ fontSize: '15px' }}>{assigned.userName ?? 'Unknown'}</Text>
               </div>
             </DetailSection>
           )}
@@ -94,7 +95,7 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
             <DetailSection icon={<Edit3 size={13} />} color={COLORS.info} label="By">
               <div className="flex items-center gap-2.5 mt-2">
                 <SmallAvatar user={user} size={32} />
-                <span className="text-[15px] font-medium">{user.userName ?? 'Unknown'}</span>
+                <Text weight="medium" style={{ fontSize: '15px' }}>{user.userName ?? 'Unknown'}</Text>
               </div>
             </DetailSection>
           )}
@@ -103,10 +104,10 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
         <div className="mt-6 flex-shrink-0 pt-2">
           <button
             onClick={onClose}
-            className="w-full py-3.5 rounded-xl text-white font-semibold text-[15px] transition-opacity hover:opacity-90 active:scale-95 shadow-md"
+            className="w-full py-3.5 rounded-xl text-white transition-opacity hover:opacity-90 active:scale-95 shadow-md"
             style={{ backgroundColor: COLORS.primary }}
           >
-            Close
+            <Text weight="semibold" style={{ fontSize: '15px' }}>Close</Text>
           </button>
         </div>
       </div>

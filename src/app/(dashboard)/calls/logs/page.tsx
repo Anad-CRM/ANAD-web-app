@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { PhoneIncoming, ArrowLeft, User, Search, Phone } from "lucide-react";
-import { getSpecificCallLogs } from "@/modules/calls/api/callsApi";
+import { PhoneIncoming, User, Search, Phone } from "lucide-react";
+import { getSpecificCallLogs, getRecordingUrl } from "@/modules/calls/api/callsApi";
 import { CallLog } from "@/modules/calls/types";
 import { AudioPlayer } from "@/core/components/ui/AudioPlayer";
-import { API_ENDPOINTS } from "@/core/api/api";
+import { BackButton } from "@/core/components/ui/BackButton";
+import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 
 const LogsPage = () => {
   const searchParams = useSearchParams();
@@ -18,13 +20,26 @@ const LogsPage = () => {
   const staffId = searchParams.get("staffId") || "";
 
   const [logs, setLogs] = useState<CallLog[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLogs = async () => {
       setLoading(true);
+      const callTypeMap: Record<string, string> = {
+        "Total": "totalCalls",
+        "Incoming": "incoming",
+        "Outgoing": "outgoing",
+        "Missed": "missed",
+        "Rejected": "rejected",
+        "Personal": "personalCalls",
+        "New": "newCalls",
+        "NotPickedUp": "notPickedUpCalls",
+        "Connected": "connected"
+      };
+
       const params: any = {
-        callType: callType.toLowerCase().replace(" ", ""),
+        callType: callTypeMap[callType as string] || callType.toLowerCase(),
         limit: 100, 
       };
       
@@ -32,8 +47,9 @@ const LogsPage = () => {
       if (endDate) params.endDate = endDate;
       if (staffId) params.staffIds = [staffId];
 
-      const data = await getSpecificCallLogs(params);
+      const { logs: data, totalCount } = await getSpecificCallLogs(params);
       setLogs(data);
+      setTotalRecords(totalCount);
       setLoading(false);
     };
 
@@ -54,25 +70,20 @@ const LogsPage = () => {
   };
 
   return (
-    <div className="p-6 sm:p-8 bg-[#F8FAFC] min-h-screen font-sans animate-in fade-in duration-500">
+    <div className="animate-in fade-in duration-500">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => router.back()}
-            className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-all border border-slate-100 text-slate-600 hover:text-[#233A78]"
-          >
-            <ArrowLeft size={24} />
-          </button>
+        <div className="flex items-center gap-5">
+          <BackButton />
           <div>
             <div className="flex items-center gap-2 mb-1">
-               <span className="bg-[#233A78] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Module</span>
-               <span className="text-slate-400 text-xs font-semibold">/ Call Analytics</span>
+               <Text weight="bold" size="custom" className="bg-[#1C3A76] text-white px-2.5 py-0.5 rounded-full uppercase tracking-widest" style={{ fontSize: '10px' }}>Module</Text>
+               <Text weight="semibold" size="xs" className="text-slate-400">/ Call Analytics</Text>
             </div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <Text as="h1" className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
               {callType} History 
-              <span className="text-slate-400 font-medium ml-3 text-xl">({logs.length})</span>
-            </h1>
+              <Text as="span" weight="medium" size="custom" className="text-slate-300" style={{ fontSize: '24px' }}>({totalRecords})</Text>
+            </Text>
           </div>
         </div>
       </div>
@@ -82,73 +93,77 @@ const LogsPage = () => {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 bg-white rounded-[40px] shadow-sm border border-slate-100">
             <div className="w-16 h-16 border-4 border-[#233A78]/20 border-t-[#233A78] rounded-full animate-spin mb-4"></div>
-            <p className="text-slate-500 font-bold text-lg animate-pulse">Loading all call records...</p>
+            <Text weight="bold" size="lg" className="text-slate-500 animate-pulse">Loading all call records...</Text>
           </div>
         ) : logs.length === 0 ? (
           <div className="bg-white rounded-[40px] p-20 shadow-sm border border-slate-100 text-center">
             <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
               <Search size={48} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">No Records Found</h2>
-            <p className="text-slate-500 max-w-sm mx-auto">We couldn't find any call logs matching your selection.</p>
+            <Text as="h2" size="2xl" weight="bold" className="text-slate-900 mb-2">No Records Found</Text>
+            <Text className="text-slate-500 max-w-sm mx-auto block">We couldn't find any call logs matching your selection.</Text>
           </div>
         ) : (
-          <div className="grid gap-6">
+          <div className="grid gap-5">
             {logs.map((call, idx) => (
               <div 
                 key={idx} 
-                className="bg-white rounded-[40px] p-6 sm:p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 group relative overflow-hidden"
+                className="bg-white rounded-[28px] p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-300 group relative overflow-hidden"
               >
                 {/* Visual Accent */}
-                <div className="absolute top-0 left-0 w-2 h-full bg-[#233A78] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-[#1C3A76] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                    <div className="w-16 h-16 bg-[#233A78]/5 rounded-[22px] flex items-center justify-center text-[#233A78] group-hover:bg-[#233A78] group-hover:text-white transition-all duration-500">
-                      <User size={32} strokeWidth={1.5} />
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start lg:items-center gap-5">
+                    <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-[#1C3A76] group-hover:bg-[#1C3A76] group-hover:text-white transition-all duration-500 border border-slate-100 shadow-sm">
+                      <User size={28} strokeWidth={1.5} />
                     </div>
                     
-                    <div className="space-y-1">
-                      <h3 className={`text-2xl font-black tracking-tight ${call.name === "Unknown Lead" ? "text-slate-400 italic" : "text-slate-900"}`}>
+                    <div className="space-y-1 text-center sm:text-left">
+                      <Text as="h3" weight="bold" className={`text-xl tracking-tight leading-none ${call.name === "Unknown Lead" ? "text-slate-400 italic" : "text-slate-900"}`}>
                         {call.name}
-                      </h3>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 text-[#1E40AF] font-bold">
-                          <Phone size={14} fill="currentColor" className="opacity-20" />
-                          <span>{call.number}</span>
+                      </Text>
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 pt-1">
+                        <div className="flex items-center gap-2 text-[#1E40AF]">
+                          <Phone size={14} className="opacity-40" />
+                          <Text weight="bold" size="sm" className="tracking-tight">{call.number}</Text>
                         </div>
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-                        <div className="px-3 py-1 bg-slate-100 rounded-full text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                          {call.userName || "System"}
+                        <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-200"></div>
+                        <div className="px-2.5 py-0.5 bg-slate-100 rounded-md">
+                           <Text weight="bold" className="text-slate-500 uppercase tracking-widest" style={{ fontSize: '9px' }}>{call.userName || "System"}</Text>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center border-t lg:border-t-0 border-slate-100 pt-6 lg:pt-0 gap-4">
+                  <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between sm:justify-center lg:justify-center border-t lg:border-t-0 border-slate-50 pt-5 lg:pt-0 gap-4">
                     <div className="text-right">
-                      <p className="text-lg font-bold text-slate-900">{formatDate(call.timestamp)}</p>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">
+                      <Text weight="bold" className="text-slate-900 block">{formatDate(call.timestamp)}</Text>
+                      <Text weight="bold" className="text-slate-400 uppercase tracking-widest mt-1 block" style={{ fontSize: '10px' }}>
                         {new Date(call.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                      </Text>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50/50 rounded-2xl border border-blue-100/50">
-                       <div className="w-2h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                       <span className="text-sm font-black text-[#1E40AF]">Duration: {call.duration}</span>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-xl border border-blue-100/30">
+                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                       <Text weight="bold" className="text-[#1E40AF] uppercase tracking-wide" style={{ fontSize: '10px' }}>{call.duration}</Text>
                     </div>
                   </div>
                 </div>
 
-                {/* Audio Component */}
-                <div className="mt-8 pt-8 border-t border-slate-100/50">
+                {/* Audio Component - Adopting RecordingCard style */}
+                <div className="mt-5">
                   {call.recordingFile ? (
-                    <div className="bg-slate-50/50 rounded-3xl p-2 border border-slate-200/50 group-hover:border-blue-200 transition-colors">
-                       <AudioPlayer src={API_ENDPOINTS.CALLS.RECORDING(call.recordingFile)} />
+                    <div className="space-y-2">
+                       <Text weight="bold" className="text-slate-800" style={{ fontSize: '13px' }}>Call Recording</Text>
+                       <AudioPlayer 
+                         src={getRecordingUrl(call.recordingFile)} 
+                         className="w-full max-w-[300px] !bg-transparent !p-0 !border-0"
+                       />
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3 px-6 py-4 bg-slate-50 rounded-3xl border border-dashed border-slate-200 text-slate-400">
-                      <div className="w-2 h-2 rounded-full bg-slate-200"></div>
-                      <span className="text-sm font-medium">No recording available for this session</span>
+                    <div className="flex items-center gap-3 px-5 py-3 bg-white/40 rounded-2xl border border-dashed border-slate-300 text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                      <Text size="sm" weight="medium" className="italic">No recording available for this session</Text>
                     </div>
                   )}
                 </div>

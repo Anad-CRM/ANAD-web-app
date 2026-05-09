@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Clock, CalendarDays, Loader2, Phone, MessageCircle, Mail } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
 import { createFollowup } from '@/modules/follow-up/api/followUpApi';
 import { api } from '@/core/api/axios'; // For updateStatus if needed
 
@@ -85,7 +86,7 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100">
-          <span className="text-[18px] font-semibold text-slate-800">New Follow-Up</span>
+          <Text weight="semibold" className="text-slate-800" style={{ fontSize: '18px' }}>New Follow-Up</Text>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors"
@@ -97,7 +98,7 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
         <div className="p-6 flex flex-col gap-6 overflow-y-auto max-h-[70vh]">
           {/* Type Selector */}
           <div className="flex flex-col gap-3">
-            <label className="text-[12px] font-semibold text-slate-500 tracking-wide uppercase">Follow-Up Via</label>
+            <Text weight="semibold" className="text-slate-500 tracking-wide uppercase" style={{ fontSize: '12px' }}>Follow-Up Via</Text>
             <div className="flex justify-between gap-2">
               {TYPE_OPTIONS.map((opt) => {
                 const isSelected = selectedType === opt.type;
@@ -120,9 +121,9 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
                     >
                       {opt.icon}
                     </div>
-                    <span className="text-[13px] font-medium" style={{ color: isSelected ? COLORS.primary : '#475569' }}>
+                    <Text weight="medium" style={{ fontSize: '13px', color: isSelected ? COLORS.primary : '#475569' }}>
                       {opt.label}
-                    </span>
+                    </Text>
                   </button>
                 );
               })}
@@ -131,7 +132,7 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
 
           {/* Schedule */}
           <div className="flex flex-col gap-3">
-            <label className="text-[12px] font-semibold text-slate-500 tracking-wide uppercase">Schedule</label>
+            <Text weight="semibold" className="text-slate-500 tracking-wide uppercase" style={{ fontSize: '12px' }}>Schedule</Text>
             <div className="flex gap-4">
               <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
                 <CalendarDays size={18} className="text-slate-400" />
@@ -157,7 +158,7 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
 
           {/* Notes */}
           <div className="flex flex-col gap-3">
-            <label className="text-[12px] font-semibold text-slate-500 tracking-wide uppercase">Notes</label>
+            <Text weight="semibold" className="text-slate-500 tracking-wide uppercase" style={{ fontSize: '12px' }}>Notes</Text>
             <textarea
               className="w-full h-32 p-4 rounded-xl border border-slate-200 bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none transition-all"
               placeholder="Add notes for the follow-up...
@@ -167,12 +168,12 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
               value={notes}
               onChange={e => setNotes(e.target.value)}
             />
-            <span className="text-[12px] text-slate-500">These notes will help you prepare for the follow-up</span>
+            <Text style={{ color: '#64748B', fontSize: '12px' }}>These notes will help you prepare for the follow-up</Text>
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm px-2 bg-red-50 py-2 rounded-lg border border-red-100">
-              {error}
+            <div className="px-2 bg-red-50 py-2 rounded-lg border border-red-100">
+              <Text className="text-red-500" style={{ fontSize: '14px' }}>{error}</Text>
             </div>
           )}
         </div>
@@ -180,18 +181,18 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
         <div className="px-6 py-5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+            className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
             disabled={isLoading}
           >
-            Cancel
+            <Text weight="semibold">Cancel</Text>
           </button>
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="px-5 py-2.5 rounded-xl font-semibold text-white transition-colors flex items-center justify-center min-w-[160px]"
+            className="px-5 py-2.5 rounded-xl text-white transition-colors flex items-center justify-center min-w-[160px]"
             style={{ backgroundColor: COLORS.primary }}
           >
-            {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Schedule Follow-Up'}
+            {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Text weight="semibold">Schedule Follow-Up</Text>}
           </button>
         </div>
       </div>

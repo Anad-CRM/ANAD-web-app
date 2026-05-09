@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, Download, Users, ChevronDown } from "lucide-react";
+import { Text } from "@/core/components/ui/Text";
 import { getUser } from "@/core/utils/auth";
 import { StaffService } from "@/modules/staffs/services/staff.service";
 import { Staff } from "@/modules/staffs/types/staff.types";
@@ -24,15 +25,12 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
   const isAdminOrTL = user?.role === "Admin" || user?.role === "Manager" || user?.role === "Team Leader";
 
   useEffect(() => {
-    if (isAdminOrTL) {
+    if (isAdminOrTL && user?.organizationId) {
       const fetchStaff = async () => {
-        const response = await StaffService.getStaffList({
-          organizationId: user.organizationId,
-          role: "Staff Member",
-          date: new Date().toISOString()
-        });
+        const response = await StaffService.getAllStaff(user.organizationId, user.role);
         if (response.status === "success") {
-          setStaff(response.data);
+          const filteredStaff = response.data.filter((s: Staff) => s.id !== (user as any).id);
+          setStaff(filteredStaff);
         }
       };
       fetchStaff();
@@ -82,9 +80,9 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
     <div className="flex flex-col gap-6 mb-8 w-full font-sans">
       <div className="flex items-center justify-between w-full">
         <div>
-          <h2 className="text-[28px] font-extrabold text-black leading-tight tracking-tight whitespace-nowrap">
+          <Text as="h2" weight="bold" size="custom" style={{ fontSize: '28px' }} className="text-black leading-tight tracking-tight whitespace-nowrap">
             Call Analytics
-          </h2>
+          </Text>
         </div>
 
         {/* Action Buttons */}
@@ -96,7 +94,7 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
                 className="flex items-center gap-2 px-5 h-11 bg-white border border-slate-200 rounded-xl shadow-sm text-[14px] font-semibold text-slate-700 hover:bg-slate-50 transition-all"
               >
                 <Users size={18} className="text-[#233A78]" />
-                <span>{selectedStaffName}</span>
+                <Text weight="semibold" size="custom" style={{ fontSize: '14px' }}>{selectedStaffName}</Text>
                 <ChevronDown size={16} className={`ml-1 transition-transform ${showStaffDropdown ? 'rotate-180' : ''}`} />
               </button>
               
@@ -104,17 +102,21 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
                 <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
                   <button
                     onClick={() => handleStaffSelect(null)}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedStaffName === "All Staff" ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
+                    className={`w-full text-left px-4 py-3 transition-colors ${selectedStaffName === "All Staff" ? 'bg-slate-50' : ''}`}
                   >
-                    All Staff
+                    <Text size="sm" weight={selectedStaffName === "All Staff" ? "bold" : "normal"} className={selectedStaffName === "All Staff" ? 'text-[#233A78]' : 'text-slate-600'}>
+                      All Staff
+                    </Text>
                   </button>
                   {staff.map((s) => (
                     <button
                       key={s.id}
                       onClick={() => handleStaffSelect(s)}
-                      className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedStaffName === s.userName ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
+                      className={`w-full text-left px-4 py-3 transition-colors ${selectedStaffName === s.userName ? 'bg-slate-50' : ''}`}
                     >
-                      {s.userName}
+                      <Text size="sm" weight={selectedStaffName === s.userName ? "bold" : "normal"} className={selectedStaffName === s.userName ? 'text-[#233A78]' : 'text-slate-600'}>
+                        {s.userName}
+                      </Text>
                     </button>
                   ))}
                 </div>
@@ -128,7 +130,7 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
               className="flex items-center gap-2 px-5 h-11 bg-[#233A78] text-white rounded-xl shadow-lg hover:opacity-95 transition-all active:scale-95 text-[14px] font-bold"
             >
               <Calendar size={18} />
-              <span>{selectedDateLabel}</span>
+              <Text weight="bold" size="custom" style={{ fontSize: '14px' }}>{selectedDateLabel}</Text>
             </button>
             
             {showDateDropdown && (
@@ -137,9 +139,11 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
                   <button
                     key={opt.label}
                     onClick={() => handleDateSelect(opt)}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 transition-colors ${selectedDateLabel === opt.label ? 'text-[#233A78] font-bold bg-slate-50' : 'text-slate-600'}`}
+                    className={`w-full text-left px-4 py-3 transition-colors ${selectedDateLabel === opt.label ? 'bg-slate-50' : ''}`}
                   >
-                    {opt.label}
+                    <Text size="sm" weight={selectedDateLabel === opt.label ? "bold" : "normal"} className={selectedDateLabel === opt.label ? 'text-[#233A78]' : 'text-slate-600'}>
+                      {opt.label}
+                    </Text>
                   </button>
                 ))}
               </div>

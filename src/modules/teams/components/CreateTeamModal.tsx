@@ -8,6 +8,7 @@ import { useAuthContext } from "@/modules/auth/stores/AuthContext";
 import { StaffService } from "@/modules/staffs/services/staff.service";
 import { Staff } from "@/modules/staffs/types/staff.types";
 import { TEAM_ICONS } from "../constants/teamIcons";
+import { Text } from "@/core/components/ui/Text";
 
 interface CreateTeamModalProps {
   isOpen: boolean;
@@ -111,15 +112,13 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-4 pb-2">
-          <span className="text-[20px] font-bold text-gray-900">
-            Create Team
-          </span>
+        <div className="flex items-center justify-between px-7 pt-5 pb-3">
+          <Text as="h3" weight="bold" size="lg" className="text-slate-900 tracking-tight">Create Team</Text>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors"
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-100"
           >
-            <X size={18} color="#555" />
+            <X size={18} className="text-slate-500" />
           </button>
         </div>
 
@@ -127,7 +126,7 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         <div className="px-6 py-4 flex flex-col gap-5 overflow-y-auto custom-scrollbar" style={{ maxHeight: "calc(100vh - 200px)" }}>
           {/* Team Name */}
           <div>
-            <label className="text-[13px] font-bold mb-2 block" style={{ color: COLORS.text }}>Team Name *</label>
+            <Text weight="bold" size="custom" className="text-slate-700 mb-2 block" style={{ fontSize: '13px' }}>Team Name *</Text>
             <input
               type="text"
               value={name}
@@ -136,25 +135,28 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
                 if (error) setError("");
               }}
               placeholder="e.g. Sales Team Alpha"
-              className="w-full rounded-xl px-4 py-3 text-[14px] border outline-none focus:ring-1 transition-all"
+              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium placeholder:text-slate-400"
               style={{ 
-                borderColor: error ? "red" : "#d1d5db", 
-                color: COLORS.text, 
-                outlineColor: error ? "red" : COLORS.primary 
+                borderColor: error ? "#EF4444" : "#E2E8F0", 
+                color: "#0F172A", 
               }}
             />
-            {error && <p className="text-red-500 text-[12px] mt-1.5">{error}</p>}
+            {error && (
+              <div className="flex items-center gap-1.5 mt-2 ml-1">
+                <div className="w-1 h-1 rounded-full bg-red-500"></div>
+                <Text weight="medium" size="xs" className="text-red-500">{error}</Text>
+              </div>
+            )}
           </div>
 
           {/* Admin Manager Assignment */}
           {isAdmin && (
             <div>
-              <label className="text-[13px] font-bold mb-2 block" style={{ color: COLORS.text }}>Assign Manager</label>
+              <Text weight="bold" size="custom" className="text-slate-700 mb-2 block" style={{ fontSize: '13px' }}>Assign Manager</Text>
               <select
                 value={managerId}
                 onChange={e => setManagerId(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 text-[14px] border outline-none focus:ring-1 transition-all bg-white"
-                style={{ borderColor: "#d1d5db", outlineColor: COLORS.primary }}
+                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-white font-medium text-slate-900 border-[#E2E8F0]"
               >
                 <option value="">Do not assign</option>
                 {managers.map((m) => (
@@ -166,21 +168,20 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
 
           {/* Icon Picker */}
           <div>
-            <label className="text-[13px] font-bold mb-3 block mt-2" style={{ color: COLORS.text }}>Select Icon</label>
+            <Text weight="bold" size="custom" className="text-slate-700 mb-3 block" style={{ fontSize: '13px' }}>Identity & Icon</Text>
             <div className="grid grid-cols-5 gap-3">
               {TEAM_ICONS.map((Icon, idx) => (
                 <button
                   key={idx}
                   onClick={() => setIconIndex(idx)}
-                  className={`flex items-center justify-center h-12 rounded-xl transition-all border-2 ${
-                    iconIndex === idx ? "shadow-md bg-blue-50" : "bg-gray-50 hover:bg-gray-100"
+                  className={`flex items-center justify-center h-12 rounded-xl transition-all border-2 relative group overflow-hidden ${
+                    iconIndex === idx ? "bg-blue-50 border-[#233A78] shadow-sm" : "bg-slate-50 border-transparent hover:bg-slate-100"
                   }`}
-                  style={{
-                    borderColor: iconIndex === idx ? COLORS.primary : "transparent",
-                    color: iconIndex === idx ? COLORS.primary : "#555",
-                  }}
                 >
-                  <Icon size={20} />
+                  <Icon size={20} className={iconIndex === idx ? "text-[#233A78]" : "text-slate-500"} />
+                  {iconIndex === idx && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#233A78] rounded-full border-2 border-white"></div>
+                  )}
                 </button>
               ))}
             </div>
@@ -188,17 +189,20 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100">
+        <div className="px-7 py-5 bg-slate-50/50 border-t border-slate-100">
           <button
             onClick={handleCreate}
             disabled={loading}
-            className="w-full py-3.5 rounded-xl text-[14px] font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryDark})`,
-              boxShadow: `0 4px 14px ${COLORS.primary}50`,
-            }}
+            className="w-full h-12 rounded-2xl flex items-center justify-center bg-[#233A78] text-white shadow-lg shadow-blue-900/20 hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
-            {loading ? "Creating..." : "Create Team"}
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <Text weight="bold" size="sm">Creating...</Text>
+              </div>
+            ) : (
+              <Text weight="bold" size="sm">Create Team</Text>
+            )}
           </button>
         </div>
       </div>

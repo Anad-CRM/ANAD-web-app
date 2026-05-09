@@ -6,6 +6,7 @@ import {
   PhoneOff, UserCheck, RefreshCw, Sparkles 
 } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
 import { Activity, ActivityKind, FollowupConfig, StatusConfig } from '../types/activity.types';
 import { RecordingCard, ManualCard, StatusCard } from './ActivityCards';
 
@@ -104,8 +105,8 @@ export const ActivityTimeline: React.FC<Props> = ({ activities, onSelect }) => {
             onClick={() => kind !== 'call_recording' && onSelect?.(activity)}
           >
             <div className="flex flex-col items-end pt-0.5 flex-shrink-0 w-auto min-w-[70px] text-right">
-              <span className="text-[12px] font-bold text-black leading-tight whitespace-nowrap">{timeStr}</span>
-              <span className="text-[11px] font-medium text-slate-500 mt-0.5 whitespace-nowrap">{dateStr}</span>
+              <Text weight="bold" className="text-black leading-tight whitespace-nowrap" style={{ fontSize: '12px' }}>{timeStr}</Text>
+              <Text weight="medium" className="text-slate-500 mt-0.5 whitespace-nowrap" style={{ fontSize: '11px' }}>{dateStr}</Text>
             </div>
 
             <div className="flex flex-col items-center flex-shrink-0">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Copy, Trash2, RefreshCw, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import { Copy, Trash2, RefreshCw, Eye, EyeOff, ChevronDown, Rocket } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
 import { generateSecretKey, disconnectSecretKey } from '../api/integrationApi';
@@ -68,12 +69,12 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
           <img src="/website.png" alt="Website" className="w-7 h-7 object-contain" />
         </div>
         <div>
-          <h2 className="text-white text-[17px] font-bold leading-tight mb-1">
+          <Text as="h2" weight="bold" className="text-white mb-1" style={{ fontSize: '17px', lineHeight: '1.25' }}>
             Website & Webhooks
-          </h2>
-          <p className="text-white/80 text-[13px] font-medium">
+          </Text>
+          <Text weight="medium" className="text-white/80" size="xs">
             Receive leads from Website, LMS or any other source by using APIs
-          </p>
+          </Text>
         </div>
       </div>
 
@@ -81,7 +82,7 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
         {secretKey ? (
           <div className="space-y-4">
             <div className="bg-white rounded-[16px] p-4 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 block text-left">Your Unique Secret Key</label>
+              <Text as="label" weight="bold" className="text-gray-400 uppercase tracking-wider mb-1 block text-left" size="custom" style={{ fontSize: '11px' }}>Your Unique Secret Key</Text>
               <div className="flex items-center justify-between gap-1">
                 <input 
                   type={showKey ? "text" : "password"}
@@ -130,8 +131,8 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm border border-gray-100">
               <Rocket size={32} className="text-gray-300" />
             </div>
-            <h3 className="text-gray-800 font-bold mb-1">Scale your integration</h3>
-            <p className="text-gray-500 text-xs mb-5 max-w-[200px]">Generate a secret key to start receiving leads directly from your website.</p>
+            <Text as="h3" weight="bold" className="text-gray-800 mb-1">Scale your integration</Text>
+            <Text weight="normal" className="text-gray-500 mb-5 max-w-[200px]" size="custom" style={{ fontSize: '12px' }}>Generate a secret key to start receiving leads directly from your website.</Text>
             <button 
               onClick={handleGenerate}
               disabled={loading}
@@ -161,9 +162,9 @@ export const WebsiteConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
           >
             <div className="flex items-center gap-3">
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
-                 <span className="text-[10px] font-bold text-white">?</span>
+                 <Text weight="bold" className="text-white" size="custom" style={{ fontSize: '10px' }}>?</Text>
               </div>
-              <span className="text-[13px] font-semibold text-[#111827]">{topic}</span>
+              <Text weight="semibold" className="text-[#111827]" size="xs">{topic}</Text>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
           </button>

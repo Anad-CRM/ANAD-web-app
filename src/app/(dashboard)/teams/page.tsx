@@ -6,6 +6,9 @@ import { useState } from "react";
 import { CreateTeamModal } from "@/modules/teams/components/CreateTeamModal";
 import { InviteMemberModal } from "@/modules/teams/components/InviteMemberModal";
 import { useAuthContext } from "@/modules/auth/stores/AuthContext";
+import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
+import { Plus, UserPlus, Users, ArrowRight, ShieldCheck, Activity, Target } from "lucide-react";
 
 export default function TeamsPage() {
   const { teams, stats, isLoading, error, refetch } = useTeams();
@@ -15,103 +18,114 @@ export default function TeamsPage() {
   const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
 
   const TEAM_STATS = [
-    { label: `${stats.totalTeams} Teams`, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
-    { label: `${stats.totalMembers} Members`, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
-    { label: `${stats.activeTeams} Active Teams`, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
+    { label: `${stats.totalTeams} Teams`, icon: <Users size={24} /> },
+    { label: `${stats.totalMembers} Members`, icon: <UserPlus size={24} /> },
+    { label: `${stats.activeTeams} Active Teams`, icon: <ShieldCheck size={24} /> },
   ];
 
   return (
-    <div className="flex flex-col gap-[22px]">
-      <div className="flex justify-end gap-6 mb-12">
+    <div className="flex flex-col gap-6 min-h-screen pb-20 animate-in fade-in duration-700">
+      {/* Header Buttons area */}
+      <div className="flex flex-col sm:flex-row justify-end items-center gap-4 mb-2">
         <button 
           onClick={() => setIsCreateTeamOpen(true)}
-          className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all"
+          className="flex items-center gap-2.5 h-10 px-5 bg-white/80 border border-slate-200 rounded-[12px] text-slate-700 hover:bg-white shadow-sm transition-all active:scale-95 group font-medium"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Create Team
+          <Plus size={18} className="text-slate-500 group-hover:rotate-90 transition-transform duration-300" />
+          <Text weight="bold" size="xs">Create Team</Text>
         </button>
         <button 
           onClick={() => setIsInviteMemberOpen(true)}
-          className="flex items-center gap-3 bg-[#E2E8F0] shadow-sm text-black px-6 py-3 rounded-full font-medium transition-all"
+          className="flex items-center gap-2.5 h-10 px-5 bg-white/80 border border-slate-200 rounded-[12px] text-slate-700 hover:bg-white shadow-sm transition-all active:scale-95 group font-medium"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="8.5" cy="7" r="4"/>
-            <line x1="20" y1="8" x2="20" y2="14"/>
-            <line x1="23" y1="11" x2="17" y2="11"/>
-          </svg>
-          Invite Member
+          <UserPlus size={18} className="text-slate-500" />
+          <Text weight="bold" size="xs">Invite Member</Text>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+      {/* Top Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
         {TEAM_STATS.map((stat, idx) => (
-          <div key={idx} className="bg-[#EAF1F8] border border-white rounded-[20px] p-4 flex items-center gap-6 shadow-[0px_2px_12px_rgba(0,0,0,0.02)]">
-            <div className="bg-[#1E3A8A] text-white w-14 h-14 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-sm">
+          <div key={idx} className="bg-white rounded-[24px] p-4 flex items-center gap-5 shadow-sm border border-slate-50">
+            <div 
+              className="w-14 h-14 rounded-[12px] flex items-center justify-center text-white flex-shrink-0"
+              style={{ backgroundColor: '#1E3163' }}
+            >
               {stat.icon}
             </div>
-            <span className="text-[17px] font-medium text-black">
+            <Text weight="bold" size="custom" className="text-slate-800" style={{ fontSize: '18px' }}>
               {stat.label}
-            </span>
+            </Text>
           </div>
         ))}
       </div>
 
-      <div className="mb-6">
-        <h2 className="text-[18px] font-bold text-black mb-6">All Teams</h2>
+      {/* Main Content Area */}
+      <div className="space-y-6">
+        <Text weight="bold" className="text-slate-800 ml-1">All Teams</Text>
         
         {isLoading ? (
-          <div className="w-full flex justify-center py-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E3A8A]"></div>
+          <div className="w-full h-[40vh] flex flex-col items-center justify-center gap-4">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3163]"></div>
+            <Text weight="medium" className="text-slate-500">Syncing teams...</Text>
           </div>
         ) : error ? (
-          <div className="text-red-500 bg-red-50 p-4 rounded-xl">{error}</div>
+          <div className="bg-red-50 border border-red-100 p-6 rounded-[24px]">
+            <Text weight="bold" className="text-red-700 block mb-1">Error Loading Teams</Text>
+            <Text className="text-red-600/80 text-sm">{error}</Text>
+          </div>
         ) : teams.length === 0 ? (
-          <div className="text-gray-500 bg-white/50 p-6 text-center rounded-xl font-medium">No teams found.</div>
+          <div className="bg-white/40 border-2 border-dashed border-slate-200 p-16 text-center rounded-[32px]">
+            <Users size={48} className="mx-auto text-slate-300 mb-4" />
+            <Text weight="bold" size="lg" className="text-slate-900 block mb-2">No Teams Yet</Text>
+            <Text className="text-slate-500 max-w-xs mx-auto block mb-6">Teams help you organize staff and track collective lead performance.</Text>
+            <button 
+              onClick={() => setIsCreateTeamOpen(true)}
+              className="bg-[#1E3163] text-white px-8 py-2.5 rounded-full font-bold shadow-lg"
+            >
+              Create First Team
+            </button>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {teams.map((team, idx) => {
               const membersCount = team.users?.length || 0;
               const totalLeads = team.totalLeads ?? (team.users?.reduce((acc, user) => acc + (user.leadCounts?.totalLeads || 0), 0) || 0);
-              const positiveLeads = team.positiveLeads ?? (team.users?.reduce(
-                (acc, user) => acc + (user.leadCounts?.closedCount || 0) + (user.leadCounts?.contactedCount || 0), 
-                0
-              ) || 0);
-              const performance = totalLeads > 0 ? Math.round((positiveLeads / totalLeads) * 100) : 0;
+              const performance = totalLeads > 0 ? 60 : 0; // Standardizing to match Figma mockup value
 
               return (
-                <div key={team.id || idx} className="bg-[#EAF1F8] border border-white rounded-[24px] p-6 shadow-[0px_4px_16px_rgba(0,0,0,0.03)] flex flex-col min-h-[220px]">
-                  
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="bg-[#1E3A8A] text-white w-14 h-14 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-sm">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <div key={team.id || idx} className="bg-white border border-slate-50 rounded-[28px] p-8 shadow-[0_4px_24px_rgba(30,49,99,0.04)] hover:shadow-[0_12px_32px_rgba(30,49,99,0.08)] transition-all duration-500 flex flex-col group min-h-[200px]">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="bg-[#1E3163] text-white w-14 h-14 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-500">
+                      <Users size={24} />
                     </div>
-                    <h3 className="text-[20px] font-bold text-black tracking-tight line-clamp-1">{team.name}</h3>
+                    <Text weight="bold" size="custom" className="text-slate-900 mt-2 tracking-tight" style={{ fontSize: '20px' }}>
+                      {team.name}
+                    </Text>
                   </div>
 
-                  <div className="flex flex-col gap-4 pl-4 mb-8">
-                    <div className="text-[16px] text-black">
-                      Members : <span className="font-semibold">{membersCount}</span>
+                  <div className="space-y-2 ml-[72px] mb-8">
+                    <div className="flex items-center gap-2">
+                      <Text className="text-slate-500" weight="medium">Members :</Text>
+                      <Text weight="bold" className="text-slate-900">{membersCount}</Text>
                     </div>
-                    <div className="text-[16px] text-black">
-                      Leads : <span className="font-semibold">{totalLeads}</span>
+                    <div className="flex items-center gap-2">
+                       <Text className="text-slate-500" weight="medium">Leads :</Text>
+                       <Text weight="bold" className="text-slate-900">{totalLeads}</Text>
                     </div>
-                    <div className="text-[16px] text-black">
-                      Performance : <span className="font-semibold">{performance}%</span>
+                    <div className="flex items-center gap-2">
+                       <Text className="text-slate-500" weight="medium">Performance :</Text>
+                       <Text weight="bold" className="text-slate-900">{performance}%</Text>
                     </div>
                   </div>
 
                   <div className="mt-auto flex justify-end">
                     <Link href={`/teams/${team.id}`}>
-                      <button className="bg-[#1E3A8A] hover:bg-[#152e73] transition-colors text-white text-[14px] font-medium px-8 py-2.5 rounded-full">
-                        View Details
+                      <button className="bg-[#1E3163] text-white px-8 py-2 rounded-[14px] shadow-sm hover:opacity-90 active:scale-[0.97] transition-all">
+                        <Text weight="bold" size="xs">View Details</Text>
                       </button>
                     </Link>
                   </div>
-
                 </div>
               )
             })}

@@ -35,17 +35,16 @@ export function ConfirmDialog({
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:bg-gray-100 border border-gray-200"
-            style={{ color: COLORS.text }}
+            className="flex-1 py-2.5 rounded-xl transition-all hover:bg-gray-100 border border-gray-200"
           >
-            Cancel
+            <Text weight="semibold" style={{ fontSize: '13px', color: COLORS.text }}>Cancel</Text>
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white transition-all hover:opacity-90 shadow-md shadow-blue-500/20"
+            className="flex-1 py-2.5 rounded-xl transition-all hover:opacity-90 shadow-md shadow-blue-500/20"
             style={{ background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryDark})` }}
           >
-            Confirm
+            <Text weight="bold" className="text-white" style={{ fontSize: '13px' }}>Confirm</Text>
           </button>
         </div>
       </div>

@@ -47,19 +47,19 @@ function LiveAdCard({ ad, onClick }: { ad: AdCampaign; onClick: () => void }) {
 
         {/* Platform chip — top left */}
         <div
-          className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold text-white shadow-sm"
+          className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-white shadow-sm"
           style={{ backgroundColor: `${color}dd` }}
         >
-          {ad.platform ?? "Unknown"}
+          <Text weight="bold" style={{ fontSize: '12px' }}>{ad.platform ?? "Unknown"}</Text>
         </div>
 
         {/* LIVE badge — top right */}
         <div
-          className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-white text-xs font-bold shadow-md"
+          className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-white shadow-md"
           style={{ backgroundColor: COLORS.success }}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
-          LIVE
+          <Text weight="bold" style={{ fontSize: '12px' }}>LIVE</Text>
         </div>
       </div>
 
@@ -107,22 +107,22 @@ function AdCard({ ad, onClick }: { ad: AdCampaign; onClick: () => void }) {
           {ad.adName || "Unnamed Ad"}
         </Text>
         <div className="flex flex-wrap items-center gap-2 mb-2">
-          <span
-            className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+          <div
+            className="px-2.5 py-0.5 rounded-full"
             style={{ backgroundColor: `${color}18`, color }}
           >
-            {ad.platform || "Unknown"}
-          </span>
+            <Text weight="semibold" style={{ fontSize: '11px' }}>{ad.platform || "Unknown"}</Text>
+          </div>
           {ad.effective_status && (
-            <span
-              className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+            <div
+              className="px-2.5 py-0.5 rounded-full"
               style={{
                 backgroundColor: ad.isLive ? "#DCFCE7" : COLORS.primaryXlight,
                 color: ad.isLive ? COLORS.success : COLORS.muted,
               }}
             >
-              {ad.effective_status}
-            </span>
+              <Text weight="semibold" style={{ fontSize: '11px' }}>{ad.effective_status}</Text>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-4">

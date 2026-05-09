@@ -1,5 +1,6 @@
 import React from "react";
 import { CallFilterType, CallAnalyticsResponse } from "../types";
+import { Text } from "@/core/components/ui/Text";
 
 export const CallTypeFilters = ({ 
     activeFilter, 
@@ -83,18 +84,26 @@ export const CallTypeFilters = ({
                 : "border-[#E2E8F0] shadow-sm hover:shadow-md hover:border-[#A5BCD1]"
             }`}
           >
-            <span 
-              className={`text-[24px] font-black leading-none mb-1.5 transition-transform group-hover:scale-110 inline-block ${
+            <Text 
+              weight="bold"
+              size="custom"
+              className={`leading-none mb-1.5 transition-transform group-hover:scale-110 inline-block ${
                 isActive ? "text-[#233A78]" : "text-slate-800"
               }`}
+              style={{ fontSize: '24px' }}
             >
               {getCount(filter.type)}
-            </span>
-            <span className={`text-[11px] font-bold text-center leading-tight uppercase tracking-wider ${
-              isActive ? "text-[#233A78]" : "text-slate-500"
-            }`}>
+            </Text>
+            <Text 
+              weight="bold"
+              size="custom"
+              className={`text-center leading-tight uppercase tracking-wider ${
+                isActive ? "text-[#233A78]" : "text-slate-500"
+              }`}
+              style={{ fontSize: '11px' }}
+            >
               {filter.label || filter.type}
-            </span>
+            </Text>
             {isActive && (
               <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#233A78]"></div>
             )}
