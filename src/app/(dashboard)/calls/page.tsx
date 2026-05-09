@@ -28,7 +28,25 @@ export default function CallAnalyticsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalCalls, setModalCalls] = useState<CallLog[]>([]);
+  const [modalTotalCount, setModalTotalCount] = useState<number>(0);
   const [isModalLoading, setIsModalLoading] = useState(false);
+
+  const getFilterCount = useCallback((type: CallFilterType) => {
+    if (!analytics) return 0;
+    const { summary, callTypes: types } = analytics;
+    switch(type) {
+      case "Total": return summary.totalCalls || 0;
+      case "Incoming": return types.incoming.count || 0;
+      case "Outgoing": return types.outgoing.count || 0;
+      case "Missed": return types.missed.count || 0;
+      case "Rejected": return types.rejected.count || 0;
+      case "Personal": return types.personalCalls.count || 0;
+      case "New": return types.newCalls.count || 0;
+      case "NotPickedUp": return types.notPickedUpCalls.count || 0;
+      case "Connected": return (types.incoming.count || 0) + (types.outgoing.count || 0);
+      default: return 0;
+    }
+  }, [analytics]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -82,7 +100,7 @@ export default function CallAnalyticsPage() {
       "Personal": "personalCalls",
       "New": "newCalls",
       "NotPickedUp": "notPickedUpCalls",
-      "Connected": "incoming" 
+      "Connected": "connected" 
     };
 
     const params: any = {
@@ -93,11 +111,13 @@ export default function CallAnalyticsPage() {
     if (staffId) params.staffIds = [staffId];
 
     try {
-      const logs = await getSpecificCallLogs(params);
+      const { logs, totalCount } = await getSpecificCallLogs(params);
       setModalCalls(logs || []);
+      setModalTotalCount(totalCount || 0);
     } catch (error) {
       console.error("Failed to fetch logs:", error);
       setModalCalls([]);
+      setModalTotalCount(0);
     } finally {
       setIsModalLoading(false);
     }
@@ -143,6 +163,7 @@ export default function CallAnalyticsPage() {
         onClose={() => setIsModalOpen(false)}
         title={modalTitle}
         calls={modalCalls}
+        totalCount={modalTotalCount}
         isLoading={isModalLoading}
         filters={{
           callType: activeFilter,

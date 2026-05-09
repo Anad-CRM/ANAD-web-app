@@ -25,7 +25,7 @@ export const getSpecificCallLogs = async (params: {
     endDate?: string; 
     staffIds?: string[];
     limit?: number;
-}): Promise<CallLog[]> => {
+}): Promise<{ logs: CallLog[]; totalCount: number }> => {
     try {
       const user = getUser<{ organizationId?: string }>();
       const response = await api.post(API_ENDPOINTS.DASHBOARD.SPECIFIC_CALL_TYPE, {
@@ -34,7 +34,7 @@ export const getSpecificCallLogs = async (params: {
       });
       
       if (response.data.success) {
-        return response.data.data.callDetails.map((item: any) => ({
+        const logs = response.data.data.callDetails.map((item: any) => ({
           id: item.id,
           number: item.number,
           callType: item.callType,
@@ -51,11 +51,16 @@ export const getSpecificCallLogs = async (params: {
           } : undefined,
           name: item.lead?.userName || "Unknown Lead"
         }));
+
+        return {
+            logs,
+            totalCount: response.data.data.pagination?.totalRecords || logs.length
+        };
       }
-      return [];
+      return { logs: [], totalCount: 0 };
     } catch (error) {
       console.error("Failed to fetch specific call logs:", error);
-      return [];
+      return { logs: [], totalCount: 0 };
     }
 };
 

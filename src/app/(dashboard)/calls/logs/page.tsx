@@ -18,13 +18,26 @@ const LogsPage = () => {
   const staffId = searchParams.get("staffId") || "";
 
   const [logs, setLogs] = useState<CallLog[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLogs = async () => {
       setLoading(true);
+      const callTypeMap: Record<string, string> = {
+        "Total": "totalCalls",
+        "Incoming": "incoming",
+        "Outgoing": "outgoing",
+        "Missed": "missed",
+        "Rejected": "rejected",
+        "Personal": "personalCalls",
+        "New": "newCalls",
+        "NotPickedUp": "notPickedUpCalls",
+        "Connected": "connected"
+      };
+
       const params: any = {
-        callType: callType.toLowerCase().replace(" ", ""),
+        callType: callTypeMap[callType as string] || callType.toLowerCase(),
         limit: 100, 
       };
       
@@ -32,8 +45,9 @@ const LogsPage = () => {
       if (endDate) params.endDate = endDate;
       if (staffId) params.staffIds = [staffId];
 
-      const data = await getSpecificCallLogs(params);
+      const { logs: data, totalCount } = await getSpecificCallLogs(params);
       setLogs(data);
+      setTotalRecords(totalCount);
       setLoading(false);
     };
 
@@ -71,7 +85,7 @@ const LogsPage = () => {
             </div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
               {callType} History 
-              <span className="text-slate-400 font-medium ml-3 text-xl">({logs.length})</span>
+              <span className="text-slate-400 font-medium ml-3 text-xl">({totalRecords})</span>
             </h1>
           </div>
         </div>
