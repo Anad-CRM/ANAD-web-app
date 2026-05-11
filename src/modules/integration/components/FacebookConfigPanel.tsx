@@ -36,7 +36,7 @@ interface Props {
 }
 
 export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
-  const { user } = useAuthContext();
+  const { user, setAuthData, token } = useAuthContext();
   const isConnected = user?.isFbConnected === "Connected";
   const [loading, setLoading] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -57,21 +57,47 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
       return;
     }
 
-    fb.login(async (response: any) => {
-      if (response.authResponse) {
-        try {
-          await connectFacebookWebhook(response.authResponse.userID, response.authResponse.accessToken);
-          showToast("Facebook webhook integration successfully created!", "success");
-        } catch (err: unknown) {
-          const apiError = err as ApiError;
-          setError(apiError?.response?.data?.message || apiError?.message || "Failed to connect integration");
-        } finally {
+    fb.login((response: any) => {
+      void (async () => {
+        if (response.authResponse) {
+          try {
+            const userAccessToken = response.authResponse.accessToken;
+            const fbResponse = await fetch(`https://graph.facebook.com/v19.0/me?fields=name,id,accounts{access_token,name,id}&access_token=${userAccessToken}`);
+            const fbData = await fbResponse.json();
+            
+            const pages = fbData.accounts?.data;
+            
+            if (!pages || pages.length === 0) {
+               setError("No Facebook pages found for this account.");
+               setLoading(false);
+               return;
+            }
+
+            let updatedUser = null;
+            for (const page of pages) {
+              const res = await connectFacebookWebhook(page.id, page.access_token, userAccessToken);
+              if (res.data?.status === 'success' && res.data?.data) {
+                updatedUser = res.data.data;
+              }
+            }
+
+            if (updatedUser && token) {
+               localStorage.setItem('user', JSON.stringify(updatedUser));
+               setAuthData(updatedUser, token);
+            }
+
+            showToast("Facebook webhook integration successfully created!", "success");
+          } catch (err: unknown) {
+            const apiError = err as ApiError;
+            setError(apiError?.response?.data?.message || apiError?.message || "Failed to connect integration");
+          } finally {
+            setLoading(false);
+          }
+        } else {
           setLoading(false);
+          setError("User cancelled login or did not fully authorize.");
         }
-      } else {
-        setLoading(false);
-        setError("User cancelled login or did not fully authorize.");
-      }
+      })();
     }, { scope: 'pages_manage_metadata,pages_read_engagement,leads_retrieval' });
   };
 
@@ -79,7 +105,17 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
     setDisconnecting(true);
     setError(null);
     try {
-       await disconnectFacebookWebhook();
+       const res = await disconnectFacebookWebhook();
+       
+       if (res.data?.status === 'success' && res.data?.data && token) {
+         localStorage.setItem('user', JSON.stringify(res.data.data));
+         setAuthData(res.data.data, token);
+       } else if (user && token) {
+         const updatedUser = { ...user, isFbConnected: "Not Connected" };
+         localStorage.setItem('user', JSON.stringify(updatedUser));
+         setAuthData(updatedUser, token);
+       }
+       
        showToast("Facebook webhook integration successfully deleted.", "success");
     } catch (err: unknown) {
        const apiError = err as ApiError;
@@ -134,20 +170,34 @@ export const FacebookConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
 
           <div className="flex gap-4">
             {isConnected ? (
-              <button 
-                onClick={handleDisconnect}
-                disabled={disconnecting}
-                className="w-full bg-red-600 text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:bg-red-700 disabled:opacity-70 flex justify-center items-center"
-              >
-                {disconnecting ? (
-                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                   "Disconnect Facebook Integration"
-                )}
-              </button>
+              <>
+                <button 
+                  onClick={(e) => { e.preventDefault(); void handleDisconnect(); }}
+                  disabled={disconnecting || loading}
+                  className="flex-1 bg-red-600 text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:bg-red-700 disabled:opacity-70 flex justify-center items-center"
+                >
+                  {disconnecting ? (
+                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                     "Disconnect"
+                  )}
+                </button>
+                <button 
+                  onClick={(e) => { e.preventDefault(); handleConnect(); }}
+                  disabled={loading || disconnecting}
+                  className="flex-1 text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 flex justify-center items-center"
+                  style={{ backgroundColor: COLORS.primary }}
+                >
+                  {loading ? (
+                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                     "Reconnect"
+                  )}
+                </button>
+              </>
             ) : (
               <button 
-                onClick={handleConnect}
+                onClick={(e) => { e.preventDefault(); handleConnect(); }}
                 disabled={loading}
                 className="w-full text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 flex justify-center items-center"
                 style={{ backgroundColor: COLORS.primary }}

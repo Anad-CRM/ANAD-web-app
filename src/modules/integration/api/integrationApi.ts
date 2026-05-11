@@ -40,34 +40,36 @@ export const disconnectWhatsAppIntegration = async () => {
   });
 };
 
-export const connectFacebookWebhook = async (pageId: string, pageToken: string) => {
-  const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
+export const connectFacebookWebhook = async (pageId: string, pageAccessToken: string, userAccessToken: string) => {
+  const user = getUser<{ id?: string; _id?: string; organizationId?: string; role?: string; }>();
   if (!user || !user.organizationId) {
      throw new Error("Authentication context missing");
   }
 
+  const userId = user.id || user._id;
+
   const payload = {
-    webhookSubscriptions: [
-      {
-        pageId,
-        pageToken,
-        organizationId: user.organizationId
-      }
-    ]
+    pageId,
+    pageAccessToken,
+    userId,
+    userAccessToken,
+    organizationId: user.organizationId
   };
 
   return api.post(API_ENDPOINTS.INTEGRATION.CREATE_SUBSCRIPTION, payload);
 };
 
 export const disconnectFacebookWebhook = async () => {
-  const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
+  const user = getUser<{ id?: string; _id?: string; organizationId?: string; role?: string; }>();
   if (!user || !user.organizationId) {
      throw new Error("Authentication context missing");
   }
 
+  const userId = user.id || user._id;
+
   return api.post(API_ENDPOINTS.INTEGRATION.DELETE_SUBSCRIPTION, {
     organizationId: user.organizationId,
-    userId: user.id
+    userId
   });
 };
 
