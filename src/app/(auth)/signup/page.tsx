@@ -9,9 +9,8 @@ import TextField from "@/core/components/ui/TextField";
 import Button from "@/core/components/ui/Button";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
-import {
-  User, Building2, Mail, Lock, MapPin, Clock, Tag, Camera, Eye, EyeOff,
-} from "lucide-react";
+import { Lock, Mail, User, Phone, MapPin, Building2, Tag, Camera, StepBack, Eye, EyeOff, Clock } from "lucide-react";
+import { fileService } from "@/modules/auth/services/file.service";
 import {
   PhoneInput,
   defaultCountries,
@@ -59,7 +58,7 @@ function FieldLabel({ children }: { children?: React.ReactNode }) {
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null;
   return (
-    <p className="text-[#E53935] text-[11px] font-bold font-poppins mt-1 ml-3 mb-0">
+    <p className="text-[#C62828] text-[11px] font-bold font-poppins mt-1 ml-3 mb-0">
       {msg}
     </p>
   );
@@ -89,7 +88,7 @@ function PasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           icon={<Lock size={18} color="#5E5E5E" strokeWidth={2.5} />}
-          className={`rounded-full h-[48px] text-[15px] pr-12 focus:ring-2 focus:ring-white/20 ${error ? "ring-2 ring-[#E53935] border-transparent" : "border-transparent"}`}
+          className={`rounded-full h-[48px] text-[15px] pr-12 focus:ring-2 focus:ring-white/20 ${error ? "ring-2 ring-[#C62828] border-transparent" : "border-transparent"}`}
           required
         />
         <button
@@ -119,13 +118,16 @@ function PhoneField({
   return (
     <div className="flex flex-col gap-0 relative w-full" style={{ zIndex: 50 }}>
       <FieldLabel>{label}</FieldLabel>
-      <div className={`flex items-center w-full h-[48px] bg-white rounded-full transition-all px-1 focus-within:ring-2 focus-within:ring-white/20 ${error ? "ring-2 ring-[#E53935]" : "border-none"}`}>
+      <div className={`flex items-center w-full h-[48px] bg-white rounded-full transition-all px-1 focus-within:ring-2 focus-within:ring-white/20 ${error ? "ring-2 ring-[#C62828]" : "border-none"}`}>
         <PhoneInput
           defaultCountry="in"
           value={value}
           onChange={onChange}
           countries={defaultCountries}
           forceDialCode={true}
+          inputProps={{
+            maxLength: 15,
+          }}
           className="w-full"
           inputClassName="phone-input-custom"
           countrySelectorStyleProps={{
@@ -192,7 +194,7 @@ function PillField({
         onChange={(e) => onChange(e.target.value)}
         icon={icon}
         required={required}
-        className={`rounded-full h-[48px] text-[15px] focus:ring-2 focus:ring-white/20 ${error ? "ring-2 ring-[#E53935] border-transparent" : "border-transparent"}`}
+        className={`rounded-full h-[48px] text-[15px] focus:ring-2 focus:ring-white/20 ${error ? "ring-2 ring-[#C62828] border-transparent" : "border-transparent"}`}
       />
       <FieldError msg={error} />
     </div>
@@ -290,7 +292,14 @@ function SignupPageContent() {
     if (!form.email.trim()) errs.email = "Please enter email";
     else if (!isValidEmail(form.email)) errs.email = "Invalid format (user@example.com)";
 
-    const rawPhone = form.mobileNumber.replace(/^\+\d+\s?/, "").replace(/\D/g, "");
+    // More robust extraction: Get only digits and remove leading +[CountryCode]
+    const phoneDigits = form.mobileNumber.replace(/\D/g, "");
+    // If India, we expect +91 + 10 digits = 12 digits total. 
+    // We isolate the last 10 digits if it starts with 91.
+    const rawPhone = form.mobileNumber.startsWith("+91") && phoneDigits.startsWith("91")
+      ? phoneDigits.slice(2)
+      : form.mobileNumber.replace(/^\+\d+/, "").replace(/\D/g, "");
+
     if (!rawPhone || rawPhone.length === 0) {
       errs.mobileNumber = "Please enter mobile number";
     } else if (form.mobileNumber.startsWith("+91")) {
@@ -327,21 +336,33 @@ function SignupPageContent() {
     e.preventDefault();
     if (!validate()) return;
 
-    // Standard params for backend
+    let finalAvatar = "avatar.png";
+    if (form.avatarPreview && form.avatar) {
+      try {
+        const uploadedFileName = await fileService.uploadFile(
+          form.avatarPreview,
+          form.avatar.name
+        );
+        finalAvatar = uploadedFileName;
+      } catch (uploadErr) {
+        console.error("Avatar upload failed, falling back to default", uploadErr);
+      }
+    }
+
     const common = {
       userName: form.userName,
       email: form.email.toLowerCase().trim(),
       mobileNumber: form.mobileNumber,
       address: form.address,
       password: form.password,
-      avatar: form.avatarPreview || "avatar.png",
+      avatar: finalAvatar,
       platform: "web" as const,
       deviceId: "browser",
-      token: "web_placeholder_token_" + Math.random().toString(36).substring(2, 60), // satisfy min 60 char
+      token: "web_placeholder_token_" + Array(4).fill(0).map(() => Math.random().toString(36).substring(2)).join(""), // satisfy min 60 char
     };
 
     if (role === "organization") {
-      await signup({ 
+      await signup({
         ...common,
         category: "Organization",
         orgName: form.orgName,
@@ -349,13 +370,13 @@ function SignupPageContent() {
         endTime: form.workEndTime,
       } as OrgSignupPayload);
     } else if (role === "individual") {
-      await signup({ 
+      await signup({
         ...common,
         category: "Individual",
         invitationCode: form.invitationCode,
       } as IndividualSignupPayload);
     } else {
-      await signup({ 
+      await signup({
         ...common,
         category: "Student",
         invitationCode: form.invitationCode,
@@ -377,7 +398,7 @@ function SignupPageContent() {
             className="hidden"
           />
           <div className="grid grid-cols-2 gap-x-12 gap-y-3 w-full">
-            
+
             <div className="flex flex-col gap-3">
               <PillField
                 label="Full Name"

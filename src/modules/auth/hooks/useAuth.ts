@@ -51,7 +51,7 @@ export function useAuth() {
         new Promise((resolve) => setTimeout(resolve, 1000)),
       ]);
       
-      showToast("Signed up! Check your email", "info");
+      showToast("Sign up successful!", "success");
       await new Promise((resolve) => setTimeout(resolve, 800));
       
       router.push("/login?registered=true");
