@@ -369,6 +369,13 @@ function SignupPageContent() {
     <>
       <AuthPanel hideSphere allowOverflow className="w-[900px] min-h-[480px] flex flex-col justify-center py-6">
         <form onSubmit={handleSubmit} noValidate className="w-full flex flex-col gap-0 px-10 relative z-10">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
           <div className="grid grid-cols-2 gap-x-12 gap-y-3 w-full">
             
             <div className="flex flex-col gap-3">
@@ -514,13 +521,6 @@ function SignupPageContent() {
                 />
               ) : (
                 <div className="flex items-center justify-between mt-auto mb-0 pt-7">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}

@@ -1,5 +1,6 @@
 import { Poppins } from "next/font/google";
 import DecorativeSphere from "@/modules/auth/components/DecorativeSphere";
+import AuthHeader from "@/modules/auth/components/AuthHeader";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -29,12 +30,7 @@ export default function AuthLayout({
       />
 
       <div className="relative z-10 flex flex-col items-center w-full px-4">
-        <h1 
-          className="mt-12 mb-12 text-white font-bold text-center tracking-normal drop-shadow-md"
-          style={{ fontSize: '40px', lineHeight: '36px' }}
-        >
-          Welcome back!
-        </h1>
+        <AuthHeader />
 
         {children}
       </div>
