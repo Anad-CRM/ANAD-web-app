@@ -1,7 +1,7 @@
-//this page is just like local db
 
 export type UserRole =
-  | "admin"
+  | "Admin"
+  | "organization_admin"
   | "manager"
   | "team_leader"
   | "staff"
@@ -35,32 +35,34 @@ export interface LoginPayload {
   signinId: string;
 }
 
-export interface OrgSignupPayload {
-  name: string;
+export interface BaseSignupPayload {
+  userName: string;
   email: string;
   password: string;
-  confirmPassword: string;
-  role: "organization_admin";
-}
-
-export interface IndividualSignupPayload {
-  name: string;
-  email: string;
-  mobile: string;
+  mobileNumber: string;
   address: string;
-  password: string;
-  confirmPassword: string;
-  role: "manager" | "team_leader" | "staff";
+  category: "Organization" | "Individual" | "Student";
+  platform: "web" | "android" | "ios";
+  token: string;
+  deviceId: string;
+  avatar?: string;
 }
 
-export interface StudentSignupPayload {
-  name: string;
-  email: string;
-  mobile: string;
-  password: string;
-  workStartTime: string;
-  workEndTime: string;
-  role: "student";
+export interface OrgSignupPayload extends BaseSignupPayload {
+  category: "Organization";
+  orgName: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface IndividualSignupPayload extends BaseSignupPayload {
+  category: "Individual";
+  invitationCode: string;
+}
+
+export interface StudentSignupPayload extends BaseSignupPayload {
+  category: "Student";
+  invitationCode: string;
 }
 
 export type SignupPayload =

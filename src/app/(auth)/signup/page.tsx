@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import AuthPanel from "@/modules/auth/components/AuthPanel";
@@ -26,7 +26,7 @@ import type {
 type Role = "organization" | "individual" | "student";
 
 const isValidName = (v: string) =>
-  v.trim().length >= 3 && /^[a-zA-Z]+( [a-zA-Z]+)*$/.test(v.trim());
+  v.trim().length >= 3 && /^[a-zA-Z0-9 _-]+$/.test(v.trim());
 
 const isValidEmail = (v: string) =>
   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v.trim());
@@ -59,7 +59,7 @@ function FieldLabel({ children }: { children?: React.ReactNode }) {
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null;
   return (
-    <p className="text-red-300 text-[11px] font-poppins mt-1 ml-3 mb-0">
+    <p className="text-[#E53935] text-[11px] font-bold font-poppins mt-1 ml-3 mb-0">
       {msg}
     </p>
   );
@@ -89,7 +89,7 @@ function PasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           icon={<Lock size={18} color="#5E5E5E" strokeWidth={2.5} />}
-          className={`rounded-full h-[48px] text-[15px] pr-12 focus:ring-2 focus:ring-white/20 ${error ? "border-red-400 ring-1 ring-red-400" : "border-transparent"}`}
+          className={`rounded-full h-[48px] text-[15px] pr-12 focus:ring-2 focus:ring-white/20 ${error ? "ring-2 ring-[#E53935] border-transparent" : "border-transparent"}`}
           required
         />
         <button
@@ -119,12 +119,13 @@ function PhoneField({
   return (
     <div className="flex flex-col gap-0 relative w-full" style={{ zIndex: 50 }}>
       <FieldLabel>{label}</FieldLabel>
-      <div className={`flex items-center w-full h-[48px] bg-white rounded-full transition-all px-1 focus-within:ring-2 focus-within:ring-white/20 ${error ? "border-red-400 ring-1 ring-red-400" : "border-transparent"}`}>
+      <div className={`flex items-center w-full h-[48px] bg-white rounded-full transition-all px-1 focus-within:ring-2 focus-within:ring-white/20 ${error ? "ring-2 ring-[#E53935]" : "border-none"}`}>
         <PhoneInput
           defaultCountry="in"
           value={value}
           onChange={onChange}
           countries={defaultCountries}
+          forceDialCode={true}
           className="w-full"
           inputClassName="phone-input-custom"
           countrySelectorStyleProps={{
@@ -148,6 +149,7 @@ function PhoneField({
           border: none !important;
           background: transparent !important;
           padding-left: 12px !important;
+          padding-top: 6px !important;
         }
         .react-international-phone-input-container {
           width: 100%;
@@ -190,7 +192,7 @@ function PillField({
         onChange={(e) => onChange(e.target.value)}
         icon={icon}
         required={required}
-        className={`rounded-full h-[48px] text-[15px] focus:ring-2 focus:ring-white/20 ${error ? "border-red-400 ring-1 ring-red-400" : "border-transparent"}`}
+        className={`rounded-full h-[48px] text-[15px] focus:ring-2 focus:ring-white/20 ${error ? "ring-2 ring-[#E53935] border-transparent" : "border-transparent"}`}
       />
       <FieldError msg={error} />
     </div>
@@ -238,31 +240,47 @@ function SignupPageContent() {
   }, [paramRole]);
 
   const [form, setForm] = useState({
-    name: "",
+    userName: "",
     orgName: "",
     email: "",
-    mobile: "+91",
+    mobileNumber: "+91",
     invitationCode: "",
     address: "",
     workStartTime: "09:00",
     workEndTime: "17:00",
     password: "",
     confirmPassword: "",
+    avatar: null as File | null,
+    avatarPreview: "" as string,
   });
 
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
-  const updateField = (key: keyof typeof form, val: string) => {
+  const updateField = (key: keyof typeof form, val: any) => {
     setForm((p) => ({ ...p, [key]: val }));
     if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      updateField("avatar", file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateField("avatarPreview", reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   function validate(): boolean {
     const errs: Record<string, string | undefined> = {};
 
-    if (!form.name.trim()) errs.name = "Please enter your full name";
-    else if (form.name.length > 30) errs.name = "Name cannot exceed 30 characters";
-    else if (!isValidName(form.name)) errs.name = "Min 3 chars, letters only";
+    if (!form.userName.trim()) errs.userName = "Please enter your full name";
+    else if (form.userName.length > 50) errs.userName = "Name cannot exceed 50 characters";
+    else if (!isValidName(form.userName)) errs.userName = "Letters, numbers, spaces, _ and - only";
 
     if (role === "organization") {
       if (!form.orgName.trim()) errs.orgName = "Please enter organization name";
@@ -270,18 +288,16 @@ function SignupPageContent() {
     }
 
     if (!form.email.trim()) errs.email = "Please enter email";
-    else if (!/^[a-z]/.test(form.email.trim())) errs.email = "Must start with lowercase letter";
     else if (!isValidEmail(form.email)) errs.email = "Invalid format (user@example.com)";
-    else if (!form.email.includes("@")) errs.email = "Must contain @ symbol";
-    else if (!form.email.includes(".")) errs.email = "Must contain . symbol";
 
-    const rawPhone = form.mobile.replace(/^\+\d+\s?/, "").replace(/\D/g, "");
-    if (!rawPhone) {
-      errs.mobile = "Please enter mobile number";
-    } else if (form.mobile.startsWith("+91")) {
-      if (!/^[6-9]\d{9}$/.test(rawPhone)) errs.mobile = "Please enter a valid 10-digit number";
+    const rawPhone = form.mobileNumber.replace(/^\+\d+\s?/, "").replace(/\D/g, "");
+    if (!rawPhone || rawPhone.length === 0) {
+      errs.mobileNumber = "Please enter mobile number";
+    } else if (form.mobileNumber.startsWith("+91")) {
+      if (rawPhone.length !== 10) errs.mobileNumber = "Please enter exactly 10 digits";
+      else if (!/^[6-9]\d{9}$/.test(rawPhone)) errs.mobileNumber = "Must start with 6-9";
     } else if (rawPhone.length < 5) {
-      errs.mobile = "Valid mobile number required";
+      errs.mobileNumber = "Valid mobile number required";
     }
 
     if ((role === "individual" || role === "student") && !form.invitationCode.trim()) {
@@ -290,7 +306,7 @@ function SignupPageContent() {
 
     if (!form.address.trim()) errs.address = "Please enter location";
     else if (form.address.trim().length < 5) errs.address = "Address is too short (min 5 chars)";
-    else if (!/[a-zA-Z]/.test(form.address)) errs.address = "Must contain letters";
+    else if (/^\d+$/.test(form.address.trim())) errs.address = "Address cannot be only numbers";
 
     if (!form.password) errs.password = "Please enter password";
     else if (!isValidPassword(form.password)) errs.password = "Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char";
@@ -311,36 +327,38 @@ function SignupPageContent() {
     e.preventDefault();
     if (!validate()) return;
 
+    // Standard params for backend
+    const common = {
+      userName: form.userName,
+      email: form.email.toLowerCase().trim(),
+      mobileNumber: form.mobileNumber,
+      address: form.address,
+      password: form.password,
+      avatar: form.avatarPreview || "avatar.png",
+      platform: "web" as const,
+      deviceId: "browser",
+      token: "web_placeholder_token_" + Math.random().toString(36).substring(2, 60), // satisfy min 60 char
+    };
+
     if (role === "organization") {
       await signup({ 
-        name: form.name, 
-        email: form.email, 
-        password: form.password, 
-        role: "organization_admin",
+        ...common,
+        category: "Organization",
         orgName: form.orgName,
-        workStartTime: form.workStartTime,
-        workEndTime: form.workEndTime,
-        address: form.address,
+        startTime: form.workStartTime,
+        endTime: form.workEndTime,
       } as OrgSignupPayload);
     } else if (role === "individual") {
       await signup({ 
-        name: form.name, 
-        email: form.email, 
-        mobile: form.mobile,
-        password: form.password, 
-        role: "staff",
+        ...common,
+        category: "Individual",
         invitationCode: form.invitationCode,
-        address: form.address,
       } as IndividualSignupPayload);
     } else {
       await signup({ 
-        name: form.name, 
-        email: form.email, 
-        mobile: form.mobile,
-        password: form.password, 
-        role: "student",
+        ...common,
+        category: "Student",
         invitationCode: form.invitationCode,
-        address: form.address,
       } as StudentSignupPayload);
     }
   }
@@ -357,11 +375,11 @@ function SignupPageContent() {
               <PillField
                 label="Full Name"
                 placeholder="Full Name"
-                value={form.name}
-                onChange={(v) => updateField("name", v)}
+                value={form.userName}
+                onChange={(v) => updateField("userName", v)}
                 icon={<User size={18} color={ic} strokeWidth={2.5} />}
                 required
-                error={errors.name}
+                error={errors.userName}
               />
 
               {role === "organization" ? (
@@ -377,18 +395,18 @@ function SignupPageContent() {
               ) : (
                 <PhoneField
                   label="Mobile Number"
-                  value={form.mobile}
-                  onChange={(v) => updateField("mobile", v)}
-                  error={errors.mobile}
+                  value={form.mobileNumber}
+                  onChange={(v) => updateField("mobileNumber", v)}
+                  error={errors.mobileNumber}
                 />
               )}
 
               {role === "organization" ? (
                 <PhoneField
                   label="Mobile Number"
-                  value={form.mobile}
-                  onChange={(v) => updateField("mobile", v)}
-                  error={errors.mobile}
+                  value={form.mobileNumber}
+                  onChange={(v) => updateField("mobileNumber", v)}
+                  error={errors.mobileNumber}
                 />
               ) : (
                 <PillField
@@ -403,22 +421,15 @@ function SignupPageContent() {
               )}
 
               {role === "organization" ? (
-                <div className="flex flex-col gap-0 w-full">
-                  <FieldLabel>Address</FieldLabel>
-                  <div className="relative">
-                    <div className="absolute left-4 top-[14px] z-10">
-                      <MapPin size={18} color={errors.address ? "#f87171" : ic} strokeWidth={2.5} />
-                    </div>
-                    <textarea
-                      placeholder="Address"
-                      value={form.address}
-                      onChange={(e) => updateField("address", e.target.value)}
-                      rows={2}
-                      className={`w-full pl-10 pr-4 pt-[13px] pb-3 text-[15px] rounded-[24px] bg-white text-[#0D1B3E] outline-none transition-all duration-200 placeholder:text-gray-400 resize-none font-poppins border-none focus:ring-2 focus:ring-white/20 ${errors.address ? "ring-2 ring-red-400" : ""}`}
-                    />
-                  </div>
-                  <FieldError msg={errors.address} />
-                </div>
+                <PillField
+                  label="Address"
+                  placeholder="Address"
+                  value={form.address}
+                  onChange={(v) => updateField("address", v)}
+                  icon={<MapPin size={18} color={ic} strokeWidth={2.5} />}
+                  required
+                  error={errors.address}
+                />
               ) : (
                 <PillField
                   label="Invitation Code"
@@ -503,12 +514,24 @@ function SignupPageContent() {
                 />
               ) : (
                 <div className="flex items-center justify-between mt-auto mb-0 pt-7">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
                   <button
                     type="button"
-                    className="flex items-center gap-2 px-5 h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[13px] font-medium shadow-sm cursor-pointer relative z-20"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 px-5 h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[13px] font-medium shadow-sm cursor-pointer relative z-20 overflow-hidden"
                   >
-                    <Camera size={18} color={ic} />
-                    Add Photo
+                    {form.avatarPreview ? (
+                      <img src={form.avatarPreview} className="w-5 h-5 rounded-full object-cover" alt="Preview" />
+                    ) : (
+                      <Camera size={18} color={ic} />
+                    )}
+                    {form.avatar ? "Photo Added" : "Add Photo"}
                   </button>
 
                   <Button
@@ -527,10 +550,15 @@ function SignupPageContent() {
                 <div className="flex items-center justify-between pb-0 mt-3 pt-0">
                   <button
                     type="button"
-                    className="flex items-center gap-2 px-5 h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[13px] font-medium shadow-sm cursor-pointer relative z-20"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 px-5 h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[13px] font-medium shadow-sm cursor-pointer relative z-20 overflow-hidden"
                   >
-                    <Camera size={18} color={ic} />
-                    Add Photo
+                    {form.avatarPreview ? (
+                      <img src={form.avatarPreview} className="w-5 h-5 rounded-full object-cover" alt="Preview" />
+                    ) : (
+                      <Camera size={18} color={ic} />
+                    )}
+                    {form.avatar ? "Photo Added" : "Add Photo"}
                   </button>
 
                   <Button
@@ -555,7 +583,7 @@ function SignupPageContent() {
         </form>
       </AuthPanel>
 
-      <div className="mt-12 flex items-center justify-center h-[20px] w-full relative z-10">
+      <div className="mt-8 flex items-center justify-center h-[20px] w-full relative z-10">
         <p className="text-white font-medium text-center m-0" style={{ fontSize: "15px", lineHeight: "15px" }}>
           <button
             type="button"
