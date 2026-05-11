@@ -3,8 +3,8 @@ import { getToken, clearToken } from "@/core/utils/auth";
 
 // export const API_BASE_URL = "http://192.168.0.202:3000"; //Nibin
 
-// export const API_BASE_URL = "http://localhost:3000/";  //Local host
-export const API_BASE_URL = "https://api.anad.ae/";  //Live server
+export const API_BASE_URL = "http://localhost:3000/";  //Local host
+// export const API_BASE_URL = "https://api.anad.ae/";  //Live server
 
 
 export const api = axios.create({
