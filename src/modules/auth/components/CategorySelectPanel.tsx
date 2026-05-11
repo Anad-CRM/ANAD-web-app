@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { Circle } from "lucide-react";
+import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 
 type Category = "organization" | "individual" | "student";
 
@@ -28,7 +30,7 @@ const CATEGORIES: {
 ];
 
 interface CategorySelectPanelProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export default function CategorySelectPanel({
@@ -48,18 +50,29 @@ export default function CategorySelectPanel({
             key={cat.id}
             type="button"
             onClick={() => handleSelect(cat.id)}
-            className="w-[360px] bg-[#F4F6F8] hover:bg-white flex items-center gap-[16px] px-[24px] py-[14px] rounded-[14px] transition-all duration-200 cursor-pointer text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-transparent hover:border-gray-100"
+            className="w-[360px] flex items-center gap-[16px] px-[24px] py-[14px] rounded-[14px] transition-all duration-200 cursor-pointer text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-transparent hover:border-gray-100"
+            style={{ backgroundColor: COLORS.surface }}
           >
             <div className="flex items-center justify-center flex-shrink-0">
-               <Circle size={20} color="#000000" strokeWidth={1.5} />
+               <Circle size={20} color={COLORS.text} strokeWidth={1.5} />
             </div>
             <div>
-              <p className="text-[15px] font-bold text-[#000000] m-0 font-poppins leading-tight">
+              <Text 
+                as="p" 
+                weight="bold" 
+                className="font-poppins m-0 leading-tight"
+                style={{ fontSize: '15px', color: COLORS.text }}
+              >
                 {cat.title}
-              </p>
-              <p className="text-[12px] text-[#000000] opacity-80 m-0 mt-[4px] font-poppins leading-tight">
+              </Text>
+              <Text 
+                as="p" 
+                weight="normal" 
+                className="font-poppins m-0 mt-[4px] leading-tight"
+                style={{ fontSize: '12px', color: COLORS.muted }}
+              >
                 {cat.subtitle}
-              </p>
+              </Text>
             </div>
           </button>
         ))}
