@@ -21,20 +21,34 @@ export function useAuth() {
     try {
       const [loginResult] = await Promise.all([
         authService.login(payload),
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        new Promise((resolve) => setTimeout(resolve, 800)),
       ]);
       const { user, token } = loginResult;
-      setAuthData(user, token);
       
+      const { rememberMe, email, password } = payload;
+      const { setRememberMe, saveCredentials, clearCredentials } = await import("@/core/utils/auth");
+      
+      if (rememberMe) {
+        setRememberMe(true);
+        saveCredentials(email, password);
+      } else {
+        clearCredentials();
+      }
+
+      setAuthData(user, token);
       showToast("Logged in successfully", "success");
       
       await new Promise((resolve) => setTimeout(resolve, 800));
-      
       router.push("/overview");
-    } catch (e: unknown) {
-      const errMsg = e instanceof Error ? e.message : "Login failed";
+    } catch (e: any) {
+      const errMsg = e.message || "Login failed";
       setError(errMsg);
-      showToast(errMsg, "error");
+      
+      if (!e.data || e.data.status !== "failed") {
+        showToast(errMsg, "error");
+      }
+      
+      throw e; 
     } finally {
       setIsPending(false);
       hideLoader();

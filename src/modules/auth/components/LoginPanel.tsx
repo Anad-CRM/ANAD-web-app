@@ -1,6 +1,4 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
@@ -8,16 +6,33 @@ import Button from "@/core/components/ui/Button";
 import TextField from "@/core/components/ui/TextField";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
+import { getCredentials, getRememberMe } from "@/core/utils/auth";
 
 interface LoginPanelProps {
   onCreateAccount: () => void;
 }
 
 export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
-  const { login, isPending, error } = useAuth();
+  const { login, isPending, error: authError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const isRemembered = getRememberMe();
+    if (isRemembered) {
+      setRememberMe(true);
+      const creds = getCredentials();
+      if (creds) {
+        setEmail(creds.email);
+        setPassword(creds.password);
+      }
+    }
+  }, []);
 
   function getOrCreate(key: string, generate: () => string): string {
     if (typeof window === "undefined") return "";
@@ -27,25 +42,38 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
   }
 
   function generateUUID() {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return typeof crypto !== "undefined" && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2, 15);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setEmailError(null);
+    setPasswordError(null);
+
     const deviceId = getOrCreate("deviceId", generateUUID);
     const signinId = getOrCreate("signinId", generateUUID);
     const fcmToken = getOrCreate("fcmToken", () => "web-token-" + generateUUID());
-    await login({
-      email,
-      password,
-      platform: "web",
-      token: fcmToken,
-      deviceId,
-      signinId,
-    });
+
+    try {
+      await login({
+        email,
+        password,
+        platform: "web",
+        token: fcmToken,
+        deviceId,
+        signinId,
+        rememberMe,
+      });
+    } catch (err: any) {
+      const msg = err.message?.toLowerCase() || "";
+      if (msg.includes("password")) {
+        setPasswordError(err.message || "Invalid password");
+      } else if (msg.includes("email") || msg.includes("not registered") || msg.includes("not found")) {
+        setEmailError(err.message || "Email not found");
+      }
+    }
   }
 
   return (
@@ -66,8 +94,12 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
             placeholder="User Name"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            icon={<User size={18} color="#5E5E5E" strokeWidth={2.5} />}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (emailError) setEmailError(null);
+            }}
+            error={emailError || undefined}
+            icon={<User size={18} color={emailError ? COLORS.danger : "#5E5E5E"} strokeWidth={2.5} />}
             className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
           />
         </div>
@@ -78,8 +110,12 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
             placeholder="Password"
             required
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock size={18} color="#5E5E5E" strokeWidth={2.5} />}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (passwordError) setPasswordError(null);
+            }}
+            error={passwordError || undefined}
+            icon={<Lock size={18} color={passwordError ? COLORS.danger : "#5E5E5E"} strokeWidth={2.5} />}
             className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
           />
           <button
@@ -95,6 +131,8 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
           <label className="flex items-center gap-2 cursor-pointer group">
             <input 
               type="checkbox" 
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
               className="w-3.5 h-3.5 rounded-sm border-white/40 bg-transparent text-[#1E56A0] focus:ring-0 cursor-pointer" 
             />
             <Text 
@@ -115,9 +153,9 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
           </Link>
         </div>
 
-        {error && (
+        {authError && !emailError && !passwordError && (
           <Text as="p" className="text-[10px] text-center" style={{ color: COLORS.danger }}>
-            {error}
+            {authError}
           </Text>
         )}
 

@@ -33,6 +33,7 @@ export interface LoginPayload {
   token: string;
   deviceId: string;
   signinId: string;
+  rememberMe: boolean;
 }
 
 export interface BaseSignupPayload {
