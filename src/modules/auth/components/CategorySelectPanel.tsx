@@ -72,7 +72,7 @@ export default function CategorySelectPanel({
                 border-2
                 ${isSelected 
                   ? "border-[#1E56A0] bg-[#EEF4FB]" 
-                  : "border-transparent hover:border-[#D6E4F0]"}
+                  : "border-transparent hover:border-[#1E56A0] hover:bg-[#EEF4FB]/50"}
               `}
               style={{ 
                 backgroundColor: isSelected ? COLORS.primaryXlight : COLORS.surface,

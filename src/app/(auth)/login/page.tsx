@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import AuthPanel from "@/modules/auth/components/AuthPanel";
 import LoginPanel from "@/modules/auth/components/LoginPanel";
@@ -10,16 +10,25 @@ import FullScreenLoader from "@/core/components/ui/FullScreenLoader";
 
 type AuthView = "login" | "category";
 
-export default function LoginPage() {
-  const [view, setView] = useState<AuthView>("login");
+function LoginContent() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const view = (searchParams.get("view") as AuthView) || "login";
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       router.replace("/overview");
     }
   }, [isLoading, isAuthenticated, router]);
+
+  const setView = (newView: AuthView) => {
+    if (newView === "login") {
+      router.push("/login", { scroll: false });
+    } else {
+      router.push(`/login?view=${newView}`, { scroll: false });
+    }
+  };
 
   return (
     <>
@@ -81,3 +90,11 @@ export default function LoginPage() {
     </>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<FullScreenLoader />}>
+      <LoginContent />
+    </Suspense>
+  );
+}

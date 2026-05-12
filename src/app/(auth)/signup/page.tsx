@@ -608,7 +608,7 @@ function SignupPageContent() {
         <p className="text-white font-medium text-center m-0" style={{ fontSize: "15px", lineHeight: "15px" }}>
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => router.push('/login')}
             className="underline cursor-pointer hover:text-white/80 transition-colors bg-transparent border-none p-0 inline font-bold"
             style={{ fontSize: "15px", lineHeight: "15px" }}
           >
