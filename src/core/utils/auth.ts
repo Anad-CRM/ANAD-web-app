@@ -35,7 +35,7 @@ export function isAuthenticated(): boolean {
 }
 
 const REMEMBER_ME_KEY = "anad_remember_me";
-const SAVED_CREDENTIALS_KEY = "anad_credentials";
+const SAVED_ACCOUNTS_KEY = "anad_saved_accounts";
 
 export function setRememberMe(value: boolean): void {
   localStorage.setItem(REMEMBER_ME_KEY, String(value));
@@ -46,22 +46,43 @@ export function getRememberMe(): boolean {
   return localStorage.getItem(REMEMBER_ME_KEY) === "true";
 }
 
-export function saveCredentials(email: string, password: string): void {
-  localStorage.setItem(SAVED_CREDENTIALS_KEY, JSON.stringify({ email, password }));
+export interface SavedAccount {
+  email: string;
+  password: string;
 }
 
-export function getCredentials(): { email: string; password: string } | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(SAVED_CREDENTIALS_KEY);
-  if (!raw) return null;
+export function saveCredentials(email: string, password: string): void {
+  if (typeof window === "undefined") return;
+  const accounts = getSavedAccounts();
+  const filtered = accounts.filter(acc => acc.email !== email);
+  const newAccounts = [{ email, password }, ...filtered].slice(0, 5);
+  localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(newAccounts));
+}
+
+export function getSavedAccounts(): SavedAccount[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(SAVED_ACCOUNTS_KEY);
+  if (!raw) return [];
   try {
     return JSON.parse(raw);
   } catch {
-    return null;
+    return [];
   }
 }
 
+export function getCredentials(): SavedAccount | null {
+  const accounts = getSavedAccounts();
+  return accounts.length > 0 ? accounts[0] : null;
+}
+
 export function clearCredentials(): void {
-  localStorage.removeItem(SAVED_CREDENTIALS_KEY);
+  localStorage.removeItem(SAVED_ACCOUNTS_KEY);
   localStorage.removeItem(REMEMBER_ME_KEY);
+}
+
+export function removeAccount(email: string): void {
+  if (typeof window === "undefined") return;
+  const accounts = getSavedAccounts();
+  const filtered = accounts.filter(acc => acc.email !== email);
+  localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(filtered));
 }
