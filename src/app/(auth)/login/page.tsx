@@ -32,7 +32,7 @@ export default function LoginPage() {
         )}
       </AuthPanel>
 
-      <div className="mt-12 flex items-center justify-center h-[20px] w-full relative">
+      <div className="mt-8 sm:mt-12 flex items-center justify-center h-[20px] w-full relative">
         <div 
           className={`absolute transition-all duration-300 ease-in-out flex flex-col items-center justify-center w-full ${
             view === "login" 

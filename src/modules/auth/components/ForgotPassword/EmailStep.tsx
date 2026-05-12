@@ -52,13 +52,13 @@ export default function EmailStep({ email, setEmail, onNext }: EmailStepProps) {
         as="h2" 
         weight="semibold"
         style={{ fontSize: '19.31px', lineHeight: '19.31px', color: COLORS.surface }}
-        className="opacity-100 tracking-normal mb-[35px]"
+        className="opacity-100 tracking-normal mb-[25px] sm:mb-[35px]"
       >
         Forgot Password
       </Text>
 
-      <form onSubmit={handleSendEmail} className="w-full flex flex-col gap-5 items-center">
-        <div className="w-[350px]">
+      <form onSubmit={handleSendEmail} className="w-full flex flex-col gap-4 sm:gap-5 items-center">
+        <div className="w-full max-w-[350px]">
           <TextField
             type="email"
             placeholder="Email Address"
@@ -69,14 +69,14 @@ export default function EmailStep({ email, setEmail, onNext }: EmailStepProps) {
               if (error) setError(null);
             }}
             icon={<Mail size={18} color="#5E5E5E" strokeWidth={2.5} />}
-            className="rounded-full shadow-sm h-[64px] text-[15px]"
+            className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
           />
         </div>
         
         <Text 
           as="p"
           style={{ fontSize: '13px', lineHeight: '1.4', color: 'rgba(255,255,255,0.8)' }}
-          className="font-poppins text-center w-[350px] mb-1"
+          className="font-poppins text-center w-full max-w-[350px] mb-1 px-2"
         >
           Enter your email address and we'll send you a reset link.
         </Text>
@@ -84,7 +84,7 @@ export default function EmailStep({ email, setEmail, onNext }: EmailStepProps) {
         <Button
           type="submit"
           variant="white"
-          className="mt-6 w-[200px] h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E] whitespace-nowrap"
+          className="mt-4 sm:mt-6 w-full max-w-[200px] h-[46px] sm:h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E] whitespace-nowrap"
           style={{ fontSize: '15px' }}
         >
           Send Reset Link

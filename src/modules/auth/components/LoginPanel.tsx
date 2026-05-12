@@ -54,13 +54,13 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
         as="h2" 
         weight="semibold"
         style={{ fontSize: '19.31px', lineHeight: '19.31px', color: COLORS.surface }}
-        className="opacity-100 tracking-normal mb-8"
+        className="opacity-100 tracking-normal mb-6 sm:mb-8"
       >
         User Login
       </Text>
 
-      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5 items-center">
-        <div className="w-[350px]">
+      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4 sm:gap-5 items-center">
+        <div className="w-full max-w-[350px]">
           <TextField
             type="email"
             placeholder="User Name"
@@ -68,11 +68,11 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             icon={<User size={18} color="#5E5E5E" strokeWidth={2.5} />}
-            className="rounded-full shadow-sm h-[64px] text-[15px]"
+            className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
           />
         </div>
 
-        <div className="relative w-[350px]">
+        <div className="relative w-full max-w-[350px]">
           <TextField
             type={showPassword ? "text" : "password"}
             placeholder="Password"
@@ -80,7 +80,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             icon={<Lock size={18} color="#5E5E5E" strokeWidth={2.5} />}
-            className="rounded-full shadow-sm h-[64px] text-[15px]"
+            className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
           />
           <button
             type="button"
@@ -91,7 +91,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
           </button>
         </div>
 
-        <div className="flex items-center justify-between w-[350px] px-2 mt-1">
+        <div className="flex items-center justify-between w-full max-w-[350px] px-2 mt-1">
           <label className="flex items-center gap-2 cursor-pointer group">
             <input 
               type="checkbox" 
@@ -125,7 +125,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
           type="submit"
           disabled={isPending}
           variant="white"
-          className="mt-6 w-[200px] h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E]"
+          className="mt-4 sm:mt-6 w-full max-w-[200px] h-[46px] sm:h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E]"
           style={{ fontSize: '15px' }}
         >
           {isPending ? "Logging in..." : "Login"}

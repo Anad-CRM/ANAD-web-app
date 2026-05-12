@@ -70,13 +70,13 @@ export default function PasswordStep({ email, onSuccess }: PasswordStepProps) {
         as="h2" 
         weight="semibold"
         style={{ fontSize: '19.31px', lineHeight: '19.31px', color: COLORS.surface }}
-        className="opacity-100 tracking-normal mb-8"
+        className="opacity-100 tracking-normal mb-6 sm:mb-8"
       >
         Create New Password
       </Text>
 
-      <form onSubmit={handleResetPassword} className="w-full flex flex-col gap-4 items-center">
-        <div className="relative w-[350px]">
+      <form onSubmit={handleResetPassword} className="w-full flex flex-col gap-3 sm:gap-4 items-center">
+        <div className="relative w-full max-w-[350px]">
           <TextField
             type={showPassword ? "text" : "password"}
             placeholder="New Password"
@@ -87,7 +87,7 @@ export default function PasswordStep({ email, onSuccess }: PasswordStepProps) {
               if (fieldErrors.password) setFieldError("password", null);
             }}
             icon={<Lock size={18} color="#5E5E5E" strokeWidth={2.5} />}
-            className="rounded-full shadow-sm h-[64px] text-[15px]"
+            className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
           />
           <button
             type="button"
@@ -98,7 +98,7 @@ export default function PasswordStep({ email, onSuccess }: PasswordStepProps) {
           </button>
         </div>
 
-        <div className="relative w-[350px]">
+        <div className="relative w-full max-w-[350px]">
           <TextField
             type={showConfirmPassword ? "text" : "password"}
             placeholder="Confirm Password"
@@ -109,7 +109,7 @@ export default function PasswordStep({ email, onSuccess }: PasswordStepProps) {
               if (fieldErrors.confirmPassword) setFieldError("confirmPassword", null);
             }}
             icon={<Lock size={18} color="#5E5E5E" strokeWidth={2.5} />}
-            className="rounded-full shadow-sm h-[64px] text-[15px]"
+            className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
           />
           <button
             type="button"
@@ -123,7 +123,7 @@ export default function PasswordStep({ email, onSuccess }: PasswordStepProps) {
         <Button
           type="submit"
           variant="white"
-          className="mt-4 w-[200px] h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E] whitespace-nowrap"
+          className="mt-3 sm:mt-4 w-full max-w-[200px] h-[46px] sm:h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E] whitespace-nowrap"
           style={{ fontSize: '15px' }}
         >
           Change Password

@@ -22,12 +22,12 @@ export default function AuthHeader() {
   const isSignup = pathname?.includes("/signup");
 
   return (
-    <div className={`mt-12 ${isSignup ? "mb-6" : "mb-12"}`}>
+    <div className={`mt-8 sm:mt-12 ${isSignup ? "mb-4 sm:mb-6" : "mb-8 sm:mb-12"}`}>
       <Text
         as="h1"
         weight="bold"
-        className="text-center tracking-normal drop-shadow-md"
-        style={{ fontSize: '40px', lineHeight: '36px', color: COLORS.surface }}
+        className="text-center tracking-normal drop-shadow-md text-[28px] sm:text-[36px] lg:text-[40px]"
+        style={{ lineHeight: '1.1', color: COLORS.surface }}
       >
         {title}
       </Text>

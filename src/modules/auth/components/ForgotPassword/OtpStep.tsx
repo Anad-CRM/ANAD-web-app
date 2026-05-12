@@ -91,13 +91,13 @@ export default function OtpStep({ email, otp, setOtp, onNext }: OtpStepProps) {
         as="h2" 
         weight="semibold"
         style={{ fontSize: '19.31px', lineHeight: '19.31px', color: COLORS.surface }}
-        className="opacity-100 tracking-normal mb-[35px]"
+        className="opacity-100 tracking-normal mb-[25px] sm:mb-[35px]"
       >
         Verification Code
       </Text>
 
-      <form onSubmit={handleVerifyOtp} className="w-full flex flex-col gap-8 items-center">
-        <div className="flex gap-3 justify-center" onPaste={handleOtpPaste}>
+      <form onSubmit={handleVerifyOtp} className="w-full flex flex-col gap-6 sm:gap-8 items-center">
+        <div className="flex gap-2 sm:gap-3 justify-center" onPaste={handleOtpPaste}>
           {[0, 1, 2, 3, 4, 5].map((idx) => (
             <input
               key={idx}
@@ -110,7 +110,7 @@ export default function OtpStep({ email, otp, setOtp, onNext }: OtpStepProps) {
                 if (error) setError(null);
               }}
               onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-              className={`w-[48px] h-[58px] rounded-[12px] bg-white text-[20px] font-bold text-[#0D1B3E] text-center outline-none transition-all duration-200 shadow-sm focus:ring-2 border-none`}
+              className="w-[40px] h-[48px] sm:w-[48px] sm:h-[58px] rounded-[10px] sm:rounded-[12px] bg-white text-[18px] sm:text-[20px] font-bold text-[#0D1B3E] text-center outline-none transition-all duration-200 shadow-sm focus:ring-2 border-none"
               style={{ 
                 boxShadow: error ? `0px 0px 0px 2px ${COLORS.danger}` : '0px 4px 10px rgba(0,0,0,0.05)' 
               }}
@@ -121,7 +121,7 @@ export default function OtpStep({ email, otp, setOtp, onNext }: OtpStepProps) {
         <Text 
           as="p"
           style={{ fontSize: '13px', lineHeight: '1.4', color: 'rgba(255,255,255,0.8)' }}
-          className="font-poppins text-center w-[350px] mb-1"
+          className="font-poppins text-center w-full max-w-[350px] mb-1 px-2"
         >
           Please enter the 6-digit code sent to your email.
         </Text>
@@ -135,7 +135,7 @@ export default function OtpStep({ email, otp, setOtp, onNext }: OtpStepProps) {
         <Button
           type="submit"
           variant="white"
-          className="mt-2 w-[200px] h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E] whitespace-nowrap"
+          className="mt-2 w-full max-w-[200px] h-[46px] sm:h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E] whitespace-nowrap"
           style={{ fontSize: '15px' }}
         >
           Verify OTP

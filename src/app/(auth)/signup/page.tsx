@@ -388,8 +388,8 @@ function SignupPageContent() {
 
   return (
     <>
-      <AuthPanel hideSphere allowOverflow className="w-[900px] min-h-[480px] flex flex-col justify-center py-6">
-        <form onSubmit={handleSubmit} noValidate className="w-full flex flex-col gap-0 px-10 relative z-10">
+      <AuthPanel hideSphere allowOverflow className="w-full max-w-[900px] min-h-[480px] flex flex-col justify-center py-6">
+        <form onSubmit={handleSubmit} noValidate className="w-full flex flex-col gap-0 px-4 sm:px-6 lg:px-10 relative z-10">
           <input
             type="file"
             ref={fileInputRef}
@@ -397,7 +397,7 @@ function SignupPageContent() {
             accept="image/*"
             className="hidden"
           />
-          <div className="grid grid-cols-2 gap-x-12 gap-y-3 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 lg:gap-x-12 gap-y-3 w-full">
 
             <div className="flex flex-col gap-3">
               <PillField
@@ -545,7 +545,7 @@ function SignupPageContent() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-5 h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[13px] font-medium shadow-sm cursor-pointer relative z-20 overflow-hidden"
+                    className="flex items-center gap-2 px-4 sm:px-5 h-[40px] sm:h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[12px] sm:text-[13px] font-medium shadow-sm cursor-pointer relative z-20 overflow-hidden"
                   >
                     {form.avatarPreview ? (
                       <img src={form.avatarPreview} className="w-5 h-5 rounded-full object-cover" alt="Preview" />
@@ -559,7 +559,7 @@ function SignupPageContent() {
                     type="submit"
                     variant="white"
                     disabled={isPending}
-                    className="w-[150px] h-[48px] text-[16px] font-bold font-poppins cursor-pointer relative z-20"
+                    className="w-[130px] sm:w-[150px] h-[44px] sm:h-[48px] text-[14px] sm:text-[16px] font-bold font-poppins cursor-pointer relative z-20"
                     style={{ color: COLORS.primary }}
                   >
                     {isPending ? "Creating…" : "Sign Up"}
@@ -572,7 +572,7 @@ function SignupPageContent() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-5 h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[13px] font-medium shadow-sm cursor-pointer relative z-20 overflow-hidden"
+                    className="flex items-center gap-2 px-4 sm:px-5 h-[40px] sm:h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[12px] sm:text-[13px] font-medium shadow-sm cursor-pointer relative z-20 overflow-hidden"
                   >
                     {form.avatarPreview ? (
                       <img src={form.avatarPreview} className="w-5 h-5 rounded-full object-cover" alt="Preview" />
@@ -586,7 +586,7 @@ function SignupPageContent() {
                     type="submit"
                     variant="white"
                     disabled={isPending}
-                    className="w-[150px] h-[48px] text-[16px] font-bold font-poppins cursor-pointer relative z-20"
+                    className="w-[130px] sm:w-[150px] h-[44px] sm:h-[48px] text-[14px] sm:text-[16px] font-bold font-poppins cursor-pointer relative z-20"
                     style={{ color: COLORS.primary }}
                   >
                     {isPending ? "Creating…" : "Sign Up"}

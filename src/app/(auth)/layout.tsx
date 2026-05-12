@@ -17,21 +17,20 @@ export default function AuthLayout({
     <div className={`relative min-h-screen overflow-hidden flex items-center justify-center bg-[linear-gradient(90deg,#C7D8E9_0%,#255BA3_100%)] ${poppins.variable} font-poppins`}>
       <DecorativeSphere 
         size="132px" 
-        className="top-[95px] left-[1157px]" 
+        className="top-[95px] right-[40px] lg:left-[1157px] hidden sm:block" 
         color="linear-gradient(0deg, rgba(94, 94, 94, 0.1), rgba(94, 94, 94, 0.1)), linear-gradient(90deg, #D6E4F0 0%, #1E56A0 100%)"
         backdropBlur="7px"
       />
       <DecorativeSphere 
         size="450px" 
-        className="bottom-[-150px] left-[-100px]" 
+        className="bottom-[-150px] left-[-100px] hidden sm:block" 
         color="rgba(169, 200, 243, 0.25)"
         blur="60px"
         backdropBlur="10px"
       />
 
-      <div className="relative z-10 flex flex-col items-center w-full px-4">
+      <div className="relative z-10 flex flex-col items-center w-full px-4 py-6 sm:py-0">
         <AuthHeader />
-
         {children}
       </div>
     </div>
