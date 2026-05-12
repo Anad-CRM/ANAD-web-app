@@ -7,6 +7,7 @@ import { User, Lock, Eye, EyeOff } from "lucide-react";
 import Button from "@/core/components/ui/Button";
 import TextField from "@/core/components/ui/TextField";
 import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 
 interface LoginPanelProps {
   onCreateAccount: () => void;
@@ -49,12 +50,14 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <h2 
-        className="text-white font-semibold opacity-100 tracking-normal mb-8"
-        style={{ fontSize: '19.31px', lineHeight: '19.31px' }}
+      <Text 
+        as="h2" 
+        weight="semibold"
+        style={{ fontSize: '19.31px', lineHeight: '19.31px', color: COLORS.surface }}
+        className="opacity-100 tracking-normal mb-8"
       >
         User Login
-      </h2>
+      </Text>
 
       <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5 items-center">
         <div className="w-[350px]">
@@ -82,7 +85,7 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-[#5E5E5E] hover:text-[#1E56A0] transition-colors z-10"
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-[#5E5E5E] hover:text-[#1E56A0] transition-colors z-10 bg-transparent border-none"
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -94,12 +97,14 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
               type="checkbox" 
               className="w-3.5 h-3.5 rounded-sm border-white/40 bg-transparent text-[#1E56A0] focus:ring-0 cursor-pointer" 
             />
-            <span 
-              className="text-white/80 group-hover:text-white transition-colors font-medium font-poppins"
+            <Text 
+              as="span"
+              weight="medium"
+              className="text-white/80 group-hover:text-white transition-colors font-poppins"
               style={{ fontSize: '13px', lineHeight: '12px' }}
             >
               Remember me
-            </span>
+            </Text>
           </label>
           <Link
             href="/forgot-password"
@@ -111,24 +116,20 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
         </div>
 
         {error && (
-          <p className="text-[10px] text-red-300 text-center">
+          <Text as="p" className="text-[10px] text-center" style={{ color: COLORS.danger }}>
             {error}
-          </p>
+          </Text>
         )}
 
-        <button
+        <Button
           type="submit"
           disabled={isPending}
-          className="mt-6 w-[200px] h-[50px] rounded-full font-medium hover:bg-gray-50 transition-all flex items-center justify-center font-poppins shadow-lg"
-          style={{ 
-            backgroundColor: '#FFFFFF',
-            color: '#5E5E5E',
-            fontSize: '20px',
-            lineHeight: '20px'
-          }}
+          variant="white"
+          className="mt-6 w-[200px] h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E]"
+          style={{ fontSize: '15px' }}
         >
           {isPending ? "Logging in..." : "Login"}
-        </button>
+        </Button>
       </form>
     </div>
   );

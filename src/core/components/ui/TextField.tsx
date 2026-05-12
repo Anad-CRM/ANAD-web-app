@@ -1,6 +1,8 @@
 import React from "react";
 import { clsx } from "clsx";
 
+import { COLORS } from "@/core/components/theme/colors";
+
 interface TextFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   icon?: React.ReactNode;
@@ -33,13 +35,16 @@ export default function TextField({
           className={clsx(
             "w-full h-[48px] rounded-[14px] bg-white text-[15px] text-[#0D1B3E] outline-none transition-all duration-200 placeholder:text-gray-400",
             icon ? "pl-18 pr-4" : "px-4",
-            error ? "ring-2 ring-red-500" : "focus:ring-2 focus:ring-white/20",
             className
           )}
+          style={{
+            boxShadow: error ? `0 0 0 2px ${COLORS.danger}` : undefined,
+            ...props.style
+          }}
           {...props}
         />
       </div>
-      {error && <span className="text-xs text-red-400 px-1">{error}</span>}
+      {error && <span className="text-xs px-1" style={{ color: COLORS.danger }}>{error}</span>}
     </div>
   );
 }

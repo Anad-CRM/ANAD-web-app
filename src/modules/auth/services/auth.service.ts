@@ -30,18 +30,27 @@ export const authService = {
   },
 
   async forgotPassword(email: string): Promise<void> {
-    await api.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+    const res = await api.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+    if (res.data.status === "failed") {
+      throw new Error(res.data.message || "Failed to send reset link");
+    }
   },
 
   async verifyOtp(email: string, otp: string): Promise<void> {
-    await api.post(API_ENDPOINTS.AUTH.VERIFY_OTP, { email, otp });
+    const res = await api.post(API_ENDPOINTS.AUTH.VERIFY_OTP, { email, invitationCode: otp });
+    if (res.data.status === "failed") {
+      throw new Error(res.data.message || "Invalid or expired OTP");
+    }
   },
 
   async resetPassword(
-    password: string,
-    confirmPassword: string
+    email: string,
+    newPassword: string
   ): Promise<void> {
-    await api.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, { password, confirmPassword });
+    const res = await api.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, { email, newPassword });
+    if (res.data.status === "failed") {
+      throw new Error(res.data.message || "Failed to reset password");
+    }
   },
 
   logout(): void {

@@ -1,6 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 
 export default function AuthHeader() {
   const pathname = usePathname();
@@ -20,11 +22,15 @@ export default function AuthHeader() {
   const isSignup = pathname?.includes("/signup");
 
   return (
-    <h1 
-      className={`mt-12 ${isSignup ? "mb-6" : "mb-12"} text-white font-bold text-center tracking-normal drop-shadow-md`}
-      style={{ fontSize: '40px', lineHeight: '36px' }}
-    >
-      {title}
-    </h1>
+    <div className={`mt-12 ${isSignup ? "mb-6" : "mb-12"}`}>
+      <Text
+        as="h1"
+        weight="bold"
+        className="text-center tracking-normal drop-shadow-md"
+        style={{ fontSize: '40px', lineHeight: '36px', color: COLORS.surface }}
+      >
+        {title}
+      </Text>
+    </div>
   );
 }
