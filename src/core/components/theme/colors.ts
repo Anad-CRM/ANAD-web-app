@@ -11,6 +11,14 @@ export const COLORS = {
   dark_orange: "#CA6702",
   brown: "#BB3E03",
   danger: "#9B2226",
+  
+  figma_input_bg: "#FFFFFF",
+  figma_btn_text: "#1E56A0",
+  figma_bg_from: "#DDE9F8",
+  figma_bg_to: "#2159A6",
+  figma_glass_bg: "rgba(255,255,255,0.22)",
+  figma_sphere_light: "#BFD5F4",
+  figma_sphere_dark: "#7AA4DD",
 
   info: "#3B82F6",
   bg: "#F7F8FA",
@@ -24,7 +32,6 @@ export const COLORS = {
   light_yellow: "#E9D8A6",
   grey: "#EFEFEF",
 
-  // ── Platform brand colors ──
   platform_facebook:  "#1877F2",
   platform_instagram: "#E1306C",
   platform_google:    "#4285F4",
@@ -36,7 +43,6 @@ export const COLORS = {
   platform_pinterest: "#E60023",
 };
 
-/** Returns the brand colour for a given ad platform name, falling back to primary. */
 export function getPlatformColor(platform?: string): string {
   if (!platform) return COLORS.primary;
   const key = `platform_${platform.toLowerCase()}` as keyof typeof COLORS;

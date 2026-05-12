@@ -1,19 +1,52 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
-import { Eye, EyeOff } from "lucide-react";
+import { User, Lock, Eye, EyeOff, UserCircle } from "lucide-react";
+import Button from "@/core/components/ui/Button";
+import TextField from "@/core/components/ui/TextField";
+import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
+import { getCredentials, getRememberMe, getSavedAccounts, type SavedAccount } from "@/core/utils/auth";
 
 interface LoginPanelProps {
   onCreateAccount: () => void;
 }
 
 export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
-  const { login, isPending, error } = useAuth();
+  const { login, isPending, error: authError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredAccounts, setFilteredAccounts] = useState<SavedAccount[]>([]);
+  const suggestionRef = useRef<HTMLDivElement>(null);
+  
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const isRemembered = getRememberMe();
+    if (isRemembered) {
+      setRememberMe(true);
+      const creds = getCredentials();
+      if (creds) {
+        setEmail(creds.email);
+        setPassword(creds.password);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   function getOrCreate(key: string, generate: () => string): string {
     if (typeof window === "undefined") return "";
@@ -23,116 +56,186 @@ export default function LoginPanel({ onCreateAccount }: LoginPanelProps) {
   }
 
   function generateUUID() {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) {
-      return crypto.randomUUID();
+    return typeof crypto !== "undefined" && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2, 15);
+  }
+
+  function handleEmailChange(val: string) {
+    setEmail(val);
+    if (emailError) setEmailError(null);
+    
+    if (val.trim()) {
+      const saved = getSavedAccounts();
+      const filtered = saved.filter(acc => 
+        acc.email.toLowerCase().includes(val.toLowerCase())
+      );
+      setFilteredAccounts(filtered);
+      setShowSuggestions(filtered.length > 0);
+    } else {
+      setShowSuggestions(false);
     }
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  }
+
+  function selectAccount(account: SavedAccount) {
+    setEmail(account.email);
+    setPassword(account.password);
+    setShowSuggestions(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setEmailError(null);
+    setPasswordError(null);
+    setShowSuggestions(false);
+
     const deviceId = getOrCreate("deviceId", generateUUID);
     const signinId = getOrCreate("signinId", generateUUID);
     const fcmToken = getOrCreate("fcmToken", () => "web-token-" + generateUUID());
-    await login({
-      email,
-      password,
-      platform: "web",
-      token: fcmToken,
-      deviceId,
-      signinId,
-    });
+
+    try {
+      await login({
+        email,
+        password,
+        platform: "web",
+        token: fcmToken,
+        deviceId,
+        signinId,
+        rememberMe,
+      });
+    } catch (err: any) {
+      const msg = err.message?.toLowerCase() || "";
+      if (msg.includes("password")) {
+        setPasswordError(err.message || "Invalid password");
+      } else if (msg.includes("email") || msg.includes("not registered") || msg.includes("not found")) {
+        setEmailError(err.message || "Email not found");
+      }
+    }
   }
-  const [showPassword, setShowPassword] = useState(false);
+
   return (
-    <>
-      <div className="px-[30px] pt-[50px] pb-[20px]">
-        <h2 className="text-[22px] font-bold text-[#0D1B3E] mb-[4px]">
-          Welcome Back
-        </h2>
-        <p className="text-[14px] text-[#5A7190] font-medium">Login here</p>
-      </div>
+    <div className="flex flex-col items-center w-full">
+      <Text 
+        as="h2" 
+        weight="semibold"
+        style={{ fontSize: '19.31px', lineHeight: '19.31px', color: COLORS.surface }}
+        className="opacity-100 tracking-normal mb-6 sm:mb-8"
+      >
+        User Login
+      </Text>
 
-      <div className="w-full h-[1px] bg-[#C8D6E5]" />
-
-      <div className="bg-[#D6E4F0] px-[30px] pt-[20px] pb-[30px]">
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <label className="text-[13px] font-semibold text-[#0D1B3E] mb-[6px]">
-            Email
-          </label>
-          <input
+      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4 sm:gap-5 items-center">
+        <div className="w-full max-w-[350px] relative" ref={suggestionRef}>
+          <TextField
             type="email"
+            placeholder="User Name"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-[42px] rounded-[12px] bg-white px-[16px] text-[14px] outline-none mb-[16px] focus:ring-2 focus:ring-[#1E56A0]/40"
+            onChange={(e) => handleEmailChange(e.target.value)}
+            onFocus={() => {
+              if (email.trim()) {
+                const saved = getSavedAccounts();
+                const filtered = saved.filter(acc => acc.email.toLowerCase().includes(email.toLowerCase()));
+                if (filtered.length > 0) {
+                  setFilteredAccounts(filtered);
+                  setShowSuggestions(true);
+                }
+              }
+            }}
+            error={emailError || undefined}
+            icon={<User size={18} color={emailError ? COLORS.danger : "#5E5E5E"} strokeWidth={2.5} />}
+            className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
           />
-
-          <label className="text-[13px] font-semibold text-[#0D1B3E] mb-[6px]">
-            Password
-          </label>
-          <div className="relative mb-[10px]">
-            <input
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-[42px] rounded-[12px] bg-white px-[16px] text-[14px] outline-none pr-[40px] focus:ring-2 focus:ring-[#1E56A0]/40"
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#163172]"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-
-          <div className="flex justify-end mb-[24px]">
-            <Link
-              href="/forgot-password"
-              className="text-[13px] font-semibold text-[#163172]"
-            >
-              Forgot Password
-            </Link>
-          </div>
-
-          {error && (
-            <p className="text-[12px] text-red-500 mb-3 text-center">
-              {error}
-            </p>
+          
+          {showSuggestions && (
+            <div className="absolute top-[110%] left-0 w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-1 duration-200">
+              {filteredAccounts.map((acc) => (
+                <button
+                  key={acc.email}
+                  type="button"
+                  onClick={() => selectAccount(acc)}
+                  className="w-full flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-50 last:border-none"
+                >
+                  <UserCircle size={20} className="text-[#1E56A0] opacity-70" />
+                  <div className="flex flex-col">
+                    <Text as="span" weight="medium" className="text-[13px] text-[#0D1B3E] truncate max-w-[200px]">
+                      {acc.email}
+                    </Text>
+                    <Text as="span" className="text-[10px] text-gray-400">
+                      Saved account
+                    </Text>
+                  </div>
+                </button>
+              ))}
+            </div>
           )}
+        </div>
 
-          <button
-            disabled={isPending}
-            className="h-[44px] rounded-full bg-[#163172] text-white text-[14px] font-bold shadow-[0_4px_12px_rgba(22,49,114,0.3)] mb-[8px]"
-          >
-            {isPending ? "Signing in…" : "Sign in"}
-          </button>
-
-          <div className="flex items-center justify-center gap-[12px] my-[8px]">
-            <span className="text-[12px] text-[#5A7190] italic">Or</span>
-          </div>
-
+        <div className="relative w-full max-w-[350px]">
+          <TextField
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (passwordError) setPasswordError(null);
+            }}
+            error={passwordError || undefined}
+            icon={<Lock size={18} color={passwordError ? COLORS.danger : "#5E5E5E"} strokeWidth={2.5} />}
+            className="rounded-full shadow-sm h-[56px] sm:h-[64px] text-[14px] sm:text-[15px]"
+          />
           <button
             type="button"
-            className="h-[44px] rounded-full bg-[#163172] text-white text-[14px] font-bold shadow-[0_4px_12px_rgba(30,86,160,0.3)]"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-[#5E5E5E] hover:text-[#1E56A0] transition-colors z-10 bg-transparent border-none"
           >
-            Login With Google
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
+        </div>
 
-          <div className="text-center mt-[28px] mb-[10px]">
-            <button
-              type="button"
-              onClick={onCreateAccount}
-              className="text-[15px] font-bold text-[#0D1B3E] bg-transparent border-none cursor-pointer"
+        <div className="flex items-center justify-between w-full max-w-[350px] px-2 mt-1">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-3.5 h-3.5 rounded-sm border-white/40 bg-transparent text-[#1E56A0] focus:ring-0 cursor-pointer" 
+            />
+            <Text 
+              as="span"
+              weight="medium"
+              className="text-white/80 group-hover:text-white transition-colors font-poppins"
+              style={{ fontSize: '13px', lineHeight: '12px' }}
             >
-              Create New Account
-            </button>
-          </div>
-        </form>
-      </div>
-    </>
+              Remember me
+            </Text>
+          </label>
+          <Link
+            href="/forgot-password"
+            className="font-medium text-white/80 hover:text-white transition-all font-poppins"
+            style={{ fontSize: '13px', lineHeight: '12px' }}
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        {authError && !emailError && !passwordError && (
+          <Text as="p" className="text-[10px] text-center px-4" style={{ color: COLORS.danger }}>
+            {authError}
+          </Text>
+        )}
+
+        <Button
+          type="submit"
+          disabled={isPending}
+          variant="white"
+          className="mt-4 sm:mt-6 w-full max-w-[200px] h-[46px] sm:h-[50px] !font-medium font-poppins transition-all flex items-center justify-center !text-[#5E5E5E]"
+          style={{ fontSize: '15px' }}
+        >
+          {isPending ? "Logging in..." : "Login"}
+        </Button>
+      </form>
+    </div>
   );
 }

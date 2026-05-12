@@ -5,7 +5,7 @@ import { AutoLeadDashboard } from "@/modules/auto-lead/components/AutoLeadDashbo
 
 export default function AutoLeadPage() {
   return (
-    <div className="flex flex-col flex-1 w-full bg-[#E5ECF4] h-screen overflow-hidden p-0 font-sans relative">
+    <div>
       <AutoLeadDashboard />
     </div>
   );

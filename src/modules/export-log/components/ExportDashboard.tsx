@@ -15,9 +15,10 @@ interface FilterModalProps {
   selected: string[];
   onClose: () => void;
   onApply: (selected: string[]) => void;
+  showSelectAll?: boolean;
 }
 
-function FilterModal({ title, options, selected, onClose, onApply }: FilterModalProps) {
+function FilterModal({ title, options, selected, onClose, onApply, showSelectAll }: FilterModalProps) {
   const [local, setLocal] = useState<string[]>(selected);
   const [search, setSearch] = useState('');
 
@@ -34,6 +35,19 @@ function FilterModal({ title, options, selected, onClose, onApply }: FilterModal
       return 0; 
     });
 
+  const handleSelectAll = () => {
+    const visibleIds = filteredOptions.map(opt => opt.id);
+    setLocal(prev => {
+      const otherIds = prev.filter(id => !visibleIds.includes(id));
+      return [...otherIds, ...visibleIds];
+    });
+  };
+
+  const handleClearSelection = () => {
+    const visibleIds = filteredOptions.map(opt => opt.id);
+    setLocal(prev => prev.filter(id => !visibleIds.includes(id)));
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 flex flex-col max-h-[80vh]">
@@ -47,7 +61,7 @@ function FilterModal({ title, options, selected, onClose, onApply }: FilterModal
         </div>
 
         <div className="p-4 border-b border-gray-50">
-          <div className="relative">
+          <div className="relative mb-3">
             <input
               type="text"
               placeholder={`Search ${title.toLowerCase()}...`}
@@ -79,6 +93,28 @@ function FilterModal({ title, options, selected, onClose, onApply }: FilterModal
               </button>
             )}
           </div>
+
+          {showSelectAll && (
+            <div className="flex items-center justify-between px-1">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                {search ? 'Filtered Results' : 'Selection'}
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={handleSelectAll}
+                  className="text-[11px] font-bold text-[#233A78] hover:underline"
+                >
+                  Select All
+                </button>
+                <button 
+                  onClick={handleClearSelection}
+                  className="text-[11px] font-bold text-red-500 hover:underline"
+                >
+                  Clear Selection
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-1.5">
@@ -291,6 +327,7 @@ export function ExportDashboard() {
           selected={selectedMap[activeModal]}
           onClose={() => setActiveModal(null)}
           onApply={(v) => modalSetters[activeModal](v)}
+          showSelectAll={activeModal === 'ads'}
         />
       )}
 
