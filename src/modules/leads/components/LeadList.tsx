@@ -193,7 +193,7 @@ export function LeadList() {
       );
       // Unassigned filter: pass isUnassigned flag to API
       if (isUnassignedRef.current) {
-        (payload as Record<string, unknown>).isUnassigned = true;
+        payload.isUnassigned = true;
         delete payload.status;
       }
 
