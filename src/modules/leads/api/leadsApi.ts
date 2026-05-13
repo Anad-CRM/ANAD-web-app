@@ -56,9 +56,7 @@ export const leadsApi = {
 
     try {
       if (params?.isUnassigned) {
-        const response = await api.get("/lead/unAssigned", { 
-          data: payload 
-        });
+        const response = await api.post("/lead/unAssigned", payload);
         return response.data;
       }
 
