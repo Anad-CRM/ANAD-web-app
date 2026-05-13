@@ -19,7 +19,11 @@ export const createSingleLead = async (data: CreateLeadPayload) => {
 
   const payload = {
     ...data,
-    organizationId: user.organizationId
+    type: 'single',
+    leadId: Date.now().toString(),
+    skip: false,
+    blockDuplicate: true,
+    organizationId: user.organizationId,
   };
 
   return api.post(API_ENDPOINTS.CREATE_LEADS.SINGLE, payload);

@@ -277,7 +277,7 @@ export const SingleLeadForm: React.FC = () => {
           {loading ? (
              <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-             "Create Lead"
+            "Create Lead"
           )}
         </button>
       </div>
