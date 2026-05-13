@@ -17,6 +17,7 @@ export interface FetchLeadsParams {
   sortByDate?: "latest" | "oldest";
   adId?: string | null;
   adIds?: string[] | null;
+  isUnassigned?: boolean;
 }
 
 interface FetchLeadsResponse {
@@ -54,7 +55,13 @@ export const leadsApi = {
     if (params?.endDate) payload.endDate = params.endDate;
 
     try {
-      // Backend expects POST (confirmed by Flutter using req.post for this endpoint)
+      if (params?.isUnassigned) {
+        const response = await api.get("/lead/unAssigned", { 
+          data: payload 
+        });
+        return response.data;
+      }
+
       const response = await api.post("/lead/getLeadsByStatus", payload);
       return response.data;
     } catch (error) {
