@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
+import { Building2, User, GraduationCap } from "lucide-react";
+import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 
 type Category = "organization" | "individual" | "student";
 
@@ -9,102 +12,109 @@ const CATEGORIES: {
   id: Category;
   title: string;
   subtitle: string;
+  icon: React.ReactNode;
 }[] = [
   {
     id: "organization",
     title: "Organization",
     subtitle: "Register as a company Administrator",
+    icon: <Building2 size={20} color="#5E5E5E" strokeWidth={2} />,
   },
   {
     id: "individual",
     title: "Individual",
     subtitle: "Register as a Staff, Team Leader or Manager",
+    icon: <User size={20} color="#5E5E5E" strokeWidth={2} />,
   },
   {
     id: "student",
     title: "Student",
     subtitle: "Register as a Student",
+    icon: <GraduationCap size={20} color="#5E5E5E" strokeWidth={2} />,
   },
 ];
 
 interface CategorySelectPanelProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export default function CategorySelectPanel({
   onBack,
 }: CategorySelectPanelProps) {
   const router = useRouter();
-  const [selected, setSelected] = useState<Category>("organization");
+  const [selectedId, setSelectedId] = React.useState<Category | null>(null);
 
-  function handleNext() {
-    router.push(`/signup?role=${selected}`);
+  function handleSelect(id: Category) {
+    setSelectedId(id);
+    setTimeout(() => {
+      router.push(`/signup?role=${id}`);
+    }, 400);
   }
 
   return (
-    <>
-      <div className="px-[30px] pt-[50px] pb-[20px]">
-        <h2 className="text-[26px] font-bold italic text-[#0D1B3E] mb-[4px]">
-          Welcome !
-        </h2>
-        <p className="text-[14px] text-[#5A7190] font-medium">
-          Please Choose Your Category
-        </p>
-      </div>
-
-      <div className="w-full h-[1px] bg-[#C8D6E5]" />
-
-      <div className="bg-[#D6E4F0] px-[30px] pt-[24px] pb-[30px] flex flex-col items-center gap-[16px]">
+    <div className="flex flex-col items-center justify-center w-full h-full pb-2">
+      <div className="flex flex-col items-center gap-[12px] w-full">
         {CATEGORIES.map((cat) => {
-          const isSelected = selected === cat.id;
+          const isSelected = selectedId === cat.id;
+          
           return (
             <button
               key={cat.id}
               type="button"
-              onClick={() => setSelected(cat.id)}
-              className={`w-full flex items-center gap-[14px] px-[20px] py-[16px] rounded-[14px] border-2 transition-all duration-200 cursor-pointer text-left ${
-                isSelected
-                  ? "bg-[#DAE5F0] border-[#163172]"
-                  : "bg-white border-transparent"
-              }`}
+              onClick={() => handleSelect(cat.id)}
+              disabled={!!selectedId}
+              className={`
+                w-full max-w-[360px] flex items-center gap-[16px] px-[20px] sm:px-[24px] py-[14px] 
+                rounded-[14px] transition-all duration-200 cursor-pointer text-left 
+                shadow-[0_4px_12px_rgba(0,0,0,0.06)] 
+                hover:shadow-[0_6px_20px_rgba(30,86,160,0.12)]
+                active:scale-[0.98]
+                border-2
+                ${isSelected 
+                  ? "border-[#1E56A0] bg-[#EEF4FB]" 
+                  : "border-transparent hover:border-[#1E56A0] hover:bg-[#EEF4FB]/50"}
+              `}
+              style={{ 
+                backgroundColor: isSelected ? COLORS.primaryXlight : COLORS.surface,
+              }}
             >
-              <div
-                className={`w-[24px] h-[24px] rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                  isSelected ? "border-[#163172]" : "border-[#B0BEC5]"
-                }`}
+              <div 
+                className={`flex items-center justify-center flex-shrink-0 p-2 rounded-xl transition-colors duration-200
+                  ${isSelected ? "bg-[#1E56A0]/10" : "bg-gray-50"}
+                `}
               >
-                {isSelected && (
-                  <div className="w-[12px] h-[12px] rounded-full bg-[#163172]" />
-                )}
+                {React.cloneElement(cat.icon as React.ReactElement<{ color?: string }>, {
+                  color: isSelected ? COLORS.primary : "#5E5E5E"
+                })}
               </div>
               <div>
-                <p className="text-[16px] font-bold text-[#0D1B3E] m-0">
+                <Text 
+                  as="p" 
+                  weight="bold" 
+                  className="font-poppins m-0 leading-tight"
+                  style={{ 
+                    fontSize: '15px', 
+                    color: isSelected ? COLORS.primary : COLORS.text 
+                  }}
+                >
                   {cat.title}
-                </p>
-                <p className="text-[13px] text-[#5A7190] m-0 mt-[2px]">
+                </Text>
+                <Text 
+                  as="p" 
+                  weight="normal" 
+                  className="font-poppins m-0 mt-[4px] leading-tight"
+                  style={{ 
+                    fontSize: '12px', 
+                    color: isSelected ? COLORS.primary : COLORS.muted 
+                  }}
+                >
                   {cat.subtitle}
-                </p>
+                </Text>
               </div>
             </button>
           );
         })}
-
-        <button
-          type="button"
-          onClick={handleNext}
-          className="w-[200px] h-[44px] rounded-full bg-[#163172] text-white text-[14px] font-bold shadow-[0_4px_12px_rgba(22,49,114,0.3)] mt-[8px] border-none cursor-pointer"
-        >
-          Next
-        </button>
-
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-[13px] font-semibold text-[#163172] bg-transparent border-none cursor-pointer mt-[4px]"
-        >
-          Back to Login
-        </button>
       </div>
-    </>
+    </div>
   );
 }

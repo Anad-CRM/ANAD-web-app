@@ -2,8 +2,10 @@ import React from "react";
 
 export default function FullScreenLoader() {
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/10 pointer-events-auto transition-opacity duration-300">
-      <div className="backdrop-blur-[10px] bg-black/60 border border-white/10 p-8 rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-transparent pointer-events-none">
+      <div className="bg-black/30 backdrop-blur-md p-10 rounded-[32px] shadow-2xl border border-white/10">
+
+
         <svg
           className="animate-spin h-[50px] w-[50px] text-white"
           xmlns="http://www.w3.org/2000/svg"

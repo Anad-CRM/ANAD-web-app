@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import AuthPanel from "@/modules/auth/components/AuthPanel";
 import LoginPanel from "@/modules/auth/components/LoginPanel";
@@ -10,10 +10,11 @@ import FullScreenLoader from "@/core/components/ui/FullScreenLoader";
 
 type AuthView = "login" | "category";
 
-export default function LoginPage() {
-  const [view, setView] = useState<AuthView>("login");
+function LoginContent() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const view = (searchParams.get("view") as AuthView) || "login";
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -21,17 +22,79 @@ export default function LoginPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  if (isLoading || isAuthenticated) {
-    return <FullScreenLoader />;
-  }
+  const setView = (newView: AuthView) => {
+    if (newView === "login") {
+      router.push("/login", { scroll: false });
+    } else {
+      router.push(`/login?view=${newView}`, { scroll: false });
+    }
+  };
 
   return (
-    <AuthPanel>
-      {view === "login" ? (
-        <LoginPanel onCreateAccount={() => setView("category")} />
-      ) : (
-        <CategorySelectPanel onBack={() => setView("login")} />
-      )}
-    </AuthPanel>
+    <>
+      {(isLoading || isAuthenticated) && <FullScreenLoader />}
+      <AuthPanel>
+        {view === "login" ? (
+          <LoginPanel onCreateAccount={() => setView("category")} />
+        ) : (
+          <CategorySelectPanel onBack={() => setView("login")} />
+        )}
+      </AuthPanel>
+
+      <div className="mt-8 sm:mt-12 flex items-center justify-center h-[20px] w-full relative">
+        <div 
+          className={`absolute transition-all duration-300 ease-in-out flex flex-col items-center justify-center w-full ${
+            view === "login" 
+              ? "opacity-100 translate-y-0 pointer-events-auto" 
+              : "opacity-0 translate-y-2 pointer-events-none"
+          }`}
+        >
+          <p 
+            className="text-white font-medium text-center m-0 flex items-center"
+            style={{ fontSize: '15px', lineHeight: '15px' }}
+          >
+            To create a new account.
+            <button 
+              type="button"
+              onClick={() => setView("category")} 
+              className="underline cursor-pointer ml-[6px] hover:text-white/80 transition-colors bg-transparent border-none p-0 inline font-bold"
+              style={{ fontSize: '15px', lineHeight: '15px' }}
+            >
+              Click here
+            </button>
+          </p>
+        </div>
+        
+        <div 
+          className={`absolute transition-all duration-300 ease-in-out flex flex-col items-center justify-center w-full ${
+            view === "category" 
+              ? "opacity-100 translate-y-0 pointer-events-auto" 
+              : "opacity-0 -translate-y-2 pointer-events-none"
+          }`}
+        >
+          <p 
+            className="text-white font-medium text-center m-0"
+            style={{ fontSize: '15px', lineHeight: '15px' }}
+          >
+            <button 
+              type="button"
+              onClick={() => setView("login")} 
+              className="underline cursor-pointer hover:text-white/80 transition-colors bg-transparent border-none p-0 inline font-bold"
+              style={{ fontSize: '15px', lineHeight: '15px' }}
+            >
+              Back to Login
+            </button>
+          </p>
+        </div>
+      </div>
+    </>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<FullScreenLoader />}>
+      <LoginContent />
+    </Suspense>
+  );
+}
