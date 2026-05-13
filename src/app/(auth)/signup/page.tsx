@@ -11,11 +11,8 @@ import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
 import { Lock, Mail, User, Phone, MapPin, Building2, Tag, Camera, StepBack, Eye, EyeOff, Clock } from "lucide-react";
 import { fileService } from "@/modules/auth/services/file.service";
-import {
-  PhoneInput,
-  defaultCountries,
-} from "react-international-phone";
-import "react-international-phone/style.css";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import type {
   OrgSignupPayload,
   IndividualSignupPayload,
@@ -25,7 +22,7 @@ import type {
 type Role = "organization" | "individual" | "student";
 
 const isValidName = (v: string) =>
-  v.trim().length >= 3 && /^[a-zA-Z0-9 _-]+$/.test(v.trim());
+  v.trim().length >= 3 && /^[a-zA-Z]+( [a-zA-Z]+)*$/.test(v.trim());
 
 const isValidEmail = (v: string) =>
   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v.trim());
@@ -118,47 +115,86 @@ function PhoneField({
   return (
     <div className="flex flex-col gap-0 relative w-full" style={{ zIndex: 50 }}>
       <FieldLabel>{label}</FieldLabel>
-      <div className={`flex items-center w-full h-[48px] bg-white rounded-full transition-all px-1 focus-within:ring-2 focus-within:ring-white/20 ${error ? "ring-2 ring-[#C62828]" : "border-none"}`}>
+      <div className={`relative w-full h-[48px] bg-white rounded-full transition-all flex items-center ${error ? "ring-2 ring-[#C62828]" : "border-none"}`}>
         <PhoneInput
-          defaultCountry="in"
+          country={"in"}
           value={value}
-          onChange={onChange}
-          countries={defaultCountries}
-          forceDialCode={true}
-          inputProps={{
-            maxLength: 15,
-          }}
-          className="w-full"
-          inputClassName="phone-input-custom"
-          countrySelectorStyleProps={{
-            buttonClassName: "phone-country-custom",
-          }}
+          onChange={(val) => onChange("+" + val)}
+          enableSearch={true}
+          countryCodeEditable={false}
+          masks={{ in: ".........." }}
+          searchPlaceholder="Search country..."
+          inputClass="phone-input-custom"
+          containerClass="phone-container-custom"
+          buttonClass="phone-button-custom"
+          dropdownClass="phone-dropdown-custom"
+          searchClass="phone-search-custom"
         />
       </div>
       <FieldError msg={error} />
       <style jsx global>{`
         .phone-input-custom {
+          width: 100% !important;
+          height: 48px !important;
+          background: white !important;
           border: none !important;
-          background: transparent !important;
+          border-radius: 9999px !important;
           font-family: 'Poppins', sans-serif !important;
           font-size: 15px !important;
           color: #0D1B3E !important;
-          width: 100% !important;
-          height: 44px !important;
-          padding-left: 8px !important;
+          padding-left: 80px !important;
+          font-weight: 500 !important;
         }
-        .phone-country-custom {
-          border: none !important;
+        .phone-button-custom {
           background: transparent !important;
-          padding-left: 12px !important;
-          padding-top: 6px !important;
-        }
-        .react-international-phone-input-container {
-          width: 100%;
           border: none !important;
+          border-radius: 9999px 0 0 9999px !important;
+          padding-left: 36px !important;
+          width: 70px !important;
         }
-        .react-international-phone-country-selector-dropdown {
-          z-index: 9999 !important;
+        .phone-button-custom:hover, .phone-button-custom.open {
+          background: #f3f4f6 !important;
+          border-radius: 9999px 0 0 9999px !important;
+        }
+        .phone-dropdown-custom {
+          width: 300px !important;
+          border-radius: 16px !important;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+          margin-top: 8px !important;
+          overflow: hidden !important;
+          border: 1px solid #eee !important;
+          color: #0D1B3E !important;
+          font-family: 'Poppins', sans-serif !important;
+        }
+        .phone-dropdown-custom li {
+          padding: 10px 15px !important;
+          transition: background 0.2s !important;
+        }
+        .phone-dropdown-custom li.active, .phone-dropdown-custom li:hover {
+          background: #EEF4FB !important;
+          color: #2D63ED !important;
+        }
+        .phone-search-custom {
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 12px !important;
+          border-bottom: 1px solid #eee !important;
+          background: #fcfcfc !important;
+        }
+        .phone-search-custom input {
+          width: 100% !important;
+          height: 38px !important;
+          border-radius: 10px !important;
+          border: 1px solid #e0e0e0 !important;
+          padding: 0 12px !important;
+          font-family: 'Poppins', sans-serif !important;
+          font-size: 14px !important;
+          color: #0D1B3E !important;
+          outline: none !important;
+        }
+        .phone-search-custom input:focus {
+          border-color: #2D63ED !important;
+          box-shadow: 0 0 0 2px rgba(45,99,237,0.1) !important;
         }
       `}</style>
     </div>
@@ -281,21 +317,28 @@ function SignupPageContent() {
     const errs: Record<string, string | undefined> = {};
 
     if (!form.userName.trim()) errs.userName = "Please enter your full name";
-    else if (form.userName.length > 50) errs.userName = "Name cannot exceed 50 characters";
-    else if (!isValidName(form.userName)) errs.userName = "Letters, numbers, spaces, _ and - only";
+    else if (form.userName.trim().length > 30) errs.userName = "Name cannot exceed 30 characters";
+    else if (!isValidName(form.userName)) errs.userName = "Name should contain only alphabets and single spaces (min 3 chars)";
 
     if (role === "organization") {
       if (!form.orgName.trim()) errs.orgName = "Please enter organization name";
-      else if (form.orgName.length < 3) errs.orgName = "Min 3 chars required";
+      else if (!isValidName(form.orgName)) errs.orgName = "Organization name should contain only alphabets and single spaces (min 3 chars)";
     }
 
-    if (!form.email.trim()) errs.email = "Please enter email";
-    else if (!isValidEmail(form.email)) errs.email = "Invalid format (user@example.com)";
+    if (!form.email.trim()) {
+      errs.email = "Please enter email";
+    } else if (!/^[a-z]/.test(form.email.trim())) {
+      errs.email = "Email must start with a lowercase letter";
+    } else if (!form.email.includes("@")) {
+      errs.email = "Email must contain @ symbol";
+    } else if (!form.email.includes(".")) {
+      errs.email = "Email must contain . symbol";
+    } else if (!isValidEmail(form.email)) {
+      errs.email = "Invalid email format (e.g., user@example.com)";
+    }
 
-    // More robust extraction: Get only digits and remove leading +[CountryCode]
     const phoneDigits = form.mobileNumber.replace(/\D/g, "");
-    // If India, we expect +91 + 10 digits = 12 digits total. 
-    // We isolate the last 10 digits if it starts with 91.
+
     const rawPhone = form.mobileNumber.startsWith("+91") && phoneDigits.startsWith("91")
       ? phoneDigits.slice(2)
       : form.mobileNumber.replace(/^\+\d+/, "").replace(/\D/g, "");
@@ -303,25 +346,40 @@ function SignupPageContent() {
     if (!rawPhone || rawPhone.length === 0) {
       errs.mobileNumber = "Please enter mobile number";
     } else if (form.mobileNumber.startsWith("+91")) {
-      if (rawPhone.length !== 10) errs.mobileNumber = "Please enter exactly 10 digits";
-      else if (!/^[6-9]\d{9}$/.test(rawPhone)) errs.mobileNumber = "Must start with 6-9";
+      if (rawPhone.length !== 10 || !/^[6-9]\d{9}$/.test(rawPhone)) {
+        errs.mobileNumber = "Please enter a valid 10-digit mobile number";
+      }
     } else if (rawPhone.length < 5) {
-      errs.mobileNumber = "Valid mobile number required";
+      errs.mobileNumber = "Please enter a valid mobile number";
     }
 
     if ((role === "individual" || role === "student") && !form.invitationCode.trim()) {
-      errs.invitationCode = "Invitation code required";
+      errs.invitationCode = "Invitation code required. Please check your email.";
     }
 
-    if (!form.address.trim()) errs.address = "Please enter location";
-    else if (form.address.trim().length < 5) errs.address = "Address is too short (min 5 chars)";
-    else if (/^\d+$/.test(form.address.trim())) errs.address = "Address cannot be only numbers";
+    if (!form.address.trim()) {
+      errs.address = "Please enter location";
+    } else if (form.address.trim().length < 5) {
+      errs.address = "Address is too short (min 5 chars)";
+    } else if (!/[a-zA-Z]/.test(form.address)) {
+      errs.address = "Address cannot contain only numbers and symbols";
+    }
 
-    if (!form.password) errs.password = "Please enter password";
-    else if (!isValidPassword(form.password)) errs.password = "Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char";
+    if (!form.password) {
+      errs.password = "Please enter password";
+    } else if (!isValidPassword(form.password)) {
+      errs.password = "Password must be at least 8 characters with uppercase, lowercase, number, and special character";
+    }
 
-    if (!form.confirmPassword) errs.confirmPassword = "Please confirm your password";
-    else if (form.password !== form.confirmPassword) errs.confirmPassword = "Passwords do not match";
+    if (!form.confirmPassword) {
+      errs.confirmPassword = "Please confirm your password";
+    } else if (form.password !== form.confirmPassword) {
+      errs.confirmPassword = "Password and confirm password do not match";
+    }
+
+    if (!form.avatar) {
+      errs.image = "Please upload your profile image";
+    }
 
     if (role === "organization") {
       const timeErr = validateWorkingTime(form.workStartTime, form.workEndTime);
@@ -594,9 +652,9 @@ function SignupPageContent() {
                 </div>
               )}
 
-              {authError && (
+              {(authError || errors.image) && (
                 <Text as="p" size="xs" className="text-red-300 font-poppins m-0 text-center">
-                  {authError}
+                  {authError || errors.image}
                 </Text>
               )}
             </div>
