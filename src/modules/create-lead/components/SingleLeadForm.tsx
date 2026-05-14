@@ -58,39 +58,10 @@ export const SingleLeadForm: React.FC = () => {
       newErrors.userName = "Full Name is required";
     }
 
-<<<<<<< HEAD
     if (!formData.mobileNumber || formData.mobileNumber === '+') {
       newErrors.mobileNumber = "Mobile Number is required";
     } else if (formData.mobileNumber.length < 8) {
       newErrors.mobileNumber = "Please enter a valid mobile number";
-=======
-    setLoading(true);
-    setError(null);
-    try {
-      const submitData = {
-        ...formData,
-        mobileNumber: formData.mobileNumber.startsWith('+') ? formData.mobileNumber : `+91${formData.mobileNumber}`
-      };
-      const response = await createSingleLead(submitData);
-      
-      if (response.data && response.data.status === 'failed') {
-        setError(response.data.message || "Failed to create lead");
-      } else {
-        alert(response.data?.message || "Lead created successfully!");
-        setFormData({
-          userName: '',
-          email: '',
-          mobileNumber: '',
-          leadSource: 'Manual',
-          adId: '',
-          staffId: isStaffMember ? String(user?.id || '') : ''
-        });
-      }
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || "Failed to create lead");
-    } finally {
-      setLoading(false);
->>>>>>> a2388aa (feat: implement bulk CSV lead upload functionality and add error handling to single lead creation)
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {

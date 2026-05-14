@@ -31,7 +31,6 @@ export const createSingleLead = async (data: CreateLeadPayload) => {
   return api.post(API_ENDPOINTS.CREATE_LEADS.SINGLE, payload);
 };
 
-<<<<<<< HEAD
 export const createBulkLeads = async (file: File, skipDuplicateCheck: boolean) => {
   const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
   if (!user || !user.organizationId) {
@@ -47,30 +46,5 @@ export const createBulkLeads = async (file: File, skipDuplicateCheck: boolean) =
      headers: {
         'Content-Type': 'multipart/form-data',
      },
-=======
-export interface CreateBulkLeadPayload {
-  file: File;
-  skipDuplicateCheck: boolean;
-}
-
-export const createBulkLead = async (data: CreateBulkLeadPayload) => {
-  const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
-  if (!user || !user.organizationId) {
-    throw new Error('Authentication error: Missing organization details.');
-  }
-
-  const formData = new FormData();
-  formData.append('file', data.file);
-  formData.append('type', 'bulk');
-  formData.append('leadId', Date.now().toString());
-  formData.append('skip', String(data.skipDuplicateCheck));
-  formData.append('blockDuplicate', 'true');
-  formData.append('organizationId', user.organizationId);
-
-  return api.post(API_ENDPOINTS.CREATE_LEADS.BULK_CSV, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
->>>>>>> a2388aa (feat: implement bulk CSV lead upload functionality and add error handling to single lead creation)
   });
 };
