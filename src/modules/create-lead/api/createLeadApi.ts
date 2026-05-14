@@ -26,6 +26,8 @@ export const createSingleLead = async (data: CreateLeadPayload) => {
     organizationId: user.organizationId,
   };
 
+  console.log("playload==========", payload);
+
   return api.post(API_ENDPOINTS.CREATE_LEADS.SINGLE, payload);
 };
 
