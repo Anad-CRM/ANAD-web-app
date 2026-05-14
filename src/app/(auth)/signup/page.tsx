@@ -603,7 +603,7 @@ function SignupPageContent() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 sm:px-5 h-[40px] sm:h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[12px] sm:text-[13px] font-medium shadow-sm cursor-pointer relative z-20 overflow-hidden"
+                    className="flex items-center justify-center gap-2 w-[130px] sm:w-[150px] h-[44px] sm:h-[48px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[14px] sm:text-[16px] font-bold shadow-sm cursor-pointer relative z-20 overflow-hidden"
                   >
                     {form.avatarPreview ? (
                       <img src={form.avatarPreview} className="w-5 h-5 rounded-full object-cover" alt="Preview" />
@@ -630,7 +630,7 @@ function SignupPageContent() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 sm:px-5 h-[40px] sm:h-[44px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[12px] sm:text-[13px] font-medium shadow-sm cursor-pointer relative z-20 overflow-hidden"
+                    className="flex items-center justify-center gap-2 w-[130px] sm:w-[150px] h-[44px] sm:h-[48px] rounded-full bg-white hover:bg-gray-50 transition-all font-poppins text-[#5E5E5E] text-[14px] sm:text-[16px] font-bold shadow-sm cursor-pointer relative z-20 overflow-hidden"
                   >
                     {form.avatarPreview ? (
                       <img src={form.avatarPreview} className="w-5 h-5 rounded-full object-cover" alt="Preview" />
@@ -653,9 +653,9 @@ function SignupPageContent() {
               )}
 
               {(authError || errors.image) && (
-                <Text as="p" size="xs" className="text-red-300 font-poppins m-0 text-center">
+                <p className="text-[#C62828] text-[11px] font-bold font-poppins mt-3 mb-0 text-center w-full">
                   {authError || errors.image}
-                </Text>
+                </p>
               )}
             </div>
           </div>
