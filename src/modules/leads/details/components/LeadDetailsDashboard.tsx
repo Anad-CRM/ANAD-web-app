@@ -11,6 +11,9 @@ import { Lead } from '@/modules/leads/types/lead.types';
 import { Activity } from '@/modules/activities/types/activity.types';
 import { getUser } from '@/core/utils/auth';
 import { Text } from '@/core/components/ui/Text';
+import { WhatsAppMessage } from '@/modules/leads/api/leadsApi';
+import { WhatsAppMessagesCard } from './WhatsAppMessagesCard';
+import { FormDetailsCard } from './FormDetailsCard';
 
 export const LeadDetailsDashboard: React.FC = () => {
   const router = useRouter();
@@ -20,6 +23,7 @@ export const LeadDetailsDashboard: React.FC = () => {
   const [lead, setLead] = useState<Lead | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [followups, setFollowups] = useState<Record<string, unknown>[]>([]);
+  const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,26 +49,28 @@ export const LeadDetailsDashboard: React.FC = () => {
         leadData = await leadsApi.fetchLeadFromList(leadId);
       }
 
-      if (leadData) setLead(leadData);
+      if (leadData) {
+        setLead(leadData);
 
-      const loggedInUser = getUser<{ id: string }>();
-      const loggedInUserId = loggedInUser?.id || '';
+        const loggedInUser = getUser<{ id: string }>();
+        const loggedInUserId = loggedInUser?.id || '';
 
-      const userIdForFollowups = (leadData as unknown as { userId?: string })?.userId ?? '';
+        const userIdForFollowups = (leadData as unknown as { userId?: string })?.userId ?? '';
 
-      console.log('[LeadDetailsDashboard] leadId:', leadId);
-      console.log('[LeadDetailsDashboard] loggedInUserId (for activities):', loggedInUserId);
-      console.log('[LeadDetailsDashboard] leadData.userId (for followups):', userIdForFollowups);
-      console.log('[LeadDetailsDashboard] full leadData:', JSON.stringify(leadData));
+        // Step 3: Fetch activities, followups, and WhatsApp messages in parallel
+        const source = (leadData.source || (leadData.ad as any)?.platform || '').toLowerCase();
+        const isWhatsApp = source === 'whatsapp';
 
-      // Step 3: Fetch activities and followups in parallel
-      const [activitiesData, followupsData] = await Promise.all([
-        activityService.fetchLeadActivities(leadId, loggedInUserId),
-        leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
-      ]);
+        const [activitiesData, followupsData, whatsappData] = await Promise.all([
+          activityService.fetchLeadActivities(leadId, loggedInUserId),
+          leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
+          isWhatsApp ? leadsApi.fetchWhatsAppMessages(leadId) : Promise.resolve([]),
+        ]);
 
-      setActivities(activitiesData || []);
-      setFollowups(followupsData || []);
+        setActivities(activitiesData || []);
+        setFollowups(followupsData || []);
+        setWhatsappMessages(whatsappData || []);
+      }
     } catch (error) {
       console.error('Failed to load lead details:', error);
     } finally {
@@ -112,7 +118,12 @@ export const LeadDetailsDashboard: React.FC = () => {
             {/* Left Column 60% */}
             <div className="flex flex-col gap-6 w-full lg:w-[60%] flex-1">
               <LeadSummaryCard lead={lead} onRefresh={loadData} />
-              <LeadActivityLog 
+
+              <WhatsAppMessagesCard messages={whatsappMessages} leadId={leadId} />
+
+              {/* <FormDetailsCard formData={lead.formData} /> */}
+
+              <LeadActivityLog
                 activities={activities}
                 leadId={leadId}
                 onRefresh={loadData}
@@ -120,13 +131,15 @@ export const LeadDetailsDashboard: React.FC = () => {
             </div>
 
             {/* Right Column 40% */}
-            <div className="w-full lg:w-[40%] flex-shrink-0 sticky top-4 flex flex-col">
+            <div className="w-full lg:w-[40%] flex-shrink-0 gap-6 sticky top-4 flex flex-col">
+              <FormDetailsCard formData={lead.formData} />
               <LeadFollowUpCard
                 followups={followups}
                 leadId={leadId}
                 assignedUserId={(lead as unknown as any)?.assignedUser?.id || (lead as unknown as any)?.assignedUser?._id || ''}
                 onRefresh={loadData}
               />
+
             </div>
           </div>
         )}

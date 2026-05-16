@@ -8,7 +8,7 @@ import { StaffService } from "../services/staff.service";
 import { getUser } from "@/core/utils/auth";
 import type { Staff } from "../types/staff.types";
 import { StaffCard } from "./StaffCard";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Search, X } from "lucide-react";
 
 
 function getRoleTitle(query: string | null): string {
@@ -28,6 +28,20 @@ export function StaffListView() {
 
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredStaffs = staffs.filter((staff) => {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return true;
+
+    return (
+      staff.userName?.toLowerCase().includes(term) ||
+      staff.email?.toLowerCase().includes(term) ||
+      staff.team?.name?.toLowerCase().includes(term) ||
+      (staff as any).mobile?.toLowerCase().includes(term) ||
+      (staff as any).phoneNumber?.toLowerCase().includes(term)
+    );
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -73,14 +87,46 @@ export function StaffListView() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none" style={{ color: COLORS.subtle }}>
+          <Search size={20} />
+        </div>
+        <input
+          type="text"
+          placeholder={`Search ${pageTitle.toLowerCase()}s by name, email, team, phone...`}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full placeholder-gray-400 border-none rounded-2xl py-4 pl-14 pr-12 focus:outline-none focus:ring-2 transition-all duration-200 text-[15px]"
+          style={{
+            backgroundColor: COLORS.primaryXlight,
+            color: "#FFFFFF",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+            outlineColor: COLORS.primary,
+          }}
+        />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm("")}
+            className="absolute inset-y-0 right-0 pr-5 flex items-center hover:opacity-80 transition-opacity"
+            style={{ color: COLORS.subtle }}
+          >
+            <X size={18} />
+          </button>
+        )}
+      </div>
+
       {/* Content */}
       {loading ? (
         <LoadingState pageTitle={pageTitle} />
-      ) : staffs.length === 0 ? (
-        <EmptyState pageTitle={pageTitle} />
+      ) : filteredStaffs.length === 0 ? (
+        <EmptyState
+          pageTitle={pageTitle}
+          message={searchTerm ? `No matches found for "${searchTerm}"` : undefined}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {staffs.map((staff) => (
+          {filteredStaffs.map((staff) => (
             <StaffCard key={String(staff.id)} staff={staff} pageTitle={pageTitle} />
           ))}
         </div>
@@ -108,7 +154,7 @@ function LoadingState({ pageTitle }: { pageTitle: string }) {
   );
 }
 
-function EmptyState({ pageTitle }: { pageTitle: string }) {
+function EmptyState({ pageTitle, message }: { pageTitle: string; message?: string }) {
   return (
     <div
       className="rounded-[28px] p-10 min-h-[400px] flex items-center justify-center"
@@ -126,9 +172,11 @@ function EmptyState({ pageTitle }: { pageTitle: string }) {
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
         </div>
-        <Text size="custom" weight="bold" className="text-[20px] text-white">No Data Available</Text>
+        <Text size="custom" weight="bold" className="text-[20px] text-white">
+          {message ? "No Matches Found" : "No Data Available"}
+        </Text>
         <Text size="custom" className="text-[14px] max-w-xs" style={{ color: COLORS.subtle }}>
-          No {pageTitle.toLowerCase()}s found in the directory.
+          {message || `No ${pageTitle.toLowerCase()}s found in the directory.`}
         </Text>
       </div>
     </div>

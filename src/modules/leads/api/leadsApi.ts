@@ -27,6 +27,23 @@ interface FetchLeadsResponse {
   totalCount?: number;
 }
 
+export interface WhatsAppMessage {
+  text: string;
+  date: string;
+  time: string;
+}
+
+export interface WhatsAppMessagesData {
+  leadId: string;
+  userName: string;
+  messages: WhatsAppMessage[];
+}
+
+export interface WhatsAppMessagesResponse {
+  success: boolean;
+  data: WhatsAppMessagesData[];
+}
+
 export const leadsApi = {
   fetchLeads: async (params?: FetchLeadsParams): Promise<FetchLeadsResponse> => {
     // Inject organizationId from the logged-in user session (mirrors Flutter's userData)
@@ -167,5 +184,29 @@ export const leadsApi = {
       }
     } catch {/* ignore */ }
     return [];
+  },
+
+  fetchWhatsAppMessages: async (leadId: string): Promise<WhatsAppMessage[]> => {
+    const userData = getUser<Record<string, string>>();
+    if (!userData?.organizationId || !userData?.id) return [];
+
+    try {
+      const response = await api.get("/whatsapp/getWhatsAppMessages", {
+        params: {
+          userId: userData.id,
+          organizationId: userData.organizationId,
+          leadId,
+        },
+      });
+
+      if (response.data?.success === true && Array.isArray(response.data.data)) {
+        // Return messages from the first lead data matching (similar to mobile logic)
+        return response.data.data[0]?.messages || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("[leadsApi] Error fetching WhatsApp messages:", error);
+      return [];
+    }
   },
 };
