@@ -121,7 +121,7 @@ export default function AdDetailsPage() {
           </div>
         </div>
 
-        <div className="flex gap-4 p-4 rounded-2xl border" style={{ backgroundColor: COLORS.bg, borderColor: COLORS.grey }}>
+        <div className="flex gap-4 p-4 rounded-2xl border" style={{ backgroundColor: COLORS.figma_bg_from, borderColor: COLORS.grey }}>
           <div className="flex-1 flex items-center gap-4 cursor-pointer" onClick={() => router.push(`/leads_list?adId=${adId}&status=Closed`)}>
             <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#DCFCE7', color: COLORS.success }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>

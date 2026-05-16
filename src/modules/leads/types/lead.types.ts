@@ -58,6 +58,7 @@ export interface Lead {
   updatedAt?: string;
   followUpDate?: string;
   isDuplicated?: boolean;
+  formData?: Record<string, any>;
 }
 
 export interface Pipeline {

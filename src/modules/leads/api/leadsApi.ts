@@ -11,7 +11,7 @@ export interface FetchLeadsParams {
   userId?: string | null;
   staffId?: string | string[] | null;
   teamId?: string | string[] | null;
-  filter?: string; 
+  filter?: string;
   startDate?: string;
   endDate?: string;
   sortByDate?: "latest" | "oldest";
@@ -25,6 +25,23 @@ interface FetchLeadsResponse {
   message?: string;
   data: Lead[];
   totalCount?: number;
+}
+
+export interface WhatsAppMessage {
+  text: string;
+  date: string;
+  time: string;
+}
+
+export interface WhatsAppMessagesData {
+  leadId: string;
+  userName: string;
+  messages: WhatsAppMessage[];
+}
+
+export interface WhatsAppMessagesResponse {
+  success: boolean;
+  data: WhatsAppMessagesData[];
 }
 
 export const leadsApi = {
@@ -167,5 +184,30 @@ export const leadsApi = {
       }
     } catch {/* ignore */ }
     return [];
+  },
+
+  fetchWhatsAppMessages: async (leadId: string): Promise<WhatsAppMessage[]> => {
+    const userData = getUser<Record<string, string>>();
+    if (!userData?.organizationId || !userData?.id) return [];
+
+    try {
+      const response = await api.post("/whatsapp/getWhatsAppMessages",
+        {
+          userId: userData.id,
+          organizationId: userData.organizationId,
+          leadId,
+        },
+      );
+
+      if (response.data?.success === true && Array.isArray(response.data.data)) {
+        // Find the specific lead data matching our leadId
+        const matchingLead = response.data.data.find((item: any) => item.leadId === leadId);
+        return matchingLead?.messages || response.data.data[0]?.messages || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("[leadsApi] Error fetching WhatsApp messages:", error);
+      return [];
+    }
   },
 };

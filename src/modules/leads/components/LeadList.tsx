@@ -119,6 +119,7 @@ export function LeadList() {
 
 
   const offsetRef = useRef(0);
+  const isFetchingRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Sync query values into refs so loadLeads never needs to be recreated ──
@@ -173,10 +174,15 @@ export function LeadList() {
 
   // Stable — reads all query values from refs, never recreated on state changes.
   const loadLeads = useCallback(async (reset: boolean) => {
+    // Prevent duplicate calls if we're already fetching
+    if (isFetchingRef.current && !reset) return;
+    isFetchingRef.current = true;
+
     if (reset) {
       offsetRef.current = 0;
       setIsLoading(true);
       setLeads([]);
+      setHasMore(true);
     } else {
       setIsLoadingMore(true);
     }
@@ -202,18 +208,17 @@ export function LeadList() {
       if (res.status === "success" && res.data) {
         const incoming = res.data;
 
+        // Batch limit is 20. If we got 20, there might be more.
+        const hasMoreFromApi = incoming.length >= 20;
+        setHasMore(hasMoreFromApi);
+
         if (reset) {
           setLeads(incoming);
-          setHasMore(incoming.length > 0);
         } else {
           setLeads(prev => {
-            // Filter out any duplicates returned by the API or caused by double-fetching
+            // Filter out any duplicates returned by the API or caused by race conditions
             const existingIds = new Set(prev.map(l => l.id));
             const uniqueIncoming = incoming.filter(l => !existingIds.has(l.id));
-
-            // If we got new unique leads, we might have more. If not, stop fetching to prevent infinite loops.
-            setHasMore(uniqueIncoming.length > 0);
-
             return [...prev, ...uniqueIncoming];
           });
         }
@@ -223,12 +228,14 @@ export function LeadList() {
         if (reset) setLeads([]);
         setHasMore(false);
       }
-    } catch {
+    } catch (err) {
+      console.error("Error loading leads:", err);
       if (reset) setLeads([]);
       setHasMore(false);
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
+      isFetchingRef.current = false;
     }
   }, []); // Intentionally empty — reads all query values from refs
 
@@ -258,7 +265,7 @@ export function LeadList() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading && !isFetchingRef.current) {
           loadLeads(false);
         }
       },
@@ -473,10 +480,8 @@ export function LeadList() {
             const t = e.currentTarget;
             const distanceToBottom = t.scrollHeight - t.scrollTop - t.clientHeight;
 
-            // Update on-screen debugger
-
             // Trigger pre-fetch when within 400px of the bottom to prevent lag
-            if (distanceToBottom <= 400 && hasMore && !isLoading && !isLoadingMore) {
+            if (distanceToBottom <= 400 && hasMore && !isLoading && !isLoadingMore && !isFetchingRef.current) {
               loadLeads(false);
             }
           }}

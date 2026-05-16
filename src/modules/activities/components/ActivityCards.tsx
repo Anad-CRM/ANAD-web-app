@@ -36,6 +36,17 @@ export const Chip: React.FC<{ label: string; color: string; grey?: boolean }> = 
   </Text>
 );
 
+const ActivityNotes: React.FC<{ notes?: string }> = ({ notes }) => {
+  if (!notes) return null;
+  return (
+    <div className="mt-2 p-2 bg-slate-50/80 rounded-lg border border-slate-100/50">
+      <Text className="text-slate-600 italic leading-relaxed" style={{ fontSize: '11px' }}>
+        "{notes}"
+      </Text>
+    </div>
+  );
+};
+
 export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) => {
   const title = activity.title ?? 'Call Recording';
   const duration = Number(activity.duration ?? 0);
@@ -60,6 +71,8 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
           />
         </div>
       )}
+
+      <ActivityNotes notes={activity.description ?? activity.notes} />
     </div>
   );
 };
@@ -76,6 +89,7 @@ export const ManualCard: React.FC<{ activity: Activity; cfg: FollowupConfig }> =
       <Text weight="medium" className="text-gray-500 mt-0.5" style={{ fontSize: '12px' }}>
         By {user?.userName ?? 'test organization'}
       </Text>
+      <ActivityNotes notes={activity.description ?? activity.notes} />
     </div>
   );
 };
@@ -94,6 +108,7 @@ export const StatusCard: React.FC<{ activity: Activity; cfg: StatusConfig }> = (
       <Text weight="medium" className="text-gray-500 mt-0.5" style={{ fontSize: '12px' }}>
         By {user?.userName ?? 'test organization'}
       </Text>
+      <ActivityNotes notes={activity.description ?? activity.notes} />
     </div>
   );
 };

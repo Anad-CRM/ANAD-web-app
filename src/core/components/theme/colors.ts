@@ -21,7 +21,7 @@ export const COLORS = {
   figma_sphere_dark: "#7AA4DD",
 
   info: "#3B82F6",
-  bg: "#F7F8FA",
+  c: "#F7F8FA",
   surface: "#FFFFFF",
   border: "#D6E4F0",
   text: "#0D1B3E",
