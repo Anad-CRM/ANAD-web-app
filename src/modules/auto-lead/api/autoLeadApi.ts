@@ -85,17 +85,16 @@ export const toggleGlobalAutoAssign = async (status: boolean, adIds: string[], o
 export const toggleGlobalAttendanceRequirement = async (status: boolean, orgId?: number) => {
    const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
-   return api.post(API_ENDPOINTS.AUTO_LEAD.TOGGLE_ATTENDANCE, { organizationId: org, status: status });
+   return api.post(API_ENDPOINTS.AUTO_LEAD.TOGGLE_ATTENDANCE, { organizationId: org, attendanceRequired: status });
 };
 
-// ─── Team-Based APIs ─────────────────────────────────────────────────────────
 
 export const getTeamAutoAssignStatus = async (teamId: string) => {
    try {
       const res = await api.get(API_ENDPOINTS.AUTO_LEAD.TEAM_STATUS(teamId));
-      const ads = res.data?.data?.ads || [];
-      const selectedAdIds: string[] = ads.filter((ad: Record<string, unknown>) => ad.autoAssignLeads === true).map((ad: Record<string, unknown>) => ad.adId);
-      return { enabled: res.data?.data?.teamAutoAssign ?? false, selectedAdIds };
+      const ads = res.data?.data?.allAds || [];
+      const selectedAdIds: string[] = ads.filter((ad: Record<string, unknown>) => ad.teamAutoAssign === true).map((ad: Record<string, unknown>) => ad.adId);
+      return { enabled: res.data?.data?.team?.autoAssignLeads ?? false, selectedAdIds };
    } catch {
       return { enabled: false, selectedAdIds: [] };
    }
@@ -104,15 +103,14 @@ export const getTeamAutoAssignStatus = async (teamId: string) => {
 export const updateTeamAds = async (teamId: string, adIds: string[], orgId?: number) => {
    const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
-   return api.post(API_ENDPOINTS.AUTO_LEAD.TEAM_UPDATE_ADS, {
+   return api.post(API_ENDPOINTS.AUTO_LEAD.TEAM_TOGGLE, {
       teamId,
-      organizationId: org,
+      organizationID: org,
       autoAssign: adIds.length > 0,
       adIds,
    });
 };
 
-// ─── Manager-Based APIs ───────────────────────────────────────────────────────
 
 export const toggleManagerAutoAssign = async (status: boolean, orgId?: number) => {
    const user = getUser<{ organizationId?: number }>();
@@ -123,8 +121,8 @@ export const toggleManagerAutoAssign = async (status: boolean, orgId?: number) =
 export const getManagerAdsStatus = async (managerId: string) => {
    try {
       const res = await api.get(API_ENDPOINTS.AUTO_LEAD.MANAGER_ADS_STATUS(managerId));
-      const ads = res.data?.data?.ads || [];
-      const selectedAdIds: string[] = ads.filter((ad: Record<string, unknown>) => ad.autoAssignLeads === true).map((ad: Record<string, unknown>) => ad.adId);
+      const ads = res.data?.data?.allAds || [];
+      const selectedAdIds: string[] = ads.filter((ad: Record<string, unknown>) => ad.managerAutoAssign === true).map((ad: Record<string, unknown>) => ad.adId);
       return { selectedAdIds };
    } catch {
       return { selectedAdIds: [] };
@@ -134,12 +132,34 @@ export const getManagerAdsStatus = async (managerId: string) => {
 export const updateManagerAds = async (managerId: string, adIds: string[], orgId?: number) => {
    const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
-   return api.post(API_ENDPOINTS.AUTO_LEAD.MANAGER_UPDATE_ADS, {
-      managerId,
-      organizationId: org,
-      autoAssign: adIds.length > 0,
-      adIds,
-   });
+
+   const current = await getManagerAdsStatus(managerId);
+   const currentIds = new Set(current.selectedAdIds);
+   const newIds = new Set(adIds);
+
+   const toAdd = adIds.filter(id => !currentIds.has(id));
+   const toRemove = current.selectedAdIds.filter(id => !newIds.has(id));
+
+   const promises: Promise<unknown>[] = [];
+   if (toAdd.length > 0) {
+      promises.push(api.post(API_ENDPOINTS.AUTO_LEAD.MANAGER_UPDATE_ADS, {
+         managerId,
+         adIds: toAdd,
+         action: 'add',
+      }));
+   }
+   if (toRemove.length > 0) {
+      promises.push(api.post(API_ENDPOINTS.AUTO_LEAD.MANAGER_UPDATE_ADS, {
+         managerId,
+         adIds: toRemove,
+         action: 'remove',
+      }));
+   }
+
+   if (promises.length > 0) {
+      return Promise.all(promises);
+   }
+   return Promise.resolve();
 };
 
 // ─── Lists ────────────────────────────────────────────────────────────────────
@@ -148,8 +168,9 @@ export const getManagersList = async (orgId?: number): Promise<StaffMember[]> =>
    try {
       const user = getUser<{ organizationId?: number }>();
       const org = orgId || user?.organizationId;
-      const res = await api.post(API_ENDPOINTS.STAFF.GET_BY_ROLE, { organizationId: org, role: 'manager' });
-      return res.data?.data || [];
+      const res = await api.post(API_ENDPOINTS.STAFF.GET_BY_ROLE, { organizationId: org, role: 'Manager' });
+      const data = res.data?.data;
+      return Array.isArray(data) ? data : (data?.managers || []);
    } catch {
       return [];
    }
