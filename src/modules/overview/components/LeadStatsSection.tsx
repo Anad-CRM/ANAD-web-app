@@ -49,8 +49,6 @@ function DonutChart({ segments, total, size = 140, stroke = 22 }: DonutProps) {
   const r = (size - stroke) / 2;
   const cx = size / 2;
   const cy = size / 2;
-  const circumference = 2 * Math.PI * r;
-  const gap = total > 0 ? 1.5 : 0;
 
   let offset = -Math.PI / 2;
   const arcs: { d: string; color: string }[] = [];
@@ -59,11 +57,9 @@ function DonutChart({ segments, total, size = 140, stroke = 22 }: DonutProps) {
   segments.forEach((seg) => {
     const val = Math.max(0, seg.value);
     if (val === 0) return;
-    const fraction = positiveTotal > 0 ? val / positiveTotal : 0;
-    const angle = fraction * 2 * Math.PI;
-    const gapAngle = positiveTotal > 0 ? (gap / circumference) * 2 * Math.PI : 0;
-    const startAngle = offset + gapAngle / 2;
-    const endAngle = offset + angle - gapAngle / 2;
+    const angle = (val / positiveTotal) * 2 * Math.PI;
+    const startAngle = offset;
+    const endAngle = offset + angle;
     const x1 = cx + r * Math.cos(startAngle);
     const y1 = cy + r * Math.sin(startAngle);
     const x2 = cx + r * Math.cos(endAngle);
