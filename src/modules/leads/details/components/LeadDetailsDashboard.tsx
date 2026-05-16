@@ -58,13 +58,11 @@ export const LeadDetailsDashboard: React.FC = () => {
         const userIdForFollowups = (leadData as unknown as { userId?: string })?.userId ?? '';
 
         // Step 3: Fetch activities, followups, and WhatsApp messages in parallel
-        const source = (leadData.source || (leadData.ad as any)?.platform || '').toLowerCase();
-        const isWhatsApp = source === 'whatsapp';
 
         const [activitiesData, followupsData, whatsappData] = await Promise.all([
           activityService.fetchLeadActivities(leadId, loggedInUserId),
           leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
-          isWhatsApp ? leadsApi.fetchWhatsAppMessages(leadId) : Promise.resolve([]),
+          leadsApi.fetchWhatsAppMessages(leadId),
         ]);
 
         setActivities(activitiesData || []);
@@ -119,7 +117,7 @@ export const LeadDetailsDashboard: React.FC = () => {
             <div className="flex flex-col gap-6 w-full lg:w-[60%] flex-1">
               <LeadSummaryCard lead={lead} onRefresh={loadData} />
 
-              <WhatsAppMessagesCard messages={whatsappMessages} leadId={leadId} />
+
 
               {/* <FormDetailsCard formData={lead.formData} /> */}
 
@@ -133,6 +131,7 @@ export const LeadDetailsDashboard: React.FC = () => {
             {/* Right Column 40% */}
             <div className="w-full lg:w-[40%] flex-shrink-0 gap-6 sticky top-4 flex flex-col">
               <FormDetailsCard formData={lead.formData} />
+              <WhatsAppMessagesCard messages={whatsappMessages} leadId={leadId} />
               <LeadFollowUpCard
                 followups={followups}
                 leadId={leadId}

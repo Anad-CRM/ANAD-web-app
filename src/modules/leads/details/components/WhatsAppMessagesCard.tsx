@@ -2,7 +2,7 @@ import React from 'react';
 import { MessageCircle, Clock, ChevronRight } from 'lucide-react';
 import { Text } from '@/core/components/ui/Text';
 import { WhatsAppMessage } from '@/modules/leads/api/leadsApi';
-
+import { Whatsapp } from '@thesvg/react';
 interface Props {
   messages: WhatsAppMessage[];
   leadId: string;
@@ -10,17 +10,16 @@ interface Props {
 
 export const WhatsAppMessagesCard: React.FC<Props> = ({ messages }) => {
   if (messages.length === 0) return null;
-
   // Show only latest 3 messages
   const displayMessages = messages.slice(0, 3);
   const hasMore = messages.length > 3;
 
   return (
-    <div className="bg-white rounded-[32px] px-6 py-6 shadow-sm border border-black/5 mt-6">
+    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col relative h-fit">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-[#E8F5E9] flex items-center justify-center">
-            <MessageCircle size={18} className="text-[#4CAF50]" />
+            <Whatsapp width={18} height={18} className="text-[#4CAF50]" />
           </div>
           <Text weight="bold" className="text-slate-800" style={{ fontSize: '18px' }}>
             WhatsApp Messages

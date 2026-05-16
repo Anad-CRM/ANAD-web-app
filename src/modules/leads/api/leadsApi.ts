@@ -11,7 +11,7 @@ export interface FetchLeadsParams {
   userId?: string | null;
   staffId?: string | string[] | null;
   teamId?: string | string[] | null;
-  filter?: string; 
+  filter?: string;
   startDate?: string;
   endDate?: string;
   sortByDate?: "latest" | "oldest";
@@ -191,17 +191,18 @@ export const leadsApi = {
     if (!userData?.organizationId || !userData?.id) return [];
 
     try {
-      const response = await api.get("/whatsapp/getWhatsAppMessages", {
-        params: {
+      const response = await api.post("/whatsapp/getWhatsAppMessages",
+        {
           userId: userData.id,
           organizationId: userData.organizationId,
           leadId,
         },
-      });
+      );
 
       if (response.data?.success === true && Array.isArray(response.data.data)) {
-        // Return messages from the first lead data matching (similar to mobile logic)
-        return response.data.data[0]?.messages || [];
+        // Find the specific lead data matching our leadId
+        const matchingLead = response.data.data.find((item: any) => item.leadId === leadId);
+        return matchingLead?.messages || response.data.data[0]?.messages || [];
       }
       return [];
     } catch (error) {
