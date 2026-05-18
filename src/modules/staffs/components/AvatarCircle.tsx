@@ -9,14 +9,15 @@ import { API_BASE_URL } from "@/core/api/axios";
 interface AvatarCircleProps {
   avatar?: string;
   size?: number;
+  backgroundColor?: string;
 }
 
-export function AvatarCircle({ avatar, size = 100 }: AvatarCircleProps) {
+export function AvatarCircle({ avatar, size = 100, backgroundColor }: AvatarCircleProps) {
   const isValidAvatar = avatar && avatar !== "null" && avatar !== "undefined";
 
   return (
     <div
-      style={{ width: size, height: size, backgroundColor: COLORS.primaryLight }}
+      style={{ width: size, height: size, backgroundColor: backgroundColor ?? COLORS.primaryLight }}
       className="rounded-full flex-shrink-0 overflow-hidden relative shadow-inner flex items-center justify-center"
     >
       <div className="absolute inset-0 flex items-center justify-center text-gray-400">

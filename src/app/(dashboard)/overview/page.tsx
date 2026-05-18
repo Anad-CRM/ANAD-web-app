@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from "react";
 import LeadStatsSection from "@/modules/overview/components/LeadStatsSection";
 import EodReportsSection from "@/modules/overview/components/EodReportsSection";
-import { getLeadSummary, getEodReports } from "@/modules/overview/api/overviewApi";
-import { LeadCountsData, StaffEodSummary } from "@/modules/overview/types";
+import { getLeadSummary, getEodReports, getTopPerformers } from "@/modules/overview/api/overviewApi";
+import { LeadCountsData, StaffEodSummary, TopPerformersResponse } from "@/modules/overview/types";
+import { LeaderboardModal } from "@/modules/overview/components/LeaderboardModal";
 
 const NAV_ROLES = [
   {
@@ -57,6 +58,9 @@ export default function OverviewPage() {
   const [staffId, setStaffId] = useState<string | undefined>();
   const [leadSummary, setLeadSummary] = useState<LeadCountsData | null>(null);
   const [eodData, setEodData] = useState<StaffEodSummary[]>([]);
+  const [topPerformers, setTopPerformers] = useState<TopPerformersResponse | null>(null);
+  const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
+  const [selectedLeaderboard, setSelectedLeaderboard] = useState<{title: string, data: any[]}>({title: "", data: []});
 
   useEffect(() => {
     const loadOverviewData = async () => {
@@ -64,6 +68,9 @@ export default function OverviewPage() {
       if (summary) setLeadSummary(summary);
       const eods = await getEodReports();
       if (eods) setEodData(eods);
+
+      const performers = await getTopPerformers();
+      if (performers) setTopPerformers(performers);
     };
     loadOverviewData();
   }, [filter, customStartDate, customEndDate, staffId]);
@@ -109,35 +116,66 @@ export default function OverviewPage() {
 
       {/* ── Performer cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {PERFORMER_CARDS.map((card, idx) => (
-          <div
-            key={idx}
-            className="relative overflow-hidden rounded-2xl p-5 flex items-center gap-5"
-            style={{
-              background: idx === 0
-                ? "linear-gradient(135deg, #1C3A76 0%, #1E56A0 100%)"
-                : "linear-gradient(135deg, #0f7368 0%, #128C7E 100%)",
-            }}
-          >
-            {/* BG decorative circle */}
-            <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-10 bg-white" />
-            <div className="absolute -right-2 bottom-0 w-16 h-16 rounded-full opacity-10 bg-white" />
+        {PERFORMER_CARDS.map((card, idx) => {
+          const performerData = idx === 0 ? topPerformers?.performerOfMonth?.performer : topPerformers?.performerOfWeek?.performer;
 
-            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl flex-shrink-0 shadow-inner">
-              {card.emoji}
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-0.5">{card.period}</span>
-              <h3 className="text-[15px] font-bold text-white truncate mb-1">{card.title}</h3>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                </div>
-                <span className="text-[13px] text-white/70 font-medium">No data yet</span>
+          return (
+            <div
+              key={idx}
+              className="relative overflow-hidden rounded-2xl p-5 flex items-center gap-5 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group/card"
+              onClick={() => {
+                const leaderboard = idx === 0 ? topPerformers?.performerOfMonth?.leaderboard : topPerformers?.performerOfWeek?.leaderboard;
+                if (leaderboard && leaderboard.length > 0) {
+                  setSelectedLeaderboard({
+                    title: idx === 0 ? "Monthly Leaderboard" : "Weekly Leaderboard",
+                    data: leaderboard
+                  });
+                  setLeaderboardModalOpen(true);
+                }
+              }}
+              style={{
+                background: idx === 0
+                  ? "linear-gradient(135deg, #1C3A76 0%, #1E56A0 100%)"
+                  : "linear-gradient(135deg, #0f7368 0%, #128C7E 100%)",
+              }}
+            >
+              {/* BG decorative circle */}
+              <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full opacity-10 bg-white" />
+              <div className="absolute -right-2 bottom-0 w-16 h-16 rounded-full opacity-10 bg-white" />
+
+              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl flex-shrink-0 shadow-inner overflow-hidden">
+                {/* {performerData?.avatar ?
+               (
+                <img src={performerData.avatar} alt={performerData.userName} className="w-full h-full object-cover" />
+              ) : (
+                card.emoji
+              )} */}
+
+
+                {card.emoji}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-0.5">{card.period}</span>
+                <h3 className="text-[15px] font-bold text-white truncate mb-1">{card.title}</h3>
+                {performerData ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] text-white/90 font-medium truncate">{performerData.userName}</span>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/20 text-white flex-shrink-0">
+                      {performerData.closedCount} closed
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    </div>
+                    <span className="text-[13px] text-white/70 font-medium">No data yet</span>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* ── Lead Stats ── */}
@@ -157,6 +195,14 @@ export default function OverviewPage() {
 
       {/* ── EOD Reports ── */}
       <EodReportsSection eodData={eodData} />
+      
+      {/* ── Leaderboard Modal ── */}
+      <LeaderboardModal 
+        open={leaderboardModalOpen} 
+        title={selectedLeaderboard.title} 
+        leaderboard={selectedLeaderboard.data} 
+        onClose={() => setLeaderboardModalOpen(false)} 
+      />
     </div>
   );
 }

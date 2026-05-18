@@ -252,7 +252,7 @@ export default function AdsAnalyticsPage() {
             data={{ totalSpend: "-", leads: globalMetrics.totalAssigned, avgCtr: "0%" }}
             teamMembers={teamMembers}
           />
-
+          
         </div>
       )}
     </div>
