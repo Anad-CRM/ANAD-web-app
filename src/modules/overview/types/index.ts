@@ -85,3 +85,27 @@ export interface StaffEodSummary {
   eods: EodRecord[];
   submitted?: boolean;
 }
+
+export interface Performer {
+  id: string;
+  userName: string;
+  email: string;
+  avatar: string | null;
+  closedCount: number;
+}
+
+export interface PerformerPeriod {
+  start: string;
+  end: string;
+}
+
+export interface PerformerData {
+  period: PerformerPeriod;
+  performer: Performer | null;
+  leaderboard: Performer[];
+}
+
+export interface TopPerformersResponse {
+  performerOfMonth: PerformerData;
+  performerOfWeek: PerformerData;
+}

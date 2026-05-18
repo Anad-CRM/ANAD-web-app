@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "@/core/api/axios";
 import { API_ENDPOINTS } from "@/core/api/api";
-import { LeadCountsData, StaffEodSummary } from "../types";
+import { LeadCountsData, StaffEodSummary, TopPerformersResponse } from "../types";
 import { getUser } from "@/core/utils/auth";
 
 export const getLeadSummary = async (params?: {
@@ -82,3 +82,23 @@ export const getEodReports = async (params?: Record<string, Record<string, unkno
   }
 };
 
+export const getTopPerformers = async (params?: { teamId?: string }): Promise<TopPerformersResponse | null> => {
+  try {
+    const user = getUser<{ id?: string; organizationId?: string; role?: string; organization?: { id?: string } }>();
+    const orgId = user?.organization?.id || user?.organizationId;
+
+    const queryParams: Record<string, unknown> = {
+      organizationId: orgId,
+    };
+
+    if (params?.teamId) queryParams.teamId = params.teamId;
+
+    const response = await api.post(API_ENDPOINTS.DASHBOARD.GET_TOP_PERFORMERS, queryParams);
+
+    if (response.data?.status !== "success") return null;
+    return response.data.data as TopPerformersResponse;
+  } catch (error) {
+    console.error("Failed to fetch top performers", error);
+    return null;
+  }
+};

@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
     EOD: "/dashboard/eod",
     GET_LEAD_COUNTS: "/lead/getLeadCounts",
     GET_FILTERED_LEAD_COUNT: "/lead/getFilteredLeadCount",
+    GET_TOP_PERFORMERS: "/lead/getTopPerformers",
     GET_AUTO_EOD: "/eod/autoSummary",
     SET_EOD_MODE: "/eod/setEodMode",
     EOD_FIELDS: "/eod/fields",
