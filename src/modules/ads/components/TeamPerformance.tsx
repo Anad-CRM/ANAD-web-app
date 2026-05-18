@@ -37,7 +37,6 @@ export const TeamPerformance = ({ teamMembers = [] }: TeamPerformanceProps) => {
 
   return (
     <div className="w-full flex flex-col gap-4 mb-4">
-
       {/* Section header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

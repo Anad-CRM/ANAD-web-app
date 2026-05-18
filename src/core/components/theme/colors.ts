@@ -11,7 +11,8 @@ export const COLORS = {
   dark_orange: "#CA6702",
   brown: "#BB3E03",
   danger: "#9B2226",
-  
+  bg: "#FFFFFF",
+
   figma_input_bg: "#FFFFFF",
   figma_btn_text: "#1E56A0",
   figma_bg_from: "#DDE9F8",
@@ -21,7 +22,7 @@ export const COLORS = {
   figma_sphere_dark: "#7AA4DD",
 
   info: "#3B82F6",
-  bg: "#F7F8FA",
+  c: "#F7F8FA",
   surface: "#FFFFFF",
   border: "#D6E4F0",
   text: "#0D1B3E",
@@ -32,14 +33,14 @@ export const COLORS = {
   light_yellow: "#E9D8A6",
   grey: "#EFEFEF",
 
-  platform_facebook:  "#1877F2",
+  platform_facebook: "#1877F2",
   platform_instagram: "#E1306C",
-  platform_google:    "#4285F4",
-  platform_youtube:   "#FF0000",
-  platform_tiktok:    "#010101",
-  platform_twitter:   "#1DA1F2",
-  platform_linkedin:  "#0A66C2",
-  platform_snapchat:  "#FFFC00",
+  platform_google: "#4285F4",
+  platform_youtube: "#FF0000",
+  platform_tiktok: "#010101",
+  platform_twitter: "#1DA1F2",
+  platform_linkedin: "#0A66C2",
+  platform_snapchat: "#FFFC00",
   platform_pinterest: "#E60023",
 };
 

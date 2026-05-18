@@ -63,12 +63,12 @@ function StatusModal({ currentStatus, onSelect, onClose }: { currentStatus: Lead
   const options = STATUS_TRANSITIONS[currentStatus] ?? DEFAULT_TRANSITIONS;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200"
       style={{ backgroundColor: "rgba(13,27,62,0.6)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
-      <div 
+      <div
         className="w-full max-w-[340px] rounded-2xl p-5 shadow-2xl animate-in zoom-in-95 duration-200"
         style={{ backgroundColor: COLORS.surface }}
         onClick={e => e.stopPropagation()}
@@ -81,7 +81,7 @@ function StatusModal({ currentStatus, onSelect, onClose }: { currentStatus: Lead
             <X size={16} style={{ color: COLORS.subtle }} />
           </button>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-3 max-h-[55vh] overflow-y-auto custom-scrollbar pr-1">
           {options.map(opt => {
             const color = STATUS_COLORS[opt] ?? COLORS.muted;
@@ -136,7 +136,7 @@ export function LeadCard({
   const [confirm, setConfirm] = useState<{
     title: string; message: string; onConfirm: () => void;
   } | null>(null);
-  
+
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
   const name = safeText(lead.userName ?? lead.name, "Unknown Lead");
@@ -215,23 +215,18 @@ export function LeadCard({
 
         {/* ── Avatar ── */}
         <div className="mr-4 md:mr-5 flex-shrink-0 relative z-10">
-          {assignedUser?.avatar ? (
-            <div className="ring-2 ring-white/20 rounded-full">
-              <AvatarCircle avatar={assignedUser.avatar} size={64} />
-            </div>
-          ) : (
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-[22px] font-bold shadow-inner"
-              style={{
-                background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
-                color: "rgba(255,255,255,0.9)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                backdropFilter: "blur(5px)"
-              }}
-            >
-              {getInitials(name)}
-            </div>
-          )}
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center text-[22px] font-bold shadow-inner"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
+              color: "rgba(255,255,255,0.9)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              backdropFilter: "blur(5px)"
+            }}
+          >
+            {getInitials(name)}
+          </div>
+
         </div>
 
         {/* ── Content columns ── */}
@@ -368,10 +363,10 @@ export function LeadCard({
 
       {/* ── Status Modal ── */}
       {isStatusModalOpen && (
-        <StatusModal 
-          currentStatus={lead.status} 
-          onSelect={handleStatusChange} 
-          onClose={() => setIsStatusModalOpen(false)} 
+        <StatusModal
+          currentStatus={lead.status}
+          onSelect={handleStatusChange}
+          onClose={() => setIsStatusModalOpen(false)}
         />
       )}
 
