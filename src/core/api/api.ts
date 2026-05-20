@@ -55,6 +55,9 @@ export const API_ENDPOINTS = {
     TEAM_TOGGLE: "/autoAssign/teams/toggle-auto-assign",
     TEAM_STATUS: (teamId: string) => `/autoAssign/teams/auto-assign-status/${teamId}`,
     TEAM_UPDATE_ADS: "/autoAssign/teams/update-ads",
+    // Strength-based team auto assign APIs
+    TEAM_STRENGTH_TOGGLE: "/autoAssign/teams/toggle-strength-auto-assign",
+    TEAM_STRENGTH_STATUS: (orgId: string | number) => `/autoAssign/teams/strength-auto-assign-status/${orgId}`,
     // Manager-based
     MANAGER_TOGGLE: "/autoAssign/managers/toggle-auto-assign",
     MANAGER_STATUS: (orgId: string | number) => `/autoAssign/managers/auto-assign-status/${orgId}`,
