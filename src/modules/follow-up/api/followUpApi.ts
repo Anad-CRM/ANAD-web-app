@@ -16,11 +16,7 @@ interface GetFollowUpsParams {
 export const getFollowUps = async (
   params: GetFollowUpsParams
 ): Promise<{ data: FollowUp[]; meta: Record<string, unknown> }> => {
-  const response = await api.request({
-    url: API_ENDPOINTS.FOLLOW_UP.GET_ALL,
-    method: "GET",
-    data: params,
-  });
+  const response = await api.post(API_ENDPOINTS.FOLLOW_UP.GET_ALL, params || {});
   return response.data;
 };
 
@@ -32,11 +28,7 @@ export const createFollowup = async (payload: { leadId: string; userId: string; 
 export const getFollowUpSummary = async (
   params?: GetFollowUpsParams
 ): Promise<{ data: FollowUpSummary }> => {
-  const response = await api.request({
-    url: API_ENDPOINTS.FOLLOW_UP.SUMMARY,
-    method: "GET",
-    data: params || {},
-  });
+  const response = await api.post(API_ENDPOINTS.FOLLOW_UP.SUMMARY, params || {});
   return response.data;
 };
 
