@@ -2,9 +2,12 @@
 
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import Link from "next/link";
+import { Menu } from "lucide-react";
+import { useSidebar } from "@/core/contexts/SidebarContext";
 
 export default function Topbar() {
   const { user, logout } = useAuth();
+  const { toggleSidebar } = useSidebar();
 
   const hour = new Date().getHours();
   let greeting = "Good evening";
@@ -12,10 +15,18 @@ export default function Topbar() {
   else if (hour < 18) greeting = "Good afternoon";
 
   return (
-    <header className="flex items-center justify-between px-8 h-20 bg-white">
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full border border-black flex-shrink-0">
+    <header className="flex items-center justify-between px-4 sm:px-6 md:px-8 h-16 md:h-20 bg-white">
+      <div className="flex items-center gap-3 sm:gap-6">
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={toggleSidebar}
+          className="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-[#233A78] hover:bg-[#d0dced] transition-colors"
+        >
+          <Menu size={20} strokeWidth={2} />
+        </button>
+
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full border border-black flex-shrink-0">
             <svg
               width="24"
               height="24"
@@ -33,11 +44,11 @@ export default function Topbar() {
             </svg>
           </div>
           <div className="flex flex-col justify-center">
-            <span className="text-[13px] text-gray-500 font-medium leading-none mb-1.5">{greeting}</span>
+            <span className="text-[11px] sm:text-[13px] text-gray-500 font-medium leading-none mb-1 sm:mb-1.5">{greeting}</span>
             <div className="flex items-center gap-2">
-              <h1 className="text-[24px] font-bold text-black tracking-tight leading-none">{user?.userName}</h1>
+              <h1 className="text-[18px] sm:text-[20px] md:text-[24px] font-bold text-black tracking-tight leading-none">{user?.userName}</h1>
               {user?.role && (
-                <span className="px-2 py-0.5 bg-[#E2E8F0] text-[#1E3A8A] text-[12px] font-bold rounded-full leading-tight">
+                <span className="hidden sm:inline-block px-2 py-0.5 bg-[#E2E8F0] text-[#1E3A8A] text-[12px] font-bold rounded-full leading-tight">
                   {user.role}
                 </span>
               )}
@@ -46,8 +57,8 @@ export default function Topbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-black">
+      <div className="flex items-center gap-2 sm:gap-4">
+        <button className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-[#E2E8F0] text-black">
           <svg
             width="18"
             height="18"
@@ -97,18 +108,18 @@ export default function Topbar() {
           </svg>
         </Link>
 
-        <div className="w-[1px] h-8 bg-gray-200 mx-1"></div>
+        <div className="hidden sm:block w-[1px] h-8 bg-gray-200 mx-1"></div>
 
         <button 
           onClick={logout}
-          className="flex items-center justify-center gap-2 px-4 h-10 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium text-[14px]"
+          className="flex items-center justify-center gap-2 px-3 sm:px-4 h-10 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium text-[14px]"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          Logout
+          <span className="hidden sm:inline">Logout</span>
         </button>
       </div>
     </header>

@@ -81,7 +81,7 @@ export default function OverviewPage() {
       {/* ── Page header ── */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-[26px] sm:text-[30px] font-extrabold text-[#1E293B] leading-tight tracking-tight">
+          <h1 className="text-[22px] sm:text-[26px] md:text-[30px] font-extrabold text-[#1E293B] leading-tight tracking-tight">
             Team Overview
           </h1>
           <p className="text-[13px] text-slate-400 mt-0.5">Real-time performance snapshot</p>
