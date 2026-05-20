@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import { NotificationService } from "../services/notificationService";
 
@@ -21,6 +21,7 @@ export default function NotificationList() {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const limit = 20;
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const fetchNotifications = useCallback(async (isRefresh = false) => {
     if (!user?.id) return;
@@ -70,6 +71,28 @@ export default function NotificationList() {
       fetchNotifications(true);
     }
   }, [user?.id, fetchNotifications]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingMore && !isLoading) {
+          fetchNotifications();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [fetchNotifications, hasMore, isFetchingMore, isLoading]);
 
   const getIconProps = (title: string) => {
     const t = title.toLowerCase();
@@ -128,13 +151,20 @@ export default function NotificationList() {
         <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
         <button 
           onClick={() => fetchNotifications(true)}
-          className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100"
+          disabled={isLoading}
+          className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 flex items-center gap-2 disabled:opacity-70"
         >
+          {isLoading && notifications.length > 0 && (
+            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+          )}
           Refresh Data
         </button>
       </div>
 
-      {isLoading ? (
+      {isLoading && notifications.length === 0 ? (
         <div className="space-y-4">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex gap-4 animate-pulse">
@@ -191,24 +221,16 @@ export default function NotificationList() {
           })}
           
           {hasMore && (
-            <div className="py-6 flex justify-center">
-              <button
-                onClick={() => fetchNotifications()}
-                disabled={isFetchingMore}
-                className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-blue-600 font-medium py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
-              >
-                {isFetchingMore ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Loading...
-                  </>
-                ) : (
-                  "Load More"
-                )}
-              </button>
+            <div ref={loadMoreRef} className="py-6 flex justify-center h-24 items-center">
+              {isFetchingMore && (
+                <div className="bg-white border border-gray-200 text-gray-700 font-medium py-3 px-8 rounded-xl shadow-sm flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-gray-500" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Loading...</span>
+                </div>
+              )}
             </div>
           )}
         </div>
