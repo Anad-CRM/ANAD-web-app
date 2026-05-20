@@ -67,7 +67,7 @@ export default function RightPanel({
   }
 
   return (
-    <div className="w-[380px] shrink-0 bg-[#C8D6E5]/40 rounded-3xl p-6 flex flex-col h-full min-h-0">
+    <div className="w-[380px] shrink-0 bg-[#C8D6E5]/40 rounded-3xl p-6 flex flex-col h-full min-h-0 overflow-y-auto custom-scrollbar">
       <div className="shrink-0">
         <div className="flex items-center gap-2 mb-6 bg-white/40 rounded-full p-1 border border-white shrink-0">
         <button
@@ -124,7 +124,7 @@ export default function RightPanel({
       
       </div>
 
-      <div className="flex flex-col gap-3 mt-6 overflow-y-auto custom-scrollbar pr-2 flex-1 min-h-0">
+      <div className="flex flex-col gap-3 mt-6 pr-2">
         {missedFollowUps.map((item) => (
           <div key={item.id} className="bg-[#1C2C5E] rounded-3xl p-4 text-white shadow-lg relative shrink-0">
             <div className="flex justify-between items-start mb-4">

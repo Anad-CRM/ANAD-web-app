@@ -1,32 +1,21 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
-import StatsSection from "@/modules/follow-up/components/StatsSection";
-import FollowUpList from "@/modules/follow-up/components/FollowUpList";
+import { useSearchParams, useRouter } from "next/navigation";
+import DetailedFollowUpList from "@/modules/follow-up/components/DetailedFollowUpList";
 import RightPanel from "@/modules/follow-up/components/RightPanel";
-import {
-  getFollowUps,
-  getFollowUpSummary,
-  completeFollowUp,
-} from "@/modules/follow-up/api/followUpApi";
-import { FollowUp, FollowUpSummary } from "@/modules/follow-up/types";
+import { getFollowUps, completeFollowUp } from "@/modules/follow-up/api/followUpApi";
+import { FollowUp } from "@/modules/follow-up/types";
 
-export default function FollowUpPage() {
+export default function AllFollowUpsPage() {
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const [summary, setSummary] = useState<FollowUpSummary>({
-    total: 0,
-    completed: 0,
-    missed: 0,
-    pending: 0,
-    rescheduled: 0,
-    updatedToMissed: 0,
-  });
+
+  const [activeTab, setActiveTab] = useState(searchParams.get("status")?.toLowerCase() || "total");
+  const [selectedDate, setSelectedDate] = useState<string | null>(searchParams.get("date"));
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [missedFollowUps, setMissedFollowUps] = useState<FollowUp[]>([]);
-  const [activeTab, setActiveTab] = useState("total");
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -44,11 +33,6 @@ export default function FollowUpPage() {
         setIsFetchingMore(true);
       }
 
-      const summaryData = await getFollowUpSummary();
-      if (summaryData?.data) {
-        setSummary(summaryData.data);
-      }
-
       const statusMap: Record<string, string | undefined> = {
         total: undefined,
         done: "COMPLETED",
@@ -61,15 +45,15 @@ export default function FollowUpPage() {
         params.date = new Date().toISOString().split('T')[0];
         delete params.status;
       }
-
+      
       if (selectedDate) {
         params.date = selectedDate;
       }
 
-      const followUpData = await getFollowUps({
-        ...params,
-        limit,
-        page: isRefresh ? 1 : page
+      const followUpData = await getFollowUps({ 
+        ...params, 
+        limit, 
+        page: isRefresh ? 1 : page 
       });
       const newFollowUps = followUpData?.data || [];
 
@@ -137,10 +121,6 @@ export default function FollowUpPage() {
     }
   };
 
-  const handleTabChange = (tab: string) => {
-    router.push(`/follow-up/all?status=${tab}`);
-  };
-
   const handleDateSelect = (date: string | null) => {
     setSelectedDate(date);
     if (activeTab === "today") {
@@ -148,26 +128,39 @@ export default function FollowUpPage() {
     }
   };
 
-  return (
-    <div className="flex flex-col gap-[22px] overflow-x-hidden">
-      <StatsSection
-        summary={summary}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
+  const getLabel = () => {
+     if (selectedDate) return `Date: ${selectedDate}`;
+     if (activeTab === "total") return "All List";
+     return activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+  };
 
-      <div className="flex gap-8 mt-5 h-[calc(100vh-240px)] min-h-[500px]">
+  return (
+    <div className="flex flex-col gap-[22px] overflow-x-hidden pt-2">
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={() => router.back()}
+          className="p-2.5 rounded-full bg-[#E6F0F9] text-[#233A78] hover:bg-[#233A78] hover:text-white transition-all shadow-sm"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div>
+           <h1 className="text-[24px] font-bold text-[#1E293B] leading-tight">All Follow-Ups</h1>
+           <p className="text-[#233A78] text-[14px] font-semibold tracking-wide">Showing: {getLabel()}</p>
+        </div>
+      </div>
+
+      <div className="flex gap-8 mt-5 h-[calc(100vh-170px)] min-h-[500px]">
         <div className="flex-1 flex flex-col pr-8 border-r border-[#A5BCD1]/50 h-full min-h-0">
           <div className="flex justify-between items-center mb-6 shrink-0">
             <h2 className="text-[20px] font-bold text-[#1E293B]">
-              Total Follow-Up
+              List View
             </h2>
-            <span className="text-[14px] text-gray-700 font-medium">
-              {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ',' + new Date().toLocaleDateString('en-GB', { weekday: 'long' })}
+            <span className="text-[14px] text-gray-700 font-medium bg-gray-100 rounded-full px-4 py-1">
+              {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' + new Date().toLocaleDateString('en-GB', { weekday: 'long' })}
             </span>
           </div>
           <div className="pr-2 flex-1 overflow-y-auto custom-scrollbar min-h-0">
-            <FollowUpList
+            <DetailedFollowUpList
               followUps={followUps}
               onReschedule={handleReschedule}
               onComplete={handleComplete}
