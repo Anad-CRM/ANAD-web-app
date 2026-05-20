@@ -95,7 +95,7 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0"
@@ -105,12 +105,16 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-sm rounded-[24px] overflow-hidden flex flex-col pt-2"
+        className="relative w-full max-w-sm rounded-t-[24px] sm:rounded-[24px] overflow-hidden flex flex-col pt-2"
         style={{
           backgroundColor: "#fff",
           boxShadow: "0 -8px 40px rgba(13,27,62,0.18)",
+          animation: "slideUp 0.25s cubic-bezier(.4,0,.2,1)"
         }}
+        onClick={(e) => e.stopPropagation()}
       >
+        <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-1 mt-2 sm:hidden" />
+        
         {/* Header */}
         <div className="flex items-center justify-between px-7 pt-5 pb-3">
           <Text as="h3" weight="bold" size="lg" className="text-slate-900 tracking-tight">Create Team</Text>
@@ -123,7 +127,7 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         </div>
 
         {/* Body */}
-        <div className="px-6 py-4 flex flex-col gap-5 overflow-y-auto custom-scrollbar" style={{ maxHeight: "calc(100vh - 200px)" }}>
+        <div className="px-6 py-4 flex flex-col gap-5 overflow-y-auto custom-scrollbar" style={{ maxHeight: "calc(85vh - 120px)" }}>
           {/* Team Name */}
           <div>
             <Text weight="bold" size="custom" className="text-slate-700 mb-2 block" style={{ fontSize: '13px' }}>Team Name *</Text>
@@ -206,6 +210,7 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
           </button>
         </div>
       </div>
+      <style>{`@keyframes slideUp { from { transform:translateY(30px);opacity:0 } to { transform:translateY(0);opacity:1 } }`}</style>
     </div>
   );
 }

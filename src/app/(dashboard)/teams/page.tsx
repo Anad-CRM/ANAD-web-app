@@ -26,17 +26,17 @@ export default function TeamsPage() {
   return (
     <div className="flex flex-col gap-6 min-h-screen pb-20 animate-in fade-in duration-700">
       {/* Header Buttons area */}
-      <div className="flex flex-col sm:flex-row justify-end items-center gap-4 mb-2">
+      <div className="flex flex-col sm:flex-row justify-end items-center gap-3 mb-2 w-full">
         <button 
           onClick={() => setIsCreateTeamOpen(true)}
-          className="flex items-center gap-2.5 h-10 px-5 bg-white/80 border border-slate-200 rounded-[12px] text-slate-700 hover:bg-white shadow-sm transition-all active:scale-95 group font-medium"
+          className="flex items-center justify-center sm:justify-start gap-2.5 h-10 w-full sm:w-auto px-5 bg-white/80 border border-slate-200 rounded-[12px] text-slate-700 hover:bg-white shadow-sm transition-all active:scale-95 group font-medium"
         >
           <Plus size={18} className="text-slate-500 group-hover:rotate-90 transition-transform duration-300" />
           <Text weight="bold" size="xs">Create Team</Text>
         </button>
         <button 
           onClick={() => setIsInviteMemberOpen(true)}
-          className="flex items-center gap-2.5 h-10 px-5 bg-white/80 border border-slate-200 rounded-[12px] text-slate-700 hover:bg-white shadow-sm transition-all active:scale-95 group font-medium"
+          className="flex items-center justify-center sm:justify-start gap-2.5 h-10 w-full sm:w-auto px-5 bg-white/80 border border-slate-200 rounded-[12px] text-slate-700 hover:bg-white shadow-sm transition-all active:scale-95 group font-medium"
         >
           <UserPlus size={18} className="text-slate-500" />
           <Text weight="bold" size="xs">Invite Member</Text>
@@ -44,7 +44,7 @@ export default function TeamsPage() {
       </div>
 
       {/* Top Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 mb-6">
         {TEAM_STATS.map((stat, idx) => (
           <div key={idx} className="bg-white rounded-[24px] p-4 flex items-center gap-5 shadow-sm border border-slate-50">
             <div 

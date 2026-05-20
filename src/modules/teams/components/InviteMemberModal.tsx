@@ -123,7 +123,7 @@ export function InviteMemberModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0"
@@ -133,12 +133,16 @@ export function InviteMemberModal({
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-md rounded-[24px] overflow-hidden flex flex-col pt-2 max-h-[90vh]"
+        className="relative w-full max-w-md rounded-t-[24px] sm:rounded-[24px] overflow-hidden flex flex-col pt-2 max-h-[90vh]"
         style={{
           backgroundColor: "#fff",
           boxShadow: "0 -8px 40px rgba(13,27,62,0.18)",
+          animation: "slideUp 0.25s cubic-bezier(.4,0,.2,1)"
         }}
+        onClick={(e) => e.stopPropagation()}
       >
+        <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-1 mt-2 sm:hidden" />
+
         {/* Header */}
         <div className="flex items-center justify-between px-7 pt-5 pb-3 border-b border-slate-50 bg-slate-50/30">
           <Text as="h3" weight="bold" size="lg" className="text-slate-900 tracking-tight">
@@ -300,6 +304,7 @@ export function InviteMemberModal({
           </button>
         </div>
       </div>
+      <style>{`@keyframes slideUp { from { transform:translateY(30px);opacity:0 } to { transform:translateY(0);opacity:1 } }`}</style>
     </div>
   );
 }
