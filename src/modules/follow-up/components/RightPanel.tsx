@@ -5,10 +5,14 @@ export default function RightPanel({
   missedFollowUps,
   viewMode,
   setViewMode,
+  selectedDate,
+  onSelectDate,
 }: {
   missedFollowUps: FollowUp[];
   viewMode: "calendar" | "list";
   setViewMode: (mode: "calendar" | "list") => void;
+  selectedDate?: string | null;
+  onSelectDate?: (date: string | null) => void;
 }) {
   const formatSafeDate = (dateStr?: string, fallback?: string) => {
     let d = new Date(dateStr || "");
@@ -38,23 +42,34 @@ export default function RightPanel({
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
   
+  const formatLocal = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
   const calendarDays = [];
   for (let i = startDayOfWeek - 1; i >= 0; i--) {
-    calendarDays.push({ day: daysInPrevMonth - i, isCurrentMonth: false, isToday: false });
+    const d = daysInPrevMonth - i;
+    const dateObj = new Date(year, month - 1, d);
+    calendarDays.push({ day: d, isCurrentMonth: false, isToday: false, dateStr: formatLocal(dateObj) });
   }
   for (let i = 1; i <= daysInMonth; i++) {
-    calendarDays.push({ day: i, isCurrentMonth: true, isToday: i === now.getDate() });
+    const dateObj = new Date(year, month, i);
+    calendarDays.push({ day: i, isCurrentMonth: true, isToday: i === now.getDate(), dateStr: formatLocal(dateObj) });
   }
   const totalSlots = calendarDays.length > 35 ? 42 : 35;
   const extra = totalSlots - calendarDays.length;
   for (let i = 1; i <= extra; i++) {
-    calendarDays.push({ day: i, isCurrentMonth: false, isToday: false });
+    const dateObj = new Date(year, month + 1, i);
+    calendarDays.push({ day: i, isCurrentMonth: false, isToday: false, dateStr: formatLocal(dateObj) });
   }
 
   return (
-    <div className="w-[380px] shrink-0 bg-[#C8D6E5]/40 rounded-3xl p-6">
-      <div>
-        <div className="flex items-center gap-2 mb-6 bg-white/40 rounded-full p-1 border border-white">
+    <div className="w-[380px] shrink-0 bg-[#C8D6E5]/40 rounded-3xl p-6 flex flex-col h-full min-h-0">
+      <div className="shrink-0">
+        <div className="flex items-center gap-2 mb-6 bg-white/40 rounded-full p-1 border border-white shrink-0">
         <button
           onClick={() => setViewMode("calendar")}
           className={`flex-1 rounded-full py-2.5 text-[15px] font-semibold flex items-center justify-center gap-2 transition-all ${
@@ -88,15 +103,20 @@ export default function RightPanel({
               <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
               
               {calendarDays.map((item, idx) => (
-                 <div key={idx} className={
-                    item.isCurrentMonth
-                    ? item.isToday 
-                       ? "bg-red-600 text-white rounded-md p-1 aspect-square flex items-center justify-center m-0.5" 
-                       : "bg-[#233A78] text-white rounded-md p-1 aspect-square flex items-center justify-center m-0.5"
-                    : "text-gray-400 aspect-square flex items-center justify-center m-0.5"
-                 }>
+                 <button 
+                    key={idx} 
+                    onClick={() => onSelectDate && onSelectDate(item.dateStr)}
+                    className={
+                      item.dateStr === selectedDate
+                      ? "bg-[#4B73B2] text-white rounded-md p-1 aspect-square flex items-center justify-center m-0.5 border border-[#233A78] shadow-inner"
+                      : item.isCurrentMonth
+                        ? item.isToday 
+                           ? "bg-red-600 text-white rounded-md p-1 aspect-square flex items-center justify-center m-0.5 shadow-sm" 
+                           : "bg-[#233A78] text-white rounded-md p-1 aspect-square flex items-center justify-center m-0.5 hover:bg-[#1a2b5e] cursor-pointer shadow-sm transition-colors"
+                        : "text-gray-400 aspect-square flex items-center justify-center m-0.5 hover:bg-gray-100 cursor-pointer rounded-md transition-colors"
+                    }>
                     {item.day}
-                 </div>
+                 </button>
               ))}
             </div>
           </div>
@@ -104,7 +124,7 @@ export default function RightPanel({
       
       </div>
 
-      <div className={`flex flex-col gap-3 mt-6 overflow-y-auto custom-scrollbar pr-2 ${viewMode === 'calendar' ? 'max-h-[300px]' : 'max-h-[700px]'}`}>
+      <div className="flex flex-col gap-3 mt-6 overflow-y-auto custom-scrollbar pr-2 flex-1 min-h-0">
         {missedFollowUps.map((item) => (
           <div key={item.id} className="bg-[#1C2C5E] rounded-3xl p-4 text-white shadow-lg relative shrink-0">
             <div className="flex justify-between items-start mb-4">
