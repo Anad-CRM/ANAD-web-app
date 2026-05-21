@@ -9,6 +9,7 @@ export function useTeamDetails(teamId: string) {
   const [team, setTeam] = useState<Team | null>(null);
   const [leadCounts, setLeadCounts] = useState<TeamLeadStatusCounts | null>(null);
   const [totalLeads, setTotalLeads] = useState<number>(0);
+  const [unAssignedCount, setUnAssignedCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +45,7 @@ export function useTeamDetails(teamId: string) {
       if (countsResponse.status === "success") {
         setLeadCounts(countsResponse.data.statusCounts);
         setTotalLeads(countsResponse.data.totalLeads);
+        setUnAssignedCount(countsResponse.data.unAssignedCount);
       }
 
     } catch (err: any) {
@@ -61,6 +63,7 @@ export function useTeamDetails(teamId: string) {
     team,
     leadCounts,
     totalLeads,
+    unAssignedCount,
     isLoading,
     error,
     refetch: fetchTeamData,

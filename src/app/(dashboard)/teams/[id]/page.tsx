@@ -10,10 +10,11 @@ export default function TeamDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const teamId = params.id as string;
-  const { team, leadCounts, totalLeads, isLoading, error } = useTeamDetails(teamId);
+  const { team, leadCounts, totalLeads, unAssignedCount, isLoading, error } = useTeamDetails(teamId);
 
   const leadStatuses = [
     { name: "All Leads", count: totalLeads },
+    { name: "Pending", count: unAssignedCount || 0 }, // Represents Unassigned leads
     { name: "New Lead", count: leadCounts?.newLead || 0 },
     { name: "Hot Lead", count: leadCounts?.hotLead || 0 },
     { name: "Contacted", count: leadCounts?.contacted || 0 },
@@ -23,6 +24,8 @@ export default function TeamDetailsPage() {
     { name: "Switch Off", count: leadCounts?.switchedOff || 0 },
     { name: "Not Interested", count: leadCounts?.notInterested || 0 },
     { name: "Register", count: leadCounts?.registered || 0 },
+    { name: "Customer", count: leadCounts?.customer || 0 },
+    { name: "Disqualified", count: leadCounts?.disqualified || 0 },
     { name: "Closed", count: leadCounts?.closed || 0 },
   ];
 
@@ -58,23 +61,45 @@ export default function TeamDetailsPage() {
         <Text as="h1" weight="bold" size="xl" className="text-slate-900">{team.name} Overview</Text>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+      <div className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -z-10 translate-x-12 -translate-y-12"></div>
         
-        <div className="flex items-center gap-6">
-          <div className="bg-[#233A78] text-white w-16 h-16 rounded-[22px] flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-900/10">
-            <Users size={28} />
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-8 w-full xl:w-auto">
+          <div className="flex items-center gap-6">
+            <div className="bg-gradient-to-br from-[#1E3163] to-[#2A4482] text-white w-16 h-16 rounded-[22px] flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-900/20">
+              <Users size={28} />
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <Text as="h3" weight="bold" size="xl" className="text-slate-900 leading-none">{team.name}</Text>
+                <div className={`w-2 h-2 rounded-full ${team.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`} title={team.status} />
+              </div>
+              <Text weight="medium" className="text-slate-500 block">{team.users?.length || 0} Members active in this team</Text>
+            </div>
           </div>
-          <div>
-            <Text as="h3" weight="bold" size="xl" className="text-slate-900 mb-1 leading-none">{team.name}</Text>
-            <Text weight="medium" className="text-slate-500 block">{team.users?.length || 0} Members active in this team</Text>
+          
+          <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
+          
+          <div className="flex items-center gap-8 bg-slate-50 rounded-[20px] p-4 border border-slate-100/50 w-full md:w-auto">
+             <div className="flex flex-col">
+                <Text size="xs" className="text-slate-500" weight="medium">Manager</Text>
+                <Text size="sm" weight="bold" className="text-slate-800 line-clamp-1">{team.manager?.userName || 'Unassigned'}</Text>
+             </div>
+             <div className="flex flex-col">
+                <Text size="xs" className="text-slate-500" weight="medium">Team Leader</Text>
+                <Text size="sm" weight="bold" className="text-slate-800 line-clamp-1">
+                   {team.teamLeaders && team.teamLeaders.length > 0 
+                     ? team.teamLeaders.map(l => l.userName).join(', ') 
+                     : 'Unassigned'}
+                </Text>
+             </div>
           </div>
         </div>
 
-        <div className="flex gap-4 w-full md:w-auto">
+        <div className="flex gap-4 w-full xl:w-auto mt-2 xl:mt-0">
           <button 
             onClick={() => router.push(`/leads_list?teamId=${teamId}`)}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2.5 h-12 px-7 bg-white border border-slate-200 rounded-full text-slate-700 hover:bg-slate-50 shadow-sm transition-all active:scale-95 group font-bold"
+            className="flex-1 xl:flex-none flex items-center justify-center gap-2.5 h-12 px-7 bg-white border border-slate-200 rounded-full text-slate-700 hover:bg-slate-50 shadow-sm transition-all active:scale-95 group font-bold"
           >
             <Filter size={18} className="text-[#233A78]" />
             <Text weight="bold" size="sm">View Team Leads</Text>
