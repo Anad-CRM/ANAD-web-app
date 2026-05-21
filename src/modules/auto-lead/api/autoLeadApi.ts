@@ -23,6 +23,7 @@ export interface TeamItem {
   members?: Record<string, unknown>[];
   membersCount?: number;
   memberCount?: number;
+  users?: Record<string, unknown>[];
 }
 
 export const getLiveAds = async (orgId?: number): Promise<AutoLeadCampaign[]> => {
@@ -129,10 +130,7 @@ export const getManagerAdsStatus = async (managerId: string) => {
    }
 };
 
-export const updateManagerAds = async (managerId: string, adIds: string[], orgId?: number) => {
-   const user = getUser<{ organizationId?: number }>();
-   const org = orgId || user?.organizationId;
-
+export const updateManagerAds = async (managerId: string, adIds: string[]) => {
    const current = await getManagerAdsStatus(managerId);
    const currentIds = new Set(current.selectedAdIds);
    const newIds = new Set(adIds);
@@ -185,4 +183,50 @@ export const getTeamsList = async (orgId?: number): Promise<TeamItem[]> => {
    } catch {
       return [];
    }
+};
+
+export interface TeamStrengthItem {
+  id: string;
+  name: string;
+  status: string;
+  autoAssignLeads: boolean;
+  strengthAutoAssignLeads: boolean | null;
+  effectiveStrengthAutoAssignLeads: boolean;
+}
+
+export interface TeamStrengthStatusResponse {
+  status: string;
+  data: {
+    organizationId: string | number;
+    organizationName: string;
+    teamStrengthAutoAssignLeads: boolean;
+    teams: TeamStrengthItem[];
+  };
+}
+
+export const getTeamStrengthAutoAssignStatus = async (orgId?: number): Promise<TeamStrengthStatusResponse | null> => {
+  try {
+    const user = getUser<{ organizationId?: number }>();
+    const org = orgId || user?.organizationId;
+    if (!org) return null;
+    const res = await api.get(API_ENDPOINTS.AUTO_LEAD.TEAM_STRENGTH_STATUS(org));
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch team strength status", error);
+    return null;
+  }
+};
+
+export const toggleTeamStrengthAutoAssignLeads = async (
+  enabled: boolean,
+  teamIds?: string[],
+  orgId?: number
+) => {
+  const user = getUser<{ organizationId?: number }>();
+  const org = orgId || user?.organizationId;
+  return api.post(API_ENDPOINTS.AUTO_LEAD.TEAM_STRENGTH_TOGGLE, {
+    organizationId: org,
+    teamIds,
+    enabled,
+  });
 };

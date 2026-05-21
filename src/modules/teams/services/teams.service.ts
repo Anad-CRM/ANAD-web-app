@@ -19,9 +19,25 @@ export const TeamsService = {
     return response.data;
   },
 
-  async createTeam(payload: { organizationId: string; name: string; managerId?: string; iconIndex?: number }): Promise<any> {
+  async createTeam(payload: { organizationId: string; name: string; managerId?: string; iconIndex?: number }): Promise<unknown> {
     const response = await api.post(
       API_ENDPOINTS.TEAM.CREATE,
+      payload
+    );
+    return response.data;
+  },
+
+  async getStaffExcludeTeam(payload: { teamId: string; organizationId: string }): Promise<unknown> {
+    const response = await api.post(
+      API_ENDPOINTS.TEAM.GET_STAFF_EXCLUDE_TEAM,
+      payload
+    );
+    return response.data;
+  },
+
+  async changeStaffTeam(payload: { userId: string[]; newTeamId: string }): Promise<unknown> {
+    const response = await api.put(
+      API_ENDPOINTS.TEAM.CHANGE_STAFF_TEAM,
       payload
     );
     return response.data;

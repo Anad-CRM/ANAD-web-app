@@ -88,6 +88,7 @@ export const leadsApi = {
   assignLeads: async (leadIds: string[], staffId: string, shouldResetStatus = false): Promise<Record<string, unknown>> => {
     try {
       const response = await api.post("/lead/assign", { leadIds, staffMemberId: staffId, shouldResetStatus });
+      // console.log("response -------- ", response);
       return response.data;
     } catch (error) {
       console.error("[leadsApi] Error assigning leads:", error);
