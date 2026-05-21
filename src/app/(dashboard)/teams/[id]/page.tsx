@@ -4,13 +4,16 @@ import { useTeamDetails } from "@/modules/teams/hooks/useTeamDetails";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/core/components/ui/BackButton";
 import { Text } from "@/core/components/ui/Text";
-import { Users, Filter, User, Target, TrendingUp, ChevronRight } from "lucide-react";
+import { Users, Filter, User, Target, TrendingUp, ChevronRight, UserPlus } from "lucide-react";
+import { useState } from "react";
+import { AddMemberModal } from "@/modules/teams/components/AddMemberModal";
 
 export default function TeamDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const teamId = params.id as string;
-  const { team, leadCounts, totalLeads, unAssignedCount, isLoading, error } = useTeamDetails(teamId);
+  const { team, leadCounts, totalLeads, unAssignedCount, isLoading, error, refetch } = useTeamDetails(teamId);
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
 
   const leadStatuses = [
     { name: "All Leads", count: totalLeads },
@@ -54,8 +57,9 @@ export default function TeamDetailsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 pb-20 animate-in fade-in duration-700">
-      <div className="flex items-center gap-4">
+    <>
+      <div className="flex flex-col gap-8 pb-20 animate-in fade-in duration-700">
+        <div className="flex items-center gap-4">
         <BackButton onClick={() => router.push('/teams')} />
         <div className="h-6 w-px bg-slate-200 mx-1"></div>
         <Text as="h1" weight="bold" size="xl" className="text-slate-900">{team.name} Overview</Text>
@@ -81,6 +85,10 @@ export default function TeamDetailsPage() {
           <div className="h-10 w-px bg-slate-200 hidden md:block"></div>
           
           <div className="flex items-center gap-8 bg-slate-50 rounded-[20px] p-4 border border-slate-100/50 w-full md:w-auto">
+             <div className="flex flex-col">
+                <Text size="xs" className="text-slate-500" weight="medium">Category</Text>
+                <Text size="sm" weight="bold" className="text-slate-800 line-clamp-1">{team.category || 'Uncategorized'}</Text>
+             </div>
              <div className="flex flex-col">
                 <Text size="xs" className="text-slate-500" weight="medium">Manager</Text>
                 <Text size="sm" weight="bold" className="text-slate-800 line-clamp-1">{team.manager?.userName || 'Unassigned'}</Text>
@@ -136,7 +144,16 @@ export default function TeamDetailsPage() {
               <div className="w-1.5 h-5 bg-[#233A78] rounded-full"></div>
               <Text weight="bold" size="lg" className="text-slate-900">Assigned Members</Text>
            </div>
-           <Text size="sm" weight="medium" className="text-slate-500">{team.users?.length || 0} active</Text>
+           <div className="flex items-center gap-4">
+              <Text size="sm" weight="medium" className="text-slate-500">{team.users?.length || 0} active</Text>
+              <button 
+                onClick={() => setIsAddMemberModalOpen(true)}
+                className="px-4 py-2 bg-[#233A78] text-white rounded-full text-sm font-bold flex items-center gap-2 hover:bg-[#1E3163] transition-colors shadow-sm active:scale-95"
+              >
+                <UserPlus size={16} />
+                Add Member
+              </button>
+           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -179,5 +196,17 @@ export default function TeamDetailsPage() {
       </div>
 
     </div>
+
+      {isAddMemberModalOpen && (
+        <AddMemberModal 
+          teamId={teamId} 
+          onClose={() => setIsAddMemberModalOpen(false)} 
+          onSuccess={() => {
+            setIsAddMemberModalOpen(false);
+            refetch();
+          }} 
+        />
+      )}
+    </>
   );
 }
