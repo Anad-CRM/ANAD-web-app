@@ -94,35 +94,61 @@ export default function TeamsPage() {
               const performance = totalLeads > 0 ? 60 : 0; // Standardizing to match Figma mockup value
 
               return (
-                <div key={team.id || idx} className="bg-white border border-slate-50 rounded-[28px] p-8 shadow-[0_4px_24px_rgba(30,49,99,0.04)] hover:shadow-[0_12px_32px_rgba(30,49,99,0.08)] transition-all duration-500 flex flex-col group min-h-[200px]">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="bg-[#1E3163] text-white w-14 h-14 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-500">
-                      <Users size={24} />
+                <div key={team.id || idx} className="bg-white border border-slate-50 rounded-[28px] p-6 shadow-[0_4px_24px_rgba(30,49,99,0.04)] hover:shadow-[0_12px_32px_rgba(30,49,99,0.08)] transition-all duration-500 flex flex-col group min-h-[200px]">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-gradient-to-br from-[#1E3163] to-[#2A4482] text-white w-14 h-14 rounded-[16px] flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform duration-500">
+                        <Users size={24} />
+                      </div>
+                      <div className="mt-1">
+                        <Text weight="bold" size="custom" className="text-slate-900 tracking-tight" style={{ fontSize: '20px' }}>
+                          {team.name}
+                        </Text>
+                        <div className="flex items-center gap-2 mt-1">
+                           <div className={`w-2 h-2 rounded-full ${team.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                           <Text size="xs" className="text-slate-500 capitalize">{team.status || 'Active'}</Text>
+                        </div>
+                      </div>
                     </div>
-                    <Text weight="bold" size="custom" className="text-slate-900 mt-2 tracking-tight" style={{ fontSize: '20px' }}>
-                      {team.name}
-                    </Text>
                   </div>
 
-                  <div className="space-y-2 ml-[72px] mb-8">
-                    <div className="flex items-center gap-2">
-                      <Text className="text-slate-500" weight="medium">Members :</Text>
-                      <Text weight="bold" className="text-slate-900">{membersCount}</Text>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-slate-50 rounded-[16px] p-4 flex flex-col gap-1 border border-slate-100/50 transition-colors group-hover:bg-blue-50/30">
+                      <Text size="xs" className="text-slate-500" weight="medium">Manager</Text>
+                      <Text size="sm" weight="bold" className="text-slate-800 line-clamp-1">{team.manager?.userName || 'Unassigned'}</Text>
                     </div>
-                    <div className="flex items-center gap-2">
-                       <Text className="text-slate-500" weight="medium">Leads :</Text>
-                       <Text weight="bold" className="text-slate-900">{totalLeads}</Text>
+                    <div className="bg-slate-50 rounded-[16px] p-4 flex flex-col gap-1 border border-slate-100/50 transition-colors group-hover:bg-blue-50/30">
+                      <Text size="xs" className="text-slate-500" weight="medium">Team Leader</Text>
+                      <Text size="sm" weight="bold" className="text-slate-800 line-clamp-1">
+                        {team.teamLeaders && team.teamLeaders.length > 0 
+                          ? team.teamLeaders.map(l => l.userName).join(', ') 
+                          : 'Unassigned'}
+                      </Text>
                     </div>
-                    <div className="flex items-center gap-2">
-                       <Text className="text-slate-500" weight="medium">Performance :</Text>
-                       <Text weight="bold" className="text-slate-900">{performance}%</Text>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-6 mb-6 px-2">
+                    <div className="flex flex-col gap-1">
+                      <Text className="text-slate-500" size="xs" weight="medium">Members</Text>
+                      <Text weight="bold" size="lg" className="text-[#1E3163]">{membersCount}</Text>
+                    </div>
+                    <div className="w-[1px] h-8 bg-slate-200"></div>
+                    <div className="flex flex-col gap-1 items-center">
+                       <Text className="text-slate-500" size="xs" weight="medium">Leads</Text>
+                       <Text weight="bold" size="lg" className="text-[#1E3163]">{totalLeads}</Text>
+                    </div>
+                    <div className="w-[1px] h-8 bg-slate-200"></div>
+                    <div className="flex flex-col gap-1 items-end">
+                       <Text className="text-slate-500" size="xs" weight="medium">Performance</Text>
+                       <Text weight="bold" size="lg" className="text-emerald-600">{performance}%</Text>
                     </div>
                   </div>
 
                   <div className="mt-auto flex justify-end">
-                    <Link href={`/teams/${team.id}`}>
-                      <button className="bg-[#1E3163] text-white px-8 py-2 rounded-[14px] shadow-sm hover:opacity-90 active:scale-[0.97] transition-all">
-                        <Text weight="bold" size="xs">View Details</Text>
+                    <Link href={`/teams/${team.id}`} className="w-full">
+                      <button className="w-full bg-[#1E3163] text-white py-3 rounded-[16px] shadow-sm hover:bg-[#15234b] hover:shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                        <Text weight="bold" size="sm">View Details</Text>
+                        <ArrowRight size={16} />
                       </button>
                     </Link>
                   </div>
