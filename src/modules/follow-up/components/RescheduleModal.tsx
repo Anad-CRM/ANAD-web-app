@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { rescheduleFollowUp } from "../api/followUpApi";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 interface RescheduleModalProps {
   followUpId: number;
@@ -51,23 +53,23 @@ export default function RescheduleModal({ followUpId, onClose, onSuccess }: Resc
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-[24px] shadow-2xl w-full max-w-[440px] mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl w-[min(100vw-1rem,440px)] sm:w-full max-w-[440px] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 pt-6 pb-2">
-          <h2 className="text-[18px] font-bold text-[#1E293B]">Reschedule Follow-up</h2>
-          <p className="text-[13px] text-gray-500 mt-1">Select a new date and add remarks</p>
+        <div className="px-5 sm:px-6 pt-6 pb-2">
+          <Text as="h2" weight="bold" size="lg" style={{ color: COLORS.text }}>Reschedule Follow-up</Text>
+          <Text as="p" size="sm" className="mt-1" style={{ color: COLORS.muted }}>Select a new date and add remarks</Text>
         </div>
 
-        <div className="px-6 pb-6 flex flex-col gap-4 mt-2">
+        <div className="px-5 sm:px-6 pb-6 flex flex-col gap-4 mt-2">
           {/* Date Input */}
           <div>
-            <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-              New Date <span className="text-red-500">*</span>
-            </label>
+            <Text as="label" size="sm" weight="semibold" className="block mb-1.5" style={{ color: COLORS.text }}>
+              New Date <span style={{ color: COLORS.danger }}>*</span>
+            </Text>
             <input
               type="date"
               value={date}
@@ -79,30 +81,32 @@ export default function RescheduleModal({ followUpId, onClose, onSuccess }: Resc
               className={`w-full px-4 py-2.5 rounded-xl border text-[14px] outline-none transition-colors ${
                 errors.date
                   ? "border-red-400 bg-red-50 focus:border-red-500"
-                  : "border-gray-200 bg-gray-50 focus:border-[#233A78] focus:bg-white"
+                  : "border-gray-200 bg-gray-50 focus:bg-white"
               }`}
+              style={{ borderColor: errors.date ? undefined : COLORS.border }}
             />
-            {errors.date && <p className="text-[12px] text-red-500 mt-1">{errors.date}</p>}
+            {errors.date && <Text as="p" size="xs" className="mt-1" style={{ color: COLORS.danger }}>{errors.date}</Text>}
           </div>
 
           {/* Time Input */}
           <div>
-            <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-              Time <span className="text-gray-400 text-[11px]">(optional)</span>
-            </label>
+            <Text as="label" size="sm" weight="semibold" className="block mb-1.5" style={{ color: COLORS.text }}>
+              Time <span style={{ color: COLORS.subtle, fontSize: 11 }}>(optional)</span>
+            </Text>
             <input
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-[14px] outline-none focus:border-[#233A78] focus:bg-white transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl border bg-gray-50 text-[14px] outline-none focus:bg-white transition-colors"
+              style={{ borderColor: COLORS.border }}
             />
           </div>
 
           {/* Remarks Input */}
           <div>
-            <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-              Remarks <span className="text-red-500">*</span>
-            </label>
+            <Text as="label" size="sm" weight="semibold" className="block mb-1.5" style={{ color: COLORS.text }}>
+              Remarks <span style={{ color: COLORS.danger }}>*</span>
+            </Text>
             <textarea
               value={remarks}
               onChange={(e) => {
@@ -114,14 +118,15 @@ export default function RescheduleModal({ followUpId, onClose, onSuccess }: Resc
               className={`w-full px-4 py-2.5 rounded-xl border text-[14px] outline-none resize-none transition-colors ${
                 errors.remarks
                   ? "border-red-400 bg-red-50 focus:border-red-500"
-                  : "border-gray-200 bg-gray-50 focus:border-[#233A78] focus:bg-white"
+                  : "border-gray-200 bg-gray-50 focus:bg-white"
               }`}
+              style={{ borderColor: errors.remarks ? undefined : COLORS.border }}
             />
-            {errors.remarks && <p className="text-[12px] text-red-500 mt-1">{errors.remarks}</p>}
+            {errors.remarks && <Text as="p" size="xs" className="mt-1" style={{ color: COLORS.danger }}>{errors.remarks}</Text>}
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 mt-2">
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
             <button
               onClick={onClose}
               disabled={isLoading}
@@ -132,7 +137,8 @@ export default function RescheduleModal({ followUpId, onClose, onSuccess }: Resc
             <button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="flex-1 py-3 rounded-xl bg-[#4B73B2] text-white font-semibold text-[14px] hover:bg-[#3d6098] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              className="flex-1 py-3 rounded-xl text-white font-semibold text-[14px] hover:opacity-90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              style={{ backgroundColor: COLORS.primary }}
             >
               {isLoading ? (
                 <>

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import Link from "next/link";
 import { FollowUp } from "../types";
 import FollowUpDetailModal from "./FollowUpDetailModal";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 export default function DetailedFollowUpList({
   followUps,
@@ -56,7 +57,7 @@ export default function DetailedFollowUpList({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 min-w-0">
       {followUps.map((item) => {
         const leadName = item.lead?.userName || "Unknown Lead";
         const phone = item.lead?.mobileNumber || "";
@@ -67,49 +68,50 @@ export default function DetailedFollowUpList({
           <div
             key={item.id}
             onClick={() => setSelectedFollowUp(item)}
-            className="group bg-white rounded-2xl border border-gray-100 p-4 hover:border-[#233A78]/20 hover:shadow-md transition-all duration-200 cursor-pointer"
+            className="group bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-all duration-200 cursor-pointer"
+            style={{ borderColor: COLORS.border }}
           >
             {/* Top Row: Avatar + Info + Date */}
-            <div className="flex items-start gap-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3.5">
               {/* Avatar */}
-              <div className="w-[42px] h-[42px] rounded-full bg-gradient-to-br from-[#233A78] to-[#4B73B2] flex items-center justify-center shrink-0 shadow-sm">
-                <span className="text-[14px] font-bold text-white leading-none">{getInitials(leadName)}</span>
+              <div className="w-[42px] h-[42px] rounded-full flex items-center justify-center shrink-0 shadow-sm" style={{ background: `linear-gradient(135deg, ${COLORS.primaryDark}, ${COLORS.primary})` }}>
+                <Text as="span" weight="bold" size="sm" className="leading-none" style={{ color: COLORS.surface }}>{getInitials(leadName)}</Text>
               </div>
 
               {/* Name + Phone */}
               <div className="flex-1 min-w-0">
-                <h3 className="text-[14px] font-bold text-[#1E293B] truncate leading-tight">{leadName}</h3>
+                <Text as="h3" weight="bold" size="sm" className="truncate leading-tight block" style={{ color: COLORS.text }}>{leadName}</Text>
                 {phone && (
-                  <p className="text-[12px] text-gray-400 mt-0.5 font-medium">{phone}</p>
+                  <Text as="p" size="xs" weight="medium" className="mt-0.5" style={{ color: COLORS.muted }}>{phone}</Text>
                 )}
               </div>
 
               {/* Date & Time */}
-              <div className="text-right shrink-0">
-                <div className="text-[12px] font-semibold text-[#1E293B]">
+              <div className="text-left sm:text-right shrink-0">
+                <Text as="div" size="xs" weight="semibold" style={{ color: COLORS.text }}>
                   {formatSafeDate(item.date, item.createdAt)}
-                </div>
-                <div className="text-[11px] text-gray-400 mt-0.5 flex items-center justify-end gap-1">
+                </Text>
+                <Text as="div" size="xs" className="mt-0.5 flex items-center justify-start sm:justify-end gap-1" style={{ color: COLORS.muted }}>
                   <ClockIcon /> {formatSafeTime(item.date, item.createdAt)}
-                </div>
+                </Text>
               </div>
             </div>
 
             {/* Remark */}
             {item.notes && (
               <div className="mt-3 bg-[#F8FAFC] rounded-lg px-3 py-2 border border-gray-50">
-                <p className="text-[12px] text-gray-600 leading-relaxed">
-                  <span className="font-semibold text-gray-400 mr-1">Remark:</span>
+                <Text as="p" size="xs" className="leading-relaxed" style={{ color: COLORS.muted }}>
+                  <span className="font-semibold mr-1" style={{ color: COLORS.subtle }}>Remark:</span>
                   {item.notes}
-                </p>
+                </Text>
               </div>
             )}
 
             {/* Bottom Row: Badges + Actions */}
-            <div className="flex items-center justify-between mt-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-3">
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Assigned User */}
-                <div className="flex items-center gap-1.5 text-[11px] text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full font-medium">
+                <div className="flex items-center gap-1.5 text-[11px] bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full font-medium" style={{ color: COLORS.muted }}>
                   <UserIcon /> {assignedTo}
                 </div>
                 {/* Status Badge */}
@@ -119,18 +121,20 @@ export default function DetailedFollowUpList({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 {status !== "COMPLETED" && (
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); onReschedule(item.id); }}
-                      className="px-3.5 py-1.5 rounded-full bg-[#4B73B2]/10 text-[#4B73B2] text-[12px] font-semibold hover:bg-[#4B73B2] hover:text-white transition-all duration-200"
+                      className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold hover:opacity-90 transition-all duration-200 w-full sm:w-auto"
+                      style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primaryDark }}
                     >
                       Reschedule
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); onComplete(item.id); }}
-                      className="px-3.5 py-1.5 rounded-full bg-[#233A78] text-white text-[12px] font-semibold hover:bg-[#1a2b5e] transition-colors shadow-sm"
+                      className="px-3.5 py-1.5 rounded-full text-white text-[12px] font-semibold hover:opacity-90 transition-colors shadow-sm w-full sm:w-auto"
+                      style={{ backgroundColor: COLORS.primaryDark }}
                     >
                       Complete
                     </button>
@@ -152,15 +156,15 @@ export default function DetailedFollowUpList({
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
           </div>
-          <p className="text-[15px] font-semibold text-gray-400">No follow-ups found</p>
-          <p className="text-[13px] text-gray-300 mt-1">Try selecting a different date or filter</p>
+          <Text as="p" size="sm" weight="semibold" style={{ color: COLORS.muted }}>No follow-ups found</Text>
+          <Text as="p" size="xs" className="mt-1" style={{ color: COLORS.subtle }}>Try selecting a different date or filter</Text>
         </div>
       )}
 
       {hasMore && (
         <div ref={loadMoreRef} className="py-4 flex justify-center items-center">
           {isFetchingMore && (
-            <div className="flex items-center justify-center gap-2 text-gray-400 font-medium text-sm">
+            <div className="flex items-center justify-center gap-2 font-medium text-sm" style={{ color: COLORS.muted }}>
               <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />

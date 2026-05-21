@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { FollowUp } from "../types";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 interface FollowUpDetailModalProps {
   followUp: FollowUp;
@@ -71,26 +73,26 @@ export default function FollowUpDetailModal({ followUp, onClose }: FollowUpDetai
   const fuStatusColors = getFollowUpStatusColor(followUpStatus);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-[24px] shadow-2xl w-full max-w-[480px] mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="bg-white rounded-t-[24px] sm:rounded-[24px] shadow-2xl w-[min(100vw-1rem,480px)] sm:w-full max-w-[480px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag Handle */}
-        <div className="flex justify-center pt-4 pb-2">
+        <div className="flex justify-center pt-4 pb-2 sm:hidden">
           <div className="w-10 h-1 rounded-full bg-gray-300" />
         </div>
 
-        <div className="px-6 pb-6">
+        <div className="px-5 sm:px-6 pb-6 overflow-y-auto custom-scrollbar">
           {/* Header: Avatar + Name + Date */}
-          <div className="flex items-start gap-4">
-            <div className="w-[50px] h-[50px] rounded-full bg-[#233A78]/10 flex items-center justify-center shrink-0">
-              <span className="text-[18px] font-bold text-[#233A78]">{getInitials(userName)}</span>
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+            <div className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: COLORS.primaryXlight }}>
+              <Text as="span" weight="bold" size="lg" style={{ color: COLORS.primaryDark }}>{getInitials(userName)}</Text>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-[16px] font-bold text-[#1E293B] truncate">{userName}</h3>
+              <Text as="h3" weight="bold" size="base" className="truncate block" style={{ color: COLORS.text }}>{userName}</Text>
               {mobileNumber && (
-                <p className="text-[13px] text-gray-500 mt-0.5">{mobileNumber}</p>
+                <Text as="p" size="xs" className="mt-0.5" style={{ color: COLORS.muted }}>{mobileNumber}</Text>
               )}
               <div className="mt-2 flex flex-wrap gap-2">
                 <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg ${statusColors.bg} ${statusColors.text} border ${statusColors.border}`}>
@@ -101,17 +103,17 @@ export default function FollowUpDetailModal({ followUp, onClose }: FollowUpDetai
                 </span>
               </div>
             </div>
-            <div className="text-right shrink-0">
-              <p className="text-[13px] text-gray-500 font-medium">{formatDate(followUp.date)}</p>
-              <p className="text-[12px] text-gray-400">{formatTime(followUp.date)}</p>
+            <div className="text-left sm:text-right shrink-0">
+              <Text as="p" size="xs" weight="medium" style={{ color: COLORS.muted }}>{formatDate(followUp.date)}</Text>
+              <Text as="p" size="xs" style={{ color: COLORS.subtle }}>{formatTime(followUp.date)}</Text>
             </div>
           </div>
 
           {/* Notes */}
           {notes && (
             <div className="mt-5 bg-[#F8FAFC] border border-gray-100 rounded-xl p-4">
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Notes / Remark</p>
-              <p className="text-[14px] text-[#1E293B] leading-relaxed">{notes}</p>
+              <Text as="p" size="xs" weight="bold" className="uppercase tracking-wider mb-1.5" style={{ color: COLORS.subtle }}>Notes / Remark</Text>
+              <Text as="p" size="sm" style={{ color: COLORS.text, lineHeight: 1.6 }}>{notes}</Text>
             </div>
           )}
 
@@ -120,35 +122,36 @@ export default function FollowUpDetailModal({ followUp, onClose }: FollowUpDetai
             {activityType && (
               <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5">
                 <ActivityIcon type={activityType} />
-                <span className="text-[12px] text-gray-600 font-medium">{activityType}</span>
+                <Text as="span" size="xs" weight="medium" style={{ color: COLORS.muted }}>{activityType}</Text>
               </div>
             )}
             {platform && (
               <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5">
                 <PlatformIcon platform={platform} />
-                <span className="text-[12px] text-gray-600 font-medium">{platform}</span>
+                <Text as="span" size="xs" weight="medium" style={{ color: COLORS.muted }}>{platform}</Text>
               </div>
             )}
             {adName && (
               <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
-                <span className="text-[12px] text-gray-600 font-medium truncate max-w-[140px]">{adName}</span>
+                <Text as="span" size="xs" weight="medium" className="truncate max-w-[140px]" style={{ color: COLORS.muted }}>{adName}</Text>
               </div>
             )}
             {assignedUserName && (
               <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span className="text-[12px] text-gray-600 font-medium">{assignedUserName}</span>
+                <Text as="span" size="xs" weight="medium" style={{ color: COLORS.muted }}>{assignedUserName}</Text>
               </div>
             )}
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-6 flex gap-3">
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
             {lead?.id ? (
               <Link
                 href={`/lead/${lead.id}`}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#233A78] text-white rounded-xl py-3 font-semibold text-[13px] hover:bg-[#1a2b5e] transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 text-white rounded-xl py-3 font-semibold text-[13px] hover:opacity-90 transition-colors"
+                style={{ backgroundColor: COLORS.primaryDark }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 Lead Details

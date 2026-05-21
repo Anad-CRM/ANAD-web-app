@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FollowUp } from "../types";
 import { getFollowUps } from "../api/followUpApi";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 export default function RightPanel({
   missedFollowUps,
@@ -21,9 +23,19 @@ export default function RightPanel({
   const [activeDates, setActiveDates] = useState<Set<string>>(new Set());
 
   // State-driven calendar month
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth()); // 0-indexed
+  const monthLabel = new Date(calYear, calMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  const formatLocal = useCallback((d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }, []);
+
+  const isViewingCurrentMonth = calYear === now.getFullYear() && calMonth === now.getMonth();
 
   const handlePrevMonth = () => {
     if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); }
@@ -79,17 +91,6 @@ export default function RightPanel({
     return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase();
   };
 
-  const monthLabel = new Date(calYear, calMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
-
-  const formatLocal = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  };
-
-  const isViewingCurrentMonth = calYear === now.getFullYear() && calMonth === now.getMonth();
-
   const calendarDays = useMemo(() => {
     let startDayOfWeek = new Date(calYear, calMonth, 1).getDay();
     startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
@@ -114,49 +115,53 @@ export default function RightPanel({
       days.push({ day: i, isCurrentMonth: false, isToday: false, dateStr: formatLocal(dateObj) });
     }
     return days;
-  }, [calYear, calMonth]);
+  }, [calYear, calMonth, isViewingCurrentMonth, now, formatLocal]);
 
   return (
-    <div className="w-[380px] shrink-0 bg-[#C8D6E5]/40 rounded-3xl p-6 flex flex-col h-full min-h-0 overflow-y-auto custom-scrollbar">
+    <div className="w-full xl:w-[380px] shrink-0 rounded-3xl p-4 sm:p-6 flex flex-col h-full min-h-0 overflow-y-auto custom-scrollbar" style={{ backgroundColor: "rgba(200,214,229,0.4)" }}>
       <div className="shrink-0">
         <div className="flex items-center gap-2 mb-6 bg-white/40 rounded-full p-1 border border-white shrink-0">
-        <button
-          onClick={() => setViewMode("calendar")}
-          className={`flex-1 rounded-full py-2.5 text-[15px] font-semibold flex items-center justify-center gap-2 transition-all ${
-            viewMode === "calendar"
-              ? "bg-[#233A78] text-white shadow-md"
-              : "text-gray-700 hover:text-black"
-          }`}
-        >
-          <CalendarIcon /> Calendar view
-        </button>
-        <button
-          onClick={() => setViewMode("list")}
-          className={`flex-1 rounded-full py-2.5 text-[15px] font-semibold flex items-center justify-center gap-2 transition-all ${
-            viewMode === "list"
-              ? "bg-[#233A78] text-white shadow-md"
-              : "text-gray-700 hover:text-black"
-          }`}
-        >
-          <ListIcon /> List View
-        </button>
-      </div>
+          <button
+            onClick={() => setViewMode("calendar")}
+            className={`flex-1 rounded-full py-2.5 text-[15px] font-semibold flex items-center justify-center gap-2 transition-all ${
+              viewMode === "calendar"
+                ? "text-white shadow-md"
+                : "hover:text-black"
+            }`}
+            style={viewMode === "calendar" ? { backgroundColor: COLORS.primaryDark, color: COLORS.surface } : { color: COLORS.text }}
+          >
+            <CalendarIcon /> Calendar view
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`flex-1 rounded-full py-2.5 text-[15px] font-semibold flex items-center justify-center gap-2 transition-all ${
+              viewMode === "list"
+                ? "text-white shadow-md"
+                : "hover:text-black"
+            }`}
+            style={viewMode === "list" ? { backgroundColor: COLORS.primaryDark, color: COLORS.surface } : { color: COLORS.text }}
+          >
+            <ListIcon /> List View
+          </button>
+        </div>
 
         {viewMode === "calendar" && (
           <div className="bg-white/40 border border-white rounded-[24px] p-5 mb-6 shadow-sm overflow-hidden shrink-0">
             <div className="flex items-center justify-between mb-4">
               <button 
                 onClick={handlePrevMonth} 
-                className="w-7 h-7 rounded-full bg-white/70 hover:bg-white flex items-center justify-center text-slate-600 hover:text-[#233A78] transition-colors shadow-sm"
+                className="w-7 h-7 rounded-full bg-white/70 hover:bg-white flex items-center justify-center text-slate-600 transition-colors shadow-sm"
+                style={{ color: COLORS.primaryDark }}
               >
                 <ChevronLeftIcon />
               </button>
-              <div className="bg-[#233A78] text-white text-[12px] font-semibold px-4 py-1 rounded-full">
+              <div className="text-white text-[12px] font-semibold px-4 py-1 rounded-full" style={{ backgroundColor: COLORS.primaryDark }}>
                 {monthLabel}
               </div>
               <button 
                 onClick={handleNextMonth} 
-                className="w-7 h-7 rounded-full bg-white/70 hover:bg-white flex items-center justify-center text-slate-600 hover:text-[#233A78] transition-colors shadow-sm"
+                className="w-7 h-7 rounded-full bg-white/70 hover:bg-white flex items-center justify-center text-slate-600 transition-colors shadow-sm"
+                style={{ color: COLORS.primaryDark }}
               >
                 <ChevronRightIcon />
               </button>
@@ -181,7 +186,7 @@ export default function RightPanel({
                    }
                  }
                  
-                 const borderClass = isSelected ? "border-[2px] border-[#233A78]" : "border border-transparent";
+                 const borderClass = isSelected ? "border-[2px]" : "border border-transparent";
 
                  return (
                    <button 
@@ -210,15 +215,15 @@ export default function RightPanel({
       {/* Missed Follow-ups Section */}
       {missedFollowUps.length > 0 && (
         <div className="shrink-0 mb-2">
-          <h3 className="text-[14px] font-bold text-[#1E293B] mb-3">Missed Follow-ups</h3>
+          <Text as="h3" size="sm" weight="bold" className="mb-3" style={{ color: COLORS.text }}>Missed Follow-ups</Text>
         </div>
       )}
       <div className="flex flex-col gap-3 pr-2">
         {missedFollowUps.map((item) => (
-          <div key={item.id} className="bg-[#1C2C5E] rounded-3xl p-4 text-white shadow-lg relative shrink-0">
-            <div className="flex justify-between items-start mb-4">
+          <div key={item.id} className="rounded-3xl p-4 text-white shadow-lg relative shrink-0" style={{ backgroundColor: COLORS.primaryDark }}>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
               <div>
-                <h4 className="text-[16px] font-semibold">{item.lead?.userName || "Unknown"}</h4>
+                <Text as="h4" size="base" weight="semibold" style={{ color: COLORS.surface }}>{item.lead?.userName || "Unknown"}</Text>
                 <div className="text-[12px] text-white/70 flex items-center gap-1 mt-0.5">
                   <PhoneSmallIcon /> {item.lead?.mobileNumber || "N/A"}
                 </div>
@@ -233,20 +238,20 @@ export default function RightPanel({
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <input 
                 type="text" 
                 placeholder="Remark" 
                 value={remarkValues[item.id] || ""}
                 onChange={(e) => setRemarkValues(prev => ({ ...prev, [item.id]: e.target.value }))}
-                className="bg-white/90 text-black text-[13px] rounded-full px-4 py-2 w-full max-w-[140px] outline-none"
+                className="bg-white/90 text-black text-[13px] rounded-full px-4 py-2 w-full sm:max-w-[140px] outline-none"
               />
               <div className="flex items-center gap-1.5 text-[12px] text-white/90 truncate flex-1">
                 <UserSmallIcon /> {item.userName || "Admin"}
               </div>
               <button 
                 onClick={() => onReschedule && onReschedule(item.id)}
-                className="bg-white text-red-500 font-semibold px-4 py-1.5 rounded-full text-[13px] shadow-sm shrink-0 hover:bg-red-50 transition-colors"
+                className="bg-white text-red-500 font-semibold px-4 py-1.5 rounded-full text-[13px] shadow-sm shrink-0 hover:bg-red-50 transition-colors w-full sm:w-auto"
               >
                 Reschedule
               </button>

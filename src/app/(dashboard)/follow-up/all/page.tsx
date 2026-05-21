@@ -9,6 +9,8 @@ import CompleteModal from "@/modules/follow-up/components/CompleteModal";
 import { getFollowUps } from "@/modules/follow-up/api/followUpApi";
 import { FollowUp } from "@/modules/follow-up/types";
 import { BackButton } from "@/core/components/ui/BackButton";
+import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 
 export default function AllFollowUpsPage() {
   const searchParams = useSearchParams();
@@ -20,7 +22,7 @@ export default function AllFollowUpsPage() {
   const [missedFollowUps, setMissedFollowUps] = useState<FollowUp[]>([]);
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
 
-  const [page, setPage] = useState(1);
+  const pageRef = useRef(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +36,7 @@ export default function AllFollowUpsPage() {
   const fetchData = useCallback(async (isRefresh = false) => {
     try {
       if (isRefresh) {
-        setPage(1);
+        pageRef.current = 1;
         setIsLoading(true);
       } else {
         setIsFetchingMore(true);
@@ -60,7 +62,7 @@ export default function AllFollowUpsPage() {
       const followUpData = await getFollowUps({ 
         ...params, 
         limit, 
-        page: isRefresh ? 1 : page 
+        page: isRefresh ? 1 : pageRef.current 
       });
       const newFollowUps = followUpData?.data || [];
 
@@ -73,7 +75,7 @@ export default function AllFollowUpsPage() {
       }
 
       if (newFollowUps.length > 0) {
-        setPage(prevPage => (isRefresh ? 2 : prevPage + 1));
+        pageRef.current = isRefresh ? 2 : pageRef.current + 1;
       }
 
       if (isRefresh) {
@@ -87,11 +89,11 @@ export default function AllFollowUpsPage() {
       setIsLoading(false);
       setIsFetchingMore(false);
     }
-  }, [activeTab, page, selectedDate]);
+  }, [activeTab, selectedDate]);
 
   useEffect(() => {
     fetchData(true);
-  }, [activeTab, selectedDate]);
+  }, [fetchData]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -145,27 +147,31 @@ export default function AllFollowUpsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-[22px] overflow-x-hidden pt-2">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col gap-[22px] overflow-x-hidden pt-2 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <BackButton onClick={() => router.back()} />
-        <div className="h-8 w-px bg-slate-200 mx-1"></div>
+        <div className="hidden sm:block h-8 w-px bg-slate-200 mx-1"></div>
         <div>
-          <h1 className="text-[24px] font-bold text-[#1E293B] leading-tight">All Follow-Ups</h1>
-          <p className="text-[#233A78] text-[13px] font-semibold tracking-wide mt-0.5">Showing: {getLabel()}</p>
+          <Text as="h1" weight="bold" size="xl" style={{ color: COLORS.text, lineHeight: 1.15 }}>
+            All Follow-Ups
+          </Text>
+          <Text size="sm" weight="semibold" className="tracking-wide mt-0.5 block" style={{ color: COLORS.primaryDark }}>
+            Showing: {getLabel()}
+          </Text>
         </div>
       </div>
 
-      <div className="flex gap-8 mt-2 h-[calc(100vh-170px)] min-h-[500px]">
-        <div className="flex-1 flex flex-col pr-8 border-r border-[#A5BCD1]/30 h-full min-h-0">
-          <div className="flex justify-between items-center mb-4 shrink-0">
-            <h2 className="text-[18px] font-bold text-[#1E293B]">
+      <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 mt-2 min-h-0 xl:h-[calc(100vh-170px)]">
+        <div className="flex-1 flex flex-col xl:pr-8 xl:border-r min-h-0">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-4 shrink-0">
+            <Text as="h2" weight="bold" size="lg" style={{ color: COLORS.text }}>
               {getLabel()}
-            </h2>
-            <span className="text-[13px] text-gray-500 font-medium bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5">
+            </Text>
+            <span className="text-[13px] font-medium bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5" style={{ color: COLORS.muted }}>
               {followUps.length} result{followUps.length !== 1 ? 's' : ''}
             </span>
           </div>
-          <div className="pr-2 flex-1 overflow-y-auto custom-scrollbar min-h-0">
+          <div className="pr-0 xl:pr-2 flex-1 overflow-y-auto custom-scrollbar min-h-0">
             <DetailedFollowUpList
               followUps={followUps}
               onReschedule={handleReschedule}

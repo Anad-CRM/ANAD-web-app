@@ -1,5 +1,7 @@
 import React from "react";
 import { FollowUpSummary } from "../types";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 const STATS = [
   { key: "total", label: "Total", icon: UsersIcon },
@@ -30,35 +32,37 @@ export default function StatsSection({
   };
 
   return (
-    <div className="flex gap-6 mb-8 mt-4 whitespace-nowrap overflow-x-auto pb-4">
+    <div className="flex gap-4 sm:gap-6 mb-8 mt-4 whitespace-nowrap overflow-x-auto pb-4">
       {STATS.map((stat) => {
         const isActive = activeTab === stat.key;
         return (
           <div
             key={stat.key}
             onClick={() => onTabChange(stat.key)}
-            className="group relative pt-5 flex-1 min-w-[120px] cursor-pointer"
+            className="group relative pt-5 flex-1 min-w-[112px] sm:min-w-[140px] cursor-pointer"
           >
             <div
               className={`absolute top-0 left-1/2 -translate-x-1/2 w-11 h-11 rounded-[14px] flex items-center justify-center z-10 transition-colors shadow-sm ${
-                isActive ? "bg-[#233A78] text-white" : "bg-[#233A78] text-white"
+                isActive ? "" : ""
               }`}
+              style={{ backgroundColor: COLORS.primaryDark, color: COLORS.surface }}
             >
               <stat.icon />
             </div>
             <div
               className={`rounded-[24px] pt-8 pb-4 px-4 text-center border-2 transition-all duration-200 ${
                 isActive
-                  ? "bg-[#E6F0F9] border-[#233A78]"
+                  ? ""
                   : "bg-white/40 border-white hover:bg-white/60"
               }`}
+              style={isActive ? { backgroundColor: COLORS.primaryXlight, borderColor: COLORS.primaryDark } : undefined}
             >
-              <h3 className={`text-[24px] mb-1 leading-none ${isActive ? "text-[#233A78]" : "text-gray-800"}`}>
+              <Text as="h3" weight="bold" size="custom" className="mb-1 leading-none" style={{ fontSize: '24px', color: isActive ? COLORS.primaryDark : COLORS.text }}>
                 {getCount(stat.key)}
-              </h3>
-              <p className={`text-[17px] ${isActive ? "text-[#233A78]" : "text-gray-800"}`}>
+              </Text>
+              <Text as="p" size="custom" weight="medium" style={{ fontSize: '17px', color: isActive ? COLORS.primaryDark : COLORS.text }}>
                 {stat.label}
-              </p>
+              </Text>
             </div>
           </div>
         );

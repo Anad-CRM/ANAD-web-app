@@ -7,6 +7,8 @@ import FollowUpList from "@/modules/follow-up/components/FollowUpList";
 import RightPanel from "@/modules/follow-up/components/RightPanel";
 import RescheduleModal from "@/modules/follow-up/components/RescheduleModal";
 import CompleteModal from "@/modules/follow-up/components/CompleteModal";
+import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 import {
   getFollowUps,
   getFollowUpSummary,
@@ -29,7 +31,7 @@ export default function FollowUpPage() {
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const [page, setPage] = useState(1);
+  const pageRef = useRef(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +45,7 @@ export default function FollowUpPage() {
   const fetchData = useCallback(async (isRefresh = false) => {
     try {
       if (isRefresh) {
-        setPage(1);
+        pageRef.current = 1;
         setIsLoading(true);
       } else {
         setIsFetchingMore(true);
@@ -74,7 +76,7 @@ export default function FollowUpPage() {
       const followUpData = await getFollowUps({
         ...params,
         limit,
-        page: isRefresh ? 1 : page
+        page: isRefresh ? 1 : pageRef.current
       });
       const newFollowUps = followUpData?.data || [];
 
@@ -87,7 +89,7 @@ export default function FollowUpPage() {
       }
 
       if (newFollowUps.length > 0) {
-        setPage(prevPage => (isRefresh ? 2 : prevPage + 1));
+        pageRef.current = isRefresh ? 2 : pageRef.current + 1;
       }
 
       if (isRefresh) {
@@ -101,11 +103,11 @@ export default function FollowUpPage() {
       setIsLoading(false);
       setIsFetchingMore(false);
     }
-  }, [activeTab, page, selectedDate]);
+  }, [activeTab, selectedDate]);
 
   useEffect(() => {
     fetchData(true);
-  }, [activeTab, selectedDate]);
+  }, [fetchData]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -153,28 +155,28 @@ export default function FollowUpPage() {
   };
 
   return (
-    <div className="flex flex-col gap-[22px] overflow-x-hidden">
+    <div className="flex flex-col gap-[22px] overflow-x-hidden min-w-0">
       <StatsSection
         summary={summary}
         activeTab={activeTab}
         onTabChange={handleTabChange}
       />
 
-      <div className="flex gap-8 mt-5 h-[calc(100vh-240px)] min-h-[500px]">
-        <div className="flex-1 flex flex-col pr-8 border-r border-[#A5BCD1]/50 h-full min-h-0">
-          <div className="flex justify-between items-center mb-6 shrink-0">
-            <h2 className="text-[20px] font-bold text-[#1E293B]">
+      <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 mt-5 min-h-0 xl:h-[calc(100vh-240px)]">
+        <div className="flex-1 flex flex-col xl:pr-8 xl:border-r min-h-0">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-6 shrink-0">
+            <Text as="h2" weight="bold" size="lg" style={{ color: COLORS.text }}>
               Total Follow-Up
-            </h2>
-            <span className="text-[14px] text-gray-700 font-medium">
+            </Text>
+            <Text size="sm" weight="medium" style={{ color: COLORS.muted }}>
               {selectedDate 
                 ? new Date(selectedDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' + new Date(selectedDate).toLocaleDateString('en-GB', { weekday: 'long' })
                 : activeTab === 'today'
                   ? new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' + new Date().toLocaleDateString('en-GB', { weekday: 'long' })
                   : "All Dates"}
-            </span>
+            </Text>
           </div>
-          <div className="pr-2 flex-1 overflow-y-auto custom-scrollbar min-h-0">
+          <div className="pr-0 xl:pr-2 flex-1 overflow-y-auto custom-scrollbar min-h-0">
             <FollowUpList
               followUps={followUps}
               onReschedule={handleReschedule}
