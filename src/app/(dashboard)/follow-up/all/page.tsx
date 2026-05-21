@@ -11,22 +11,24 @@ import { FollowUp } from "@/modules/follow-up/types";
 import { BackButton } from "@/core/components/ui/BackButton";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
+import { useResponsive } from "@/core/hooks/useResponsive";
 
 export default function AllFollowUpsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { isMobile } = useResponsive();
 
   const [activeTab, setActiveTab] = useState(searchParams.get("status")?.toLowerCase() || "total");
   const [selectedDate, setSelectedDate] = useState<string | null>(searchParams.get("date"));
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [missedFollowUps, setMissedFollowUps] = useState<FollowUp[]>([]);
-  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+  const [viewMode, setViewMode] = useState<"calendar" | "list">(isMobile ? "list" : "calendar");
 
   const pageRef = useRef(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const limit = 20;
+  const limit = isMobile ? 10 : 20;
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Modal state
@@ -89,13 +91,14 @@ export default function AllFollowUpsPage() {
       setIsLoading(false);
       setIsFetchingMore(false);
     }
-  }, [activeTab, selectedDate]);
+  }, [activeTab, selectedDate, limit]);
 
   useEffect(() => {
     fetchData(true);
   }, [fetchData]);
 
   useEffect(() => {
+    if (isMobile) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isFetchingMore && !isLoading) {
@@ -115,7 +118,7 @@ export default function AllFollowUpsPage() {
         observer.unobserve(currentRef);
       }
     };
-  }, [fetchData, hasMore, isFetchingMore, isLoading]);
+  }, [fetchData, hasMore, isFetchingMore, isLoading, isMobile]);
 
   const handleReschedule = (id: number) => {
     setRescheduleId(id);
@@ -135,6 +138,12 @@ export default function AllFollowUpsPage() {
       setActiveTab("total");
     }
   };
+
+  useEffect(() => {
+    if (isMobile) {
+      setViewMode("list");
+    }
+  }, [isMobile]);
 
   const getLabel = () => {
      if (selectedDate) {
@@ -179,6 +188,7 @@ export default function AllFollowUpsPage() {
               hasMore={hasMore}
               isFetchingMore={isFetchingMore}
               loadMoreRef={loadMoreRef}
+              onLoadMore={isMobile ? () => fetchData() : undefined}
             />
           </div>
         </div>

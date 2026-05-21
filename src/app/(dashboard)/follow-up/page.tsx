@@ -9,6 +9,7 @@ import RescheduleModal from "@/modules/follow-up/components/RescheduleModal";
 import CompleteModal from "@/modules/follow-up/components/CompleteModal";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
+import { useResponsive } from "@/core/hooks/useResponsive";
 import {
   getFollowUps,
   getFollowUpSummary,
@@ -17,6 +18,7 @@ import { FollowUp, FollowUpSummary } from "@/modules/follow-up/types";
 
 export default function FollowUpPage() {
   const router = useRouter();
+  const { isMobile } = useResponsive();
   const [summary, setSummary] = useState<FollowUpSummary>({
     total: 0,
     completed: 0,
@@ -28,14 +30,14 @@ export default function FollowUpPage() {
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [missedFollowUps, setMissedFollowUps] = useState<FollowUp[]>([]);
   const [activeTab, setActiveTab] = useState("total");
-  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+  const [viewMode, setViewMode] = useState<"calendar" | "list">(isMobile ? "list" : "calendar");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const pageRef = useRef(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const limit = 20;
+  const limit = isMobile ? 10 : 20;
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Modal state
@@ -103,13 +105,20 @@ export default function FollowUpPage() {
       setIsLoading(false);
       setIsFetchingMore(false);
     }
-  }, [activeTab, selectedDate]);
+  }, [activeTab, selectedDate, limit]);
+
+  useEffect(() => {
+    if (isMobile) {
+      setViewMode("list");
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     fetchData(true);
   }, [fetchData]);
 
   useEffect(() => {
+    if (isMobile) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isFetchingMore && !isLoading) {
@@ -129,7 +138,7 @@ export default function FollowUpPage() {
         observer.unobserve(currentRef);
       }
     };
-  }, [fetchData, hasMore, isFetchingMore, isLoading]);
+  }, [fetchData, hasMore, isFetchingMore, isLoading, isMobile]);
 
   const handleReschedule = (id: number) => {
     setRescheduleId(id);
@@ -184,6 +193,7 @@ export default function FollowUpPage() {
               hasMore={hasMore}
               isFetchingMore={isFetchingMore}
               loadMoreRef={loadMoreRef}
+              onLoadMore={isMobile ? () => fetchData() : undefined}
             />
           </div>
         </div>

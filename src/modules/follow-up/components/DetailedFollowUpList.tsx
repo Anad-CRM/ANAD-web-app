@@ -11,6 +11,7 @@ export default function DetailedFollowUpList({
   hasMore,
   isFetchingMore,
   loadMoreRef,
+  onLoadMore,
 }: {
   followUps: FollowUp[];
   onReschedule: (id: number) => void;
@@ -18,6 +19,7 @@ export default function DetailedFollowUpList({
   hasMore?: boolean;
   isFetchingMore?: boolean;
   loadMoreRef?: React.RefObject<HTMLDivElement | null>;
+  onLoadMore?: () => void;
 }) {
   const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUp | null>(null);
 
@@ -161,7 +163,20 @@ export default function DetailedFollowUpList({
         </div>
       )}
 
-      {hasMore && (
+      {hasMore && onLoadMore && (
+        <div className="py-4 flex justify-center">
+          <button
+            onClick={onLoadMore}
+            disabled={isFetchingMore}
+            className="inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[13px] font-semibold text-white transition-colors disabled:opacity-60"
+            style={{ backgroundColor: COLORS.primaryDark }}
+          >
+            {isFetchingMore ? "Loading..." : "Load more"}
+          </button>
+        </div>
+      )}
+
+      {hasMore && !onLoadMore && (
         <div ref={loadMoreRef} className="py-4 flex justify-center items-center">
           {isFetchingMore && (
             <div className="flex items-center justify-center gap-2 font-medium text-sm" style={{ color: COLORS.muted }}>

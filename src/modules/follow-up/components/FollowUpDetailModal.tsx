@@ -83,7 +83,7 @@ export default function FollowUpDetailModal({ followUp, onClose }: FollowUpDetai
           <div className="w-10 h-1 rounded-full bg-gray-300" />
         </div>
 
-        <div className="px-5 sm:px-6 pb-6 overflow-y-auto custom-scrollbar">
+        <div className="px-5 sm:px-6 pt-2 sm:pt-3 pb-6 overflow-y-auto custom-scrollbar">
           {/* Header: Avatar + Name + Date */}
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             <div className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: COLORS.primaryXlight }}>
