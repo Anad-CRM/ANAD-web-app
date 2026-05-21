@@ -105,9 +105,9 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-sm rounded-t-[24px] sm:rounded-[24px] overflow-hidden flex flex-col pt-2"
+        className="relative w-[min(100vw-1rem,24rem)] sm:w-full max-w-sm rounded-t-[24px] sm:rounded-[24px] overflow-hidden flex flex-col pt-2"
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: COLORS.surface,
           boxShadow: "0 -8px 40px rgba(13,27,62,0.18)",
           animation: "slideUp 0.25s cubic-bezier(.4,0,.2,1)"
         }}
@@ -116,21 +116,22 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-1 mt-2 sm:hidden" />
         
         {/* Header */}
-        <div className="flex items-center justify-between px-7 pt-5 pb-3">
-          <Text as="h3" weight="bold" size="lg" className="text-slate-900 tracking-tight">Create Team</Text>
+        <div className="flex items-center justify-between px-5 sm:px-7 pt-5 pb-3">
+          <Text as="h3" weight="bold" size="lg" className="tracking-tight" style={{ color: COLORS.text }}>Create Team</Text>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-100"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+            style={{ backgroundColor: COLORS.primaryXlight, border: `1px solid ${COLORS.border}` }}
           >
-            <X size={18} className="text-slate-500" />
+            <X size={18} style={{ color: COLORS.muted }} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-4 flex flex-col gap-5 overflow-y-auto custom-scrollbar" style={{ maxHeight: "calc(85vh - 120px)" }}>
+        <div className="px-5 sm:px-6 py-4 flex flex-col gap-5 overflow-y-auto custom-scrollbar" style={{ maxHeight: "calc(85vh - 120px)" }}>
           {/* Team Name */}
           <div>
-            <Text weight="bold" size="custom" className="text-slate-700 mb-2 block" style={{ fontSize: '13px' }}>Team Name *</Text>
+            <Text weight="bold" size="custom" className="mb-2 block" style={{ fontSize: '13px', color: COLORS.text }}>Team Name *</Text>
             <input
               type="text"
               value={name}
@@ -139,10 +140,10 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
                 if (error) setError("");
               }}
               placeholder="e.g. Sales Team Alpha"
-              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium placeholder:text-slate-400"
+              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 transition-all font-medium placeholder:text-slate-400"
               style={{ 
-                borderColor: error ? "#EF4444" : "#E2E8F0", 
-                color: "#0F172A", 
+                borderColor: error ? COLORS.danger : COLORS.border,
+                color: COLORS.text,
               }}
             />
             {error && (
@@ -156,11 +157,12 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
           {/* Admin Manager Assignment */}
           {isAdmin && (
             <div>
-              <Text weight="bold" size="custom" className="text-slate-700 mb-2 block" style={{ fontSize: '13px' }}>Assign Manager</Text>
+              <Text weight="bold" size="custom" className="mb-2 block" style={{ fontSize: '13px', color: COLORS.text }}>Assign Manager</Text>
               <select
                 value={managerId}
                 onChange={e => setManagerId(e.target.value)}
-                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-white font-medium text-slate-900 border-[#E2E8F0]"
+                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 transition-all bg-white font-medium"
+                style={{ color: COLORS.text, borderColor: COLORS.border }}
               >
                 <option value="">Do not assign</option>
                 {managers.map((m) => (
@@ -172,19 +174,23 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
 
           {/* Icon Picker */}
           <div>
-            <Text weight="bold" size="custom" className="text-slate-700 mb-3 block" style={{ fontSize: '13px' }}>Identity & Icon</Text>
+            <Text weight="bold" size="custom" className="mb-3 block" style={{ fontSize: '13px', color: COLORS.text }}>Identity & Icon</Text>
             <div className="grid grid-cols-5 gap-3">
               {TEAM_ICONS.map((Icon, idx) => (
                 <button
                   key={idx}
                   onClick={() => setIconIndex(idx)}
                   className={`flex items-center justify-center h-12 rounded-xl transition-all border-2 relative group overflow-hidden ${
-                    iconIndex === idx ? "bg-blue-50 border-[#233A78] shadow-sm" : "bg-slate-50 border-transparent hover:bg-slate-100"
+                    iconIndex === idx ? "shadow-sm" : "hover:bg-slate-100"
                   }`}
+                  style={{
+                    backgroundColor: iconIndex === idx ? COLORS.primaryXlight : COLORS.c,
+                    borderColor: iconIndex === idx ? COLORS.primaryDark : "transparent",
+                  }}
                 >
-                  <Icon size={20} className={iconIndex === idx ? "text-[#233A78]" : "text-slate-500"} />
+                  <Icon size={20} style={{ color: iconIndex === idx ? COLORS.primaryDark : COLORS.muted }} />
                   {iconIndex === idx && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#233A78] rounded-full border-2 border-white"></div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: COLORS.primaryDark }}></div>
                   )}
                 </button>
               ))}
@@ -193,11 +199,12 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         </div>
 
         {/* Footer */}
-        <div className="px-7 py-5 bg-slate-50/50 border-t border-slate-100">
+        <div className="px-5 sm:px-7 py-5 border-t" style={{ backgroundColor: COLORS.primaryXlight, borderColor: COLORS.border }}>
           <button
             onClick={handleCreate}
             disabled={loading}
-            className="w-full h-12 rounded-2xl flex items-center justify-center bg-[#233A78] text-white shadow-lg shadow-blue-900/20 hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            className="w-full h-12 rounded-2xl flex items-center justify-center text-white shadow-lg hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            style={{ backgroundColor: COLORS.primaryDark }}
           >
             {loading ? (
               <div className="flex items-center gap-2">

@@ -133,9 +133,9 @@ export function InviteMemberModal({
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-md rounded-t-[24px] sm:rounded-[24px] overflow-hidden flex flex-col pt-2 max-h-[90vh]"
+        className="relative w-[min(100vw-1rem,28rem)] sm:w-full max-w-md rounded-t-[24px] sm:rounded-[24px] overflow-hidden flex flex-col pt-2 max-h-[90vh]"
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: COLORS.surface,
           boxShadow: "0 -8px 40px rgba(13,27,62,0.18)",
           animation: "slideUp 0.25s cubic-bezier(.4,0,.2,1)"
         }}
@@ -144,25 +144,26 @@ export function InviteMemberModal({
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-1 mt-2 sm:hidden" />
 
         {/* Header */}
-        <div className="flex items-center justify-between px-7 pt-5 pb-3 border-b border-slate-50 bg-slate-50/30">
-          <Text as="h3" weight="bold" size="lg" className="text-slate-900 tracking-tight">
+        <div className="flex items-center justify-between px-5 sm:px-7 pt-5 pb-3 border-b" style={{ borderColor: COLORS.primaryXlight, backgroundColor: "rgba(238,244,251,0.3)" }}>
+          <Text as="h3" weight="bold" size="lg" className="tracking-tight" style={{ color: COLORS.text }}>
             {role === "Students" ? "Invite Student" : "Invite Member"}
           </Text>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-white/50 hover:bg-white transition-colors border border-slate-100 shadow-sm"
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm"
+            style={{ backgroundColor: "rgba(255,255,255,0.5)", border: `1px solid ${COLORS.primaryXlight}` }}
           >
-            <X size={18} className="text-slate-500" />
+            <X size={18} style={{ color: COLORS.muted }} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
+        <div className="px-5 sm:px-6 py-5 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
           {/* Email */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-               <Mail size={14} className="text-slate-400" />
-               <Text weight="bold" size="custom" className="text-slate-700" style={{ fontSize: '13px' }}>Email Address *</Text>
+               <Mail size={14} style={{ color: COLORS.subtle }} />
+               <Text weight="bold" size="custom" className="" style={{ fontSize: '13px', color: COLORS.text }}>Email Address *</Text>
             </div>
             <input
               type="email"
@@ -172,13 +173,13 @@ export function InviteMemberModal({
                 if (errors.email) setErrors({ ...errors, email: "" });
               }}
               placeholder="e.g. user@example.com"
-              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium placeholder:text-slate-400"
-              style={{ borderColor: errors.email ? "#EF4444" : "#E2E8F0" }}
+              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 transition-all font-medium placeholder:text-slate-400"
+              style={{ borderColor: errors.email ? COLORS.danger : COLORS.border, color: COLORS.text }}
             />
             {errors.email && (
                <div className="flex items-center gap-1.5 mt-2 ml-1">
                  <div className="w-1 h-1 rounded-full bg-red-500"></div>
-                 <Text weight="medium" size="xs" className="text-red-500">{errors.email}</Text>
+               <Text weight="medium" size="xs" style={{ color: COLORS.danger }}>{errors.email}</Text>
                </div>
             )}
           </div>
@@ -186,8 +187,8 @@ export function InviteMemberModal({
           {/* Role */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-               <Shield size={14} className="text-slate-400" />
-               <Text weight="bold" size="custom" className="text-slate-700" style={{ fontSize: '13px' }}>Select Role *</Text>
+               <Shield size={14} style={{ color: COLORS.subtle }} />
+               <Text weight="bold" size="custom" style={{ fontSize: '13px', color: COLORS.text }}>Select Role *</Text>
             </div>
             <select
               value={role}
@@ -195,7 +196,8 @@ export function InviteMemberModal({
                 setRole(e.target.value);
                 if (errors.role) setErrors({ ...errors, role: "" });
               }}
-              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-white font-medium text-slate-900 border-[#E2E8F0]"
+              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 transition-all bg-white font-medium"
+              style={{ color: COLORS.text, borderColor: COLORS.border }}
             >
               <option value="" disabled>Select Role</option>
               {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
@@ -203,7 +205,7 @@ export function InviteMemberModal({
             {errors.role && (
                <div className="flex items-center gap-1.5 mt-2 ml-1">
                  <div className="w-1 h-1 rounded-full bg-red-500"></div>
-                 <Text weight="medium" size="xs" className="text-red-500">{errors.role}</Text>
+                 <Text weight="medium" size="xs" style={{ color: COLORS.danger }}>{errors.role}</Text>
                </div>
             )}
           </div>
@@ -211,7 +213,7 @@ export function InviteMemberModal({
           {/* Batch Name (for Students) */}
           {role === "Students" && (
             <div>
-              <Text weight="bold" size="custom" className="text-slate-700 mb-2 block" style={{ fontSize: '13px' }}>Enter Batch Name *</Text>
+              <Text weight="bold" size="custom" className="mb-2 block" style={{ fontSize: '13px', color: COLORS.text }}>Enter Batch Name *</Text>
               <input
                 type="text"
                 value={batchName}
@@ -220,13 +222,13 @@ export function InviteMemberModal({
                   if (errors.batchName) setErrors({ ...errors, batchName: "" });
                 }}
                 placeholder="e.g. Jan2025"
-                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium placeholder:text-slate-400"
-                style={{ borderColor: errors.batchName ? "#EF4444" : "#E2E8F0" }}
+                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 transition-all font-medium placeholder:text-slate-400"
+                style={{ borderColor: errors.batchName ? COLORS.danger : COLORS.border, color: COLORS.text }}
               />
               {errors.batchName && (
                  <div className="flex items-center gap-1.5 mt-2 ml-1">
                    <div className="w-1 h-1 rounded-full bg-red-500"></div>
-                   <Text weight="medium" size="xs" className="text-red-500">{errors.batchName}</Text>
+                   <Text weight="medium" size="xs" style={{ color: COLORS.danger }}>{errors.batchName}</Text>
                  </div>
               )}
             </div>
@@ -236,8 +238,8 @@ export function InviteMemberModal({
           {(role === "Team Leader" || role === "Staff Member") && (
             <div>
               <div className="flex items-center gap-2 mb-2">
-                 <Users size={14} className="text-slate-400" />
-                 <Text weight="bold" size="custom" className="text-slate-700" style={{ fontSize: '13px' }}>Select Team *</Text>
+                 <Users size={14} style={{ color: COLORS.subtle }} />
+                 <Text weight="bold" size="custom" style={{ fontSize: '13px', color: COLORS.text }}>Select Team *</Text>
               </div>
               <select
                 value={teamId}
@@ -245,7 +247,8 @@ export function InviteMemberModal({
                   setTeamId(e.target.value);
                   if (errors.teamId) setErrors({ ...errors, teamId: "" });
                 }}
-                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-white font-medium text-slate-900 border-[#E2E8F0]"
+                className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 transition-all bg-white font-medium"
+                style={{ color: COLORS.text, borderColor: COLORS.border }}
               >
                 <option value="" disabled>Select Team</option>
                 {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -253,7 +256,7 @@ export function InviteMemberModal({
               {errors.teamId && (
                  <div className="flex items-center gap-1.5 mt-2 ml-1">
                    <div className="w-1 h-1 rounded-full bg-red-500"></div>
-                   <Text weight="medium" size="xs" className="text-red-500">{errors.teamId}</Text>
+                   <Text weight="medium" size="xs" style={{ color: COLORS.danger }}>{errors.teamId}</Text>
                  </div>
               )}
             </div>
@@ -261,21 +264,22 @@ export function InviteMemberModal({
 
           {/* Skill Level (for Staff Member) */}
           {role === "Staff Member" && (
-            <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+            <div className="bg-slate-50/80 p-4 rounded-2xl" style={{ border: `1px solid ${COLORS.primaryXlight}` }}>
               <div className="flex items-center gap-2 mb-3">
-                 <Layers size={14} className="text-slate-400" />
-                 <Text weight="bold" size="custom" className="text-slate-700" style={{ fontSize: '13px' }}>Skill Level *</Text>
+                 <Layers size={14} style={{ color: COLORS.subtle }} />
+                 <Text weight="bold" size="custom" style={{ fontSize: '13px', color: COLORS.text }}>Skill Level *</Text>
               </div>
               <select
                 value={skillLevel}
                 onChange={e => setSkillLevel(e.target.value)}
-                className="w-full rounded-xl px-3 py-2.5 text-[14px] border border-slate-200 outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-white font-medium text-slate-900 mb-3"
+                className="w-full rounded-xl px-3 py-2.5 text-[14px] border outline-none focus:ring-2 transition-all bg-white font-medium mb-3"
+                style={{ color: COLORS.text, borderColor: COLORS.border }}
               >
                 {SKILL_LEVELS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
-              <div className="flex items-start gap-2 pt-1 border-t border-slate-100 mt-1">
-                 <Info size={12} className="text-blue-400 mt-0.5" />
-                 <Text className="text-[11px] text-slate-500 leading-relaxed italic">
+              <div className="flex items-start gap-2 pt-1 mt-1" style={{ borderTop: `1px solid ${COLORS.primaryXlight}` }}>
+                 <Info size={12} className="mt-0.5" style={{ color: COLORS.primary }} />
+                 <Text className="text-[11px] leading-relaxed italic" style={{ color: COLORS.muted }}>
                   {skillLevel === 'None' && "Staffs with 'None' skill level will receive 0 automated leads."}
                   {skillLevel === 'Beginner' && "Beginner staff will receive 1 lead at a time."}
                   {skillLevel === 'Intermediate' && "Intermediate staff will receive 2 leads at a time."}
@@ -287,11 +291,12 @@ export function InviteMemberModal({
         </div>
 
         {/* Footer */}
-        <div className="px-7 py-5 bg-slate-50/50 border-t border-slate-100">
+        <div className="px-5 sm:px-7 py-5 border-t" style={{ backgroundColor: COLORS.primaryXlight, borderColor: COLORS.primaryXlight }}>
           <button
             onClick={handleInvite}
             disabled={loading}
-            className="w-full h-12 rounded-2xl flex items-center justify-center bg-[#233A78] text-white shadow-lg shadow-blue-900/20 hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            className="w-full h-12 rounded-2xl flex items-center justify-center text-white shadow-lg hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            style={{ backgroundColor: COLORS.primaryDark }}
           >
             {loading ? (
               <div className="flex items-center gap-2">
