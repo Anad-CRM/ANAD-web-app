@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { FollowUp } from "../types";
+import FollowUpDetailModal from "./FollowUpDetailModal";
 
 export default function FollowUpList({
   followUps,
@@ -17,6 +18,7 @@ export default function FollowUpList({
   isFetchingMore?: boolean;
   loadMoreRef?: React.RefObject<HTMLDivElement | null>;
 }) {
+  const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUp | null>(null);
 
   const formatSafeTime = (dateStr?: string, fallback?: string) => {
     let d = new Date(dateStr || "");
@@ -26,10 +28,19 @@ export default function FollowUpList({
     }
     return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase();
   };
+
+  const formatSafeDate = (dateStr?: string, fallback?: string) => {
+    let d = new Date(dateStr || "");
+    if (isNaN(d.getTime())) {
+      d = new Date(fallback || "");
+      if (isNaN(d.getTime())) return "N/A";
+    }
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "long" });
+  };
   return (
     <div className="flex flex-col gap-4">
       {followUps.map((item) => (
-        <div key={item.id} className="flex items-center justify-between py-2 rounded-xl hover:bg-white/30 px-3 -mx-3 transition-colors">
+        <div key={item.id} className="flex items-center justify-between py-2 rounded-xl hover:bg-white/30 px-3 -mx-3 transition-colors cursor-pointer" onClick={() => setSelectedFollowUp(item)}>
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-black shrink-0" />
             <div className="flex flex-col">
@@ -37,21 +48,15 @@ export default function FollowUpList({
                 {item.lead?.userName || "Unknown Lead"}
               </span>
               <span className="text-[12px] text-gray-500 flex items-center gap-1">
-                <ClockIcon /> {formatSafeTime(item.date, item.createdAt)}
+                <ClockIcon /> {formatSafeDate(item.date, item.createdAt)}, {formatSafeTime(item.date, item.createdAt)}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3 text-gray-700">
-              <button aria-label="Call" className="hover:text-black">
-                <PhoneIcon />
-              </button>
-              <button aria-label="Missed" className="text-red-500 hover:text-red-600">
-                <PhoneOffIcon />
-              </button>
               {item.lead?.id ? (
-                <Link href={`/lead/${item.lead.id}`} aria-label="Profile" className="hover:text-black">
+                <Link href={`/lead/${item.lead.id}`} aria-label="Profile" className="hover:text-black" onClick={(e) => e.stopPropagation()}>
                   <UserIcon />
                 </Link>
               ) : (
@@ -65,13 +70,13 @@ export default function FollowUpList({
               {item.status !== "COMPLETED" && (
                 <>
                   <button
-                    onClick={() => onReschedule(item.id)}
+                    onClick={(e) => { e.stopPropagation(); onReschedule(item.id); }}
                     className="px-4 py-1.5 rounded-full bg-[#4B73B2] text-white text-[13px] font-semibold hover:bg-[#3d6098] transition-colors"
                   >
                     Reschedule
                   </button>
                   <button
-                    onClick={() => onComplete(item.id)}
+                    onClick={(e) => { e.stopPropagation(); onComplete(item.id); }}
                     className="px-4 py-1.5 rounded-full bg-[#233A78] text-white text-[13px] font-semibold hover:bg-[#1a2b5e] transition-colors"
                   >
                     Complete
@@ -101,6 +106,12 @@ export default function FollowUpList({
             </div>
           )}
         </div>
+      )}
+      {selectedFollowUp && (
+        <FollowUpDetailModal
+          followUp={selectedFollowUp}
+          onClose={() => setSelectedFollowUp(null)}
+        />
       )}
     </div>
   );

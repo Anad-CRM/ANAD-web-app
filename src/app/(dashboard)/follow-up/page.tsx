@@ -167,7 +167,11 @@ export default function FollowUpPage() {
               Total Follow-Up
             </h2>
             <span className="text-[14px] text-gray-700 font-medium">
-              {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ',' + new Date().toLocaleDateString('en-GB', { weekday: 'long' })}
+              {selectedDate 
+                ? new Date(selectedDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' + new Date(selectedDate).toLocaleDateString('en-GB', { weekday: 'long' })
+                : activeTab === 'today'
+                  ? new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' + new Date().toLocaleDateString('en-GB', { weekday: 'long' })
+                  : "All Dates"}
             </span>
           </div>
           <div className="pr-2 flex-1 overflow-y-auto custom-scrollbar min-h-0">

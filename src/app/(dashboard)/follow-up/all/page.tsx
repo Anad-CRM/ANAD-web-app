@@ -135,8 +135,12 @@ export default function AllFollowUpsPage() {
   };
 
   const getLabel = () => {
-     if (selectedDate) return `Date: ${selectedDate}`;
-     if (activeTab === "total") return "All List";
+     if (selectedDate) {
+       const d = new Date(selectedDate);
+       return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+     }
+     if (activeTab === "total") return "All Follow-Ups";
+     if (activeTab === "today") return "Today";
      return activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
   };
 
@@ -146,19 +150,19 @@ export default function AllFollowUpsPage() {
         <BackButton onClick={() => router.back()} />
         <div className="h-8 w-px bg-slate-200 mx-1"></div>
         <div>
-           <h1 className="text-[24px] font-bold text-[#1E293B] leading-tight">All Follow-Ups</h1>
-           <p className="text-[#233A78] text-[14px] font-semibold tracking-wide">Showing: {getLabel()}</p>
+          <h1 className="text-[24px] font-bold text-[#1E293B] leading-tight">All Follow-Ups</h1>
+          <p className="text-[#233A78] text-[13px] font-semibold tracking-wide mt-0.5">Showing: {getLabel()}</p>
         </div>
       </div>
 
-      <div className="flex gap-8 mt-5 h-[calc(100vh-170px)] min-h-[500px]">
-        <div className="flex-1 flex flex-col pr-8 border-r border-[#A5BCD1]/50 h-full min-h-0">
-          <div className="flex justify-between items-center mb-6 shrink-0">
-            <h2 className="text-[20px] font-bold text-[#1E293B]">
-              List View
+      <div className="flex gap-8 mt-2 h-[calc(100vh-170px)] min-h-[500px]">
+        <div className="flex-1 flex flex-col pr-8 border-r border-[#A5BCD1]/30 h-full min-h-0">
+          <div className="flex justify-between items-center mb-4 shrink-0">
+            <h2 className="text-[18px] font-bold text-[#1E293B]">
+              {getLabel()}
             </h2>
-            <span className="text-[14px] text-gray-700 font-medium bg-gray-100 rounded-full px-4 py-1">
-              {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' + new Date().toLocaleDateString('en-GB', { weekday: 'long' })}
+            <span className="text-[13px] text-gray-500 font-medium bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5">
+              {followUps.length} result{followUps.length !== 1 ? 's' : ''}
             </span>
           </div>
           <div className="pr-2 flex-1 overflow-y-auto custom-scrollbar min-h-0">

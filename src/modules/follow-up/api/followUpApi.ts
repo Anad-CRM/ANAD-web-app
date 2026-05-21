@@ -11,6 +11,8 @@ interface GetFollowUpsParams {
   date?: string;
   fromDate?: string;
   toDate?: string;
+  fromScheduledDate?: string;
+  toScheduledDate?: string;
 }
 
 export const getFollowUps = async (
