@@ -16,7 +16,7 @@ export default function DetailedFollowUpList({
   onComplete: (id: number) => void;
   hasMore?: boolean;
   isFetchingMore?: boolean;
-  loadMoreRef?: React.RefObject<HTMLDivElement>;
+  loadMoreRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUp | null>(null);
 
@@ -81,18 +81,22 @@ export default function DetailedFollowUpList({
                    </span>
                 </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={(e) => { e.stopPropagation(); onReschedule(item.id); }}
-                  className="px-4 py-1.5 rounded-full bg-[#4B73B2] text-white text-[13px] font-semibold hover:bg-[#3d6098] transition-colors"
-                >
-                  Reschedule
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onComplete(item.id); }}
-                  className="px-4 py-1.5 rounded-full bg-[#233A78] text-white text-[13px] font-semibold hover:bg-[#1a2b5e] transition-colors"
-                >
-                  Complete
-                </button>
+                {item.status !== "COMPLETED" && (
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onReschedule(item.id); }}
+                      className="px-4 py-1.5 rounded-full bg-[#4B73B2] text-white text-[13px] font-semibold hover:bg-[#3d6098] transition-colors"
+                    >
+                      Reschedule
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onComplete(item.id); }}
+                      className="px-4 py-1.5 rounded-full bg-[#233A78] text-white text-[13px] font-semibold hover:bg-[#1a2b5e] transition-colors"
+                    >
+                      Complete
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

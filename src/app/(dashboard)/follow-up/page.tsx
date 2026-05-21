@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import StatsSection from "@/modules/follow-up/components/StatsSection";
 import FollowUpList from "@/modules/follow-up/components/FollowUpList";
 import RightPanel from "@/modules/follow-up/components/RightPanel";
+import RescheduleModal from "@/modules/follow-up/components/RescheduleModal";
+import CompleteModal from "@/modules/follow-up/components/CompleteModal";
 import {
   getFollowUps,
   getFollowUpSummary,
-  completeFollowUp,
 } from "@/modules/follow-up/api/followUpApi";
 import { FollowUp, FollowUpSummary } from "@/modules/follow-up/types";
 
@@ -34,6 +35,10 @@ export default function FollowUpPage() {
   const [isLoading, setIsLoading] = useState(true);
   const limit = 20;
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Modal state
+  const [rescheduleId, setRescheduleId] = useState<number | null>(null);
+  const [completeId, setCompleteId] = useState<number | null>(null);
 
   const fetchData = useCallback(async (isRefresh = false) => {
     try {
@@ -125,16 +130,15 @@ export default function FollowUpPage() {
   }, [fetchData, hasMore, isFetchingMore, isLoading]);
 
   const handleReschedule = (id: number) => {
-    console.log("Reschedule prompt triggered for ID:", id);
+    setRescheduleId(id);
   };
 
-  const handleComplete = async (id: number) => {
-    try {
-      await completeFollowUp(id);
-      fetchData();
-    } catch (error) {
-      console.error("Complete error", error);
-    }
+  const handleComplete = (id: number) => {
+    setCompleteId(id);
+  };
+
+  const handleModalSuccess = () => {
+    fetchData(true);
   };
 
   const handleTabChange = (tab: string) => {
@@ -184,8 +188,27 @@ export default function FollowUpPage() {
           setViewMode={setViewMode}
           selectedDate={selectedDate}
           onSelectDate={handleDateSelect}
+          onReschedule={handleReschedule}
         />
       </div>
+
+      {/* Reschedule Modal */}
+      {rescheduleId !== null && (
+        <RescheduleModal
+          followUpId={rescheduleId}
+          onClose={() => setRescheduleId(null)}
+          onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {/* Complete Modal */}
+      {completeId !== null && (
+        <CompleteModal
+          followUpId={completeId}
+          onClose={() => setCompleteId(null)}
+          onSuccess={handleModalSuccess}
+        />
+      )}
     </div>
   );
 }

@@ -24,7 +24,7 @@ export default function StatsSection({
       case "done": return summary?.completed || 0;
       case "missed": return summary?.missed || 0;
       case "pending": return summary?.pending || 0;
-      case "today": return 0; 
+      case "today": return summary?.pending || 0;
       default: return 0;
     }
   };

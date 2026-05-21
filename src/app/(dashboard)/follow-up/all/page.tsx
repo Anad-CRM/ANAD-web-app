@@ -4,8 +4,11 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import DetailedFollowUpList from "@/modules/follow-up/components/DetailedFollowUpList";
 import RightPanel from "@/modules/follow-up/components/RightPanel";
-import { getFollowUps, completeFollowUp } from "@/modules/follow-up/api/followUpApi";
+import RescheduleModal from "@/modules/follow-up/components/RescheduleModal";
+import CompleteModal from "@/modules/follow-up/components/CompleteModal";
+import { getFollowUps } from "@/modules/follow-up/api/followUpApi";
 import { FollowUp } from "@/modules/follow-up/types";
+import { BackButton } from "@/core/components/ui/BackButton";
 
 export default function AllFollowUpsPage() {
   const searchParams = useSearchParams();
@@ -23,6 +26,10 @@ export default function AllFollowUpsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const limit = 20;
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Modal state
+  const [rescheduleId, setRescheduleId] = useState<number | null>(null);
+  const [completeId, setCompleteId] = useState<number | null>(null);
 
   const fetchData = useCallback(async (isRefresh = false) => {
     try {
@@ -109,16 +116,15 @@ export default function AllFollowUpsPage() {
   }, [fetchData, hasMore, isFetchingMore, isLoading]);
 
   const handleReschedule = (id: number) => {
-    console.log("Reschedule prompt triggered for ID:", id);
+    setRescheduleId(id);
   };
 
-  const handleComplete = async (id: number) => {
-    try {
-      await completeFollowUp(id);
-      fetchData();
-    } catch (error) {
-      console.error("Complete error", error);
-    }
+  const handleComplete = (id: number) => {
+    setCompleteId(id);
+  };
+
+  const handleModalSuccess = () => {
+    fetchData(true);
   };
 
   const handleDateSelect = (date: string | null) => {
@@ -137,12 +143,8 @@ export default function AllFollowUpsPage() {
   return (
     <div className="flex flex-col gap-[22px] overflow-x-hidden pt-2">
       <div className="flex items-center gap-4">
-        <button 
-          onClick={() => router.back()}
-          className="p-2.5 rounded-full bg-[#E6F0F9] text-[#233A78] hover:bg-[#233A78] hover:text-white transition-all shadow-sm"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        </button>
+        <BackButton onClick={() => router.back()} />
+        <div className="h-8 w-px bg-slate-200 mx-1"></div>
         <div>
            <h1 className="text-[24px] font-bold text-[#1E293B] leading-tight">All Follow-Ups</h1>
            <p className="text-[#233A78] text-[14px] font-semibold tracking-wide">Showing: {getLabel()}</p>
@@ -177,8 +179,27 @@ export default function AllFollowUpsPage() {
           setViewMode={setViewMode}
           selectedDate={selectedDate}
           onSelectDate={handleDateSelect}
+          onReschedule={handleReschedule}
         />
       </div>
+
+      {/* Reschedule Modal */}
+      {rescheduleId !== null && (
+        <RescheduleModal
+          followUpId={rescheduleId}
+          onClose={() => setRescheduleId(null)}
+          onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {/* Complete Modal */}
+      {completeId !== null && (
+        <CompleteModal
+          followUpId={completeId}
+          onClose={() => setCompleteId(null)}
+          onSuccess={handleModalSuccess}
+        />
+      )}
     </div>
   );
 }

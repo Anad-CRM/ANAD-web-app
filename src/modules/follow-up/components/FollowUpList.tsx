@@ -15,7 +15,7 @@ export default function FollowUpList({
   onComplete: (id: number) => void;
   hasMore?: boolean;
   isFetchingMore?: boolean;
-  loadMoreRef?: React.RefObject<HTMLDivElement>;
+  loadMoreRef?: React.RefObject<HTMLDivElement | null>;
 }) {
 
   const formatSafeTime = (dateStr?: string, fallback?: string) => {
@@ -50,24 +50,34 @@ export default function FollowUpList({
               <button aria-label="Missed" className="text-red-500 hover:text-red-600">
                 <PhoneOffIcon />
               </button>
-              <Link href={`/lead/${item.lead?.id || item.id}`} aria-label="Profile" className="hover:text-black">
-                <UserIcon />
-              </Link>
+              {item.lead?.id ? (
+                <Link href={`/lead/${item.lead.id}`} aria-label="Profile" className="hover:text-black">
+                  <UserIcon />
+                </Link>
+              ) : (
+                <button aria-label="Profile" className="text-gray-300 cursor-not-allowed" title="Lead missing">
+                  <UserIcon />
+                </button>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => onReschedule(item.id)}
-                className="px-4 py-1.5 rounded-full bg-[#4B73B2] text-white text-[13px] font-semibold hover:bg-[#3d6098] transition-colors"
-              >
-                Reschedule
-              </button>
-              <button
-                onClick={() => onComplete(item.id)}
-                className="px-4 py-1.5 rounded-full bg-[#233A78] text-white text-[13px] font-semibold hover:bg-[#1a2b5e] transition-colors"
-              >
-                Complete
-              </button>
+              {item.status !== "COMPLETED" && (
+                <>
+                  <button
+                    onClick={() => onReschedule(item.id)}
+                    className="px-4 py-1.5 rounded-full bg-[#4B73B2] text-white text-[13px] font-semibold hover:bg-[#3d6098] transition-colors"
+                  >
+                    Reschedule
+                  </button>
+                  <button
+                    onClick={() => onComplete(item.id)}
+                    className="px-4 py-1.5 rounded-full bg-[#233A78] text-white text-[13px] font-semibold hover:bg-[#1a2b5e] transition-colors"
+                  >
+                    Complete
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

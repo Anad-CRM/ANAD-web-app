@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FollowUp } from "../types";
 
 export default function RightPanel({
@@ -7,13 +7,17 @@ export default function RightPanel({
   setViewMode,
   selectedDate,
   onSelectDate,
+  onReschedule,
 }: {
   missedFollowUps: FollowUp[];
   viewMode: "calendar" | "list";
   setViewMode: (mode: "calendar" | "list") => void;
   selectedDate?: string | null;
   onSelectDate?: (date: string | null) => void;
+  onReschedule?: (id: number) => void;
 }) {
+  const [remarkValues, setRemarkValues] = useState<Record<number, string>>({});
+
   const formatSafeDate = (dateStr?: string, fallback?: string) => {
     let d = new Date(dateStr || "");
     if (isNaN(d.getTime())) {
@@ -124,7 +128,13 @@ export default function RightPanel({
       
       </div>
 
-      <div className="flex flex-col gap-3 mt-6 pr-2">
+      {/* Missed Follow-ups Section */}
+      {missedFollowUps.length > 0 && (
+        <div className="shrink-0 mb-2">
+          <h3 className="text-[14px] font-bold text-[#1E293B] mb-3">Missed Follow-ups</h3>
+        </div>
+      )}
+      <div className="flex flex-col gap-3 pr-2">
         {missedFollowUps.map((item) => (
           <div key={item.id} className="bg-[#1C2C5E] rounded-3xl p-4 text-white shadow-lg relative shrink-0">
             <div className="flex justify-between items-start mb-4">
@@ -148,13 +158,18 @@ export default function RightPanel({
               <input 
                 type="text" 
                 placeholder="Remark" 
+                value={remarkValues[item.id] || ""}
+                onChange={(e) => setRemarkValues(prev => ({ ...prev, [item.id]: e.target.value }))}
                 className="bg-white/90 text-black text-[13px] rounded-full px-4 py-2 w-full max-w-[140px] outline-none"
               />
               <div className="flex items-center gap-1.5 text-[12px] text-white/90 truncate flex-1">
                 <UserSmallIcon /> {item.userName || "Admin"}
               </div>
-              <button className="bg-white text-red-500 font-semibold px-4 py-1.5 rounded-full text-[13px] shadow-sm shrink-0">
-                Missed
+              <button 
+                onClick={() => onReschedule && onReschedule(item.id)}
+                className="bg-white text-red-500 font-semibold px-4 py-1.5 rounded-full text-[13px] shadow-sm shrink-0 hover:bg-red-50 transition-colors"
+              >
+                Reschedule
               </button>
             </div>
           </div>

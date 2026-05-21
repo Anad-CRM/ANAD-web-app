@@ -145,13 +145,24 @@ export default function FollowUpDetailModal({ followUp, onClose }: FollowUpDetai
 
           {/* Action Buttons */}
           <div className="mt-6 flex gap-3">
-            <Link
-              href={`/lead/${lead?.id || followUp.id}`}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#233A78] text-white rounded-xl py-3 font-semibold text-[13px] hover:bg-[#1a2b5e] transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              Lead Details
-            </Link>
+            {lead?.id ? (
+              <Link
+                href={`/lead/${lead.id}`}
+                className="flex-1 flex items-center justify-center gap-2 bg-[#233A78] text-white rounded-xl py-3 font-semibold text-[13px] hover:bg-[#1a2b5e] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Lead Details
+              </Link>
+            ) : (
+              <button
+                disabled
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-300 text-white rounded-xl py-3 font-semibold text-[13px] cursor-not-allowed"
+                title="Lead not found or deleted"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Lead Details
+              </button>
+            )}
             <button
               onClick={onClose}
               className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 rounded-xl py-3 font-semibold text-[13px] hover:bg-gray-200 transition-colors"

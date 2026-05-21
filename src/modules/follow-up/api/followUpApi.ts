@@ -21,7 +21,7 @@ export const getFollowUps = async (
 };
 
 export const createFollowup = async (payload: { leadId: string; userId: string; notes: string; date: string; type: string }) => {
-  const response = await api.post("/followup/createFollowup", payload);
+  const response = await api.post(API_ENDPOINTS.FOLLOW_UP.CREATE, payload);
   return response.data;
 };
 
@@ -44,7 +44,7 @@ export const completeFollowUp = async (
 
 export const rescheduleFollowUp = async (
   followupId: number,
-  params: { date: string; notes?: string }
+  params: { followUpDate: string; remarks?: string }
 ) => {
   const response = await api.patch(API_ENDPOINTS.FOLLOW_UP.RESCHEDULE(followupId), params);
   return response.data;

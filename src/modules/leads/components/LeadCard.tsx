@@ -10,6 +10,7 @@ import {
 import { Lead, LeadStatus } from "../types/lead.types";
 import { getUser } from "@/core/utils/auth";
 import { api } from "@/core/api/axios";
+import { API_ENDPOINTS } from "@/core/api/api";
 import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 import { STATUS_COLORS, STATUS_TRANSITIONS, DEFAULT_TRANSITIONS } from "../constants/leadConstants";
 
@@ -160,7 +161,7 @@ export function LeadCard({
       onConfirm: async () => {
         setConfirm(null);
         try {
-          await api.post("/lead/update/LeadStatus", { leadId: lead.id, status: newStatus });
+          await api.post(API_ENDPOINTS.LEADS.UPDATE_STATUS, { leadId: lead.id, status: newStatus });
           onStatusChange?.(lead.id, newStatus);
         } catch (e) {
           console.error("Status update failed", e);

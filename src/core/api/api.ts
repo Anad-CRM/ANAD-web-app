@@ -44,6 +44,16 @@ export const API_ENDPOINTS = {
     SUMMARY: "/followup/summary",
     COMPLETE: (id: number | string) => `/followup/complete/${id}`,
     RESCHEDULE: (id: number | string) => `/followup/reschedule/${id}`,
+    GET_BY_LEAD: "/followup/getAllFollowUpByLeads",
+    CREATE: "/followup/createFollowup",
+  },
+  LEADS: {
+    UNASSIGNED: "/lead/unAssigned",
+    GET_BY_STATUS: "/lead/getLeadsByStatus",
+    ASSIGN: "/lead/assign",
+    GET_BY_ID: "/lead/getLeadById",
+    WHATSAPP: "/whatsapp/getWhatsAppMessages",
+    UPDATE_STATUS: "/lead/update/LeadStatus",
   },
   AUTO_LEAD: {
     GET_LIVE_ADS: (orgId: string | number) => `/ad/getLiveAds/${orgId}`,

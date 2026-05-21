@@ -4,7 +4,8 @@ import { X, Clock, CalendarDays, Loader2, Phone, MessageCircle, Mail } from 'luc
 import { COLORS } from '@/core/components/theme/colors';
 import { Text } from '@/core/components/ui/Text';
 import { createFollowup } from '@/modules/follow-up/api/followUpApi';
-import { api } from '@/core/api/axios'; // For updateStatus if needed
+import { api } from '@/core/api/axios'; 
+import { API_ENDPOINTS } from '@/core/api/api';
 
 interface Props {
   leadId: string;
@@ -49,11 +50,11 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
     setError(null);
 
     try {
-      const formattedDate = `${dateStr} ${timeStr}`; // e.g., "2023-10-25 14:30"
+      const formattedDate = `${dateStr} ${timeStr}`;
       
       const payload = {
         leadId,
-        userId: assignedUserId, // the one we got from leadData.assignedUser.id
+        userId: assignedUserId, 
         notes: notes.trim(),
         date: formattedDate,
         type: selectedType,
@@ -62,9 +63,9 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
       const result = await createFollowup(payload);
 
       if (result.status === 'success') {
-        // Automatically update lead status to 'Follow Up'
+        
         try {
-          await api.post('/lead/update/LeadStatus', { leadId, status: 'Follow Up' });
+          await api.post(API_ENDPOINTS.LEADS.UPDATE_STATUS, { leadId, status: 'Follow Up' });
         } catch (e) {
           console.error("Failed to update status to Follow Up", e);
         }
