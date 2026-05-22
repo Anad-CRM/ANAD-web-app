@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     LEADS: "/dashboard/leads",
     CALLS_ANALYTICS: "/calls/getCallAnalytics",
     SPECIFIC_CALL_TYPE: "/calls/specificCallType",
+    SPECIFIC_CALL_TYPE_ANALYTICS: "/calls/getSpecificCallTypeAnalytics",
     TEAMS: "/dashboard/teams",
     EOD: "/dashboard/eod",
     GET_LEAD_COUNTS: "/lead/getLeadCounts",
