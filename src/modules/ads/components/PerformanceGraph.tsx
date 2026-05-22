@@ -5,7 +5,7 @@ import { Text } from "@/core/components/ui/Text";
 import { BarChart3 } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 
-export const PerformanceGraph = ({ adId }: { adId?: string }) => {
+export const PerformanceGraph = ({ adId, adRecordId }: { adId?: string; adRecordId?: number }) => {
   const [statusData, setStatusData] = useState<AdStatusCount | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -14,12 +14,12 @@ export const PerformanceGraph = ({ adId }: { adId?: string }) => {
 
     const fetchStatus = async () => {
       setIsLoading(true);
-      const data = await getAdStatusBreakdown(adId);
+      const data = await getAdStatusBreakdown(adId, { adRecordId });
       if (data) setStatusData(data.leadStatusCounts);
       setIsLoading(false);
     };
     fetchStatus();
-  }, [adId]);
+  }, [adId, adRecordId]);
 
   const stats = [
     { label: "New", count: statusData?.newLeadCount || 0, color1: COLORS.info, color2: COLORS.primaryDark },
@@ -31,8 +31,8 @@ export const PerformanceGraph = ({ adId }: { adId?: string }) => {
   const maxCount = Math.max(...stats.map(s => s.count), 1);
 
   return (
-    <div className="flex flex-col w-full h-full max-h-[120px]">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="flex w-full flex-col gap-4">
+      <div className="flex items-center gap-2">
         <div className="p-2 rounded-lg" style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primary }}>
           <BarChart3 className="w-5 h-5" />
         </div>
@@ -40,7 +40,7 @@ export const PerformanceGraph = ({ adId }: { adId?: string }) => {
       </div>
 
       <div
-        className="rounded-[24px] p-8 relative w-full flex-1 min-h-[360px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border flex flex-col justify-center"
+        className="relative flex w-full flex-1 flex-col justify-center rounded-[24px] border p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:p-6 lg:p-8 min-h-[280px] sm:min-h-[320px] lg:min-h-[360px]"
         style={{ backgroundColor: COLORS.surface, borderColor: COLORS.grey }}
       >
         {isLoading ? (
@@ -54,7 +54,7 @@ export const PerformanceGraph = ({ adId }: { adId?: string }) => {
             <Text size="sm">Select a campaign to see performance</Text>
           </div>
         ) : (
-          <div className="absolute bottom-12 left-10 right-10 top-16 flex items-end justify-between border-b" style={{ borderBottomColor: COLORS.border }}>
+          <div className="absolute bottom-8 left-4 right-4 top-12 flex items-end justify-between border-b sm:bottom-10 sm:left-8 sm:right-8 sm:top-16" style={{ borderBottomColor: COLORS.border }}>
 
             {/* Y Axis lines - Decorative */}
             <div className="absolute inset-0 flex flex-col justify-between -z-10 opacity-30">
@@ -67,17 +67,17 @@ export const PerformanceGraph = ({ adId }: { adId?: string }) => {
             {stats.map((stat, idx) => {
               const percentage = Math.max((stat.count / maxCount) * 100, 4); // min 4% height
               return (
-                <div key={idx} className="relative flex flex-col items-center justify-end w-16 h-full group">
+                <div key={idx} className="relative flex h-full w-12 flex-col items-center justify-end group sm:w-16">
 
                   {/* Tooltip on hover */}
-                  <div className="absolute -top-10 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300 px-3 py-1 rounded-lg pointer-events-none z-10 flex flex-col items-center" style={{ backgroundColor: COLORS.text, color: COLORS.surface }}>
+                    <div className="absolute -top-10 z-10 flex flex-col items-center rounded-lg px-3 py-1 opacity-0 pointer-events-none transition-all duration-300 group-hover:-translate-y-2 group-hover:opacity-100" style={{ backgroundColor: COLORS.text, color: COLORS.surface }}>
                     <Text size="xs" weight="bold">{stat.count}</Text>
                     <div className="absolute -bottom-1 w-2 h-2 rotate-45" style={{ backgroundColor: COLORS.text }}></div>
                   </div>
 
                   {/* Bar */}
                   <div
-                    className="w-12 rounded-t-xl transition-all duration-700 ease-out flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(0,0,0,0.1)]"
+                    className="w-8 rounded-t-xl transition-all duration-700 ease-out flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(0,0,0,0.1)] sm:w-12"
                     style={{
                       height: `${percentage}%`,
                       background: `linear-gradient(to top, ${stat.color2}, ${stat.color1})`
@@ -86,7 +86,7 @@ export const PerformanceGraph = ({ adId }: { adId?: string }) => {
                   </div>
 
                   {/* X Axis Label */}
-                  <Text weight="semibold" className="absolute -bottom-8 whitespace-nowrap transition-colors" style={{ color: COLORS.muted, fontSize: '12px' }}>{stat.label}</Text>
+                  <Text weight="semibold" className="absolute -bottom-7 whitespace-nowrap transition-colors sm:-bottom-8" style={{ color: COLORS.muted, fontSize: '11px' }}>{stat.label}</Text>
                 </div>
               );
             })}

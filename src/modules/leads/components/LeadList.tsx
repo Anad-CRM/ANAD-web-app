@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Search, Filter, X, Users } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
@@ -94,6 +94,7 @@ export function LeadList() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const statusParam = searchParams.get("status");
+  const adIdParam = searchParams.get("adId");
   const userIdParam = searchParams.get("userId");
   const staffIdParam = searchParams.get("staffId");
   const teamIdParam = searchParams.get("teamId");
@@ -116,6 +117,10 @@ export function LeadList() {
   const [isAssigning, setIsAssigning] = useState(false);
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
   const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
+  const selectedAdLabel = useMemo(() => {
+    if (!adIdParam) return "";
+    return ads.find((ad) => ad.id === adIdParam)?.adName || "Ad filtered";
+  }, [ads, adIdParam]);
 
 
   const offsetRef = useRef(0);
@@ -127,6 +132,7 @@ export function LeadList() {
   const searchTermRef = useRef(searchTerm);
   const filtersRef = useRef(filters);
   const statusParamRef = useRef(statusParam);
+  const adIdParamRef = useRef(adIdParam);
   const userIdParamRef = useRef(userIdParam);
   const staffIdParamRef = useRef(staffIdParam);
   const teamIdParamRef = useRef(teamIdParam);
@@ -134,6 +140,7 @@ export function LeadList() {
   searchTermRef.current = searchTerm;
   filtersRef.current = filters;
   statusParamRef.current = statusParam;
+  adIdParamRef.current = adIdParam;
   userIdParamRef.current = userIdParam;
   staffIdParamRef.current = staffIdParam;
   teamIdParamRef.current = teamIdParam;
@@ -197,6 +204,9 @@ export function LeadList() {
         teamIdParamRef.current,
         offsetRef.current,
       );
+      if (adIdParamRef.current) {
+        payload.adId = adIdParamRef.current;
+      }
       // Unassigned filter: pass isUnassigned flag to API
       if (isUnassignedRef.current) {
         payload.isUnassigned = true;
@@ -248,7 +258,7 @@ export function LeadList() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, isUnassigned]);
+  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, adIdParam, isUnassigned]);
 
 
 
@@ -313,6 +323,9 @@ export function LeadList() {
 
   if (statusParam && filters.statuses.length === 0) {
     activePills.push({ label: statusParam, onRemove: () => { } }); 
+  }
+  if (adIdParam && filters.adIds.length === 0) {
+    activePills.push({ label: selectedAdLabel, onRemove: () => { } });
   }
 
   filters.statuses.forEach(s =>
@@ -436,6 +449,7 @@ export function LeadList() {
             <Text weight="medium" style={{ color: COLORS.muted, fontSize: '12px' }}>
               {leads.length} lead{leads.length !== 1 ? "s" : ""} found
               {statusParam && filters.statuses.length === 0 ? ` · ${statusParam}` : ""}
+              {adIdParam && filters.adIds.length === 0 ? ` · ${selectedAdLabel || "Ad filtered"}` : ""}
             </Text>
           )}
 

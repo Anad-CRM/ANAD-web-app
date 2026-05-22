@@ -30,7 +30,7 @@ export const GlobalMetrics = ({ data }: { data?: GlobalAdMetrics }) => {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-4 mb-8">
+    <div className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-3">
       {metrics.map((m, i) => (
         <div
           key={i}
