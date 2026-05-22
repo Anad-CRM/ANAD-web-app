@@ -10,6 +10,21 @@ import { Staff } from "@/modules/staffs/types/staff.types";
 import { TEAM_ICONS } from "../constants/teamIcons";
 import { Text } from "@/core/components/ui/Text";
 
+const TEAM_CATEGORIES = [
+  "Sales Team",
+  "Telemarketing Team",
+  "Customer Support Team",
+  "Lead Generation Team",
+  "Product Specialists Team",
+  "Follow-up Team",
+  "Market Research Team",
+  "Client Onboarding Team",
+  "Campaign Management Team",
+  "Social Media Response Team",
+  "Product Development Team",
+  "Customer Success Team",
+];
+
 interface CreateTeamModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,35 +38,38 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
   const userManagerId = String(user?.id || "");
 
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
   const [managerId, setManagerId] = useState("");
   const [iconIndex, setIconIndex] = useState(0);
   const [managers, setManagers] = useState<Staff[]>([]);
   
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<{ name?: string; category?: string }>({});
 
   const { showToast } = useFeedback();
 
   useEffect(() => {
     if (isOpen && isAdmin) {
+      setManagers([]);
       StaffService.getStaffList({
         organizationId,
         role: "Manager",
-        date: new Date().toISOString(),
+        date: new Date().toISOString().split("T")[0],
       }).then(res => {
         if (res.status === "success" && Array.isArray(res.data)) {
           setManagers(res.data);
         }
       }).catch(console.error);
     }
-  }, [isOpen, isAdmin, organizationId]);
+  }, [isOpen, isAdmin, organizationId, user?.role]);
 
   useEffect(() => {
     if (isOpen) {
       setName("");
+      setCategory("");
       setManagerId("");
       setIconIndex(0);
-      setError("");
+      setErrors({});
     }
   }, [isOpen]);
 
@@ -65,8 +83,14 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      setError("Please enter team name");
+      setErrors({ name: "Please enter team name" });
       showToast("Please enter a team name", "error");
+      return;
+    }
+
+    if (!category.trim()) {
+      setErrors({ category: "Please enter team category" });
+      showToast("Please enter a team category", "error");
       return;
     }
 
@@ -75,6 +99,8 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
       const res = await TeamsService.createTeam({
         organizationId,
         name: name.trim(),
+        category: category.trim(),
+        typeCategory: category.trim(),
         managerId: isAdmin ? (managerId || undefined) : userManagerId,
         iconIndex: iconIndex,
       });
@@ -137,19 +163,48 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
               value={name}
               onChange={e => {
                 setName(e.target.value);
-                if (error) setError("");
+                if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
               }}
               placeholder="e.g. Sales Team Alpha"
               className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 transition-all font-medium placeholder:text-slate-400"
               style={{ 
-                borderColor: error ? COLORS.danger : COLORS.border,
+                borderColor: errors.name ? COLORS.danger : COLORS.border,
                 color: COLORS.text,
               }}
             />
-            {error && (
+            {errors.name && (
               <div className="flex items-center gap-1.5 mt-2 ml-1">
                 <div className="w-1 h-1 rounded-full bg-red-500"></div>
-                <Text weight="medium" size="xs" className="text-red-500">{error}</Text>
+                <Text weight="medium" size="xs" className="text-red-500">{errors.name}</Text>
+              </div>
+            )}
+          </div>
+
+          {/* Team Category */}
+          <div>
+            <Text weight="bold" size="custom" className="mb-2 block" style={{ fontSize: '13px', color: COLORS.text }}>Team Category *</Text>
+            <select
+              value={category}
+              onChange={e => {
+                setCategory(e.target.value);
+                if (errors.category) setErrors(prev => ({ ...prev, category: undefined }));
+              }}
+              className="w-full rounded-2xl px-4 py-3.5 text-[14px] border outline-none focus:ring-2 transition-all font-medium placeholder:text-slate-400"
+              style={{
+                borderColor: errors.category ? COLORS.danger : COLORS.border,
+                color: COLORS.text,
+                backgroundColor: COLORS.surface,
+              }}
+            >
+              <option value="">--Select Category--</option>
+              {TEAM_CATEGORIES.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+            {errors.category && (
+              <div className="flex items-center gap-1.5 mt-2 ml-1">
+                <div className="w-1 h-1 rounded-full bg-red-500"></div>
+                <Text weight="medium" size="xs" className="text-red-500">{errors.category}</Text>
               </div>
             )}
           </div>
@@ -165,9 +220,13 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
                 style={{ color: COLORS.text, borderColor: COLORS.border }}
               >
                 <option value="">Do not assign</option>
-                {managers.map((m) => (
-                  <option key={m.id} value={m.id}>{m.userName || (m.id as string)}</option>
-                ))}
+                {managers.length === 0 ? (
+                  <option value="" disabled>No managers found</option>
+                ) : (
+                  managers.map((m) => (
+                    <option key={m.id} value={m.id}>{m.userName || (m.id as string)}</option>
+                  ))
+                )}
               </select>
             </div>
           )}

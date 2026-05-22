@@ -19,7 +19,7 @@ export const TeamsService = {
     return response.data;
   },
 
-  async createTeam(payload: { organizationId: string; name: string; managerId?: string; iconIndex?: number }): Promise<unknown> {
+  async createTeam(payload: { organizationId: string; name: string; category?: string; typeCategory?: string; managerId?: string; iconIndex?: number }): Promise<unknown> {
     const response = await api.post(
       API_ENDPOINTS.TEAM.CREATE,
       payload
