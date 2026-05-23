@@ -344,8 +344,8 @@ export function LeadList() {
 
   return (
     <>
-      <div className="flex flex-col h-full min-h-0 space-y-2 sm:space-y-3" >
-        {/* <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6"> */}
+      <div className="flex flex-col space-y-2 sm:space-y-3 pb-6">
+        <div className="sticky top-[-16px] sm:top-[-24px] md:top-[-32px] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 z-40 bg-[#DCE6F2] pt-0 pb-3">
         <div className="flex items-center gap-2 flex-wrap mb-0.5 sm:mb-1">
           <BackButton onClick={() => router.back()} />
           <Text as="h1" weight="semibold" className="text-slate-800 text-[16px] sm:text-[18px] leading-tight">
@@ -362,8 +362,8 @@ export function LeadList() {
         </div>
 
         {/* ── Search + Filter Row ── */}
-        <div className="flex items-center gap-2 relative">
-          <div className="flex-1 lg:max-w-[760px] relative group">
+        <div className="flex items-start gap-2 relative">
+          <div className="flex-1 relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
               style={{ color: COLORS.subtle }}>
               <Search size={17} />
@@ -392,26 +392,40 @@ export function LeadList() {
             )}
           </div>
 
-          {/* Filter button */}
-          <button
-            onClick={() => setIsFilterOpen(true)}
-            className="relative w-10 h-10 sm:w-auto sm:h-auto sm:px-3.5 sm:py-3 rounded-full sm:rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-0.5 flex items-center justify-center shrink-0"
-            style={{
-              backgroundColor: hasActiveFilters ? COLORS.primary : COLORS.primaryDark,
-              boxShadow: `0 4px 14px ${COLORS.primary}40`,
-            }}
-            title="Filter Leads"
-          >
-            <Filter size={17} className="sm:w-5 sm:h-5" />
-            {hasActiveFilters && (
-              <span
-                className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
-                style={{ backgroundColor: COLORS.warning }}
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            {/* Filter button */}
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              className="relative w-10 h-10 sm:w-auto sm:h-auto sm:px-3.5 sm:py-3 rounded-full sm:rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-0.5 flex items-center justify-center shrink-0"
+              style={{
+                backgroundColor: hasActiveFilters ? COLORS.primary : COLORS.primaryDark,
+                boxShadow: `0 4px 14px ${COLORS.primary}40`,
+              }}
+              title="Filter Leads"
+            >
+              <Filter size={17} className="sm:w-5 sm:h-5" />
+              {hasActiveFilters && (
+                <span
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
+                  style={{ backgroundColor: COLORS.warning }}
+                >
+                  {activePills.length}
+                </span>
+              )}
+            </button>
+
+            {leads.length > 0 && (
+              <button
+                onClick={toggleSelectionMode}
+                className={`text-[11px] sm:text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors border ${isSelectionMode
+                  ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100"
+                  : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+                  }`}
               >
-                {activePills.length}
-              </span>
+                {isSelectionMode ? "Cancel" : "Select"}
+              </button>
             )}
-          </button>
+          </div>
         </div>
 
         {/* ── Active filter pills ── */}
@@ -444,7 +458,7 @@ export function LeadList() {
         )}
 
         {/* ── Selection Action Bar ── */}
-        <div className="flex items-center justify-between gap-2 sm:gap-3 flex-wrap">
+        <div className="mt-1 flex items-center justify-between gap-2 sm:gap-3 flex-wrap">
           {!isLoading && (
             <Text weight="medium" className="text-[11px] sm:text-[12px] leading-tight" style={{ color: COLORS.muted }}>
               {leads.length} lead{leads.length !== 1 ? "s" : ""} found
@@ -485,33 +499,16 @@ export function LeadList() {
                   </button>
                 </>
               )}
-              <button
-                onClick={toggleSelectionMode}
-                className={`text-[11px] sm:text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors border ${isSelectionMode
-                  ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100"
-                  : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
-                  }`}
-              >
-                {isSelectionMode ? "Cancel" : "Select"}
-              </button>
               </>
             )}
           </div>
         </div>
 
-        {/* ── Leads Grid ── */}
-        <div
-          className="flex-1 overflow-y-auto custom-scrollbar px-0 sm:px-1 md:px-2 lg:px-3 py-3 sm:py-4"
-          onScroll={(e) => {
-            const t = e.currentTarget;
-            const distanceToBottom = t.scrollHeight - t.scrollTop - t.clientHeight;
+        </div>
 
-            // Trigger pre-fetch when within 400px of the bottom to prevent lag
-            if (distanceToBottom <= 400 && hasMore && !isLoading && !isLoadingMore && !isFetchingRef.current) {
-              loadLeads(false);
-            }
-          }}
-        >
+        {/* ── Leads Grid ── */}
+
+        <div className="px-0 sm:px-1 md:px-2 lg:px-3 py-3 sm:py-4">
 
           {isLoading ? (
             <div className="flex justify-center items-center h-52">
