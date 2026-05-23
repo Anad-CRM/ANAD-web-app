@@ -2,6 +2,8 @@
 import React from "react";
 import * as Icons from "lucide-react";
 import { PipelineMetric } from "../types";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 interface PipelineMetricCardProps {
   metric: PipelineMetric;
@@ -13,26 +15,42 @@ export const PipelineMetricCard: React.FC<PipelineMetricCardProps> = ({ metric, 
 
   return (
     <div
-      className="bg-white rounded-xl p-4 lg:p-5 flex flex-col justify-between shadow-sm border border-slate-100 flex-1 cursor-pointer hover:shadow-md transition-shadow"
+      className="bg-white rounded-xl p-3.5 sm:p-4 lg:p-5 flex flex-col justify-between shadow-sm border border-slate-100 h-full min-h-[118px] sm:min-h-[130px] cursor-pointer hover:shadow-md transition-all duration-200 active:scale-[0.99]"
       onClick={onClick}
     >
       <div className="flex justify-between items-start w-full">
-        <h3 className="text-[#1A1A1A] text-[15px] font-medium tracking-tight">
+        <Text
+          as="h3"
+          weight="medium"
+          className="text-[13px] sm:text-[14px] leading-tight tracking-tight text-balance"
+          style={{ color: COLORS.text }}
+        >
           {metric.title}
           {metric.title === "RNR" && (
-            <span className="text-[#8B8B8B] text-[11px] font-normal ml-1 tracking-normal">
+            <span
+              className="block sm:inline text-[11px] sm:text-[11px] font-normal sm:ml-1 tracking-normal"
+              style={{ color: COLORS.subtle }}
+            >
               (Ring Not Respond)
             </span>
           )}
-        </h3>
-        <div className="w-8 h-8 rounded-lg bg-[#1C3A76] flex items-center justify-center shrink-0">
-          <IconComponent className="w-4 h-4 text-white" strokeWidth={2.5} />
+        </Text>
+        <div
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0"
+          style={{ backgroundColor: COLORS.primaryDark }}
+        >
+          <IconComponent className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
         </div>
       </div>
       <div className="mt-2">
-        <span className="text-3xl font-bold text-[#1A1A1A] leading-none">
+        <Text
+          as="span"
+          weight="bold"
+          className="text-[clamp(1.5rem,3.8vw,2.6rem)] leading-none"
+          style={{ color: COLORS.text }}
+        >
           {metric.count}
-        </span>
+        </Text>
       </div>
     </div>
   );

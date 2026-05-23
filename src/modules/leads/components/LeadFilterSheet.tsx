@@ -323,10 +323,10 @@ export function LeadFilterSheet({
 
       {/* Sheet */}
       <div
-        className="relative w-full sm:max-w-md rounded-t-[28px] sm:rounded-[24px] overflow-hidden flex flex-col"
+        className="relative w-full h-[100dvh] sm:h-auto sm:max-w-md rounded-none sm:rounded-[24px] overflow-hidden flex flex-col"
         style={{
           backgroundColor: "#fff",
-          maxHeight: "92vh",
+          maxHeight: "100dvh",
           boxShadow: "0 -8px 40px rgba(13,27,62,0.18)",
         }}
       >
@@ -336,10 +336,10 @@ export function LeadFilterSheet({
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-1">
+        <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-1">
           <div className="flex items-center gap-2">
             <SlidersHorizontal size={20} style={{ color: COLORS.primary }} />
-            <Text weight="bold" style={{ color: "#1a1a1a", fontSize: '20px' }}>
+            <Text weight="bold" className="text-[18px] sm:text-[20px]" style={{ color: "#1a1a1a" }}>
               Filter Options
             </Text>
           </div>
@@ -352,11 +352,11 @@ export function LeadFilterSheet({
         </div>
 
         {/* Summary line */}
-        <div className="px-6 pt-2 pb-3">
+        <div className="px-4 sm:px-6 pt-2 pb-3">
           <Text
             weight="bold"
             className="text-center"
-            style={{ color: summaryCount > 0 ? "#c0392b" : "#9ca3af", fontSize: '14px' }}
+            style={{ color: summaryCount > 0 ? "#c0392b" : "#9ca3af", fontSize: '13px' }}
           >
             {summaryCount > 0
               ? `${summaryCount} filter${summaryCount > 1 ? "s" : ""} active: ${summaryParts.join(", ")}`
@@ -365,7 +365,7 @@ export function LeadFilterSheet({
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 custom-scrollbar">
 
           {/* ────────── DATE RANGE ────────── */}
           <div className="h-px bg-gray-200 mb-1" />
@@ -396,14 +396,14 @@ export function LeadFilterSheet({
           {expandedKey === "date" && (
             <div className="pb-4">
               {/* Preset chips — 4 in row 1, 2 in row 2 (like Flutter) */}
-              <div className="grid grid-cols-4 gap-2 mb-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                 {DATE_PRESETS.slice(0, 4).map(preset => {
                   const isActive = datePreset === preset;
                   return (
                     <button
                       key={preset}
                       onClick={() => applyPreset(preset)}
-                      className="flex items-center justify-center gap-1 py-2 rounded-full text-[11px] font-semibold transition-all"
+                      className="flex items-center justify-center gap-1 py-2 rounded-full text-[10px] sm:text-[11px] font-semibold transition-all"
                       style={{
                         backgroundColor: isActive ? COLORS.primary : "#fff",
                         color: isActive ? "#fff" : "#1a1a1a",
@@ -416,14 +416,14 @@ export function LeadFilterSheet({
                   );
                 })}
               </div>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex">
                 {DATE_PRESETS.slice(4).map(preset => {
                   const isActive = datePreset === preset;
                   return (
                     <button
                       key={preset}
                       onClick={() => applyPreset(preset)}
-                      className="flex items-center justify-center gap-1 py-2 px-4 rounded-full text-[11px] font-semibold transition-all"
+                      className="flex items-center justify-center gap-1 py-2 px-3 sm:px-4 rounded-full text-[10px] sm:text-[11px] font-semibold transition-all"
                       style={{
                         backgroundColor: isActive ? COLORS.primary : "#fff",
                         color: isActive ? "#fff" : "#1a1a1a",
@@ -458,7 +458,7 @@ export function LeadFilterSheet({
 
               {/* Custom date inputs */}
               {datePreset === "Custom" && (
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-col sm:flex-row gap-2">
                   <div className="flex-1">
                     <Text weight="medium" className="mb-1 block text-gray-500" style={{ fontSize: '11px' }}>From</Text>
                     <input
@@ -676,7 +676,7 @@ export function LeadFilterSheet({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 flex gap-3 border-t border-gray-200">
+        <div className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row gap-3 border-t border-gray-200">
           <button
             onClick={handleClear}
             className="flex-1 py-3 rounded-xl text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all border border-gray-200"
