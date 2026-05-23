@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Clock, ChevronRight } from 'lucide-react';
+import { Clock, ChevronRight } from 'lucide-react';
 import { Text } from '@/core/components/ui/Text';
 import { WhatsAppMessage } from '@/modules/leads/api/leadsApi';
 import { Whatsapp } from '@thesvg/react';
@@ -15,13 +15,13 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ messages }) => {
   const hasMore = messages.length > 3;
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col relative h-fit">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] p-4 sm:p-6 shadow-sm border border-black/5 flex flex-col relative h-fit">
+      <div className="flex items-start sm:items-center justify-between gap-3 mb-4 sm:mb-6">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-[#E8F5E9] flex items-center justify-center">
             <Whatsapp width={18} height={18} className="text-[#4CAF50]" />
           </div>
-          <Text weight="bold" className="text-slate-800" style={{ fontSize: '18px' }}>
+          <Text weight="bold" className="text-slate-800" style={{ fontSize: '16px' }}>
             WhatsApp Messages
           </Text>
         </div>
@@ -32,10 +32,10 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ messages }) => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5 sm:gap-3">
         {displayMessages.map((msg, i) => (
-          <div key={i} className="bg-[#F8F9FA] rounded-2xl p-4 border border-slate-100/50">
-            <Text className="text-slate-700 leading-relaxed" style={{ fontSize: '13.5px' }}>
+          <div key={i} className="bg-[#F8F9FA] rounded-2xl p-3 sm:p-4 border border-slate-100/50">
+            <Text className="text-slate-700 leading-relaxed break-words" style={{ fontSize: '13.5px' }}>
               {msg.text}
             </Text>
             <div className="flex items-center gap-1.5 mt-2.5 opacity-60">

@@ -57,6 +57,7 @@ export const API_ENDPOINTS = {
     GET_BY_ID: "/lead/getLeadById",
     WHATSAPP: "/whatsapp/getWhatsAppMessages",
     UPDATE_STATUS: "/lead/update/LeadStatus",
+    DELETE: "/lead/deleteLead",
   },
   AUTO_LEAD: {
     GET_LIVE_ADS: (orgId: string | number) => `/ad/getLiveAds/${orgId}`,

@@ -49,12 +49,12 @@ export const CreateActivityModal: React.FC<Props> = ({ leadId, activityType, onC
   const timeStr = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).format(now);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100">
           <Text weight="semibold" className="text-slate-800" style={{ fontSize: '18px' }}>Add {activityType}</Text>
           <button
             onClick={onClose}
@@ -64,7 +64,7 @@ export const CreateActivityModal: React.FC<Props> = ({ leadId, activityType, onC
           </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-6">
+        <div className="p-4 sm:p-6 flex flex-col gap-5 sm:gap-6 overflow-y-auto">
           <div className="flex flex-col gap-2">
             <Text weight="semibold" className="text-slate-600 tracking-wide uppercase" style={{ fontSize: '13px' }}>Details</Text>
             <textarea
@@ -83,10 +83,10 @@ export const CreateActivityModal: React.FC<Props> = ({ leadId, activityType, onC
           </div>
         </div>
 
-        <div className="px-6 py-5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-t border-slate-100 bg-slate-50/50 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
             disabled={isLoading}
           >
             <Text weight="semibold">Cancel</Text>
@@ -94,7 +94,7 @@ export const CreateActivityModal: React.FC<Props> = ({ leadId, activityType, onC
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="px-5 py-2.5 rounded-xl text-white transition-colors flex items-center justify-center min-w-[120px]"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-white transition-colors flex items-center justify-center min-w-[120px]"
             style={{ backgroundColor: COLORS.primary }}
           >
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Text weight="semibold">Add Activity</Text>}

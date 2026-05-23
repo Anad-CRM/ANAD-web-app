@@ -28,6 +28,11 @@ interface FetchLeadsResponse {
   totalCount?: number;
 }
 
+interface DeleteLeadResponse {
+  status: string;
+  message?: string;
+}
+
 export interface WhatsAppMessage {
   text: string;
   date: string;
@@ -183,6 +188,25 @@ export const leadsApi = {
     } catch (error) {
       console.error("[leadsApi] Error fetching WhatsApp messages:", error);
       return [];
+    }
+  },
+
+  deleteLead: async (leadId: string, deleteDuplicates = false): Promise<DeleteLeadResponse> => {
+    const userData = getUser<Record<string, string>>();
+    if (!userData?.organizationId) {
+      return { status: "failed", message: "No organization found for this user" };
+    }
+
+    try {
+      const response = await api.post(API_ENDPOINTS.LEADS.DELETE, {
+        leadId,
+        organizationId: userData.organizationId,
+        deleteDuplicates,
+      });
+      return response.data;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      return { status: "failed", message: err?.response?.data?.message || "Failed to delete lead" };
     }
   },
 };

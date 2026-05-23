@@ -9,18 +9,18 @@ export const LeadFollowUpCard: React.FC<{ followups: Record<string, unknown>[], 
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col relative h-fit">   
-       <div className="flex items-center justify-between mb-8">
+    <div className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] p-4 sm:p-6 shadow-sm border border-black/5 flex flex-col relative h-[360px] sm:h-[420px] lg:h-[500px] overflow-hidden">   
+       <div className="flex items-center justify-between mb-4 sm:mb-6 flex-shrink-0">
       <Text size="xl" weight="semibold" className="text-black">Follow Up</Text>
       <button 
         onClick={() => setShowCreateModal(true)}
-        className="w-12 h-12 rounded-full flex items-center justify-center text-white transition-all shadow-lg active:scale-95 hover:opacity-90 " style={{ backgroundColor: COLORS.primary }}>
-        <Pencil className="w-5 h-5" />
+        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white transition-all shadow-lg active:scale-95 hover:opacity-90 " style={{ backgroundColor: COLORS.primary }}>
+        <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
     </div>
 
       {followups && followups.length > 0 ? (
-        <div className="flex flex-col gap-4 overflow-y-auto pr-2">
+        <div className="flex-1 min-h-0 flex flex-col gap-3 sm:gap-4 overflow-y-scroll pr-1 sm:pr-2 custom-scrollbar" style={{ scrollbarWidth: 'thin', scrollbarGutter: 'stable' }}>
           {followups.map((fu: any, idx) => {
             const fuDate = fu.date ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(fu.date)) : '';
             const fuTime = fu.time || '';
@@ -35,7 +35,7 @@ export const LeadFollowUpCard: React.FC<{ followups: Record<string, unknown>[], 
                   {isCompleted && <CheckCircle2 className="w-5 h-5 text-green-500" />}
                 </div>
 
-                <div className="flex gap-4 mt-2">
+                <div className="flex flex-wrap gap-2 sm:gap-4 mt-2">
                   <div className="flex items-center gap-1.5 text-slate-500 bg-slate-50 px-2 py-1 rounded-md">
                     <CalendarDays className="w-3.5 h-3.5" />
                     <Text size="custom" weight="medium" className="text-[12px]">{fuDate}</Text>

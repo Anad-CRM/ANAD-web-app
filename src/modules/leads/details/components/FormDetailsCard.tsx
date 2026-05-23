@@ -1,10 +1,10 @@
 import React from 'react';
-import { FileText, Copy } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { Text } from '@/core/components/ui/Text';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
 
 interface Props {
-  formData?: Record<string, any>;
+  formData?: Record<string, unknown>;
 }
 
 export const FormDetailsCard: React.FC<Props> = ({ formData }) => {
@@ -35,15 +35,15 @@ export const FormDetailsCard: React.FC<Props> = ({ formData }) => {
   };
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[32px] p-6 shadow-sm border border-black/5 flex flex-col relative h-fit">
-      <div className="flex items-center gap-2 mb-6">
+    <div className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] p-4 sm:p-6 shadow-sm border border-black/5 flex flex-col relative h-fit">
+      <div className="flex items-center gap-2 mb-4 sm:mb-6">
 
         <Text weight="bold" className="text-slate-800" size="xl" >
           Form Details
         </Text>
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 sm:gap-5">
         {filteredData.map(([key, value], index) => {
           const displayValue = Array.isArray(value) ? value[0] : value;
           const isLast = index === filteredData.length - 1;
@@ -57,10 +57,10 @@ export const FormDetailsCard: React.FC<Props> = ({ formData }) => {
                 className="flex items-center justify-between group cursor-pointer"
                 onClick={() => handleCopy(displayValue?.toString() || '')}
               >
-                <Text weight="medium" className="text-slate-900 leading-relaxed" style={{ fontSize: '14px' }}>
+                <Text weight="medium" className="text-slate-900 leading-relaxed break-words pr-3" style={{ fontSize: '14px' }}>
                   {displayValue?.toString() || 'N/A'}
                 </Text>
-                <Copy size={14} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Copy size={14} className="text-slate-300 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0" />
               </div>
               {!isLast && <div className="h-px bg-slate-50 mt-1" />}
             </div>

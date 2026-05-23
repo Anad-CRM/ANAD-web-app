@@ -81,12 +81,12 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100">
           <Text weight="semibold" className="text-slate-800" style={{ fontSize: '18px' }}>New Follow-Up</Text>
           <button
             onClick={onClose}
@@ -96,18 +96,18 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
           </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-6 overflow-y-auto max-h-[70vh]">
+        <div className="p-4 sm:p-6 flex flex-col gap-5 sm:gap-6 overflow-y-auto">
           {/* Type Selector */}
           <div className="flex flex-col gap-3">
             <Text weight="semibold" className="text-slate-500 tracking-wide uppercase" style={{ fontSize: '12px' }}>Follow-Up Via</Text>
-            <div className="flex justify-between gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {TYPE_OPTIONS.map((opt) => {
                 const isSelected = selectedType === opt.type;
                 return (
                   <button
                     key={opt.type}
                     onClick={() => setSelectedType(opt.type)}
-                    className="flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border transition-all"
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border transition-all"
                     style={{
                       borderColor: isSelected ? COLORS.primary : '#E2E8F0',
                       backgroundColor: isSelected ? `${COLORS.primary}0D` : 'transparent'
@@ -134,8 +134,8 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
           {/* Schedule */}
           <div className="flex flex-col gap-3">
             <Text weight="semibold" className="text-slate-500 tracking-wide uppercase" style={{ fontSize: '12px' }}>Schedule</Text>
-            <div className="flex gap-4">
-              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all min-w-0">
                 <CalendarDays size={18} className="text-slate-400" />
                 <input
                   type="date"
@@ -145,7 +145,7 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
                   onChange={e => setDateStr(e.target.value)}
                 />
               </div>
-              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all min-w-0">
                 <Clock size={18} className="text-slate-400" />
                 <input
                   type="time"
@@ -179,10 +179,10 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
           )}
         </div>
 
-        <div className="px-6 py-5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-t border-slate-100 bg-slate-50/50 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
             disabled={isLoading}
           >
             <Text weight="semibold">Cancel</Text>
@@ -190,7 +190,7 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="px-5 py-2.5 rounded-xl text-white transition-colors flex items-center justify-center min-w-[160px]"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-white transition-colors flex items-center justify-center min-w-[160px]"
             style={{ backgroundColor: COLORS.primary }}
           >
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Text weight="semibold">Schedule Follow-Up</Text>}
