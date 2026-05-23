@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { LeadSummaryCard } from '@/modules/leads/details/components/LeadSummaryCard';
 import { LeadFollowUpCard } from '@/modules/leads/details/components/LeadFollowUpCard';
@@ -24,6 +24,8 @@ export const LeadDetailsDashboard: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [followups, setFollowups] = useState<Record<string, unknown>[]>([]);
   const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([]);
+  const summaryCardRef = useRef<HTMLDivElement | null>(null);
+  const [summaryCardHeight, setSummaryCardHeight] = useState<number | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -80,6 +82,27 @@ export const LeadDetailsDashboard: React.FC = () => {
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    const element = summaryCardRef.current;
+    if (!element) return;
+
+    const updateHeight = () => {
+      setSummaryCardHeight(element.getBoundingClientRect().height);
+    };
+
+    updateHeight();
+
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(element);
+
+    window.addEventListener('resize', updateHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [lead, activities, followups, whatsappMessages]);
+
   return (
     <div className="flex flex-col w-full min-h-0 overflow-y-auto [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/20">
       <div className="max-w-[1400px] mx-auto w-full px-0 sm:px-1">
@@ -112,34 +135,38 @@ export const LeadDetailsDashboard: React.FC = () => {
             <Text weight="medium" style={{ color: '#64748B' }}>Lead not found.</Text>
           </div>
         ) : (
-          <div className="flex flex-col xl:flex-row gap-4 sm:gap-6 items-stretch h-full">
-            {/* Left Column 60% */}
-            <div className="flex flex-col gap-4 sm:gap-6 w-full xl:w-[60%] flex-1">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 items-stretch">
+            <div ref={summaryCardRef} className="h-fit self-start">
               <LeadSummaryCard lead={lead} onRefresh={loadData} />
+            </div>
+            <div className="h-full">
+              <FormDetailsCard
+                formData={lead.formData}
+                style={summaryCardHeight ? { height: `${summaryCardHeight}px` } : undefined}
+              />
+            </div>
 
-
-
-              {/* <FormDetailsCard formData={lead.formData} /> */}
-
+            <div className="h-full">
               <LeadActivityLog
                 activities={activities}
                 leadId={leadId}
                 onRefresh={loadData}
               />
             </div>
-
-            {/* Right Column 40% */}
-            <div className="w-full xl:w-[40%] flex-shrink-0 gap-4 sm:gap-6 xl:sticky xl:top-4 flex flex-col self-start">
-              <FormDetailsCard formData={lead.formData} />
-              <WhatsAppMessagesCard messages={whatsappMessages} leadId={leadId} />
+            <div className="h-full">
               <LeadFollowUpCard
                 followups={followups}
                 leadId={leadId}
                 assignedUserId={(lead as unknown as any)?.assignedUser?.id || (lead as unknown as any)?.assignedUser?._id || ''}
                 onRefresh={loadData}
               />
-
             </div>
+
+            {whatsappMessages.length > 0 && (
+              <div className="xl:col-span-2">
+                <WhatsAppMessagesCard messages={whatsappMessages} leadId={leadId} />
+              </div>
+            )}
           </div>
         )}
       </div>

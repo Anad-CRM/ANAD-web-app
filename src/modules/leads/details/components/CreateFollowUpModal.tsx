@@ -28,29 +28,43 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
   const [notes, setNotes] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ date?: string; notes?: string; general?: string }>({});
+
+  const validate = () => {
+    const nextErrors: { date?: string; notes?: string } = {};
+
+    if (!dateStr) {
+      nextErrors.date = 'Please select a date';
+    } else {
+      const followUpDate = timeStr
+        ? new Date(`${dateStr}T${timeStr}:00`)
+        : new Date(`${dateStr}T00:00:00`);
+
+      if (Number.isNaN(followUpDate.getTime())) {
+        nextErrors.date = 'Please select a valid date';
+      } else if (followUpDate < new Date()) {
+        nextErrors.date = 'Follow-up date cannot be in the past';
+      }
+    }
+
+    if (!notes.trim()) {
+      nextErrors.notes = 'Please enter notes';
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
 
   const handleSubmit = async () => {
-    if (!dateStr || !timeStr) {
-      setError('Please select a follow-up date and time');
-      return;
-    }
-    if (!notes.trim()) {
-      setError('Please add some notes');
-      return;
-    }
-
-    const followUpDate = new Date(`${dateStr}T${timeStr}`);
-    if (followUpDate < new Date()) {
-      setError('Follow-up date cannot be in the past');
-      return;
-    }
+    if (!validate()) return;
 
     setIsLoading(true);
-    setError(null);
+    setErrors({});
 
     try {
-      const formattedDate = `${dateStr} ${timeStr}`;
+      const formattedDate = timeStr
+        ? new Date(`${dateStr}T${timeStr}:00`).toISOString()
+        : new Date(`${dateStr}T00:00:00`).toISOString();
       
       const payload = {
         leadId,
@@ -71,10 +85,10 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
         }
         onSuccess();
       } else {
-        setError(result.message || 'Failed to create follow-up');
+        setErrors({ general: result.message || 'Failed to create follow-up' });
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Something went wrong');
+      setErrors({ general: err?.response?.data?.message || 'Something went wrong' });
     } finally {
       setIsLoading(false);
     }
@@ -142,7 +156,10 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
                   className="flex-1 bg-transparent text-[15px] outline-none text-slate-800"
                   value={dateStr}
                   min={new Date().toISOString().split('T')[0]}
-                  onChange={e => setDateStr(e.target.value)}
+                  onChange={e => {
+                    setDateStr(e.target.value);
+                    if (errors.date) setErrors((prev) => ({ ...prev, date: undefined }));
+                  }}
                 />
               </div>
               <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all min-w-0">
@@ -155,6 +172,9 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
                 />
               </div>
             </div>
+            {errors.date && (
+              <Text style={{ color: COLORS.danger, fontSize: '12px' }}>{errors.date}</Text>
+            )}
           </div>
 
           {/* Notes */}
@@ -167,14 +187,20 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
 • Questions to ask
 • Next steps"
               value={notes}
-              onChange={e => setNotes(e.target.value)}
+              onChange={e => {
+                setNotes(e.target.value);
+                if (errors.notes) setErrors((prev) => ({ ...prev, notes: undefined }));
+              }}
             />
+            {errors.notes && (
+              <Text style={{ color: COLORS.danger, fontSize: '12px' }}>{errors.notes}</Text>
+            )}
             <Text style={{ color: '#64748B', fontSize: '12px' }}>These notes will help you prepare for the follow-up</Text>
           </div>
 
-          {error && (
+          {errors.general && (
             <div className="px-2 bg-red-50 py-2 rounded-lg border border-red-100">
-              <Text className="text-red-500" style={{ fontSize: '14px' }}>{error}</Text>
+              <Text className="text-red-500" style={{ fontSize: '14px' }}>{errors.general}</Text>
             </div>
           )}
         </div>

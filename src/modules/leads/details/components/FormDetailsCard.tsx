@@ -5,20 +5,18 @@ import { useFeedback } from '@/core/contexts/FeedbackContext';
 
 interface Props {
   formData?: Record<string, unknown>;
+  style?: React.CSSProperties;
 }
 
-export const FormDetailsCard: React.FC<Props> = ({ formData }) => {
+export const FormDetailsCard: React.FC<Props> = ({ formData, style }) => {
   const { showToast } = useFeedback();
-
-  if (!formData || Object.keys(formData).length === 0) return null;
+  const safeFormData = formData ?? {};
 
   const skipFields = ['full_name', 'phone_number', 'mobileNumber', 'userName', 'email'];
 
-  const filteredData = Object.entries(formData).filter(([key]) => {
+  const filteredData = Object.entries(safeFormData).filter(([key]) => {
     return !skipFields.some(field => key.toLowerCase().includes(field.toLowerCase()));
   });
-
-  if (filteredData.length === 0) return null;
 
   const formatKey = (key: string) => {
     return key
@@ -35,7 +33,10 @@ export const FormDetailsCard: React.FC<Props> = ({ formData }) => {
   };
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] p-4 sm:p-6 shadow-sm border border-black/5 flex flex-col relative h-fit">
+    <div
+      className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] p-4 sm:p-6 shadow-sm border border-black/5 flex flex-col relative overflow-hidden"
+      style={style}
+    >
       <div className="flex items-center gap-2 mb-4 sm:mb-6">
 
         <Text weight="bold" className="text-slate-800" size="xl" >
@@ -43,29 +44,42 @@ export const FormDetailsCard: React.FC<Props> = ({ formData }) => {
         </Text>
       </div>
 
-      <div className="flex flex-col gap-4 sm:gap-5">
-        {filteredData.map(([key, value], index) => {
-          const displayValue = Array.isArray(value) ? value[0] : value;
-          const isLast = index === filteredData.length - 1;
+      <div className="flex-1 min-h-0 overflow-y-scroll pr-1 sm:pr-2 custom-scrollbar" style={{ scrollbarWidth: 'thin', scrollbarGutter: 'stable' }}>
+      {filteredData.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-8 text-center min-h-full flex flex-col items-center justify-center">
+          <Text weight="semibold" className="text-slate-600" style={{ fontSize: '14px' }}>
+            No form details available
+          </Text>
+          <Text className="mt-1 text-slate-400 block" style={{ fontSize: '12px' }}>
+            This lead does not have additional form responses.
+          </Text>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4 sm:gap-5">
+          {filteredData.map(([key, value], index) => {
+            const displayValue = Array.isArray(value) ? value[0] : value;
+            const isLast = index === filteredData.length - 1;
 
-          return (
-            <div key={key} className="flex flex-col gap-1.5">
-              <Text weight="semibold" className="text-slate-500 uppercase tracking-wider" style={{ fontSize: '11px' }}>
-                {formatKey(key)}
-              </Text>
-              <div
-                className="flex items-center justify-between group cursor-pointer"
-                onClick={() => handleCopy(displayValue?.toString() || '')}
-              >
-                <Text weight="medium" className="text-slate-900 leading-relaxed break-words pr-3" style={{ fontSize: '14px' }}>
-                  {displayValue?.toString() || 'N/A'}
+            return (
+              <div key={key} className="flex flex-col gap-1.5">
+                <Text weight="semibold" className="text-slate-500 uppercase tracking-wider" style={{ fontSize: '11px' }}>
+                  {formatKey(key)}
                 </Text>
-                <Copy size={14} className="text-slate-300 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0" />
+                <div
+                  className="flex items-center justify-between group cursor-pointer"
+                  onClick={() => handleCopy(displayValue?.toString() || '')}
+                >
+                  <Text weight="medium" className="text-slate-900 leading-relaxed break-words pr-3" style={{ fontSize: '14px' }}>
+                    {displayValue?.toString() || 'N/A'}
+                  </Text>
+                  <Copy size={14} className="text-slate-300 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0" />
+                </div>
+                {!isLast && <div className="h-px bg-slate-50 mt-1" />}
               </div>
-              {!isLast && <div className="h-px bg-slate-50 mt-1" />}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+      )}
       </div>
     </div>
   );

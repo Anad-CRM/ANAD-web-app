@@ -94,8 +94,8 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   };
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] px-4 sm:px-6 py-4 sm:py-5 shadow-sm border border-black/5">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 sm:mb-5">
+    <div className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] px-4 sm:px-6 py-4 sm:py-5 shadow-sm border border-black/5 flex flex-col">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 sm:mb-5 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full flex-shrink-0 flex flex-col items-center justify-center font-bold text-lg sm:text-2xl text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}>
             {leadName.charAt(0).toUpperCase()}
@@ -134,6 +134,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
         </div>
       </div>
 
+      
       <div className="flex flex-col gap-3">
         <Text as="h3" size="custom" weight="normal" className="text-[13px] text-[#64748B] tracking-wide uppercase">
           Lead Information
@@ -178,6 +179,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
             icon={<Megaphone className="w-5 h-5 " />}
           />
         </div>
+      
       </div>
 
       {showWhatsApp && (
