@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 const MenuItem = ({ 
   icon, 
@@ -10,8 +12,8 @@ const MenuItem = ({
   href, 
   onClick, 
   textColor = "text-gray-800",
-  iconColor = "text-blue-600",
-  iconBgColor = "bg-blue-50"
+  iconColor = "text-[#1E56A0]",
+  iconBgColor = "bg-[#1E56A0]/10"
 }: { 
   icon: React.ReactNode; 
   title: string; 
@@ -29,8 +31,8 @@ const MenuItem = ({
           {icon}
         </div>
         <div>
-          <h4 className={`text-base font-semibold ${textColor}`}>{title}</h4>
-          {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+          <Text size="base" weight="semibold" className={textColor}>{title}</Text>
+          {subtitle && <Text size="sm" className="text-gray-500 mt-0.5 block">{subtitle}</Text>}
         </div>
       </div>
       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,9 +49,14 @@ const MenuItem = ({
 };
 
 const SectionHeader = ({ title }: { title: string }) => (
-  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-1 mt-6">
+  <Text 
+    as="h3" 
+    size="xs" 
+    weight="bold" 
+    className="text-gray-400 uppercase tracking-wider mb-2 px-1 mt-6 block"
+  >
     {title}
-  </h3>
+  </Text>
 );
 
 export default function ProfileMenu() {
@@ -68,11 +75,11 @@ export default function ProfileMenu() {
   );
 
   return (
-    <div className="w-full max-w-5xl px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0 items-start">
+    <div className="w-full max-w-4xl px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0 items-start">
         <div className="flex flex-col gap-0">
           <SectionHeader title="Account" />
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+          <div className="bg-white rounded-[24px] shadow-sm overflow-hidden border border-gray-100">
             <MenuItem 
               icon={renderIcon("M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z")} 
               title="Edit Profile" 
@@ -91,7 +98,7 @@ export default function ProfileMenu() {
           </div>
 
           <SectionHeader title="General" />
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 mb-6">
+          <div className="bg-white rounded-[24px] shadow-sm overflow-hidden border border-gray-100 mb-6">
             <MenuItem 
               icon={renderIcon("M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z")} 
               title="Invite a Friend" 
@@ -119,7 +126,7 @@ export default function ProfileMenu() {
           {(isAdmin || isManager) && (
             <>
               <SectionHeader title="Management" />
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+              <div className="bg-white rounded-[24px] shadow-sm overflow-hidden border border-gray-100">
                 {isAdmin && (
                   <MenuItem 
                     icon={renderIcon("M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1")} 
@@ -185,7 +192,7 @@ export default function ProfileMenu() {
           {(isTeamLeader || isStaff) && (
             <>
               <SectionHeader title="Work" />
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+              <div className="bg-white rounded-[24px] shadow-sm overflow-hidden border border-gray-100">
                 <MenuItem 
                   icon={renderIcon("M12 4v16m8-8H4")} 
                   title="Create Linear Lead" 

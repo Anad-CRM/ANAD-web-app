@@ -21,7 +21,7 @@ export default function TextField({
   return (
     <div className={clsx("flex flex-col gap-1.5 w-full", containerClassName)}>
       {label && (
-        <label className="text-[13px] font-semibold text-white/90 px-1">
+        <label className="text-[13px] font-semibold text-gray-700 px-1">
           {label}
         </label>
       )}
