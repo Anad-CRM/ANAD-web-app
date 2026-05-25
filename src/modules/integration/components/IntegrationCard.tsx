@@ -26,7 +26,7 @@ export const IntegrationIcons: Record<string, React.FC<{ active?: boolean }>> = 
     </div>
   ),
   "google": () => (
-    <div className="w-16 h-16 flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)] rounded-full bg-white text-[#1A1A1A]">
+    <div className="w-16 h-16 flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)] rounded-full bg-white text-[#0D1B3E]">
       <img src="/ads.png" alt="Google Ads" className="w-11 h-11 object-contain" />
     </div>
   ),
@@ -57,7 +57,7 @@ export const IntegrationCard: React.FC<Props> = ({ item, isActive, onClick, inde
           ? `border-none text-white shadow-[-12px_18px_30px_rgba(35,58,120,0.16)] z-10 relative xl:-mr-[50px] xl:w-[calc(100%+50px)] ${
               index === 0 ? "rounded-tr-[28px]" : "rounded-tr-0"
             } ${index === total - 1 ? "rounded-br-[28px]" : "rounded-br-0"}`
-          : "border-white/80 bg-[#F8FAFE] text-[#1A1A1A] shadow-[0_14px_28px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_18px_32px_rgba(15,23,42,0.12)] rounded-tr-[28px] rounded-br-[28px]"
+          : "border-white/80 bg-[#F8FAFE] text-[#0D1B3E] shadow-[0_14px_28px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_18px_32px_rgba(15,23,42,0.12)] rounded-tr-[28px] rounded-br-[28px]"
       }`}
       style={{ 
         backgroundColor: isActive ? COLORS.primary : undefined,
@@ -70,7 +70,7 @@ export const IntegrationCard: React.FC<Props> = ({ item, isActive, onClick, inde
           <IconComponent active={isActive} />
         </div>
         <Text 
-          className={isActive ? "text-white/90" : "text-[#1F2937]"}
+          className={isActive ? "text-white/90" : "text-[#0D1B3E]"}
           size="custom"
           weight="medium"
           style={{ fontSize: '15px', lineHeight: '1.5rem' }}
@@ -82,7 +82,7 @@ export const IntegrationCard: React.FC<Props> = ({ item, isActive, onClick, inde
       <div className="flex justify-end px-5 pb-5 lg:px-6 lg:pb-6">
         <Text 
           as="span"
-          className="inline-flex items-center gap-2 rounded-full bg-[#1C3A76] px-5 py-2 text-white shadow-[0_10px_20px_rgba(15,23,42,0.18)]"
+          className="inline-flex items-center gap-2 rounded-full bg-[#163172] px-5 py-2 text-white shadow-[0_10px_20px_rgba(15,23,42,0.18)]"
           size="custom"
           weight="semibold"
           style={{ fontSize: '15px' }}

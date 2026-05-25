@@ -6,6 +6,7 @@ import { useFeedback } from '@/core/contexts/FeedbackContext';
 import { useGoogleLogin } from '@react-oauth/google';
 import { COLORS } from '@/core/components/theme/colors';
 import { Text } from '@/core/components/ui/Text';
+import Button from '@/core/components/ui/Button';
 
 type GoogleCodeResponse = {
   code: string;
@@ -115,7 +116,8 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
 
         <div className="flex gap-4">
           {isConnected ? (
-            <button 
+            <Button 
+              variant="primary"
               onClick={handleDisconnect}
               disabled={disconnecting}
               className="w-full bg-red-600 text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:bg-red-700 disabled:opacity-70 flex items-center justify-center"
@@ -125,20 +127,20 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
               ) : (
                  "Disconnect Google Ads"
               )}
-            </button>
+            </Button>
           ) : (
-            <button 
+            <Button 
+              variant="primary"
               onClick={handleConnect}
               disabled={loading}
               className="w-full text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 flex items-center justify-center"
-              style={{ backgroundColor: COLORS.primary }}
             >
               {loading ? (
                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                  "Connect Google Ads"
               )}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -155,10 +157,10 @@ export const GoogleConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
             className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:bg-[#D4DEE9] group"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0D1B3E] group-hover:scale-110 transition-transform">
                  <Text weight="bold" className="text-white" size="custom" style={{ fontSize: '10px' }}>?</Text>
               </div>
-              <Text weight="semibold" className="text-[#111827]" size="xs">{topic}</Text>
+              <Text weight="semibold" className="text-[#0D1B3E]" size="xs">{topic}</Text>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
           </button>

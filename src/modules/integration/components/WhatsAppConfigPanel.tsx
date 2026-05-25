@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ClipboardList, Eye, EyeOff, Key } from 'lucide-react';
 import { COLORS } from "@/core/components/theme/colors";
 import { Text } from "@/core/components/ui/Text";
+import Button from "@/core/components/ui/Button";
 import { disconnectWhatsAppIntegration, connectWhatsAppIntegration } from "../api/integrationApi";
 import { useAuthContext } from '@/modules/auth/stores/AuthContext';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
@@ -89,7 +90,7 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             <img src="/whatsapp.png" alt="WhatsApp" className="h-7 w-7 object-contain" />
           </div>
           <div>
-            <Text as="h2" weight="bold" style={{ fontSize: '17px', lineHeight: '1.25' }} className="text-[#1A1A1A]">WhatsApp Business</Text>
+            <Text as="h2" weight="bold" style={{ fontSize: '17px', lineHeight: '1.25' }} className="text-[#0D1B3E]">WhatsApp Business</Text>
             <Text className="text-[#64748B]" size="xs" weight="medium">Receive new leads from Whatsapp Business in your account</Text>
           </div>
         </div>
@@ -97,8 +98,8 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
 
       <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 lg:px-5 lg:py-4">
         <div className="flex items-center gap-2.5">
-          <Key className="h-5 w-5 text-[#111827]" strokeWidth={2.5} />
-          <Text as="h3" weight="bold" className="text-[#111827]" style={{ fontSize: '16px' }}>Access Token</Text>
+          <Key className="h-5 w-5 text-[#0D1B3E]" strokeWidth={2.5} />
+          <Text as="h3" weight="bold" className="text-[#0D1B3E]" style={{ fontSize: '16px' }}>Access Token</Text>
         </div>
 
         <div className="mt-3 rounded-[16px] bg-white px-4 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent focus-within:border-gray-200 transition-all">
@@ -131,24 +132,24 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
 
         <div className="mt-4">
           {isConnected ? (
-            <button 
+            <Button 
+              variant="primary"
               onClick={handleDisconnect}
               disabled={loading}
-              className="flex h-[48px] w-full items-center justify-center rounded-full px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
-              style={{ backgroundColor: COLORS.primary }}
+              className="w-full text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70 bg-[#163172] hover:bg-[#0D1B3E]"
             >
               {loading ? (
                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
-                 <Text weight="bold" size="custom" style={{ fontSize: '15px' }}>Disconnect WhatsApp Business</Text>
+                 "Disconnect WhatsApp Business"
               )}
-            </button>
+            </Button>
           ) : (
-            <button 
+            <Button 
+              variant="primary"
               onClick={handleConnect}
               disabled={loading}
-              className="flex h-[48px] w-full items-center justify-center rounded-full px-5 text-[15px] font-bold text-white transition-all hover:opacity-90 disabled:opacity-70"
-              style={{ backgroundColor: COLORS.primary }}
+              className="w-full text-white h-[48px] rounded-full text-[15px] font-bold transition-all hover:opacity-90 disabled:opacity-70"
             >
               {loading ? (
                  <div className="flex items-center gap-3">
@@ -156,9 +157,9 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
                    <span>Connecting...</span>
                  </div>
               ) : (
-                 <Text weight="bold" size="custom" style={{ fontSize: '15px' }}>Connect WhatsApp Business</Text>
+                 "Connect WhatsApp Business"
               )}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -171,10 +172,10 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
             className="flex items-center justify-between rounded-[16px] bg-[#E2E8F0] px-4 py-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:bg-[#D4DEE9] group"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#111827] group-hover:scale-110 transition-transform">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0D1B3E] group-hover:scale-110 transition-transform">
                  <Text weight="bold" className="text-white" size="custom" style={{ fontSize: '10px' }}>?</Text>
               </div>
-              <Text weight="semibold" className="text-[#111827]" size="xs">{topic}</Text>
+              <Text weight="semibold" className="text-[#0D1B3E]" size="xs">{topic}</Text>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500 transition-transform group-hover:translate-y-0.5" strokeWidth={2.5} />
           </button>
