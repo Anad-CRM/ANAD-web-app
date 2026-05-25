@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { CloudUpload, AlertCircle, CheckCircle, XCircle, FileText } from 'lucide-react';
 import { createBulkLeads } from '../api/createLeadApi';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
+import Button from '@/core/components/ui/Button';
+import { Text } from '@/core/components/ui/Text';
 
 export const BulkUploadForm: React.FC = () => {
   const { showToast } = useFeedback();
@@ -50,13 +52,13 @@ export const BulkUploadForm: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      <h2 className="text-[18px] font-semibold text-black mb-6 tracking-wide">File Upload</h2>
+      <Text as="h2" weight="semibold" className="text-black mb-6 tracking-wide" style={{ fontSize: '18px' }}>File Upload</Text>
       
       <div 
         onClick={() => fileInputRef.current?.click()}
-        className={`bg-[#1C3A76] rounded-[24px] w-full h-[160px] flex flex-col items-center justify-center shadow-sm cursor-pointer hover:bg-[#11234D] transition-colors relative mb-6 group ${file ? 'border-2 border-green-400' : ''}`}
+        className={`bg-[#163172] rounded-[24px] w-full h-[160px] flex flex-col items-center justify-center shadow-sm cursor-pointer hover:bg-[#0D1B3E] transition-colors relative mb-6 group ${file ? 'border-2 border-green-400' : ''}`}
       >
-         <div className="bg-[#11234D] w-[54px] h-[40px] rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+         <div className="bg-[#0D1B3E] w-[54px] h-[40px] rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
             {file ? <FileText className="text-green-400 w-5 h-5" /> : <CloudUpload className="text-white w-5 h-5" />}
          </div>
          <p className="text-white text-[16px] font-light tracking-wide">
@@ -77,7 +79,7 @@ export const BulkUploadForm: React.FC = () => {
           <label className="flex items-center gap-3 cursor-pointer group">
             <div 
               onClick={() => setSkipDuplicates(!skipDuplicates)}
-              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${skipDuplicates ? 'bg-[#1C3A76] border-[#1C3A76]' : 'border-gray-300 group-hover:border-[#1C3A76]'}`}
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${skipDuplicates ? 'bg-[#163172] border-[#163172]' : 'border-gray-300 group-hover:border-[#163172]'}`}
             >
               {skipDuplicates && <CheckCircle className="w-3.5 h-3.5 text-white" />}
             </div>
@@ -85,17 +87,18 @@ export const BulkUploadForm: React.FC = () => {
           </label>
 
           <div className="flex justify-center">
-            <button 
+            <Button 
+               variant="primary"
                onClick={handleUpload}
                disabled={uploading}
-               className="bg-[#1C3A76] text-white text-[14px] font-semibold px-12 py-3 rounded-xl hover:bg-[#11234D] disabled:opacity-70 transition-all shadow-md min-w-[200px] flex justify-center items-center h-[48px]"
+               className="text-[14px] font-semibold px-12 py-3 rounded-xl disabled:opacity-70 transition-all shadow-md min-w-[200px] flex justify-center items-center h-[48px]"
             >
               {uploading ? (
                  <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                  "Upload & Create Leads"
               )}
-            </button>
+            </Button>
           </div>
         </div>
       )}
