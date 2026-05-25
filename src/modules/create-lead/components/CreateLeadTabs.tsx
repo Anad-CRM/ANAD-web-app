@@ -8,7 +8,7 @@ interface Props {
 
 export const CreateLeadTabs: React.FC<Props> = ({ activeTab, onTabChange }) => {
   return (
-    <div className="flex gap-4">
+    <div className="flex justify-end gap-4">
       <button 
         onClick={() => onTabChange('single')}
         className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[15px] font-medium transition-colors shadow-sm ${

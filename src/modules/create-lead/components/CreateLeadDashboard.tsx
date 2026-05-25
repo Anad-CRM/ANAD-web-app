@@ -8,7 +8,7 @@ export const CreateLeadDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full h-full font-sans tracking-tight overflow-y-auto custom-scrollbar">
-      <div className="w-full pt-4 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto overflow-x-auto custom-scrollbar pb-2">
+      <div className="w-full pt-4 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto overflow-x-auto custom-scrollbar pb-2 flex justify-end">
          <CreateLeadTabs activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 

@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Mail, User, Users, Zap, Send, CheckCircle } from "lucide-react";
+import { Mail, User, Users, Zap, Send, CheckCircle } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 import { Text } from "@/core/components/ui/Text";
 import { api } from "@/core/api/axios";
 import { getUser } from "@/core/utils/auth";
 import { API_ENDPOINTS } from "@/core/api/api";
+import { BackButton } from "@/core/components/ui/BackButton";
 
 const ROLES = ["Manager", "Team Leader", "Staff Member", "Students"];
 const SKILL_LEVELS = ["Beginner", "Intermediate", "Expert", "None"];
@@ -123,13 +124,7 @@ export function InviteView() {
     <div className="min-h-screen p-4 md:p-8 flex flex-col gap-8 mx-auto max-w-5xl w-full">
       {/* Header */}
       <div className="flex flex-col gap-5">
-        <button
-          onClick={() => router.back()}
-          style={{ backgroundColor: COLORS.primaryDark }}
-          className="w-[42px] h-[42px] flex items-center justify-center rounded-full text-white hover:opacity-90 transition shadow-md"
-        >
-          <ChevronLeft width={30} height={30} strokeWidth={1.5} />
-        </button>
+        <BackButton onClick={() => router.back()} />
         <div>
           <Text as="h1" size="custom" weight="bold" className="text-[26px] md:text-[30px] leading-tight" style={{ color: COLORS.text }}>
             Invite a Friend
@@ -168,8 +163,8 @@ export function InviteView() {
               <select
                 value={role}
                 onChange={(e) => { setRole(e.target.value); setTeamId(""); setError(""); }}
-                className="flex-1 outline-none text-sm bg-transparent"
-                style={{ color: role ? COLORS.text : COLORS.muted }}
+                className="flex-1 appearance-none border-0 outline-none shadow-none text-sm bg-transparent"
+                style={{ color: role ? COLORS.text : COLORS.muted, WebkitAppearance: "none", MozAppearance: "none" }}
               >
                 <option value="">Select Role</option>
                 {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
