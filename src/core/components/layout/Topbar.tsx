@@ -6,10 +6,13 @@ import { Menu } from "lucide-react";
 import { useSidebar } from "@/core/contexts/SidebarContext";
 import { COLORS } from "@/core/components/theme/colors";
 import { Text } from "@/core/components/ui/Text";
+import { AuthImage } from "@/core/components/ui/AuthImage";
+import { API_BASE_URL } from "@/core/api/axios";
 
 export default function Topbar() {
   const { user, logout } = useAuth();
   const { toggleSidebar } = useSidebar();
+  const avatarSrc = user?.avatar ? `${API_BASE_URL}uploads/${user.avatar}` : "/login/login.png";
 
   const hour = new Date().getHours();
   let greeting = "Good evening";
@@ -29,22 +32,13 @@ export default function Topbar() {
         </button>
 
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full border flex-shrink-0" style={{ borderColor: COLORS.text }}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={COLORS.text}
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-              <line x1="9" y1="9" x2="9.01" y2="9" />
-              <line x1="15" y1="9" x2="15.01" y2="9" />
-            </svg>
+          <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full border flex-shrink-0 overflow-hidden bg-white" style={{ borderColor: COLORS.border }}>
+            <AuthImage
+              src={avatarSrc}
+              fallbackSrc="/login/login.png"
+              alt={user?.userName || "Profile image"}
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="flex flex-col justify-center">
             <Text as="span" size="xs" weight="medium" className="leading-none mb-1 sm:mb-1.5" style={{ color: COLORS.muted }}>
