@@ -2,7 +2,7 @@ import NotificationList from "@/modules/notifications/components/NotificationLis
 
 export default function NotificationsPage() {
   return (
-    <div className="bg-gray-50 w-full min-h-full min-h-screen">
+    <div className="">
       <NotificationList />
     </div>
   );

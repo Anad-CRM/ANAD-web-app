@@ -3,6 +3,9 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import { NotificationService } from "../services/notificationService";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
+import Button from "@/core/components/ui/Button";
 
 interface NotificationItem {
   id?: string | number;
@@ -117,8 +120,8 @@ export default function NotificationList() {
     }
     return {
       path: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
-      color: "text-indigo-600",
-      bg: "bg-indigo-50"
+      color: "text-[#1E56A0]",
+      bg: "bg-[#1E56A0]/10"
     };
   };
 
@@ -146,46 +149,36 @@ export default function NotificationList() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-        <button 
-          onClick={() => fetchNotifications(true)}
-          disabled={isLoading}
-          className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 flex items-center gap-2 disabled:opacity-70"
-        >
-          {isLoading && notifications.length > 0 && (
-            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
-          )}
-          Refresh Data
-        </button>
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <Text as="h1" size="3xl" weight="bold" className="text-gray-900">Notifications</Text>
+          <Text size="sm" className="text-gray-500 mt-1">Stay updated with your latest alerts</Text>
+        </div>
+        
       </div>
 
       {isLoading && notifications.length === 0 ? (
         <div className="space-y-4">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex gap-4 animate-pulse">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <div key={i} className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm flex gap-4 sm:gap-5 animate-pulse">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-full flex-shrink-0"></div>
               <div className="flex-1">
-                <div className="h-5 bg-gray-200 rounded-md w-3/4 mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded-md w-1/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded-md w-full"></div>
+                <div className="h-5 bg-gray-100 rounded-md w-3/4 mb-3"></div>
+                <div className="h-4 bg-gray-100 rounded-md w-full"></div>
               </div>
             </div>
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <div className="bg-white rounded-3xl p-16 flex flex-col items-center justify-center text-center shadow-sm border border-gray-100">
-          <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-            <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white rounded-3xl p-10 sm:p-20 flex flex-col items-center justify-center text-center shadow-sm border border-gray-100">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#F8F9FD] rounded-full flex items-center justify-center mb-6">
+            <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">No notifications yet</h2>
-          <p className="text-gray-500 max-w-sm">We&apos;ll let you know when something arrives or requires your attention.</p>
+          <Text as="h2" size="xl" weight="bold" className="text-gray-900 mb-2">No notifications yet</Text>
+          <Text size="sm" className="text-gray-500 max-w-xs sm:max-w-sm">We&apos;ll let you know when something arrives or requires your attention.</Text>
         </div>
       ) : (
         <div className="space-y-4">
@@ -196,25 +189,25 @@ export default function NotificationList() {
             return (
               <div 
                 key={item.id || index} 
-                className="bg-white p-5 text-left rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-default flex gap-5 group"
+                className="bg-white p-4 sm:p-5 text-left rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-default flex items-start gap-4 sm:gap-5 group"
               >
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${iconProps.bg} ${iconProps.color}`}>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${iconProps.bg} ${iconProps.color}`}>
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={iconProps.path} />
                   </svg>
                 </div>
                 
                 <div className="flex-1 overflow-hidden">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-4 mb-2">
-                    <h3 className="font-bold text-gray-900 text-base leading-snug">{title}</h3>
-                    <span className="text-xs font-semibold text-gray-400 whitespace-nowrap">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
+                    <Text size="base" weight="bold" className="text-gray-900 leading-snug truncate">{title}</Text>
+                    <Text size="xs" weight="semibold" className="text-gray-400 whitespace-nowrap">
                       {formatTimeAgo(item.createdAt)}
-                    </span>
+                    </Text>
                   </div>
                   
-                  <p className="text-gray-600 text-sm leading-relaxed truncate md:whitespace-normal md:overflow-visible overflow-hidden">
+                  <Text as="p" size="sm" className="text-gray-600 leading-relaxed max-w-full">
                     {item.detail || item.body || "No details available"}
-                  </p>
+                  </Text>
                 </div>
               </div>
             );
