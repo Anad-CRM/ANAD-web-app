@@ -6,6 +6,9 @@ import { useExportData } from '../hooks/useExportData';
 import { downloadExport } from '../api/exportApi';
 import { EXPORT_FORMATS, LEAD_STATUS_OPTIONS } from '../types/export.types';
 import type { ExportFormat } from '../types/export.types';
+import { COLORS } from '@/core/components/theme/colors';
+import { Text } from '@/core/components/ui/Text';
+import Button from '@/core/components/ui/Button';
 
 type FilterKey = 'staff' | 'teams' | 'statuses' | 'ads';
 
@@ -52,7 +55,7 @@ function FilterModal({ title, options, selected, onClose, onApply, showSelectAll
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 flex flex-col max-h-[80vh]">
         <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">
-          <span className="text-[15px] font-semibold text-gray-800">{title}</span>
+          <Text size="base" weight="semibold" className="text-gray-800">{title}</Text>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -67,7 +70,11 @@ function FilterModal({ title, options, selected, onClose, onApply, showSelectAll
               placeholder={`Search ${title.toLowerCase()}...`}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#233A78]/20 focus:border-[#233A78] transition-all"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              style={{
+                borderColor: search ? COLORS.primary : undefined,
+                boxShadow: search ? `0 0 0 2px ${COLORS.primary}33` : undefined
+              }}
             />
             <svg
               className="absolute left-3 top-2.5 text-gray-400"
@@ -102,7 +109,8 @@ function FilterModal({ title, options, selected, onClose, onApply, showSelectAll
               <div className="flex gap-3">
                 <button 
                   onClick={handleSelectAll}
-                  className="text-[11px] font-bold text-[#233A78] hover:underline"
+                  className="text-[11px] font-bold hover:underline"
+                  style={{ color: COLORS.primary }}
                 >
                   Select All
                 </button>
@@ -127,13 +135,19 @@ function FilterModal({ title, options, selected, onClose, onApply, showSelectAll
               <button
                 key={opt.id}
                 onClick={() => toggle(opt.id)}
-                className={`flex items-start gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all ${
-                  checked ? 'bg-[#233A78]/10 text-[#233A78]' : 'hover:bg-gray-50 text-gray-700'
-                }`}
+                className="flex items-start gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all"
+                style={{
+                  backgroundColor: checked ? `${COLORS.primary}1A` : undefined,
+                  color: checked ? COLORS.primary : undefined
+                }}
               >
-                <span className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all ${
-                  checked ? 'bg-[#233A78] border-[#233A78]' : 'border-gray-300'
-                }`}>
+                <span 
+                  className="mt-0.5 w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all"
+                  style={{
+                    backgroundColor: checked ? COLORS.primary : 'transparent',
+                    borderColor: checked ? COLORS.primary : '#D1D5DB'
+                  }}
+                >
                   {checked && (
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"/>
@@ -143,9 +157,13 @@ function FilterModal({ title, options, selected, onClose, onApply, showSelectAll
                 <div className="flex flex-col">
                   <span className="truncate">{opt.label}</span>
                   {opt.subtitle && (
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${checked ? 'text-[#233A78]/60' : 'text-gray-400'}`}>
+                    <Text 
+                      size="custom" 
+                      className="text-[10px] font-bold uppercase tracking-wider"
+                      style={{ color: checked ? `${COLORS.primary}99` : COLORS.subtle }}
+                    >
                       {opt.subtitle}
-                    </span>
+                    </Text>
                   )}
                 </div>
               </button>
@@ -153,18 +171,23 @@ function FilterModal({ title, options, selected, onClose, onApply, showSelectAll
           })}
         </div>
         <div className="flex gap-2 px-5 pb-5 pt-3 border-t border-gray-100">
-          <button
+          <Button
+            variant="white"
+            size="md"
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+            className="flex-1 !rounded-xl !h-10 text-gray-600 border border-gray-200 hover:bg-gray-50"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
             onClick={() => { onApply(local); onClose(); }}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#233A78] hover:bg-[#1a2d5a] transition-colors"
+            className="flex-1 !rounded-xl !h-10"
+            style={{ backgroundColor: COLORS.primary }}
           >
             Apply
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -189,8 +212,9 @@ export function ExportDashboard() {
   const [showNoDataConfirm, setShowNoDataConfirm] = useState(false);
   const [filterSearch, setFilterSearch] = useState('');
 
-  const hasFilters =
-    startDate || endDate || selectedStaff.length || selectedTeams.length || selectedStatuses.length || selectedAds.length;
+  const hasFilters = !!(
+    startDate || endDate || selectedStaff.length || selectedTeams.length || selectedStatuses.length || selectedAds.length
+  );
 
   const clearFilters = () => {
     setStartDate('');
@@ -334,23 +358,28 @@ export function ExportDashboard() {
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
-            <h3 className="text-[15px] font-semibold text-gray-800 mb-2">Export All Data?</h3>
-            <p className="text-sm text-gray-500 leading-relaxed mb-5">
+            <Text as="h3" size="base" weight="semibold" className="text-gray-800 mb-2">Export All Data?</Text>
+            <Text size="sm" className="text-gray-500 leading-relaxed mb-5">
               No filters selected. This will export ALL lead data for your organization. Do you want to proceed?
-            </p>
+            </Text>
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="white"
+                size="md"
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="flex-1 !rounded-xl !h-10 text-gray-600 border border-gray-200 hover:bg-gray-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
                 onClick={() => { setShowConfirm(false); triggerExport(); }}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#233A78] hover:bg-[#1a2d5a] transition-colors"
+                className="flex-1 !rounded-xl !h-10"
+                style={{ backgroundColor: COLORS.primary }}
               >
                 Proceed
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -364,18 +393,23 @@ export function ExportDashboard() {
               No leads match the selected filters. Do you want to download an empty data file anyway?
             </p>
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="white"
+                size="md"
                 onClick={() => setShowNoDataConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="flex-1 !rounded-xl !h-10 text-gray-600 border border-gray-200 hover:bg-gray-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
                 onClick={() => { triggerExport(true); }}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#233A78] hover:bg-[#1a2d5a] transition-colors"
+                className="flex-1 !rounded-xl !h-10"
+                style={{ backgroundColor: COLORS.primary }}
               >
                 Proceed
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -384,8 +418,8 @@ export function ExportDashboard() {
       <div className="w-full px-6 lg:px-8 max-w-[1400px] mx-auto pt-4">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-[22px] font-bold text-gray-900 leading-tight">Export Log</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Export lead data to CSV, XLSX, PDF, or XML</p>
+            <Text as="h1" size="2xl" weight="bold" className="text-gray-900 leading-tight">Export Log</Text>
+            <Text size="sm" className="text-gray-400 mt-0.5">Export lead data to CSV, XLSX, PDF, or XML</Text>
           </div>
           {hasFilters && (
             <button
@@ -405,19 +439,21 @@ export function ExportDashboard() {
         <div className="bg-white w-full max-w-[560px] rounded-3xl p-6 shadow-sm border border-black/5 h-fit">
 
           <div className="mb-6">
-            <label className="block text-[13px] font-semibold text-gray-600 mb-2 uppercase tracking-wider">
+            <Text as="label" size="custom" weight="semibold" className="block text-[13px] text-gray-600 mb-2 uppercase tracking-wider">
               Export Format
-            </label>
+            </Text>
             <div className="grid grid-cols-4 gap-2">
               {EXPORT_FORMATS.map((f) => (
                 <button
                   key={f}
                   onClick={() => setFormat(f)}
-                  className={`py-2.5 rounded-xl text-sm font-bold transition-all border ${
-                    format === f
-                      ? 'bg-[#233A78] text-white border-[#233A78] shadow-md shadow-[#233A78]/20'
-                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-[#233A78]/30 hover:text-[#233A78]'
-                  }`}
+                  className="py-2.5 rounded-xl text-sm font-bold transition-all border"
+                  style={{
+                    backgroundColor: format === f ? COLORS.primary : COLORS.figma_sphere_light + '20',
+                    color: format === f ? '#FFFFFF' : COLORS.primary,
+                    borderColor: format === f ? COLORS.primary : COLORS.border,
+                    boxShadow: format === f ? `0 4px 12px ${COLORS.primary}40` : undefined
+                  }}
                 >
                   {f.toUpperCase()}
                 </button>
@@ -427,9 +463,9 @@ export function ExportDashboard() {
 
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-[13px] font-semibold text-gray-600 uppercase tracking-wider">
+              <Text as="label" size="custom" weight="semibold" className="block text-[13px] text-gray-600 uppercase tracking-wider">
                 Date Range
-              </label>
+              </Text>
               {(startDate || endDate) && (
                 <button
                   onClick={() => { setStartDate(''); setEndDate(''); }}
@@ -447,7 +483,10 @@ export function ExportDashboard() {
                   value={startDate}
                   max={endDate || new Date().toISOString().split('T')[0]}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#233A78] focus:ring-1 focus:ring-[#233A78]/20 transition-all bg-gray-50 focus:bg-white"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all bg-gray-50 focus:bg-white"
+                  style={{
+                    borderColor: startDate ? COLORS.primary : undefined
+                  }}
                 />
               </div>
               <div className="relative">
@@ -458,7 +497,10 @@ export function ExportDashboard() {
                   min={startDate || undefined}
                   max={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-[#233A78] focus:ring-1 focus:ring-[#233A78]/20 transition-all bg-gray-50 focus:bg-white"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all bg-gray-50 focus:bg-white"
+                  style={{
+                    borderColor: endDate ? COLORS.primary : undefined
+                  }}
                 />
               </div>
             </div>
@@ -466,9 +508,9 @@ export function ExportDashboard() {
 
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-[13px] font-semibold text-gray-600 uppercase tracking-wider">
+              <Text as="label" size="custom" weight="semibold" className="block text-[13px] text-gray-600 uppercase tracking-wider">
                 Optional Filters
-              </label>
+              </Text>
               {(selectedStaff.length || selectedTeams.length || selectedStatuses.length || selectedAds.length) ? (
                 <button
                   onClick={() => { setSelectedStaff([]); setSelectedTeams([]); setSelectedStatuses([]); setSelectedAds([]); }}
@@ -486,7 +528,10 @@ export function ExportDashboard() {
                   placeholder="Search filters..."
                   value={filterSearch}
                   onChange={(e) => setFilterSearch(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#233A78]/20 focus:border-[#233A78] transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all"
+                  style={{
+                    borderColor: filterSearch ? COLORS.primary : undefined
+                  }}
                 />
                 <svg
                   className="absolute left-3 top-3 text-gray-400"
@@ -520,16 +565,20 @@ export function ExportDashboard() {
                       <button
                         key={key}
                         onClick={() => setActiveModal(key)}
-                        className={`flex items-center gap-3 w-full px-4 py-3.5 rounded-xl border text-left transition-all ${
-                          active
-                            ? 'bg-[#233A78]/5 border-[#233A78]/20 text-[#233A78]'
-                            : 'bg-gray-50 border-gray-200 text-gray-600 hover:border-[#233A78]/30 hover:bg-[#233A78]/5 hover:text-[#233A78]'
-                        }`}
+                        className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl border text-left transition-all"
+                        style={{
+                          backgroundColor: active ? `${COLORS.primary}0D` : COLORS.figma_sphere_light + '10',
+                          borderColor: active ? COLORS.primary : COLORS.border,
+                          color: active ? COLORS.primary : COLORS.text
+                        }}
                       >
                         <span className={active ? 'text-[#233A78]' : 'text-gray-400'}>{icon}</span>
                         <span className="flex-1 text-sm font-medium">{label}</span>
                         {active ? (
-                          <span className="text-[11px] font-bold bg-[#233A78]/10 text-[#233A78] px-2.5 py-0.5 rounded-full">
+                          <span 
+                            className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                            style={{ backgroundColor: `${COLORS.primary}1A`, color: COLORS.primary }}
+                          >
                             {count} selected
                           </span>
                         ) : (
@@ -556,26 +605,32 @@ export function ExportDashboard() {
             </div>
           )}
 
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             onClick={handleExportClick}
             disabled={isExporting}
-            className="w-full py-3.5 rounded-xl text-[15px] font-bold text-white bg-[#233A78] hover:bg-[#1a2d5a] active:scale-[0.98] transition-all shadow-md shadow-[#233A78]/20 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full !rounded-xl !h-14"
+            style={{ 
+              backgroundColor: COLORS.primary,
+              boxShadow: `0 8px 20px ${COLORS.primary}33`
+            }}
           >
             {isExporting ? (
               <>
                 <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                Generating…
+                <Text size="base" weight="bold">Generating…</Text>
               </>
             ) : (
               <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                   <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                Generate Export
+                <Text size="base" weight="bold">Generate Export</Text>
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
