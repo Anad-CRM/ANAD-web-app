@@ -1,37 +1,28 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
-import StatsSection from "@/modules/follow-up/components/StatsSection";
-import FollowUpList from "@/modules/follow-up/components/FollowUpList";
+import { useSearchParams, useRouter } from "next/navigation";
+import DetailedFollowUpList from "@/modules/follow-up/components/DetailedFollowUpList";
 import RightPanel from "@/modules/follow-up/components/RightPanel";
 import RescheduleModal from "@/modules/follow-up/components/RescheduleModal";
 import CompleteModal from "@/modules/follow-up/components/CompleteModal";
+import { getFollowUps } from "@/modules/follow-up/api/followUpApi";
+import { FollowUp } from "@/modules/follow-up/types";
+import { BackButton } from "@/core/components/ui/BackButton";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
 import { useResponsive } from "@/core/hooks/useResponsive";
-import {
-  getFollowUps,
-  getFollowUpSummary,
-} from "@/modules/follow-up/api/followUpApi";
-import { FollowUp, FollowUpSummary } from "@/modules/follow-up/types";
 
-export default function FollowUpPage() {
+export default function AllFollowUpsPage() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { isMobile } = useResponsive();
-  const [summary, setSummary] = useState<FollowUpSummary>({
-    total: 0,
-    completed: 0,
-    missed: 0,
-    pending: 0,
-    rescheduled: 0,
-    updatedToMissed: 0,
-  });
+
+  const [activeTab, setActiveTab] = useState(searchParams.get("status")?.toLowerCase() || "total");
+  const [selectedDate, setSelectedDate] = useState<string | null>(searchParams.get("date"));
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [missedFollowUps, setMissedFollowUps] = useState<FollowUp[]>([]);
-  const [activeTab, setActiveTab] = useState("total");
   const [viewMode, setViewMode] = useState<"calendar" | "list">(isMobile ? "list" : "calendar");
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const pageRef = useRef(1);
   const [hasMore, setHasMore] = useState(true);
@@ -53,11 +44,6 @@ export default function FollowUpPage() {
         setIsFetchingMore(true);
       }
 
-      const summaryData = await getFollowUpSummary();
-      if (summaryData?.data) {
-        setSummary(summaryData.data);
-      }
-
       const statusMap: Record<string, string | undefined> = {
         total: undefined,
         done: "COMPLETED",
@@ -70,15 +56,15 @@ export default function FollowUpPage() {
         params.date = new Date().toISOString().split('T')[0];
         delete params.status;
       }
-
+      
       if (selectedDate) {
         params.date = selectedDate;
       }
 
-      const followUpData = await getFollowUps({
-        ...params,
-        limit,
-        page: isRefresh ? 1 : pageRef.current
+      const followUpData = await getFollowUps({ 
+        ...params, 
+        limit, 
+        page: isRefresh ? 1 : pageRef.current 
       });
       const newFollowUps = followUpData?.data || [];
 
@@ -106,12 +92,6 @@ export default function FollowUpPage() {
       setIsFetchingMore(false);
     }
   }, [activeTab, selectedDate, limit]);
-
-  useEffect(() => {
-    if (isMobile) {
-      setViewMode("list");
-    }
-  }, [isMobile]);
 
   useEffect(() => {
     fetchData(true);
@@ -152,10 +132,6 @@ export default function FollowUpPage() {
     fetchData(true);
   };
 
-  const handleTabChange = (tab: string) => {
-    router.push(`/follow-up/all?status=${tab}`);
-  };
-
   const handleDateSelect = (date: string | null) => {
     setSelectedDate(date);
     if (activeTab === "today") {
@@ -163,30 +139,49 @@ export default function FollowUpPage() {
     }
   };
 
-  return (
-    <div className="flex flex-col gap-[22px] overflow-x-hidden min-w-0">
-      <StatsSection
-        summary={summary}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
+  useEffect(() => {
+    if (isMobile) {
+      setViewMode("list");
+    }
+  }, [isMobile]);
 
-      <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 mt-5 min-h-0 xl:h-[calc(100vh-240px)]">
+  const getLabel = () => {
+     if (selectedDate) {
+       const d = new Date(selectedDate);
+       return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+     }
+     if (activeTab === "total") return "All Follow-Ups";
+     if (activeTab === "today") return "Today";
+     return activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+  };
+
+  return (
+    <div className="flex flex-col gap-[22px] overflow-x-hidden pt-2 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <BackButton onClick={() => router.back()} />
+        <div className="hidden sm:block h-8 w-px bg-slate-200 mx-1"></div>
+        <div>
+          <Text as="h1" weight="bold" size="xl" style={{ color: COLORS.text, lineHeight: 1.15 }}>
+            All Follow-Ups
+          </Text>
+          <Text size="sm" weight="semibold" className="tracking-wide mt-0.5 block" style={{ color: COLORS.primaryDark }}>
+            Showing: {getLabel()}
+          </Text>
+        </div>
+      </div>
+
+      <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 mt-2 min-h-0 xl:h-[calc(100vh-170px)]">
         <div className="flex-1 flex flex-col xl:pr-8 xl:border-r min-h-0">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-6 shrink-0">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-4 shrink-0">
             <Text as="h2" weight="bold" size="lg" style={{ color: COLORS.text }}>
-              Total Follow-Up
+              {getLabel()}
             </Text>
-            <Text size="sm" weight="medium" style={{ color: COLORS.muted }}>
-              {selectedDate 
-                ? new Date(selectedDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' + new Date(selectedDate).toLocaleDateString('en-GB', { weekday: 'long' })
-                : activeTab === 'today'
-                  ? new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ', ' + new Date().toLocaleDateString('en-GB', { weekday: 'long' })
-                  : "All Dates"}
-            </Text>
+            <span className="text-[13px] font-medium bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5" style={{ color: COLORS.muted }}>
+              {followUps.length} result{followUps.length !== 1 ? 's' : ''}
+            </span>
           </div>
           <div className="pr-0 xl:pr-2 flex-1 overflow-y-auto custom-scrollbar min-h-0">
-            <FollowUpList
+            <DetailedFollowUpList
               followUps={followUps}
               onReschedule={handleReschedule}
               onComplete={handleComplete}

@@ -72,6 +72,14 @@ export default function AdDetailsPage() {
 
   const conversionRate = computeRate((leadCounts?.closedLeadCount || 0) + (leadCounts?.registerCount || 0), leadCounts?.allLeadsCount);
   const disqualifiedRate = computeRate(leadCounts?.disqualifiedCount, leadCounts?.allLeadsCount);
+  const resolvedAdId = adDetail?.adId || adId;
+
+  const openLeadsList = (status?: string) => {
+    const query = new URLSearchParams();
+    query.set("adId", resolvedAdId);
+    if (status) query.set("status", status);
+    router.push(`/leads_list?${query.toString()}`);
+  };
 
   if (isLoading) {
     return <div className="flex justify-center p-12 animate-pulse" style={{ color: COLORS.muted }}><Text>Loading ad details...</Text></div>;
@@ -122,7 +130,7 @@ export default function AdDetailsPage() {
         </div>
 
         <div className="flex gap-4 p-4 rounded-2xl border" style={{ backgroundColor: COLORS.figma_bg_from, borderColor: COLORS.grey }}>
-          <div className="flex-1 flex items-center gap-4 cursor-pointer" onClick={() => router.push(`/leads_list?adId=${adId}&status=Closed`)}>
+          <button type="button" className="flex-1 flex items-center gap-4 cursor-pointer text-left" onClick={() => openLeadsList("Closed")}>
             <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#DCFCE7', color: COLORS.success }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
             </div>
@@ -130,9 +138,9 @@ export default function AdDetailsPage() {
               <Text weight="bold" size="lg" className="font-extrabold block" style={{ color: COLORS.text }}>{conversionRate ? `${conversionRate}%` : '--'}</Text>
               <Text weight="bold" size="xs" className="block" style={{ color: COLORS.subtle }}>Conversion</Text>
             </div>
-          </div>
+          </button>
           <div className="w-[1px]" style={{ backgroundColor: COLORS.border }}></div>
-          <div className="flex-1 flex items-center gap-4 cursor-pointer" onClick={() => router.push(`/leads_list?adId=${adId}&status=Disqualified`)}>
+          <button type="button" className="flex-1 flex items-center gap-4 cursor-pointer text-left" onClick={() => openLeadsList("Disqualified")}>
             <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FEE2E2', color: COLORS.danger }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /></svg>
             </div>
@@ -140,7 +148,7 @@ export default function AdDetailsPage() {
               <Text weight="bold" size="lg" className="font-extrabold block" style={{ color: COLORS.text }}>{disqualifiedRate ? `${disqualifiedRate}%` : '--'}</Text>
               <Text weight="bold" size="xs" className="block" style={{ color: COLORS.subtle }}>Disqualified</Text>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -166,8 +174,12 @@ export default function AdDetailsPage() {
           <div
             key={idx}
             onClick={() => {
-              const statusQuery = card.title === "All Leads" ? "" : `&status=${card.title}`;
-              router.push(`/leads_list?adId=${adId}${statusQuery}`);
+              const query = new URLSearchParams();
+              query.set("adId", resolvedAdId);
+              if (card.title !== "All Leads") {
+                query.set("status", card.title);
+              }
+              router.push(`/leads_list?${query.toString()}`);
             }}
             className="p-4 rounded-2xl shadow-sm border flex flex-col justify-between cursor-pointer hover:shadow-md transition-shadow h-[120px]"
             style={{ backgroundColor: COLORS.surface, borderColor: COLORS.grey }}

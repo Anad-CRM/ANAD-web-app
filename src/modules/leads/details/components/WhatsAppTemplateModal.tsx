@@ -89,20 +89,20 @@ export const WhatsAppTemplateModal: React.FC<Props> = ({ leadId, leadName, phone
 
   if (previewTemplate) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]" onClick={() => setPreviewTemplate(null)}>
-        <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-          <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-[2px]" onClick={() => setPreviewTemplate(null)}>
+        <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100">
             <div className="text-green-500"><Whatsapp width={24} height={24} /></div>
             <Text weight="semibold" className="text-slate-800" style={{ fontSize: '16px' }}>{previewTemplate.title}</Text>
           </div>
-          <div className="p-6 bg-slate-50">
+          <div className="p-4 sm:p-6 bg-slate-50 overflow-y-auto">
             <Text className="text-slate-700 whitespace-pre-wrap leading-relaxed" style={{ fontSize: '14px' }}>{previewTemplate.message}</Text>
           </div>
-          <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-white">
-            <button onClick={() => setPreviewTemplate(null)} className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
+          <div className="px-4 sm:px-6 py-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 bg-white">
+            <button onClick={() => setPreviewTemplate(null)} className="w-full sm:w-auto px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
               <Text weight="semibold">Close</Text>
             </button>
-            <button onClick={() => handleSend(previewTemplate.message)} className="px-4 py-2 rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center gap-2">
+            <button onClick={() => handleSend(previewTemplate.message)} className="w-full sm:w-auto px-4 py-2 rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
               <Send size={16} /> <Text weight="semibold">Send</Text>
             </button>
           </div>
@@ -114,17 +114,17 @@ export const WhatsAppTemplateModal: React.FC<Props> = ({ leadId, leadName, phone
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]"
+        className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 flex-shrink-0">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100 flex-shrink-0">
           <Text weight="semibold" className="text-slate-800" style={{ fontSize: '18px' }}>Select WhatsApp Template</Text>
           <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
             <X size={18} />
           </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-6 overflow-y-auto">
+        <div className="p-4 sm:p-6 flex flex-col gap-5 sm:gap-6 overflow-y-auto">
           {/* Custom Message Box */}
           <div className={`p-4 rounded-xl border ${error ? 'border-red-300 bg-red-50/30' : 'border-green-200 bg-green-50/30'}`}>
             <div className="flex items-center gap-2 mb-3">

@@ -67,7 +67,7 @@ export const CampaignCard = ({ data }: { data?: AdCampaign }) => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-px p-5" style={{ backgroundColor: COLORS.bg }}>
+      <div className="grid grid-cols-1 gap-px p-3 sm:grid-cols-2 sm:p-5" style={{ backgroundColor: COLORS.bg }}>
         
         <div className="bg-white rounded-[20px] p-4 flex flex-col justify-between h-[96px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] mr-2 mb-2">
           <div className="flex items-center gap-2 w-full mb-2">

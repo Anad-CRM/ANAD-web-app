@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { getToken, getUser, clearToken } from "@/core/utils/auth";
+import { getToken, getUser, clearToken, setUser as setStoredUser, setToken as setStoredToken } from "@/core/utils/auth";
 import type { User } from "@/modules/auth/types/auth.types";
 
 interface AuthContextValue {
@@ -16,6 +16,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   setAuthData: (user: User, token: string) => void;
+  updateUser: (user: User) => void;
   logout: () => void;
 }
 
@@ -39,8 +40,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setAuthData = useCallback((newUser: User, newToken: string) => {
+    setStoredUser(newUser);
+    setStoredToken(newToken);
     setUser(newUser);
     setToken(newToken);
+  }, []);
+
+  const updateUser = useCallback((newUser: User) => {
+    setStoredUser(newUser);
+    setUser(newUser);
   }, []);
 
   const logout = useCallback(() => {
@@ -57,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!token,
         isLoading,
         setAuthData,
+        updateUser,
         logout,
       }}
     >

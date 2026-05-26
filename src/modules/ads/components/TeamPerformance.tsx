@@ -38,7 +38,7 @@ export const TeamPerformance = ({ teamMembers = [] }: TeamPerformanceProps) => {
   return (
     <div className="w-full flex flex-col gap-4 mb-4">
       {/* Section header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg" style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primary }}>
             <Users className="w-5 h-5" />
@@ -55,7 +55,7 @@ export const TeamPerformance = ({ teamMembers = [] }: TeamPerformanceProps) => {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-1" style={{ color: COLORS.subtle }}>
+        <div className="flex items-center gap-1 self-start sm:self-auto" style={{ color: COLORS.subtle }}>
           <TrendingUp className="w-3.5 h-3.5" />
           <Text weight="semibold" style={{ fontSize: '12px' }}>Sorted by completion</Text>
         </div>
@@ -94,7 +94,7 @@ export const TeamPerformance = ({ teamMembers = [] }: TeamPerformanceProps) => {
               return (
                 <div
                   key={member.userId || idx}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50/60 transition-colors"
+                  className="flex items-center gap-3 px-4 py-4 hover:bg-gray-50/60 transition-colors sm:gap-4 sm:px-5"
                   style={{
                     borderBottom:
                       idx !== displayedMembers.length - 1

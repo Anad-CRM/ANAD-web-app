@@ -30,17 +30,17 @@ export const EodAnalyticsPanel = ({ data }: { data: EodStaffMember | null }) => 
 
   if (!data || (totalLeads === 0 && totalCalls === 0)) {
     return (
-      <div className="flex flex-col flex-1 min-h-[600px] bg-[#233A78] rounded-[24px] p-6 text-white font-sans shadow-xl items-center justify-center opacity-90 border border-white/10 relative overflow-hidden group">
+      <div className="flex flex-col flex-1 min-h-[400px] sm:min-h-[600px] bg-[#163172] rounded-[24px] p-4 sm:p-6 text-white font-sans shadow-xl items-center justify-center opacity-90 border border-white/10 relative overflow-hidden group">
         {/* Animated background hint */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity" />
         
-        <div className="bg-white/10 p-10 rounded-[32px] backdrop-blur-xl flex flex-col items-center text-center max-w-[340px] border border-white/10 shadow-2xl relative z-10">
-          <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 ring-8 ring-white/5">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/40"><path d="M21 21L15 15"/><circle cx="11" cy="11" r="8"/></svg>
+        <div className="bg-white/10 p-6 sm:p-10 rounded-[32px] backdrop-blur-xl flex flex-col items-center text-center w-full max-w-[90%] sm:max-w-[340px] border border-white/10 shadow-2xl relative z-10">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 ring-8 ring-white/5">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/40"><path d="M21 21L15 15"/><circle cx="11" cy="11" r="8"/></svg>
           </div>
-          <h3 className="text-[22px] font-bold mb-3 tracking-tight">No data recorded</h3>
-          <p className="text-[14px] text-white/50 leading-relaxed">
-            This staff member hasn&apos;t recorded any activity leads or calls for the selected period yet.
+          <h3 className="text-[18px] sm:text-[22px] font-bold mb-3 tracking-tight">No data recorded</h3>
+          <p className="text-[13px] sm:text-[14px] text-white/50 leading-relaxed">
+            This staff member hasn't recorded any activity leads or calls for the selected period yet.
           </p>
           <div className="mt-8 flex gap-2">
             <div className="w-2 h-2 rounded-full bg-white/20 animate-pulse" />
@@ -53,15 +53,16 @@ export const EodAnalyticsPanel = ({ data }: { data: EodStaffMember | null }) => 
   }
 
   return (
-    <div className="flex flex-col min-h-[600px] bg-[#233A78] rounded-[24px] p-6 text-white font-sans shadow-xl">
+    <div className="flex flex-col min-h-[600px] bg-[#163172] rounded-[24px] p-6 text-white font-sans shadow-xl">
       
-      <div className="flex flex-col flex-1 mb-8">
-        <div className="flex items-center gap-3 mb-8">
-            <div className="w-6 h-6 bg-white/20 rounded-md backdrop-blur-sm" />
-            <h2 className="text-[20px] font-bold">Total Leads</h2>
+      <div className="flex flex-col flex-1 mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 mb-6 sm:mb-8">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white/20 rounded-md backdrop-blur-sm" />
+            <h2 className="text-[18px] sm:text-[20px] font-bold">Total Leads</h2>
         </div>
 
-        <div className="flex-1 flex items-end justify-between px-2 min-h-[220px]">
+        <div className="flex-1 flex px-1 sm:px-2 min-h-[220px] overflow-x-auto custom-scrollbar pb-4 -mx-2 sm:mx-0">
+          <div className="flex items-end justify-between min-w-[500px] w-full px-2 sm:px-0">
            {leadMetrics.map((lead, idx) => (
              <div key={idx} className="flex flex-col items-center gap-4 group">
                <div className="relative flex flex-col items-center justify-end h-[180px] w-[26px]">
@@ -77,16 +78,17 @@ export const EodAnalyticsPanel = ({ data }: { data: EodStaffMember | null }) => 
                </span>
              </div>
            ))}
+          </div>
         </div>
       </div>
 
       <div className="mt-auto">
-        <div className="flex items-center gap-3 mb-6">
-            <div className="w-6 h-6 bg-white/20 rounded-md backdrop-blur-sm" />
-            <h2 className="text-[20px] font-bold">Total Calls</h2>
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white/20 rounded-md backdrop-blur-sm" />
+            <h2 className="text-[18px] sm:text-[20px] font-bold">Total Calls</h2>
         </div>
 
-        <div className="grid grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 min-[450px]:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {callMetrics.map((call, idx) => (
              <div key={idx} className="bg-white/90 rounded-xl p-3 flex flex-col items-center justify-center text-gray-800 shadow-sm transition-transform hover:scale-105 cursor-pointer">
                 <span className="text-[15px] font-extrabold mb-1">{call.count}</span>

@@ -11,32 +11,26 @@ interface GetFollowUpsParams {
   date?: string;
   fromDate?: string;
   toDate?: string;
+  fromScheduledDate?: string;
+  toScheduledDate?: string;
 }
 
 export const getFollowUps = async (
   params: GetFollowUpsParams
 ): Promise<{ data: FollowUp[]; meta: Record<string, unknown> }> => {
-  const response = await api.request({
-    url: API_ENDPOINTS.FOLLOW_UP.GET_ALL,
-    method: "GET",
-    data: params,
-  });
+  const response = await api.post(API_ENDPOINTS.FOLLOW_UP.GET_ALL, params || {});
   return response.data;
 };
 
 export const createFollowup = async (payload: { leadId: string; userId: string; notes: string; date: string; type: string }) => {
-  const response = await api.post("/followup/createFollowup", payload);
+  const response = await api.post(API_ENDPOINTS.FOLLOW_UP.CREATE, payload);
   return response.data;
 };
 
 export const getFollowUpSummary = async (
   params?: GetFollowUpsParams
 ): Promise<{ data: FollowUpSummary }> => {
-  const response = await api.request({
-    url: API_ENDPOINTS.FOLLOW_UP.SUMMARY,
-    method: "GET",
-    data: params || {},
-  });
+  const response = await api.post(API_ENDPOINTS.FOLLOW_UP.SUMMARY, params || {});
   return response.data;
 };
 
@@ -52,7 +46,7 @@ export const completeFollowUp = async (
 
 export const rescheduleFollowUp = async (
   followupId: number,
-  params: { date: string; notes?: string }
+  params: { followUpDate: string; remarks?: string }
 ) => {
   const response = await api.patch(API_ENDPOINTS.FOLLOW_UP.RESCHEDULE(followupId), params);
   return response.data;

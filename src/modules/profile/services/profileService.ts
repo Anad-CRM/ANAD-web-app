@@ -7,12 +7,10 @@ export interface UpdateProfileData {
   email?: string;
   mobileNumber?: string;
   address?: string;
-  organization?: {
-    organizationName?: string;
-    businessCategory?: string;
-    startTime?: string;
-    endTime?: string;
-  };
+  organizationName?: string;
+  businessCategory?: string;
+  startTime?: string;
+  endTime?: string;
   avatar?: string;
 }
 

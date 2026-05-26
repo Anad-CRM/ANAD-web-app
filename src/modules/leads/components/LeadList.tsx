@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Search, Filter, X, Users } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
@@ -94,6 +94,7 @@ export function LeadList() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const statusParam = searchParams.get("status");
+  const adIdParam = searchParams.get("adId");
   const userIdParam = searchParams.get("userId");
   const staffIdParam = searchParams.get("staffId");
   const teamIdParam = searchParams.get("teamId");
@@ -116,6 +117,10 @@ export function LeadList() {
   const [isAssigning, setIsAssigning] = useState(false);
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
   const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
+  const selectedAdLabel = useMemo(() => {
+    if (!adIdParam) return "";
+    return ads.find((ad) => ad.id === adIdParam)?.adName || "Ad filtered";
+  }, [ads, adIdParam]);
 
 
   const offsetRef = useRef(0);
@@ -127,6 +132,7 @@ export function LeadList() {
   const searchTermRef = useRef(searchTerm);
   const filtersRef = useRef(filters);
   const statusParamRef = useRef(statusParam);
+  const adIdParamRef = useRef(adIdParam);
   const userIdParamRef = useRef(userIdParam);
   const staffIdParamRef = useRef(staffIdParam);
   const teamIdParamRef = useRef(teamIdParam);
@@ -134,6 +140,7 @@ export function LeadList() {
   searchTermRef.current = searchTerm;
   filtersRef.current = filters;
   statusParamRef.current = statusParam;
+  adIdParamRef.current = adIdParam;
   userIdParamRef.current = userIdParam;
   staffIdParamRef.current = staffIdParam;
   teamIdParamRef.current = teamIdParam;
@@ -197,6 +204,9 @@ export function LeadList() {
         teamIdParamRef.current,
         offsetRef.current,
       );
+      if (adIdParamRef.current) {
+        payload.adId = adIdParamRef.current;
+      }
       // Unassigned filter: pass isUnassigned flag to API
       if (isUnassignedRef.current) {
         payload.isUnassigned = true;
@@ -248,7 +258,7 @@ export function LeadList() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, isUnassigned]);
+  }, [searchTerm, filters, statusParam, userIdParam, staffIdParam, adIdParam, isUnassigned]);
 
 
 
@@ -314,6 +324,9 @@ export function LeadList() {
   if (statusParam && filters.statuses.length === 0) {
     activePills.push({ label: statusParam, onRemove: () => { } }); 
   }
+  if (adIdParam && filters.adIds.length === 0) {
+    activePills.push({ label: selectedAdLabel, onRemove: () => { } });
+  }
 
   filters.statuses.forEach(s =>
     activePills.push({
@@ -331,11 +344,11 @@ export function LeadList() {
 
   return (
     <>
-      <div className="flex flex-col h-full min-h-0 space-y-2" >
-        {/* <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-6"> */}
-        <div className="flex items-center gap-4 mb-4">
+      <div className="flex flex-col space-y-2 sm:space-y-3 pb-6">
+        <div className="sticky top-[-16px] sm:top-[-24px] md:top-[-32px] -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 z-40 bg-[#DCE6F2] pt-0 pb-3">
+        <div className="flex items-center gap-2 flex-wrap mb-0.5 sm:mb-1">
           <BackButton onClick={() => router.back()} />
-          <Text as="h1" weight="semibold" className="text-slate-800" style={{ fontSize: '20px' }}>
+          <Text as="h1" weight="semibold" className="text-slate-800 text-[16px] sm:text-[18px] leading-tight">
             {isUnassigned
               ? "Unassigned Leads"
               : statusParam
@@ -349,18 +362,18 @@ export function LeadList() {
         </div>
 
         {/* ── Search + Filter Row ── */}
-        <div className="flex items-center gap-3 relative">
+        <div className="flex items-start gap-2 relative">
           <div className="flex-1 relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
               style={{ color: COLORS.subtle }}>
-              <Search size={18} />
+              <Search size={17} />
             </div>
             <input
               type="text"
               placeholder="Search by name, email, mobile..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full placeholder-gray-400 border-none rounded-full py-3.5 pl-11 pr-10 focus:outline-none focus:ring-2 transition-all duration-200"
+              className="w-full placeholder-gray-400 border-none rounded-full py-3 pl-10 pr-9 focus:outline-none focus:ring-2 transition-all duration-200 text-[14px] sm:text-[15px]"
               style={{
                 backgroundColor: COLORS.surface,
                 color: COLORS.text,
@@ -379,42 +392,56 @@ export function LeadList() {
             )}
           </div>
 
-          {/* Filter button */}
-          <button
-            onClick={() => setIsFilterOpen(true)}
-            className="relative p-3.5 rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-0.5 flex items-center justify-center"
-            style={{
-              backgroundColor: hasActiveFilters ? COLORS.primary : COLORS.primaryDark,
-              boxShadow: `0 4px 14px ${COLORS.primary}40`,
-            }}
-            title="Filter Leads"
-          >
-            <Filter size={20} />
-            {hasActiveFilters && (
-              <span
-                className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
-                style={{ backgroundColor: COLORS.warning }}
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            {/* Filter button */}
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              className="relative w-10 h-10 sm:w-auto sm:h-auto sm:px-3.5 sm:py-3 rounded-full sm:rounded-xl text-white transition-all hover:opacity-90 hover:-translate-y-0.5 flex items-center justify-center shrink-0"
+              style={{
+                backgroundColor: hasActiveFilters ? COLORS.primary : COLORS.primaryDark,
+                boxShadow: `0 4px 14px ${COLORS.primary}40`,
+              }}
+              title="Filter Leads"
+            >
+              <Filter size={17} className="sm:w-5 sm:h-5" />
+              {hasActiveFilters && (
+                <span
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
+                  style={{ backgroundColor: COLORS.warning }}
+                >
+                  {activePills.length}
+                </span>
+              )}
+            </button>
+
+            {leads.length > 0 && (
+              <button
+                onClick={toggleSelectionMode}
+                className={`text-[11px] sm:text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors border ${isSelectionMode
+                  ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100"
+                  : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+                  }`}
               >
-                {activePills.length}
-              </span>
+                {isSelectionMode ? "Cancel" : "Select"}
+              </button>
             )}
-          </button>
+          </div>
         </div>
 
         {/* ── Active filter pills ── */}
         {activePills.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
             {activePills.map((pill, i) => (
               <span
                 key={i}
-                className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full"
+                className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold px-2.5 py-1.5 rounded-full"
                 style={{
                   backgroundColor: COLORS.primaryXlight,
                   color: COLORS.primary,
                   border: `1px solid ${COLORS.primaryLight}`,
                 }}
               >
-                <Text weight="semibold" style={{ fontSize: '11px' }}>{pill.label}</Text>
+                <Text weight="semibold" className="text-[10px] sm:text-[11px]">{pill.label}</Text>
                 <button onClick={pill.onRemove} className="hover:opacity-70">
                   <X size={11} />
                 </button>
@@ -422,7 +449,7 @@ export function LeadList() {
             ))}
             <button
               onClick={handleClearAll}
-              className="text-[11px] font-semibold px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
+              className="hidden sm:inline-flex text-[11px] font-semibold px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
               style={{ color: COLORS.danger, backgroundColor: "#9B222610" }}
             >
               Clear all
@@ -431,61 +458,57 @@ export function LeadList() {
         )}
 
         {/* ── Selection Action Bar ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="mt-1 flex items-center justify-between gap-2 sm:gap-3 flex-wrap">
           {!isLoading && (
-            <Text weight="medium" style={{ color: COLORS.muted, fontSize: '12px' }}>
+            <Text weight="medium" className="text-[11px] sm:text-[12px] leading-tight" style={{ color: COLORS.muted }}>
               {leads.length} lead{leads.length !== 1 ? "s" : ""} found
               {statusParam && filters.statuses.length === 0 ? ` · ${statusParam}` : ""}
+              {adIdParam && filters.adIds.length === 0 ? ` · ${selectedAdLabel || "Ad filtered"}` : ""}
             </Text>
           )}
 
-          {leads.length > 0 && (
-            <div className="flex items-center gap-2">
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            {activePills.length > 0 && (
+              <button
+                onClick={handleClearAll}
+                className="sm:hidden text-[11px] font-semibold px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
+                style={{ color: COLORS.danger, backgroundColor: "#9B222610" }}
+              >
+                Clear all
+              </button>
+            )}
+
+            {leads.length > 0 && (
+              <>
               {isSelectionMode && (
                 <>
                   <button
                     onClick={toggleSelectAll}
-                    className="text-[12px] font-semibold text-primary px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
+                    className="text-[11px] sm:text-[12px] font-semibold text-primary px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
                   >
                     {selectedLeadIds.length === leads.length ? "Deselect All" : "Select All"}
                   </button>
                   <button
                     disabled={selectedLeadIds.length === 0}
                     onClick={() => setIsAssignModalOpen(true)}
-                    className="flex items-center gap-1.5 text-[12px] font-bold text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 text-[11px] sm:text-[12px] font-bold text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                     style={{ backgroundColor: COLORS.primary }}
                   >
-                    <Users size={14} /> 
-                    <Text weight="bold" style={{ fontSize: '12px' }}>Assign ({selectedLeadIds.length})</Text>
+                    <Users size={14} />
+                    <Text weight="bold" className="text-[11px] sm:text-[12px]">Assign ({selectedLeadIds.length})</Text>
                   </button>
                 </>
               )}
-              <button
-                onClick={toggleSelectionMode}
-                className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors border ${isSelectionMode
-                  ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100"
-                  : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
-                  }`}
-              >
-                {isSelectionMode ? "Cancel" : "Select"}
-              </button>
-            </div>
-          )}
+              </>
+            )}
+          </div>
+        </div>
+
         </div>
 
         {/* ── Leads Grid ── */}
-        <div
-          className="flex-1 overflow-y-auto custom-scrollbar px-3 py-6"
-          onScroll={(e) => {
-            const t = e.currentTarget;
-            const distanceToBottom = t.scrollHeight - t.scrollTop - t.clientHeight;
 
-            // Trigger pre-fetch when within 400px of the bottom to prevent lag
-            if (distanceToBottom <= 400 && hasMore && !isLoading && !isLoadingMore && !isFetchingRef.current) {
-              loadLeads(false);
-            }
-          }}
-        >
+        <div className="px-0 sm:px-1 md:px-2 lg:px-3 py-3 sm:py-4">
 
           {isLoading ? (
             <div className="flex justify-center items-center h-52">
@@ -498,15 +521,15 @@ export function LeadList() {
               </div>
             </div>
           ) : leads.length === 0 ? (
-            <div className="flex flex-col justify-center items-center h-90 space-y-2">
+            <div className="flex flex-col justify-center items-center min-h-[280px] sm:min-h-[360px] space-y-2 text-center px-4">
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: COLORS.primaryXlight }}
               >
-                <Search size={28} style={{ color: COLORS.primary }} />
+                <Search size={24} className="sm:w-7 sm:h-7" style={{ color: COLORS.primary }} />
               </div>
-              <Text weight="semibold" style={{ color: COLORS.text, fontSize: '15px' }}>No leads found</Text>
-              <Text style={{ color: COLORS.muted, fontSize: '12px' }}>
+              <Text weight="semibold" className="text-[15px] sm:text-[16px]" style={{ color: COLORS.text }}>No leads found</Text>
+              <Text className="text-[12px] sm:text-[13px]" style={{ color: COLORS.muted }}>
                 {hasActiveFilters ? "Try adjusting your filters" : "No leads available yet"}
               </Text>
               {hasActiveFilters && (
@@ -521,7 +544,7 @@ export function LeadList() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 auto-rows-max">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5 auto-rows-max">
                 {leads.map((lead) => (
                   <LeadCard
                     key={lead.id}

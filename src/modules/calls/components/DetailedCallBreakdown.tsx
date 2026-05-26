@@ -2,15 +2,16 @@ import React from "react";
 import Image from "next/image";
 import { Text } from "@/core/components/ui/Text";
 import { CallTeamRow } from "../types";
+import { COLORS } from "@/core/components/theme/colors";
 
 export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[], isLoading: boolean }) => {
   return (
     <div className="flex flex-col w-full mt-6 font-sans">
-      <Text as="h2" weight="medium" className="text-black mb-4" style={{ fontSize: '18px' }}>Detailed Call Breakdown</Text>
+      <Text as="h2" weight="medium" className="mb-4" style={{ fontSize: '18px', color: COLORS.text }}>Detailed Call Breakdown</Text>
       
-      <div className="w-full">
+      <div className="w-full overflow-x-auto">
          
-         <div className="bg-[#1E3A8A] text-white rounded-full px-10 py-4 mb-6 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center shadow-lg tracking-wide uppercase">
+         <div className="min-w-[860px] bg-[#1E3A8A] text-white rounded-full px-6 sm:px-10 py-4 mb-6 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center shadow-lg tracking-wide uppercase">
             <Text weight="bold" className="text-left" style={{ fontSize: '14px' }}>Sales Team</Text>
             <Text weight="bold" style={{ fontSize: '14px' }}>Call made</Text>
             <Text weight="bold" style={{ fontSize: '14px' }}>Received</Text>
@@ -18,7 +19,7 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
             <Text weight="bold" style={{ fontSize: '14px' }}>Avg Duration</Text>
          </div>
 
-         <div className="flex flex-col gap-4 pb-4 max-h-[380px] overflow-y-auto custom-scrollbar-table pr-2">
+         <div className="min-w-[860px] flex flex-col gap-4 pb-4 max-h-[380px] overflow-y-auto custom-scrollbar-table pr-2">
             {isLoading ? (
               <div className="h-40 flex items-center justify-center text-slate-400 bg-slate-100/50 rounded-[32px] animate-pulse border border-dashed border-slate-200">
                 <Text weight="medium" size="sm">Fetching call metrics...</Text>
@@ -29,7 +30,7 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
               </div>
             ) : (
               data.map((row) => (
-                  <div key={row.id} className="bg-[#3561A5] text-white rounded-[24px] p-4 px-10 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center transition-all hover:translate-x-1 hover:shadow-md active:scale-[0.99] group">
+                  <div key={row.id} className="bg-[#3561A5] text-white rounded-[24px] p-4 px-6 sm:px-10 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center transition-all hover:translate-x-1 hover:shadow-md active:scale-[0.99] group">
                       
                       <div className="flex items-center gap-5 text-left">
                           <div className="w-[48px] h-[48px] min-w-[48px] bg-white rounded-full overflow-hidden shadow-inner flex items-center justify-center p-0.5">
@@ -41,13 +42,13 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
                                 </div>
                               )}
                           </div>
-                          <Text weight="semibold" className="tracking-wide group-hover:text-blue-100 transition-colors" style={{ fontSize: '18px' }}>{row.name}</Text>
+                          <Text weight="semibold" className="tracking-wide group-hover:text-blue-100 transition-colors" style={{ fontSize: '18px', color: COLORS.bg }}>{row.name}</Text>
                       </div>
 
-                      <Text weight="bold" style={{ fontSize: '18px' }}>{row.callsMade}</Text>
-                      <Text weight="bold" style={{ fontSize: '18px' }}>{row.received}</Text>
-                      <Text weight="bold" style={{ fontSize: '18px' }}>{row.missed}</Text>
-                      <Text weight="bold" className="tabular-nums tracking-tighter" style={{ fontSize: '18px' }}>{row.avgDuration}</Text>
+                      <Text weight="bold" style={{ fontSize: '18px', color: COLORS.bg }}>{row.callsMade}</Text>
+                      <Text weight="bold" style={{ fontSize: '18px', color: COLORS.bg }}>{row.received}</Text>
+                      <Text weight="bold" style={{ fontSize: '18px', color: COLORS.bg }}>{row.missed}</Text>
+                      <Text weight="bold" className="tabular-nums tracking-tighter" style={{ fontSize: '18px', color: COLORS.bg }}>{row.avgDuration}</Text>
                   </div>
               ))
             )}

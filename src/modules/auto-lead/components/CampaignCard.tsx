@@ -12,7 +12,7 @@ export const CampaignCard: React.FC<Props> = ({ campaign, isSelected, onToggle }
   return (
     <div 
       onClick={() => onToggle(campaign.id)}
-      className={`relative rounded-2xl p-4 flex flex-col justify-between h-[105px] border-2 transition-all cursor-pointer ${
+      className={`relative rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-h-[100px] sm:h-[105px] border-2 transition-all cursor-pointer ${
         isSelected ? 'bg-white' : 'bg-gray-50/50 hover:border-gray-200'
       }`}
       style={isSelected ? { borderColor: COLORS.primary, boxShadow: `0 4px 6px -1px ${COLORS.primary}20, 0 2px 4px -2px ${COLORS.primary}20` } : {}}
@@ -36,7 +36,7 @@ export const CampaignCard: React.FC<Props> = ({ campaign, isSelected, onToggle }
           {isSelected && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
         </div>
         
-        <p className={`text-[14px] font-semibold leading-snug line-clamp-2 mt-px ${
+        <p className={`text-[13px] sm:text-[14px] font-semibold leading-snug line-clamp-2 mt-px ${
           isSelected ? 'text-gray-900' : 'text-gray-600'
         }`}>
           {campaign.title}
@@ -46,9 +46,9 @@ export const CampaignCard: React.FC<Props> = ({ campaign, isSelected, onToggle }
       <div className="flex items-center justify-between mt-auto">
         <div className="flex items-center gap-1 opacity-60">
           <BarChart2 className="w-3.5 h-3.5" style={{ color: COLORS.primary }} />
-          <span className="text-[12px] font-medium text-gray-500">Leads</span>
+          <span className="text-[11px] sm:text-[12px] font-medium text-gray-500">Leads</span>
         </div>
-        <span className="font-bold text-[14px]" style={{ color: COLORS.primary }}>{campaign.leadsCount}</span>
+        <span className="font-bold text-[13px] sm:text-[14px]" style={{ color: COLORS.primary }}>{campaign.leadsCount}</span>
       </div>
     </div>
   );

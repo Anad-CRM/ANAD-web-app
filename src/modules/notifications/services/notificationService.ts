@@ -9,9 +9,7 @@ export interface GetNotificationsParams {
 
 export const NotificationService = {
   getNotifications: async (params: GetNotificationsParams) => {
-    const response = await api.get(API_ENDPOINTS.NOTIFICATIONS.GET_BY_USER, {
-      params,
-    });
+    const response = await api.post(API_ENDPOINTS.NOTIFICATIONS.GET_BY_USER, params);
     return response.data;
   },
 };

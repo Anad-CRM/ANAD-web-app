@@ -1,6 +1,7 @@
 import React from "react";
 import { CallFilterType, CallAnalyticsResponse } from "../types";
 import { Text } from "@/core/components/ui/Text";
+import { COLORS } from "@/core/components/theme/colors";
 
 export const CallTypeFilters = ({ 
     activeFilter, 
@@ -71,7 +72,7 @@ export const CallTypeFilters = ({
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3 mb-8">
+    <div className="grid grid-cols-2 gap-3 mb-8 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-9">
       {filters.map((filter) => {
         const isActive = activeFilter === filter.type;
         return (
@@ -80,17 +81,21 @@ export const CallTypeFilters = ({
             onClick={() => onFilterChange(filter.type)}
             className={`bg-white border rounded-2xl p-4 flex flex-col items-center justify-center transition-all group relative ${
               isActive 
-                ? "border-[#233A78] shadow-md ring-1 ring-[#233A78]/20 bg-[#F8FAFC]" 
-                : "border-[#E2E8F0] shadow-sm hover:shadow-md hover:border-[#A5BCD1]"
+                ? "shadow-md ring-1 bg-[#F8FAFC]" 
+                : "shadow-sm hover:shadow-md"
             }`}
+            style={{
+              borderColor: isActive ? COLORS.primaryDark : COLORS.border,
+              boxShadow: isActive ? `0 10px 20px ${COLORS.primaryDark}14` : undefined,
+            }}
           >
             <Text 
               weight="bold"
               size="custom"
               className={`leading-none mb-1.5 transition-transform group-hover:scale-110 inline-block ${
-                isActive ? "text-[#233A78]" : "text-slate-800"
+                isActive ? "" : ""
               }`}
-              style={{ fontSize: '24px' }}
+              style={{ fontSize: 'clamp(18px, 2vw, 24px)', color: isActive ? COLORS.primaryDark : COLORS.text }}
             >
               {getCount(filter.type)}
             </Text>
@@ -98,14 +103,14 @@ export const CallTypeFilters = ({
               weight="bold"
               size="custom"
               className={`text-center leading-tight uppercase tracking-wider ${
-                isActive ? "text-[#233A78]" : "text-slate-500"
+                isActive ? "" : ""
               }`}
-              style={{ fontSize: '11px' }}
+              style={{ fontSize: '11px', color: isActive ? COLORS.primaryDark : COLORS.muted }}
             >
               {filter.label || filter.type}
             </Text>
             {isActive && (
-              <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#233A78]"></div>
+              <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS.primaryDark }}></div>
             )}
           </button>
         );

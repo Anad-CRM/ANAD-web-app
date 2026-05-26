@@ -5,6 +5,7 @@ import { PIPELINE_METRICS } from "../constants";
 import { PipelineMetricCard } from "./PipelineMetricCard";
 import { getPipelineData } from "../api/pipelineApi";
 import { PipelineData } from "../types";
+import { COLORS } from "@/core/components/theme/colors";
 
 // Map pipeline metric id → backend status value
 const METRIC_STATUS: Record<string, string> = {
@@ -58,15 +59,18 @@ export const PipelineDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex-1 w-full flex items-center justify-center font-sans h-full">
-        <div className="w-12 h-12 border-4 border-[#1C3A76] border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex-1 w-full min-h-[240px] flex items-center justify-center font-sans h-full">
+        <div
+          className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: COLORS.primary }}
+        />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col flex-1 w-full font-sans h-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 h-full content-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 h-full content-start auto-rows-fr">
         {PIPELINE_METRICS.map((metric) => (
           <PipelineMetricCard
             key={metric.id}

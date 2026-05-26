@@ -28,7 +28,7 @@ const formatDate = (dateString: string) => {
       day: "2-digit",
       year: "numeric",
     });
-  } catch (e) {
+  } catch {
     return dateString;
   }
 };

@@ -8,13 +8,13 @@ interface Props {
 
 export const CreateLeadTabs: React.FC<Props> = ({ activeTab, onTabChange }) => {
   return (
-    <div className="flex gap-4">
+    <div className="flex justify-end gap-4">
       <button 
         onClick={() => onTabChange('single')}
         className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[15px] font-medium transition-colors shadow-sm ${
           activeTab === 'single' 
-            ? 'bg-[#1C3A76] text-white' 
-            : 'bg-[#2B5299] text-white/90 hover:bg-[#1C3A76]'
+            ? 'bg-[#163172] text-white' 
+            : 'bg-[#2B5299] text-white/90 hover:bg-[#163172]'
         }`}
       >
         <UserPlus className="w-5 h-5" />
@@ -25,8 +25,8 @@ export const CreateLeadTabs: React.FC<Props> = ({ activeTab, onTabChange }) => {
         onClick={() => onTabChange('bulk')}
         className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[15px] font-medium transition-colors shadow-sm ${
           activeTab === 'bulk' 
-            ? 'bg-[#1C3A76] text-white' 
-            : 'bg-[#2B5299] text-white/90 hover:bg-[#1C3A76]'
+            ? 'bg-[#163172] text-white' 
+            : 'bg-[#2B5299] text-white/90 hover:bg-[#163172]'
         }`}
       >
         <CloudUpload className="w-5 h-5" />

@@ -1,6 +1,6 @@
 import { api } from "@/core/api/axios";
 import { API_ENDPOINTS } from "@/core/api/api";
-import { CallAnalyticsResponse, CallLog } from "../types";
+import { CallAnalyticsResponse, CallLog, CallTrendResponse } from "../types";
 import { getUser } from "@/core/utils/auth";
 
 export const getCallAnalytics = async (params?: Record<string, unknown>): Promise<CallAnalyticsResponse | null> => {
@@ -34,7 +34,30 @@ export const getSpecificCallLogs = async (params: {
       });
       
       if (response.data.success) {
-        const logs = response.data.data.callDetails.map((item: any) => ({
+        type CallDetailItem = {
+          id: string;
+          number?: string;
+          callType?: string;
+          duration?: number | string;
+          timestamp?: string;
+          recording?: { fileName?: string };
+          createdUserName?: string;
+          lead?: {
+            id: string;
+            userName?: string;
+            mobileNumber?: string;
+            name?: string;
+          };
+          name?: string;
+          leadName?: string;
+          customerName?: string;
+        };
+
+        const callDetails: CallDetailItem[] = Array.isArray(response.data.data?.callDetails)
+          ? response.data.data.callDetails
+          : [];
+
+        const logs = callDetails.map((item) => ({
           id: item.id,
           number: item.number,
           callType: item.callType,
@@ -62,6 +85,33 @@ export const getSpecificCallLogs = async (params: {
       console.error("Failed to fetch specific call logs:", error);
       return { logs: [], totalCount: 0 };
     }
+};
+
+export const getCallTrendAnalytics = async (params?: {
+  callType: "incoming" | "outgoing";
+  startDate?: string;
+  endDate?: string;
+  staffIds?: string[];
+  teamId?: string;
+  teamLeadOnly?: boolean;
+}): Promise<CallTrendResponse | null> => {
+  try {
+    const user = getUser<{ organizationId?: string }>();
+    const response = await api.get(API_ENDPOINTS.DASHBOARD.SPECIFIC_CALL_TYPE_ANALYTICS, {
+      params: {
+        ...params,
+        organizationId: user?.organizationId,
+      },
+    });
+
+    if (response.data?.success) {
+      return response.data.data?.trends || null;
+    }
+    return null;
+  } catch (error) {
+    console.error("Failed to fetch call trend analytics:", error);
+    return null;
+  }
 };
 
 export const getStaffCallBreakdown = async (params?: Record<string, unknown>) => {

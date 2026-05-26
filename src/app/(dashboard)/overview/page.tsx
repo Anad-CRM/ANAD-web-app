@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import LeadStatsSection from "@/modules/overview/components/LeadStatsSection";
 import EodReportsSection from "@/modules/overview/components/EodReportsSection";
 import { getLeadSummary, getEodReports, getTopPerformers } from "@/modules/overview/api/overviewApi";
-import { LeadCountsData, StaffEodSummary, TopPerformersResponse } from "@/modules/overview/types";
+import { LeadCountsData, Performer, StaffEodSummary, TopPerformersResponse } from "@/modules/overview/types";
 import { LeaderboardModal } from "@/modules/overview/components/LeaderboardModal";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 const NAV_ROLES = [
   {
@@ -60,7 +63,7 @@ export default function OverviewPage() {
   const [eodData, setEodData] = useState<StaffEodSummary[]>([]);
   const [topPerformers, setTopPerformers] = useState<TopPerformersResponse | null>(null);
   const [leaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
-  const [selectedLeaderboard, setSelectedLeaderboard] = useState<{title: string, data: any[]}>({title: "", data: []});
+  const [selectedLeaderboard, setSelectedLeaderboard] = useState<{ title: string; data: Performer[] }>({ title: "", data: [] });
 
   useEffect(() => {
     const loadOverviewData = async () => {
@@ -76,41 +79,37 @@ export default function OverviewPage() {
   }, [filter, customStartDate, customEndDate, staffId]);
 
   return (
-    <div className="flex flex-col gap-6 pb-10">
+    <div className="flex min-w-0 flex-col gap-6 pb-10">
 
       {/* ── Page header ── */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-[26px] sm:text-[30px] font-extrabold text-[#1E293B] leading-tight tracking-tight">
+          <Text as="h1" size="4xl" weight="bold" className="leading-tight tracking-tight sm:text-[26px] md:text-[30px]" style={{ color: COLORS.text }}>
             Team Overview
-          </h1>
-          <p className="text-[13px] text-slate-400 mt-0.5">Real-time performance snapshot</p>
+          </Text>
+          <Text as="p" size="sm" className="mt-0.5" style={{ color: COLORS.subtle }}>
+            Real-time performance snapshot
+          </Text>
         </div>
 
-        {/* Calendar quick action */}
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1C3A76] text-white text-[13px] font-semibold shadow-md hover:bg-[#11234D] transition-colors">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><path d="M12 14v4" /><path d="M10 16h4" />
-          </svg>
-          Schedule
-        </button>
       </div>
 
       {/* ── Quick-nav role chips ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {NAV_ROLES.map((role) => (
-          <a
+          <Link
             key={role.name}
             href={role.href}
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm hover:shadow-md hover:border-[#A5BCD1] transition-all group"
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white shadow-sm hover:shadow-md transition-all group"
+            style={{ border: `1px solid ${COLORS.border}` }}
           >
-            <div className="w-9 h-9 rounded-xl bg-[#1C3A76] flex items-center justify-center text-white flex-shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 group-hover:scale-105 transition-transform" style={{ backgroundColor: COLORS.primaryDark }}>
               {role.icon}
             </div>
-            <span className="text-[14px] font-semibold text-[#1E293B] group-hover:text-[#1C3A76] transition-colors truncate">
+            <Text as="span" size="sm" weight="semibold" className="truncate transition-colors group-hover:text-[#1C3A76]" style={{ color: COLORS.text }}>
               {role.name}
-            </span>
-          </a>
+            </Text>
+          </Link>
         ))}
       </div>
 
@@ -135,7 +134,7 @@ export default function OverviewPage() {
               }}
               style={{
                 background: idx === 0
-                  ? "linear-gradient(135deg, #1C3A76 0%, #1E56A0 100%)"
+                  ? `linear-gradient(135deg, ${COLORS.primaryDark} 0%, ${COLORS.primary} 100%)`
                   : "linear-gradient(135deg, #0f7368 0%, #128C7E 100%)",
               }}
             >
@@ -155,11 +154,17 @@ export default function OverviewPage() {
                 {card.emoji}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-0.5">{card.period}</span>
-                <h3 className="text-[15px] font-bold text-white truncate mb-1">{card.title}</h3>
+                <Text as="span" size="xs" weight="semibold" className="uppercase tracking-widest mb-0.5 text-white/60">
+                  {card.period}
+                </Text>
+                <Text as="h3" size="sm" weight="bold" className="truncate mb-1 text-white">
+                  {card.title}
+                </Text>
                 {performerData ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] text-white/90 font-medium truncate">{performerData.userName}</span>
+                    <Text as="span" size="sm" weight="medium" className="truncate text-white/90">
+                      {performerData.userName}
+                    </Text>
                     <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/20 text-white flex-shrink-0">
                       {performerData.closedCount} closed
                     </span>
@@ -169,7 +174,9 @@ export default function OverviewPage() {
                     <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                     </div>
-                    <span className="text-[13px] text-white/70 font-medium">No data yet</span>
+                    <Text as="span" size="sm" weight="medium" className="text-white/70">
+                      No data yet
+                    </Text>
                   </div>
                 )}
               </div>

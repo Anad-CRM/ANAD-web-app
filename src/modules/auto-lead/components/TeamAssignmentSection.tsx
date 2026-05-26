@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Users } from 'lucide-react';
 import { AutoLeadCampaign } from '../types';
-import { 
-  TeamItem, 
-  getTeamsList, 
-  getTeamAutoAssignStatus, 
+import {
+  TeamItem,
+  getTeamsList,
+  getTeamAutoAssignStatus,
   updateTeamAds,
   getTeamStrengthAutoAssignStatus,
   toggleTeamStrengthAutoAssignLeads,
-  TeamStrengthItem
+  TeamStrengthItem,
 } from '../api/autoLeadApi';
 import { DistributionAssignModal } from './DistributionAssignModal';
 import { getUser } from '@/core/utils/auth';
+import { Text } from '@/core/components/ui/Text';
+import { COLORS } from '@/core/components/theme/colors';
 
 interface Props {
   campaigns: AutoLeadCampaign[];
@@ -25,8 +27,6 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
   const [modalTeam, setModalTeam] = useState<TeamItem | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
-
-  // Strength-Based States
   const [orgStrengthEnabled, setOrgStrengthEnabled] = useState(false);
   const [teamStrengthMap, setTeamStrengthMap] = useState<Record<string, {
     id: string;
@@ -43,7 +43,7 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
 
     const [list, strengthStatus] = await Promise.all([
       getTeamsList(),
-      orgId ? getTeamStrengthAutoAssignStatus(orgId) : Promise.resolve(null)
+      orgId ? getTeamStrengthAutoAssignStatus(orgId) : Promise.resolve(null),
     ]);
 
     setTeams(list);
@@ -58,13 +58,17 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
     }
 
     const results = await Promise.all(
-      list.map(async (t) => {
+      list.map(async t => {
         const status = await getTeamAutoAssignStatus(t.id);
         return { id: t.id, ids: status.selectedAdIds };
       })
     );
+
     const map: Record<string, string[]> = {};
-    results.forEach(r => { map[r.id] = r.ids; });
+    results.forEach(r => {
+      map[r.id] = r.ids;
+    });
+
     setTeamAdsMap(map);
     setLoading(false);
   };
@@ -132,19 +136,21 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="w-9 h-9 border-4 border-[#1C3A76] border-t-transparent rounded-full animate-spin" />
+        <div className="w-9 h-9 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: COLORS.primary }} />
       </div>
     );
   }
 
   if (teams.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 m-5">
+      <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 m-4 sm:m-5">
         <Users className="w-12 h-12 text-gray-300 mb-3" />
-        <p className="text-gray-800 font-bold text-[14px]">No Teams Found</p>
-        <p className="text-gray-400 text-[12px] mt-1 max-w-[280px] leading-relaxed">
+        <Text weight="bold" className="text-gray-800 block" style={{ fontSize: '14px' }}>
+          No Teams Found
+        </Text>
+        <Text className="text-gray-400 block mt-1 max-w-[280px]" style={{ fontSize: '12px', lineHeight: '1.55' }}>
           You need to create at least one team in the CRM settings before you can assign lead routing targets.
-        </p>
+        </Text>
       </div>
     );
   }
@@ -152,27 +158,32 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
   return (
     <>
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-lg transition-all ${toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-lg transition-all ${
+            toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+          }`}
+        >
           {toast.msg}
         </div>
       )}
+
       <div className="space-y-5">
-        {/* ─── Organization Strength-Based Auto Assign Card ─── */}
-        <div className="bg-gradient-to-r from-[#1C3A76] via-[#244A91] to-[#2E5AA8] text-white rounded-2xl p-5 shadow-lg border border-[#2B5299]/50 overflow-hidden relative">
-          {/* Subtle Background Graphics */}
+        <div className="bg-gradient-to-r from-[#1C3A76] via-[#244A91] to-[#2E5AA8] text-white rounded-2xl p-4 sm:p-5 shadow-lg border border-[#2B5299]/50 overflow-hidden relative">
           <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-4 translate-y-4">
             <Users className="w-40 h-40 text-white" />
           </div>
-          
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-2 flex-1">
+
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="space-y-2 flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-xl">📊</span>
-                <h3 className="font-extrabold text-[15.5px] tracking-wide text-white">Team Strength-Based Distribution</h3>
+                <Text as="h3" weight="bold" className="text-white block" style={{ fontSize: '15.5px', letterSpacing: '0.02em' }}>
+                  Team Strength-Based Distribution
+                </Text>
               </div>
-              <p className="text-white/85 text-[12.5px] leading-relaxed max-w-[600px]">
+              <Text className="text-white/85 block max-w-[600px]" style={{ fontSize: '12.5px', lineHeight: '1.65' }}>
                 Distribute incoming leads dynamically among your teams. Larger teams with more active present members today will receive a larger share of the lead pool.
-              </p>
+              </Text>
               {attendanceRequired && (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/25 border border-amber-400/20 text-amber-300 text-[11px] font-semibold mt-1 animate-pulse">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
@@ -180,7 +191,7 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
                 </div>
               )}
             </div>
-            
+
             <button
               onClick={handleToggleOrgStrength}
               disabled={isUpdatingOrgStrength}
@@ -188,15 +199,16 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
                 orgStrengthEnabled ? 'bg-green-500 shadow-md shadow-green-500/20' : 'bg-white/20'
               } ${isUpdatingOrgStrength ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ${
-                orgStrengthEnabled ? 'translate-x-5' : 'translate-x-0'
-              }`} />
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ${
+                  orgStrengthEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
             </button>
           </div>
         </div>
 
-        {/* ─── Teams Grid List ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {teams.map(team => {
             const assignedIds = teamAdsMap[team.id] || [];
             const assignedCount = assignedIds.length;
@@ -205,10 +217,9 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
               .map(id => campaigns.find(c => c.id === id)?.title)
               .filter(Boolean) as string[];
 
-            // Strength calculations
             const totalMembers = team.users?.length ?? team.members?.length ?? team.membersCount ?? team.memberCount ?? 0;
-            const activeMembers = team.users 
-              ? team.users.filter((u: { Attendance?: unknown; Attendances?: unknown }) => u.Attendance || (Array.isArray(u.Attendances) && u.Attendances.length > 0)).length 
+            const activeMembers = team.users
+              ? team.users.filter((u: { Attendance?: unknown; Attendances?: unknown }) => u.Attendance || (Array.isArray(u.Attendances) && u.Attendances.length > 0)).length
               : totalMembers;
 
             const strengthInfo = teamStrengthMap[team.id];
@@ -216,33 +227,42 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
             const effectiveStrength = strengthInfo ? strengthInfo.effectiveStrengthAutoAssignLeads : orgStrengthEnabled;
 
             return (
-              <div key={team.id} className="bg-white border border-gray-100/80 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-gray-200 transition-all duration-300 flex flex-col justify-between relative group">
+              <div key={team.id} className="bg-white border border-gray-100/80 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-gray-200 transition-all duration-300 flex flex-col justify-between relative group h-full">
                 <div>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/80 border border-indigo-200/50 flex items-center justify-center flex-shrink-0 text-indigo-700 font-bold text-[17px] shadow-xs">
                         {(team.name || 'T')[0].toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[15px] font-bold text-gray-800 truncate group-hover:text-[#1C3A76] transition-colors">{team.name}</p>
-                        <p className="text-[12px] text-gray-400 mt-0.5 font-medium">{totalMembers} members total</p>
+                        <Text weight="bold" className="text-gray-800 block truncate group-hover:text-[#1C3A76] transition-colors" style={{ fontSize: '15px' }}>
+                          {team.name}
+                        </Text>
+                        <Text className="text-gray-400 block mt-0.5 font-medium" style={{ fontSize: '12px' }}>
+                          {totalMembers} members total
+                        </Text>
                       </div>
                     </div>
-                    
-                    <div className={`px-2.5 py-1 rounded-lg text-[12px] font-bold tracking-wide shrink-0 ${
-                      assignedCount > 0 
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs' 
-                        : 'bg-gray-50 text-gray-400 border border-gray-100'
-                    }`}>
+
+                    <div
+                      className={`px-2.5 py-1 rounded-lg text-[12px] font-bold tracking-wide shrink-0 self-start sm:self-auto ${
+                        assignedCount > 0
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs'
+                          : 'bg-gray-50 text-gray-400 border border-gray-100'
+                      }`}
+                    >
                       {assignedCount > 0 ? `${assignedCount} Ads` : 'No Ads'}
                     </div>
                   </div>
 
-                  {/* Campaign tag capsules */}
                   {assignedCount > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-4">
                       {assignedNames.map(name => (
-                        <span key={name} className="text-[10px] font-bold bg-gray-50 text-gray-600 border border-gray-200/60 px-2 py-0.5 rounded-md truncate max-w-[125px] hover:bg-gray-100 transition-colors" title={name}>
+                        <span
+                          key={name}
+                          className="text-[10px] font-bold bg-gray-50 text-gray-600 border border-gray-200/60 px-2 py-0.5 rounded-md truncate max-w-[125px] hover:bg-gray-100 transition-colors"
+                          title={name}
+                        >
                           {name}
                         </span>
                       ))}
@@ -254,7 +274,6 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
                     </div>
                   )}
 
-                  {/* Team Strength Data Badge */}
                   <div className="flex items-center justify-between text-[12.5px] font-semibold text-gray-600 mt-4 bg-gray-50/60 border border-gray-100 rounded-xl px-3.5 py-2.5">
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm">📈</span>
@@ -265,28 +284,31 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
                     </span>
                   </div>
 
-                  {/* Inset Strength routing Override switch container */}
-                  <div className={`mt-3.5 p-3 rounded-xl border transition-all duration-300 flex items-center justify-between gap-3 ${
-                    effectiveStrength 
-                      ? 'bg-indigo-50/40 border-indigo-100' 
-                      : 'bg-gray-50/30 border-gray-100'
-                  }`}>
+                  <div
+                    className={`mt-3.5 p-3 rounded-xl border transition-all duration-300 flex items-center justify-between gap-3 ${
+                      effectiveStrength ? 'bg-indigo-50/40 border-indigo-100' : 'bg-gray-50/30 border-gray-100'
+                    }`}
+                  >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-[12.5px] font-bold text-gray-700">Strength Routing</p>
-                        <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border ${
-                          strengthOverrideVal === null
-                            ? 'bg-gray-100/80 text-gray-400 border-gray-200/60'
-                            : 'bg-indigo-100/60 text-indigo-700 border-indigo-200/40'
-                        }`}>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Text weight="bold" className="text-gray-700 block" style={{ fontSize: '12.5px' }}>
+                          Strength Routing
+                        </Text>
+                        <span
+                          className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full border ${
+                            strengthOverrideVal === null
+                              ? 'bg-gray-100/80 text-gray-400 border-gray-200/60'
+                              : 'bg-indigo-100/60 text-indigo-700 border-indigo-200/40'
+                          }`}
+                        >
                           {strengthOverrideVal === null ? 'Inherited' : 'Override'}
                         </span>
                       </div>
-                      <p className="text-[11px] text-gray-400 mt-0.5 truncate font-medium">
+                      <Text className="text-gray-400 block mt-0.5 truncate font-medium" style={{ fontSize: '11px' }}>
                         {effectiveStrength ? 'Weighted distribution active' : 'Standard round-robin routing'}
-                      </p>
+                      </Text>
                     </div>
-                    
+
                     <button
                       onClick={() => handleToggleTeamStrength(team.id)}
                       disabled={isUpdatingTeamStrength[team.id]}
@@ -294,16 +316,21 @@ export const TeamAssignmentSection: React.FC<Props> = ({ campaigns, attendanceRe
                         effectiveStrength ? 'bg-indigo-600' : 'bg-gray-200'
                       } ${isUpdatingTeamStrength[team.id] ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
-                      <span className={`absolute w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${
-                        effectiveStrength ? 'translate-x-4.5' : 'translate-x-0.5'
-                      }`} />
+                      <span
+                        className={`absolute w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${
+                          effectiveStrength ? 'translate-x-4.5' : 'translate-x-0.5'
+                        }`}
+                      />
                     </button>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => { setModalTeam(team); setModalLoading(false); }}
-                  className="mt-4 w-full py-2.5 bg-white border border-gray-200 text-[#1C3A76] hover:bg-[#1C3A76] hover:text-white text-[13px] font-bold rounded-xl transition-all duration-300 hover:shadow-md hover:shadow-[#1C3A76]/10 cursor-pointer transform hover:scale-[1.01]"
+                  onClick={() => {
+                    setModalTeam(team);
+                    setModalLoading(false);
+                  }}
+                  className="mt-4 w-full py-2.5 bg-white border border-gray-200 text-[#1C3A76] hover:bg-[#1C3A76] hover:text-white text-[12.5px] sm:text-[13px] font-bold rounded-xl transition-all duration-300 hover:shadow-md hover:shadow-[#1C3A76]/10 cursor-pointer transform hover:scale-[1.01]"
                 >
                   {assignedCount > 0 ? 'Manage Assigned Ads' : 'Assign Campaigns'}
                 </button>
