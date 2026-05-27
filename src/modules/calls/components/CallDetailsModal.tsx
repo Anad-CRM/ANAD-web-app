@@ -21,7 +21,8 @@ interface CallDetailsModalProps {
   };
 }
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString?: string) => {
+  if (!dateString) return "N/A";
   try {
     const date = new Date(dateString);
     return date.toLocaleString("en-US", {
@@ -131,7 +132,7 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
                     <div className="text-right flex-shrink-0">
                       <Text weight="bold" size="custom" style={{ fontSize: '13px' }} className="text-slate-900 uppercase tracking-tight">{formatDate(call.timestamp)}</Text>
                       <Text weight="bold" className="text-slate-400 uppercase tracking-widest mt-0.5 block" style={{ fontSize: '9px' }}>
-                        {new Date(call.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {call.timestamp ? new Date(call.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A"}
                       </Text>
                     </div>
                   </div>
