@@ -7,7 +7,7 @@ import { useSidebar } from "@/core/contexts/SidebarContext";
 import { COLORS } from "@/core/components/theme/colors";
 import { Text } from "@/core/components/ui/Text";
 import { AuthImage } from "@/core/components/ui/AuthImage";
-import { API_BASE_URL } from "@/core/api/axios";
+
 
 export default function Topbar() {
   const { user, logout } = useAuth();
