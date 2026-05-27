@@ -50,18 +50,19 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   return (
     <div className="flex flex-col gap-1 w-full" ref={dropdownRef}>
-      {label && <label className="text-[12px] font-medium text-[#1A1A1A] block">{label}</label>}
+      {label && <label className="text-[13px] font-semibold text-[#0D1B3E] px-1 block">{label}</label>}
       
       <div className="relative">
         <button
           type="button"
           onClick={() => !disabled && setIsOpen(!isOpen)}
-          className={`w-full flex items-center justify-between bg-[#2B5299] text-white rounded-xl px-4 py-2.5 text-[13px] text-left transition-all shadow-sm ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#345BA1] active:scale-[0.99]'}`}
+          className={`w-full h-[48px] flex items-center justify-between bg-white text-[#0D1B3E] rounded-[14px] px-4 text-[15px] text-left transition-all duration-200 ${disabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-[0.99]'}`}
+          style={{ boxShadow: error ? '0 0 0 2px #ef4444' : undefined }}
         >
-          <span className={selectedOption ? 'text-white' : 'text-[#8DA8D6]'}>
+          <span className={selectedOption ? 'text-[#0D1B3E]' : 'text-gray-400'}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
-          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isOpen && (
@@ -92,7 +93,7 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     className={`w-full flex items-center justify-between px-4 py-2.5 text-[13px] transition-colors hover:bg-gray-50 group border-b border-gray-50 last:border-none my-0.5 ${value === option.id ? 'bg-[#F0F4FF]' : ''}`}
                   >
                     <div className="flex flex-col items-start gap-0.5">
-                      <span className={`font-medium ${value === option.id ? 'text-[#1C3A76]' : 'text-gray-700'}`}>
+                      <span className={`font-medium ${value === option.id ? 'text-[#163172]' : 'text-gray-700'}`}>
                         {option.label}
                       </span>
                       {option.subLabel && (
@@ -101,7 +102,7 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                         </span>
                       )}
                     </div>
-                    {value === option.id && <Check className="w-4 h-4 text-[#1C3A76]" />}
+                    {value === option.id && <Check className="w-4 h-4 text-[#163172]" />}
                   </button>
                 ))
               ) : (
@@ -114,7 +115,7 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         )}
       </div>
       
-      {error && <p className="text-[#C62828] text-[10px] font-medium mt-0.5 ml-1">{error}</p>}
+      {error && <span className="text-xs px-1 text-red-500 mt-1 block">{error}</span>}
     </div>
   );
 };

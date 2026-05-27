@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { X } from "lucide-react";
+import { useSidebar } from "@/core/contexts/SidebarContext";
+import Button from "@/core/components/ui/Button";
+import { COLORS } from "@/core/components/theme/colors";
+import { Text } from "@/core/components/ui/Text";
 
 const NAV = [
   { href: "/overview", label: "Dashboard", svgIcon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
@@ -22,14 +28,24 @@ import { useAuthContext } from "@/modules/auth/stores/AuthContext";
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuthContext();
+  const { sidebarOpen, setSidebarOpen } = useSidebar();
 
   const userRole = user?.role?.toLowerCase() || "";
   const isAuthorizedForTeams = userRole === "admin" || userRole === "manager" || userRole === "organization_admin";
   const isAdmin = userRole === "admin";
 
-  return (
-    <aside className="w-[240px] bg-[#233A78] h-full flex flex-col rounded-tr-3xl overflow-hidden flex-shrink-0">
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname, setSidebarOpen]);
+
+  const sidebarContent = (
+    <>
       <nav className="flex-1 py-4 px-3 flex flex-col gap-1.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="px-2 pb-3">
+          <Text as="p" size="xs" weight="semibold" className="uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Navigation
+          </Text>
+        </div>
         {NAV.map((item) => {
           if (item.href === "/teams" && !isAuthorizedForTeams) {
             return null;
@@ -42,9 +58,14 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] font-medium transition-all duration-200 ${
-                active ? "bg-[#E2E8F0] text-black font-bold" : "text-white/80 hover:bg-white/10"
+                active ? "font-bold" : ""
               }`}
+              style={{
+                backgroundColor: active ? COLORS.primaryXlight : "transparent",
+                color: active ? COLORS.text : "rgba(255,255,255,0.8)",
+              }}
             >
               <span className="text-[18px] w-6 flex justify-center">
                 {item.svgIcon}
@@ -56,14 +77,62 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-4 mt-auto">
-        <div className="bg-[#E2E8F0] rounded-[16px] p-5 flex flex-col items-center text-center">
-          <h4 className="text-[14px] font-bold text-black mb-1">Upgrade Pro</h4>
-          <p className="text-[12px] text-[#64748B] mb-3">Get all Feature</p>
-          <button className="bg-[#233A78] text-white text-[13px] font-bold py-2 px-6 rounded-full w-full">
+        <div className="rounded-[16px] p-5 flex flex-col items-center text-center" style={{ backgroundColor: COLORS.primaryXlight }}>
+          <Text as="h4" size="sm" weight="bold" className="mb-1" style={{ color: COLORS.text }}>
+            Upgrade Pro
+          </Text>
+          <Text as="p" size="xs" className="mb-3" style={{ color: COLORS.muted }}>
+            Get all Feature
+          </Text>
+          <Button variant="secondary" size="sm" className="w-full rounded-full">
             Get Pro
-          </button>
+          </Button>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar — visible on md+ */}
+      <aside className="hidden md:flex w-[240px] h-full flex-col rounded-tr-3xl overflow-hidden flex-shrink-0" style={{ backgroundColor: COLORS.primaryDark }}>
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile sidebar overlay — visible below md */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
+          {/* Drawer */}
+          <aside
+            className="relative w-[280px] max-w-[80vw] h-full max-h-[100dvh] flex flex-col overflow-hidden shadow-2xl"
+            style={{ backgroundColor: COLORS.primaryDark, animation: "slideInLeft 0.25s cubic-bezier(.4,0,.2,1)" }}
+          >
+            {/* Close button */}
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+              <span className="text-white/80 text-[14px] font-semibold">Menu</span>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              >
+                <X size={16} strokeWidth={2.5} />
+              </button>
+            </div>
+            {sidebarContent}
+          </aside>
+
+          <style>{`
+            @keyframes slideInLeft {
+              from { transform: translateX(-100%); opacity: 0; }
+              to { transform: translateX(0); opacity: 1; }
+            }
+          `}</style>
+        </div>
+      )}
+    </>
   );
 }

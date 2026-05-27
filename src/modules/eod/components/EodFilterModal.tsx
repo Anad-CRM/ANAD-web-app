@@ -5,6 +5,8 @@ import { StaffService } from "@/modules/staffs/services/staff.service";
 import { getUser } from "@/core/utils/auth";
 import { Team } from "@/modules/teams/types/teams.types";
 import { Staff } from "@/modules/staffs/types/staff.types";
+import Button from "@/core/components/ui/Button";
+import { Text } from "@/core/components/ui/Text";
 
 export interface EodFilters {
   startDate?: string;
@@ -143,10 +145,10 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
       <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300 flex flex-col h-[85vh]">
         
         {/* Header */}
-        <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 flex-shrink-0">
+        <div className="px-4 sm:px-8 py-5 sm:py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-[#233A78]">Filter Options</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Refine EOD reports and analytics</p>
+            <Text as="h2" size="xl" weight="bold" className="text-[#163172]">Filter Options</Text>
+            <Text as="p" size="sm" className="text-gray-500 mt-0.5">Refine EOD reports and analytics</Text>
           </div>
           <button 
             onClick={onClose}
@@ -157,12 +159,12 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 sm:space-y-10 custom-scrollbar">
           
           {/* Date Range */}
           <section>
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Calendar size={14} className="text-[#233A78]" />
+              <Calendar size={14} className="text-[#163172]" />
               Date Range
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -172,7 +174,7 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
                   onClick={() => handleFilterTypeChange(option)}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${
                     tempFilters.filterType === option
-                      ? "bg-[#233A78] text-white border-[#233A78] shadow-lg shadow-[#233A78]/20"
+                      ? "bg-[#163172] text-white border-[#163172] shadow-lg shadow-[#163172]/20"
                       : "bg-white text-gray-600 border-gray-100 hover:border-gray-300"
                   }`}
                 >
@@ -189,7 +191,7 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
                     type="date" 
                     value={tempFilters.startDate || ""} 
                     onChange={(e) => setTempFilters({ ...tempFilters, startDate: e.target.value })}
-                    className="w-full p-3.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-[#233A78] focus:bg-white outline-none transition-all"
+                    className="w-full p-3.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-[#163172] focus:bg-white outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -198,7 +200,7 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
                     type="date" 
                     value={tempFilters.endDate || ""} 
                     onChange={(e) => setTempFilters({ ...tempFilters, endDate: e.target.value })}
-                    className="w-full p-3.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-[#233A78] focus:bg-white outline-none transition-all"
+                    className="w-full p-3.5 bg-gray-50 rounded-xl text-sm border border-transparent focus:border-[#163172] focus:bg-white outline-none transition-all"
                   />
                 </div>
               </div>
@@ -209,12 +211,12 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
           <section>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <div className="w-1 h-3 bg-[#233A78] rounded-full" />
+                <div className="w-1 h-3 bg-[#163172] rounded-full" />
                 Teams
               </h3>
               <button 
                 onClick={() => setTempFilters({ ...tempFilters, teamIds: tempFilters.teamIds.length === teams.length ? [] : teams.map(t => t.id) })}
-                className="text-[11px] font-bold text-[#233A78] hover:bg-[#233A78]/5 px-2 py-1 rounded-md transition-colors"
+                className="text-[11px] font-bold text-[#163172] hover:bg-[#163172]/5 px-2 py-1 rounded-md transition-colors"
               >
                 {tempFilters.teamIds.length === teams.length ? "Deselect All" : "Select All"}
               </button>
@@ -226,10 +228,10 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
                 placeholder="Search teams by name..."
                 value={teamSearch}
                 onChange={(e) => setTeamSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-2xl text-sm border border-transparent focus:border-[#233A78] focus:bg-white outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-2xl text-sm border border-transparent focus:border-[#163172] focus:bg-white outline-none transition-all"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
               {filteredTeamsList.map((team) => {
                 const isSelected = tempFilters.teamIds.includes(team.id);
                 return (
@@ -237,15 +239,15 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
                     key={team.id}
                     onClick={() => toggleSelection(team.id, "teamIds")}
                     className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all text-left border ${
-                      isSelected ? "border-[#233A78] bg-[#233A78]/5 shadow-sm" : "border-gray-50 bg-gray-50/50 hover:bg-gray-100/50 hover:border-gray-200"
+                      isSelected ? "border-[#163172] bg-[#163172]/5 shadow-sm" : "border-gray-50 bg-gray-50/50 hover:bg-gray-100/50 hover:border-gray-200"
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
-                      isSelected ? "bg-[#233A78] border-[#233A78]" : "bg-white border-gray-300"
+                      isSelected ? "bg-[#163172] border-[#163172]" : "bg-white border-gray-300"
                     }`}>
                       {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
                     </div>
-                    <span className={`text-[13px] font-bold truncate ${isSelected ? 'text-[#233A78]' : 'text-gray-700'}`}>{team.name}</span>
+                    <span className={`text-[13px] font-bold truncate ${isSelected ? 'text-[#163172]' : 'text-gray-700'}`}>{team.name}</span>
                   </button>
                 );
               })}
@@ -261,12 +263,12 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
           <section>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <div className="w-1 h-3 bg-[#233A78] rounded-full" />
+                <div className="w-1 h-3 bg-[#163172] rounded-full" />
                 Staff Members
               </h3>
               <button 
                 onClick={() => setTempFilters({ ...tempFilters, staffIds: tempFilters.staffIds.length === staff.length ? [] : staff.map(s => String(s.id)) })}
-                className="text-[11px] font-bold text-[#233A78] hover:bg-[#233A78]/5 px-2 py-1 rounded-md transition-colors"
+                className="text-[11px] font-bold text-[#163172] hover:bg-[#163172]/5 px-2 py-1 rounded-md transition-colors"
               >
                 {tempFilters.staffIds.length === staff.length ? "Deselect All" : "Select All"}
               </button>
@@ -278,10 +280,10 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
                 placeholder="Search staff members..."
                 value={staffSearch}
                 onChange={(e) => setStaffSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-2xl text-sm border border-transparent focus:border-[#233A78] focus:bg-white outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 rounded-2xl text-sm border border-transparent focus:border-[#163172] focus:bg-white outline-none transition-all"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
               {filteredStaffList.map((s) => {
                 const sId = String(s.id);
                 const isSelected = tempFilters.staffIds.includes(sId);
@@ -290,15 +292,15 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
                     key={sId}
                     onClick={() => toggleSelection(sId, "staffIds")}
                     className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all text-left border ${
-                      isSelected ? "border-[#233A78] bg-[#233A78]/5 shadow-sm" : "border-gray-50 bg-gray-50/50 hover:bg-gray-100/50 hover:border-gray-200"
+                      isSelected ? "border-[#163172] bg-[#163172]/5 shadow-sm" : "border-gray-50 bg-gray-50/50 hover:bg-gray-100/50 hover:border-gray-200"
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
-                      isSelected ? "bg-[#233A78] border-[#233A78]" : "bg-white border-gray-300"
+                      isSelected ? "bg-[#163172] border-[#163172]" : "bg-white border-gray-300"
                     }`}>
                       {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
                     </div>
-                    <span className={`text-[13px] font-bold truncate ${isSelected ? 'text-[#233A78]' : 'text-gray-700'}`}>{s.userName}</span>
+                    <span className={`text-[13px] font-bold truncate ${isSelected ? 'text-[#163172]' : 'text-gray-700'}`}>{s.userName}</span>
                   </button>
                 );
               })}
@@ -312,8 +314,9 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
         </div>
 
         {/* Footer */}
-        <div className="p-8 border-t border-gray-100 bg-gray-50/80 flex items-center gap-4 flex-shrink-0">
-          <button
+        <div className="p-4 sm:p-8 border-t border-gray-100 bg-gray-50/80 flex items-center gap-3 sm:gap-4 flex-shrink-0">
+          <Button
+            variant="white"
             onClick={() => setTempFilters({ 
               filterType: "Overall", 
               staffIds: [], 
@@ -321,16 +324,17 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
               startDate: "", 
               endDate: "" 
             })}
-            className="flex-1 h-14 rounded-2xl font-bold text-gray-500 hover:bg-white hover:text-[#233A78] transition-all border border-transparent hover:border-[#233A78]/10"
+            className="flex-1 h-14 rounded-2xl"
           >
             Clear All
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
             onClick={handleApply}
-            className="flex-[2] h-14 bg-[#233A78] hover:bg-[#1a2b5a] text-white rounded-2xl font-bold px-8 shadow-xl shadow-[#233A78]/20 transition-all active:scale-[0.98]"
+            className="flex-[2] h-14 rounded-2xl shadow-xl shadow-[#163172]/20"
           >
             Apply Filters
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -342,11 +346,11 @@ export const EodFilterModal = ({ isOpen, onClose, onApply, initialFilters }: Eod
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #233a7833;
+          background: #16317233;
           border-radius: 20px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #233a7866;
+          background: #16317266;
         }
       `}</style>
     </div>

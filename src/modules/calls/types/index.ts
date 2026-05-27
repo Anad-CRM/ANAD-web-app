@@ -2,11 +2,11 @@ export type CallFilterType = "Total" | "Incoming" | "Outgoing" | "Missed" | "Con
 
 export interface CallLog {
   id: string;
-  number: string;
+  number?: string;
   name?: string;
-  callType: string;
-  duration: string;
-  timestamp: string;
+  callType?: string;
+  duration?: string;
+  timestamp?: string;
   recordingFile?: string;
   userName?: string; 
   lead?: {
@@ -49,4 +49,23 @@ export interface CallAnalyticsResponse {
     newCalls: { count: number; duration: number };
     notPickedUpCalls: { count: number };
   };
+  trends?: {
+    dailyBreakdown: Record<string, number>;
+    peakDay?: string | null;
+    peakDayCount?: number;
+  };
+  userStatistics?: Array<{
+    userId: string;
+    userName: string;
+    userEmail: string;
+    totalCalls: number;
+    totalDuration: number;
+    averageDuration: number;
+  }>;
+}
+
+export interface CallTrendResponse {
+  dailyBreakdown: Record<string, number>;
+  peakDay?: string | null;
+  peakDayCount?: number;
 }

@@ -1,6 +1,7 @@
 export interface TeamUser {
   id: string;
   userName: string;
+  role?: string;
   leadCounts: {
     totalLeads: number;
     closedCount: number;
@@ -12,6 +13,8 @@ export interface TeamUser {
 export interface CreateTeamPayload {
   organizationId: string;
   name: string;
+  category?: string;
+  typeCategory?: string;
   managerId?: string;
   iconIndex?: number;
 }
@@ -21,6 +24,14 @@ export interface Team {
   name: string;
   organizationId: string;
   managerId?: string | null;
+  manager?: {
+    id: string;
+    userName: string;
+  };
+  teamLeaders?: {
+    id: string;
+    userName: string;
+  }[];
   category?: string;
   status: string;
   users: TeamUser[];

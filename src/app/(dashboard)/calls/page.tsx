@@ -7,13 +7,15 @@ import { CallsOverTimeChart } from "@/modules/calls/components/CallsOverTimeChar
 import { CallsStatusChart } from "@/modules/calls/components/CallsStatusChart";
 import { DetailedCallBreakdown } from "@/modules/calls/components/DetailedCallBreakdown";
 import { CallDetailsModal } from "@/modules/calls/components/CallDetailsModal";
-import { CallFilterType, CallTeamRow, CallAnalyticsResponse, CallLog } from "@/modules/calls/types";
-import { getCallAnalytics, getStaffCallBreakdown, getSpecificCallLogs } from "@/modules/calls/api/callsApi";
+import { CallFilterType, CallTeamRow, CallAnalyticsResponse, CallLog, CallTrendResponse } from "@/modules/calls/types";
+import { getCallAnalytics, getCallTrendAnalytics, getStaffCallBreakdown, getSpecificCallLogs } from "@/modules/calls/api/callsApi";
 
 export default function CallAnalyticsPage() {
   const [activeFilter, setActiveFilter] = useState<CallFilterType>("Total");
   const [analytics, setAnalytics] = useState<CallAnalyticsResponse | null>(null);
   const [tableData, setTableData] = useState<CallTeamRow[]>([]);
+  const [incomingTrend, setIncomingTrend] = useState<CallTrendResponse | null>(null);
+  const [outgoingTrend, setOutgoingTrend] = useState<CallTrendResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Filtering state
@@ -31,27 +33,14 @@ export default function CallAnalyticsPage() {
   const [modalTotalCount, setModalTotalCount] = useState<number>(0);
   const [isModalLoading, setIsModalLoading] = useState(false);
 
-  const getFilterCount = useCallback((type: CallFilterType) => {
-    if (!analytics) return 0;
-    const { summary, callTypes: types } = analytics;
-    switch(type) {
-      case "Total": return summary.totalCalls || 0;
-      case "Incoming": return types.incoming.count || 0;
-      case "Outgoing": return types.outgoing.count || 0;
-      case "Missed": return types.missed.count || 0;
-      case "Rejected": return types.rejected.count || 0;
-      case "Personal": return types.personalCalls.count || 0;
-      case "New": return types.newCalls.count || 0;
-      case "NotPickedUp": return types.notPickedUpCalls.count || 0;
-      case "Connected": return (types.incoming.count || 0) + (types.outgoing.count || 0);
-      default: return 0;
-    }
-  }, [analytics]);
-
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     
-    const params: any = {};
+    const params: {
+      startDate?: string;
+      endDate?: string;
+      staffIds?: string[];
+    } = {};
     if (dateRange.startDate) {
       params.startDate = dateRange.startDate.split("T")[0];
       params.endDate = dateRange.endDate?.split("T")[0];
@@ -65,13 +54,23 @@ export default function CallAnalyticsPage() {
     }
 
     try {
-      const [analyticsData, staffData] = await Promise.all([
+      const [analyticsData, staffData, incomingTrendData, outgoingTrendData] = await Promise.all([
         getCallAnalytics(params),
-        getStaffCallBreakdown(breakdownParams)
+        getStaffCallBreakdown(breakdownParams),
+        getCallTrendAnalytics({
+          callType: "incoming",
+          ...params,
+        }),
+        getCallTrendAnalytics({
+          callType: "outgoing",
+          ...params,
+        }),
       ]);
       
       if (analyticsData) setAnalytics(analyticsData);
       setTableData(staffData || []);
+      setIncomingTrend(incomingTrendData);
+      setOutgoingTrend(outgoingTrendData);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
@@ -103,7 +102,12 @@ export default function CallAnalyticsPage() {
       "Connected": "connected" 
     };
 
-    const params: any = {
+    const params: {
+      callType: string;
+      startDate?: string;
+      endDate?: string;
+      staffIds?: string[];
+    } = {
       callType: callTypeMap[type] || "totalCalls",
     };
     if (dateRange.startDate) params.startDate = dateRange.startDate.split("T")[0];
@@ -124,9 +128,9 @@ export default function CallAnalyticsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-[22px] min-h-screen pb-12 animate-slide-up-fade">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col gap-6 px-4 pb-12 pt-4 sm:px-6 sm:gap-8 lg:px-8 animate-slide-up-fade">
       
-      <div className="px-1 pt-2">
+      <div className="pt-2">
         <CallsHeader 
           selectedDateLabel={dateLabel}
           onDateRangeChange={(range) => {
@@ -137,7 +141,7 @@ export default function CallAnalyticsPage() {
         />
       </div>
 
-      <div className="px-1">
+      <div>
         <CallTypeFilters 
           activeFilter={activeFilter} 
           onFilterChange={handleFilterChange} 
@@ -145,9 +149,13 @@ export default function CallAnalyticsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-10 mb-8 items-stretch pt-2">
+      <div className="grid grid-cols-1 gap-6 mb-6 items-stretch pt-2 lg:grid-cols-[1.5fr_1fr] lg:gap-10">
           <div className="flex flex-col">
-            <CallsOverTimeChart />
+            <CallsOverTimeChart
+              incomingTrend={incomingTrend?.dailyBreakdown}
+              outgoingTrend={outgoingTrend?.dailyBreakdown}
+              isLoading={isLoading && !analytics}
+            />
           </div>
           <div className="flex flex-col justify-center">
             <CallsStatusChart analytics={analytics} />

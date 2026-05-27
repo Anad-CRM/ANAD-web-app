@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Download, Users, ChevronDown } from "lucide-react";
+import { Calendar, Users, ChevronDown } from "lucide-react";
 import { Text } from "@/core/components/ui/Text";
 import { getUser } from "@/core/utils/auth";
 import { StaffService } from "@/modules/staffs/services/staff.service";
 import { Staff } from "@/modules/staffs/types/staff.types";
+import { COLORS } from "@/core/components/theme/colors";
 
 interface CallsHeaderProps {
   onDateRangeChange: (range: { startDate: string | null; endDate: string | null; label: string }) => void;
@@ -21,7 +22,7 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
   const [staff, setStaff] = useState<Staff[]>([]);
   const [selectedStaffName, setSelectedStaffName] = useState("All Staff");
   
-  const user = getUser<{ organizationId: string; role: string }>();
+  const user = getUser<{ id?: string; organizationId: string; role: string }>();
   const isAdminOrTL = user?.role === "Admin" || user?.role === "Manager" || user?.role === "Team Leader";
 
   useEffect(() => {
@@ -29,13 +30,13 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
       const fetchStaff = async () => {
         const response = await StaffService.getAllStaff(user.organizationId, user.role);
         if (response.status === "success") {
-          const filteredStaff = response.data.filter((s: Staff) => s.id !== (user as any).id);
+          const filteredStaff = response.data.filter((s: Staff) => s.id !== user.id);
           setStaff(filteredStaff);
         }
       };
       fetchStaff();
     }
-  }, [isAdminOrTL, user?.organizationId]);
+  }, [isAdminOrTL, user?.id, user?.organizationId, user?.role]);
 
   const dateOptions = [
     { label: "Today", getValue: () => ({ startDate: new Date().toISOString(), endDate: new Date().toISOString() }) },
@@ -70,51 +71,52 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
     setShowDateDropdown(false);
   };
 
-  const handleStaffSelect = (s: any | null) => {
-    onStaffChange(s ? s.id : null);
-    setSelectedStaffName(s ? s.userName : "All Staff");
+  const handleStaffSelect = (s: Staff | null) => {
+    onStaffChange(s ? String(s.id) : null);
+    setSelectedStaffName(s?.userName || "All Staff");
     setShowStaffDropdown(false);
   };
 
   return (
-    <div className="flex flex-col gap-6 mb-8 w-full font-sans">
-      <div className="flex items-center justify-between w-full">
-        <div>
-          <Text as="h2" weight="bold" size="custom" style={{ fontSize: '28px' }} className="text-black leading-tight tracking-tight whitespace-nowrap">
+    <div className="flex w-full flex-col gap-5 sm:gap-6 mb-8 font-sans">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between w-full">
+        <div className="min-w-0">
+          <Text as="h2" weight="bold" size="custom" style={{ fontSize: 'clamp(22px, 3vw, 28px)', color: COLORS.text }} className="leading-tight tracking-tight">
             Call Analytics
           </Text>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center md:w-auto">
           {isAdminOrTL && (
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <button 
                 onClick={() => setShowStaffDropdown(!showStaffDropdown)}
-                className="flex items-center gap-2 px-5 h-11 bg-white border border-slate-200 rounded-xl shadow-sm text-[14px] font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+                className="flex w-full items-center justify-between gap-2 rounded-xl border px-4 sm:px-5 h-11 shadow-sm text-[14px] font-semibold transition-all sm:w-auto"
+                style={{ backgroundColor: COLORS.surface, borderColor: COLORS.border, color: COLORS.text }}
               >
-                <Users size={18} className="text-[#233A78]" />
+                <Users size={18} style={{ color: COLORS.primaryDark }} />
                 <Text weight="semibold" size="custom" style={{ fontSize: '14px' }}>{selectedStaffName}</Text>
                 <ChevronDown size={16} className={`ml-1 transition-transform ${showStaffDropdown ? 'rotate-180' : ''}`} />
               </button>
               
               {showStaffDropdown && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
                   <button
                     onClick={() => handleStaffSelect(null)}
                     className={`w-full text-left px-4 py-3 transition-colors ${selectedStaffName === "All Staff" ? 'bg-slate-50' : ''}`}
                   >
-                    <Text size="sm" weight={selectedStaffName === "All Staff" ? "bold" : "normal"} className={selectedStaffName === "All Staff" ? 'text-[#233A78]' : 'text-slate-600'}>
+                    <Text size="sm" weight={selectedStaffName === "All Staff" ? "bold" : "normal"} style={{ color: selectedStaffName === "All Staff" ? COLORS.primaryDark : COLORS.muted }}>
                       All Staff
                     </Text>
                   </button>
                   {staff.map((s) => (
                     <button
                       key={s.id}
-                      onClick={() => handleStaffSelect(s)}
-                      className={`w-full text-left px-4 py-3 transition-colors ${selectedStaffName === s.userName ? 'bg-slate-50' : ''}`}
-                    >
-                      <Text size="sm" weight={selectedStaffName === s.userName ? "bold" : "normal"} className={selectedStaffName === s.userName ? 'text-[#233A78]' : 'text-slate-600'}>
+                    onClick={() => handleStaffSelect(s)}
+                    className={`w-full text-left px-4 py-3 transition-colors ${selectedStaffName === s.userName ? 'bg-slate-50' : ''}`}
+                  >
+                      <Text size="sm" weight={selectedStaffName === s.userName ? "bold" : "normal"} style={{ color: selectedStaffName === s.userName ? COLORS.primaryDark : COLORS.muted }}>
                         {s.userName}
                       </Text>
                     </button>
@@ -124,24 +126,25 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
             </div>
           )}
 
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <button 
               onClick={() => setShowDateDropdown(!showDateDropdown)}
-              className="flex items-center gap-2 px-5 h-11 bg-[#233A78] text-white rounded-xl shadow-lg hover:opacity-95 transition-all active:scale-95 text-[14px] font-bold"
+              className="flex w-full items-center justify-center gap-2 px-5 h-11 rounded-xl shadow-lg hover:opacity-95 transition-all active:scale-95 text-[14px] font-bold sm:w-auto"
+              style={{ backgroundColor: COLORS.primaryDark, color: COLORS.bg }}
             >
               <Calendar size={18} />
               <Text weight="bold" size="custom" style={{ fontSize: '14px' }}>{selectedDateLabel}</Text>
             </button>
             
             {showDateDropdown && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 {dateOptions.map((opt) => (
                   <button
                     key={opt.label}
                     onClick={() => handleDateSelect(opt)}
                     className={`w-full text-left px-4 py-3 transition-colors ${selectedDateLabel === opt.label ? 'bg-slate-50' : ''}`}
                   >
-                    <Text size="sm" weight={selectedDateLabel === opt.label ? "bold" : "normal"} className={selectedDateLabel === opt.label ? 'text-[#233A78]' : 'text-slate-600'}>
+                    <Text size="sm" weight={selectedDateLabel === opt.label ? "bold" : "normal"} style={{ color: selectedDateLabel === opt.label ? COLORS.primaryDark : COLORS.muted }}>
                       {opt.label}
                     </Text>
                   </button>

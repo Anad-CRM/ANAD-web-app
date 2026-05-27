@@ -4,7 +4,8 @@ import { X, Clock, CalendarDays, Loader2, Phone, MessageCircle, Mail } from 'luc
 import { COLORS } from '@/core/components/theme/colors';
 import { Text } from '@/core/components/ui/Text';
 import { createFollowup } from '@/modules/follow-up/api/followUpApi';
-import { api } from '@/core/api/axios'; // For updateStatus if needed
+import { api } from '@/core/api/axios'; 
+import { API_ENDPOINTS } from '@/core/api/api';
 
 interface Props {
   leadId: string;
@@ -27,33 +28,47 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
   const [notes, setNotes] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ date?: string; notes?: string; general?: string }>({});
+
+  const validate = () => {
+    const nextErrors: { date?: string; notes?: string } = {};
+
+    if (!dateStr) {
+      nextErrors.date = 'Please select a date';
+    } else {
+      const followUpDate = timeStr
+        ? new Date(`${dateStr}T${timeStr}:00`)
+        : new Date(`${dateStr}T00:00:00`);
+
+      if (Number.isNaN(followUpDate.getTime())) {
+        nextErrors.date = 'Please select a valid date';
+      } else if (followUpDate < new Date()) {
+        nextErrors.date = 'Follow-up date cannot be in the past';
+      }
+    }
+
+    if (!notes.trim()) {
+      nextErrors.notes = 'Please enter notes';
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
 
   const handleSubmit = async () => {
-    if (!dateStr || !timeStr) {
-      setError('Please select a follow-up date and time');
-      return;
-    }
-    if (!notes.trim()) {
-      setError('Please add some notes');
-      return;
-    }
-
-    const followUpDate = new Date(`${dateStr}T${timeStr}`);
-    if (followUpDate < new Date()) {
-      setError('Follow-up date cannot be in the past');
-      return;
-    }
+    if (!validate()) return;
 
     setIsLoading(true);
-    setError(null);
+    setErrors({});
 
     try {
-      const formattedDate = `${dateStr} ${timeStr}`; // e.g., "2023-10-25 14:30"
+      const formattedDate = timeStr
+        ? new Date(`${dateStr}T${timeStr}:00`).toISOString()
+        : new Date(`${dateStr}T00:00:00`).toISOString();
       
       const payload = {
         leadId,
-        userId: assignedUserId, // the one we got from leadData.assignedUser.id
+        userId: assignedUserId, 
         notes: notes.trim(),
         date: formattedDate,
         type: selectedType,
@@ -62,30 +77,30 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
       const result = await createFollowup(payload);
 
       if (result.status === 'success') {
-        // Automatically update lead status to 'Follow Up'
+        
         try {
-          await api.post('/lead/update/LeadStatus', { leadId, status: 'Follow Up' });
+          await api.post(API_ENDPOINTS.LEADS.UPDATE_STATUS, { leadId, status: 'Follow Up' });
         } catch (e) {
           console.error("Failed to update status to Follow Up", e);
         }
         onSuccess();
       } else {
-        setError(result.message || 'Failed to create follow-up');
+        setErrors({ general: result.message || 'Failed to create follow-up' });
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Something went wrong');
+      setErrors({ general: err?.response?.data?.message || 'Something went wrong' });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100">
           <Text weight="semibold" className="text-slate-800" style={{ fontSize: '18px' }}>New Follow-Up</Text>
           <button
             onClick={onClose}
@@ -95,18 +110,18 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
           </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-6 overflow-y-auto max-h-[70vh]">
+        <div className="p-4 sm:p-6 flex flex-col gap-5 sm:gap-6 overflow-y-auto">
           {/* Type Selector */}
           <div className="flex flex-col gap-3">
             <Text weight="semibold" className="text-slate-500 tracking-wide uppercase" style={{ fontSize: '12px' }}>Follow-Up Via</Text>
-            <div className="flex justify-between gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {TYPE_OPTIONS.map((opt) => {
                 const isSelected = selectedType === opt.type;
                 return (
                   <button
                     key={opt.type}
                     onClick={() => setSelectedType(opt.type)}
-                    className="flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border transition-all"
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border transition-all"
                     style={{
                       borderColor: isSelected ? COLORS.primary : '#E2E8F0',
                       backgroundColor: isSelected ? `${COLORS.primary}0D` : 'transparent'
@@ -133,18 +148,21 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
           {/* Schedule */}
           <div className="flex flex-col gap-3">
             <Text weight="semibold" className="text-slate-500 tracking-wide uppercase" style={{ fontSize: '12px' }}>Schedule</Text>
-            <div className="flex gap-4">
-              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all min-w-0">
                 <CalendarDays size={18} className="text-slate-400" />
                 <input
                   type="date"
                   className="flex-1 bg-transparent text-[15px] outline-none text-slate-800"
                   value={dateStr}
                   min={new Date().toISOString().split('T')[0]}
-                  onChange={e => setDateStr(e.target.value)}
+                  onChange={e => {
+                    setDateStr(e.target.value);
+                    if (errors.date) setErrors((prev) => ({ ...prev, date: undefined }));
+                  }}
                 />
               </div>
-              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all min-w-0">
                 <Clock size={18} className="text-slate-400" />
                 <input
                   type="time"
@@ -154,6 +172,9 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
                 />
               </div>
             </div>
+            {errors.date && (
+              <Text style={{ color: COLORS.danger, fontSize: '12px' }}>{errors.date}</Text>
+            )}
           </div>
 
           {/* Notes */}
@@ -166,22 +187,28 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
 • Questions to ask
 • Next steps"
               value={notes}
-              onChange={e => setNotes(e.target.value)}
+              onChange={e => {
+                setNotes(e.target.value);
+                if (errors.notes) setErrors((prev) => ({ ...prev, notes: undefined }));
+              }}
             />
+            {errors.notes && (
+              <Text style={{ color: COLORS.danger, fontSize: '12px' }}>{errors.notes}</Text>
+            )}
             <Text style={{ color: '#64748B', fontSize: '12px' }}>These notes will help you prepare for the follow-up</Text>
           </div>
 
-          {error && (
+          {errors.general && (
             <div className="px-2 bg-red-50 py-2 rounded-lg border border-red-100">
-              <Text className="text-red-500" style={{ fontSize: '14px' }}>{error}</Text>
+              <Text className="text-red-500" style={{ fontSize: '14px' }}>{errors.general}</Text>
             </div>
           )}
         </div>
 
-        <div className="px-6 py-5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-t border-slate-100 bg-slate-50/50 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
             disabled={isLoading}
           >
             <Text weight="semibold">Cancel</Text>
@@ -189,7 +216,7 @@ export const CreateFollowUpModal: React.FC<Props> = ({ leadId, assignedUserId, o
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="px-5 py-2.5 rounded-xl text-white transition-colors flex items-center justify-center min-w-[160px]"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-white transition-colors flex items-center justify-center min-w-[160px]"
             style={{ backgroundColor: COLORS.primary }}
           >
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Text weight="semibold">Schedule Follow-Up</Text>}

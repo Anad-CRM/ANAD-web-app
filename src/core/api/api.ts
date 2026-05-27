@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     LEADS: "/dashboard/leads",
     CALLS_ANALYTICS: "/calls/getCallAnalytics",
     SPECIFIC_CALL_TYPE: "/calls/specificCallType",
+    SPECIFIC_CALL_TYPE_ANALYTICS: "/calls/getSpecificCallTypeAnalytics",
     TEAMS: "/dashboard/teams",
     EOD: "/dashboard/eod",
     GET_LEAD_COUNTS: "/lead/getLeadCounts",
@@ -35,15 +36,28 @@ export const API_ENDPOINTS = {
     ACTIVATE: "/team/activate",
     DEACTIVATE: "/team/deactivate",
     GET_TEAM_LEAD_STATUS_COUNTS: "/team/getTeamLeadStatusCounts",
+    GET_STAFF_EXCLUDE_TEAM: "/team/getStaffExcludeTeam",
+    CHANGE_STAFF_TEAM: "/team/changeStaffTeam",
   },
   CALLS: {
-    RECORDING: (fileName: string) => `/calls/recording/${fileName}`,
+    RECORDING: (fileName: string) => `${fileName}`,
   },
   FOLLOW_UP: {
     GET_ALL: "/followup/getAllFollowUp",
     SUMMARY: "/followup/summary",
     COMPLETE: (id: number | string) => `/followup/complete/${id}`,
     RESCHEDULE: (id: number | string) => `/followup/reschedule/${id}`,
+    GET_BY_LEAD: "/followup/getAllFollowUpByLeads",
+    CREATE: "/followup/createFollowup",
+  },
+  LEADS: {
+    UNASSIGNED: "/lead/unAssigned",
+    GET_BY_STATUS: "/lead/getLeadsByStatus",
+    ASSIGN: "/lead/assign",
+    GET_BY_ID: "/lead/getLeadById",
+    WHATSAPP: "/whatsapp/getWhatsAppMessages",
+    UPDATE_STATUS: "/lead/update/LeadStatus",
+    DELETE: "/lead/deleteLead",
   },
   AUTO_LEAD: {
     GET_LIVE_ADS: (orgId: string | number) => `/ad/getLiveAds/${orgId}`,
@@ -55,6 +69,9 @@ export const API_ENDPOINTS = {
     TEAM_TOGGLE: "/autoAssign/teams/toggle-auto-assign",
     TEAM_STATUS: (teamId: string) => `/autoAssign/teams/auto-assign-status/${teamId}`,
     TEAM_UPDATE_ADS: "/autoAssign/teams/update-ads",
+    // Strength-based team auto assign APIs
+    TEAM_STRENGTH_TOGGLE: "/autoAssign/teams/toggle-strength-auto-assign",
+    TEAM_STRENGTH_STATUS: (orgId: string | number) => `/autoAssign/teams/strength-auto-assign-status/${orgId}`,
     // Manager-based
     MANAGER_TOGGLE: "/autoAssign/managers/toggle-auto-assign",
     MANAGER_STATUS: (orgId: string | number) => `/autoAssign/managers/auto-assign-status/${orgId}`,

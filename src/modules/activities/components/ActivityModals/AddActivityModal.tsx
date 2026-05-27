@@ -17,15 +17,15 @@ interface Props {
 
 export const AddActivityModal: React.FC<Props> = ({ onClose, onSelectType }) => (
   <div
-    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
     onClick={onClose}
   >
     <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
     <div
-      className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+      className="relative w-full max-w-sm bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col"
       onClick={e => e.stopPropagation()}
     >
-      <div className="flex justify-between items-center px-5 py-4 border-b border-slate-100">
+      <div className="flex justify-between items-center px-4 sm:px-5 py-4 border-b border-slate-100">
         <Text weight="semibold" className="text-slate-800" style={{ fontSize: '18px' }}>Add Activity</Text>
         <button
           onClick={onClose}
@@ -39,7 +39,7 @@ export const AddActivityModal: React.FC<Props> = ({ onClose, onSelectType }) => 
         {ACTIVITY_TYPES.map((t, i) => (
           <button
             key={i}
-            className="w-full flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors text-left"
+            className="w-full flex items-center gap-4 px-4 sm:px-5 py-3 hover:bg-slate-50 transition-colors text-left"
             onClick={() => {
               onSelectType?.(t.label);
               onClose();

@@ -4,7 +4,6 @@ import React from "react";
 import { AuthImage } from "@/core/components/ui/AuthImage";
 import { COLORS } from "@/core/components/theme/colors";
 import { User } from "lucide-react";
-import { API_BASE_URL } from "@/core/api/axios";
 
 interface AvatarCircleProps {
   avatar?: string;
@@ -14,7 +13,6 @@ interface AvatarCircleProps {
 
 export function AvatarCircle({ avatar, size = 100, backgroundColor }: AvatarCircleProps) {
   const isValidAvatar = avatar && avatar !== "null" && avatar !== "undefined";
-
   return (
     <div
       style={{ width: size, height: size, backgroundColor: backgroundColor ?? COLORS.primaryLight }}
@@ -26,7 +24,7 @@ export function AvatarCircle({ avatar, size = 100, backgroundColor }: AvatarCirc
 
       {isValidAvatar && (
         <AuthImage
-          src={`${API_BASE_URL}uploads/${avatar}`}
+          src={avatar}
           alt="Staff avatar"
           className="w-full h-full object-cover absolute inset-0 z-10"
         />

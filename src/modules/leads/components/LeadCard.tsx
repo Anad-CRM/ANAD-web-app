@@ -152,7 +152,6 @@ export function LeadCard({
   const statusLabel = lead.status === "Closed" ? "Enrolled"
     : lead.status === "Follow Up" ? "Follow-Up"
       : lead.status;
-
   async function handleStatusChange(newStatus: string) {
     setConfirm({
       title: "Change Status",

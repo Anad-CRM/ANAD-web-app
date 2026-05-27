@@ -50,12 +50,12 @@ export const ActivityDetailModal: React.FC<Props> = ({ activity, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
       <div
-        className="relative w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
         <div className="overflow-y-auto custom-scrollbar flex-1 pr-2" style={{ scrollbarWidth: 'thin' }}>

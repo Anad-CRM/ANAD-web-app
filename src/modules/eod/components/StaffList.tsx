@@ -31,8 +31,8 @@ export const StaffList = ({ staff, selectedId, onSelect }: StaffListProps) => {
               onClick={() => onSelect(member)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all text-left flex-shrink-0 ${
                 isSelected
-                  ? "bg-[#233A78] text-white shadow-md"
-                  : "bg-[#EAEFF5] text-gray-900 hover:bg-[#D6E4F0]"
+                  ? "bg-[#163172] text-white shadow-md"
+                  : "bg-gray-100 text-gray-900 hover:bg-gray-200"
               }`}
             >
               <div
@@ -52,7 +52,7 @@ export const StaffList = ({ staff, selectedId, onSelect }: StaffListProps) => {
                 ) : (
                   <div
                     className={`w-full h-full flex items-center justify-center text-[13px] font-bold ${
-                      isSelected ? "text-[#233A78]" : "text-gray-400"
+                      isSelected ? "text-[#163172]" : "text-gray-400"
                     }`}
                   >
                     {member.userName?.charAt(0) || "U"}
@@ -77,7 +77,7 @@ export const StaffList = ({ staff, selectedId, onSelect }: StaffListProps) => {
         })}
       </div>
 
-      <button className="mt-4 self-center bg-[#233A78] text-white px-6 py-2 rounded-full font-bold text-[12px] shadow-sm hover:bg-[#3561A5] transition-colors flex-shrink-0">
+      <button className="mt-4 self-center bg-[#163172] text-white px-6 py-2 rounded-full font-bold text-[12px] shadow-sm hover:bg-[#0D1B3E] transition-colors flex-shrink-0">
         View more
       </button>
 
@@ -90,11 +90,11 @@ export const StaffList = ({ staff, selectedId, onSelect }: StaffListProps) => {
           border-radius: 20px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #233a7866;
+          background: #16317233;
           border-radius: 20px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #233a7899;
+          background: #16317266;
         }
       `}</style>
     </div>

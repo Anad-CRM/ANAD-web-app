@@ -179,13 +179,13 @@ export default function AdsAnalyticsPage() {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-[1600px] mx-auto min-h-screen">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
       <AdsHeader />
 
       {isLoading ? (
         <DashboardSkeleton />
       ) : (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-6 sm:gap-8">
 
           {/* Global KPI Metrics */}
           <GlobalMetrics data={globalMetrics} />
@@ -242,7 +242,7 @@ export default function AdsAnalyticsPage() {
 
             {/* Right: Performance chart */}
             <div className="flex flex-col h-full">
-              <PerformanceGraph adId={selectedCampaign?.adId} />
+              <PerformanceGraph adId={selectedCampaign?.adId} adRecordId={selectedCampaign?.id} />
             </div>
 
           </div>

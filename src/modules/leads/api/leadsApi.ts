@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "@/core/api/axios";
 import { getUser } from "@/core/utils/auth";
+import { API_ENDPOINTS } from "@/core/api/api";
 import { Lead } from "../types/lead.types";
 
 export interface FetchLeadsParams {
@@ -27,6 +28,11 @@ interface FetchLeadsResponse {
   totalCount?: number;
 }
 
+interface DeleteLeadResponse {
+  status: string;
+  message?: string;
+}
+
 export interface WhatsAppMessage {
   text: string;
   date: string;
@@ -46,7 +52,6 @@ export interface WhatsAppMessagesResponse {
 
 export const leadsApi = {
   fetchLeads: async (params?: FetchLeadsParams): Promise<FetchLeadsResponse> => {
-    // Inject organizationId from the logged-in user session (mirrors Flutter's userData)
     const userData = getUser<Record<string, string>>();
     if (!userData?.organizationId) {
       console.warn("[leadsApi] No organizationId found in session.");
@@ -73,11 +78,11 @@ export const leadsApi = {
 
     try {
       if (params?.isUnassigned) {
-        const response = await api.post("/lead/unAssigned", payload);
+        const response = await api.post(API_ENDPOINTS.LEADS.UNASSIGNED, payload);
         return response.data;
       }
 
-      const response = await api.post("/lead/getLeadsByStatus", payload);
+      const response = await api.post(API_ENDPOINTS.LEADS.GET_BY_STATUS, payload);
       return response.data;
     } catch (error) {
       console.error("[leadsApi] Error fetching leads:", error);
@@ -87,7 +92,8 @@ export const leadsApi = {
 
   assignLeads: async (leadIds: string[], staffId: string, shouldResetStatus = false): Promise<Record<string, unknown>> => {
     try {
-      const response = await api.post("/lead/assign", { leadIds, staffMemberId: staffId, shouldResetStatus });
+      const response = await api.post(API_ENDPOINTS.LEADS.ASSIGN, { leadIds, staffMemberId: staffId, shouldResetStatus });
+      // console.log("response -------- ", response);
       return response.data;
     } catch (error) {
       console.error("[leadsApi] Error assigning leads:", error);
@@ -97,7 +103,7 @@ export const leadsApi = {
 
   createActivity: async (leadId: string, payload: { title: string; description: string; userId: string }): Promise<Record<string, unknown>> => {
     try {
-      const response = await api.post(`/lead/${leadId}/createActivity`, payload);
+      const response = await api.post(API_ENDPOINTS.ACTIVITIES.CREATE(leadId), payload);
       return response.data;
     } catch (error) {
       console.error("[leadsApi] Error creating activity:", error);
@@ -106,52 +112,27 @@ export const leadsApi = {
   },
 
   fetchLeadFromList: async (leadId: string): Promise<Lead | null> => {
-    const userData = getUser<Record<string, string>>();
-    if (!userData?.organizationId) return null;
-
-    // Helper to search within a page of results
-    const searchPage = async (offset: number, limit: number): Promise<Lead | null> => {
-      const response = await api.post("/lead/getLeadsByStatus", {
-        organizationId: userData.organizationId,
-        offset,
-        limit,
-        filter: "Overall",
-        sortByDate: "latest",
-      });
-      if (response.data?.status === "success" && Array.isArray(response.data.data)) {
-        return response.data.data.find((l: Lead) => l.id === leadId) ?? null;
+    try {
+      const response = await api.get(`${API_ENDPOINTS.LEADS.GET_BY_ID}?leadId=${leadId}`);
+      if (response.data?.status === "success") {
+        return response.data.data;
       }
       return null;
-    };
-
-    try {
-      // First try a large first page (covers most cases)
-      const firstPage = await searchPage(0, 500);
-      if (firstPage) return firstPage;
-
-      // If not found, try fetching the next 500 (handles large orgs)
-      const secondPage = await searchPage(500, 500);
-      return secondPage;
     } catch (error) {
-      console.error("[leadsApi] Error fetching lead from list:", error);
+      console.error("[leadsApi] Error fetching lead by ID:", error);
       return null;
     }
   },
 
-  // Mirrors Flutter follow_up_page._fetchFollowUps():
-  // userId = leadData['userId']  (the lead's raw userId field, NOT assignedUser.id)
-  // leadId = leadData['id']
   fetchFollowupsByLead: async (leadId: string, leadUserId?: string): Promise<Record<string, unknown>[]> => {
     try {
       const userId = leadUserId ?? '';
       console.log('[leadsApi] fetchFollowupsByLead →', { leadId, userId });
-      const response = await api.post("/followup/getAllFollowUpByLeads", { leadId, userId });
+      const response = await api.post(API_ENDPOINTS.FOLLOW_UP.GET_BY_LEAD, { leadId, userId });
       console.log('[leadsApi] getAllFollowUpByLeads response:', response.data);
-      // Flutter checks result['success'] == true (not status)
       if (response.data?.success === true) {
         return response.data.data || [];
       }
-      // Also handle status-based response shape as fallback
       if (response.data?.status === "success") {
         return response.data.data || [];
       }
@@ -167,7 +148,7 @@ export const leadsApi = {
     if (!userData?.organizationId) return [];
     try {
       const date = new Date().toISOString().split("T")[0];
-      const response = await api.post("/staff/getStaffByRole",
+      const response = await api.post(API_ENDPOINTS.STAFF.GET_BY_ROLE,
         { organizationId: userData.organizationId, date }
       );
 
@@ -191,7 +172,7 @@ export const leadsApi = {
     if (!userData?.organizationId || !userData?.id) return [];
 
     try {
-      const response = await api.post("/whatsapp/getWhatsAppMessages",
+      const response = await api.post(API_ENDPOINTS.LEADS.WHATSAPP,
         {
           userId: userData.id,
           organizationId: userData.organizationId,
@@ -200,7 +181,6 @@ export const leadsApi = {
       );
 
       if (response.data?.success === true && Array.isArray(response.data.data)) {
-        // Find the specific lead data matching our leadId
         const matchingLead = response.data.data.find((item: any) => item.leadId === leadId);
         return matchingLead?.messages || response.data.data[0]?.messages || [];
       }
@@ -208,6 +188,25 @@ export const leadsApi = {
     } catch (error) {
       console.error("[leadsApi] Error fetching WhatsApp messages:", error);
       return [];
+    }
+  },
+
+  deleteLead: async (leadId: string, deleteDuplicates = false): Promise<DeleteLeadResponse> => {
+    const userData = getUser<Record<string, string>>();
+    if (!userData?.organizationId) {
+      return { status: "failed", message: "No organization found for this user" };
+    }
+
+    try {
+      const response = await api.post(API_ENDPOINTS.LEADS.DELETE, {
+        leadId,
+        organizationId: userData.organizationId,
+        deleteDuplicates,
+      });
+      return response.data;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      return { status: "failed", message: err?.response?.data?.message || "Failed to delete lead" };
     }
   },
 };

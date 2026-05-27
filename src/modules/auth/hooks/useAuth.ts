@@ -8,7 +8,7 @@ import { useFeedback } from "@/core/contexts/FeedbackContext";
 import type { LoginPayload, SignupPayload } from "@/modules/auth/types/auth.types";
 
 export function useAuth() {
-  const { user, token, isAuthenticated, isLoading, setAuthData, logout: ctxLogout } = useAuthContext();
+  const { user, token, isAuthenticated, isLoading, setAuthData, updateUser, logout: ctxLogout } = useAuthContext();
   const { showLoader, hideLoader, showToast } = useFeedback();
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -102,5 +102,6 @@ export function useAuth() {
     login,
     signup,
     logout,
+    updateUser,
   };
 }
