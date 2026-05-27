@@ -40,7 +40,7 @@ export const API_ENDPOINTS = {
     CHANGE_STAFF_TEAM: "/team/changeStaffTeam",
   },
   CALLS: {
-    RECORDING: (fileName: string) => `/calls/recording/${fileName}`,
+    RECORDING: (fileName: string) => `${fileName}`,
   },
   FOLLOW_UP: {
     GET_ALL: "/followup/getAllFollowUp",

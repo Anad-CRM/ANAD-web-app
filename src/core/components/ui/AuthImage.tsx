@@ -1,6 +1,5 @@
-import React, { useEffect, useState, ImgHTMLAttributes } from "react";
+import React, { useState, ImgHTMLAttributes } from "react";
 import Image from "next/image";
-import { api } from "@/core/api/axios";
 
 interface AuthImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -8,56 +7,14 @@ interface AuthImageProps extends ImgHTMLAttributes<HTMLImageElement> {
 }
 
 export function AuthImage({ src, fallbackSrc, alt, ...rest }: AuthImageProps) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [errored, setErrored]  = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [errored, setErrored] = useState(false);
   const imageClassName = rest.className || "";
   const imageStyle = rest.style as React.CSSProperties | undefined;
 
-  useEffect(() => {
-    let objectUrl: string | null = null;
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const response = await api.get(src, { responseType: "blob" });
-        if (!cancelled) {
-          objectUrl = URL.createObjectURL(response.data);
-          setBlobUrl(objectUrl);
-          setErrored(false);
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setErrored(true);
-          setLoading(false);
-        }
-      }
-    }
-
-    Promise.resolve().then(() => {
-      setBlobUrl(null);
-      setErrored(false);
-      setLoading(true);
-      load();
-    });
-
-    return () => {
-      cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [src]);
-
-  const displaySrc = errored || !blobUrl ? fallbackSrc : blobUrl;
+  const displaySrc = errored || !src ? fallbackSrc : src;
 
   return (
     <div className={`relative overflow-hidden ${imageClassName}`} style={imageStyle}>
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/70">
-          <div className="h-5 w-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
-        </div>
-      )}
-
       {displaySrc ? (
         <Image
           src={displaySrc}
@@ -66,6 +23,7 @@ export function AuthImage({ src, fallbackSrc, alt, ...rest }: AuthImageProps) {
           height={100}
           className="absolute inset-0 h-full w-full object-cover"
           unoptimized
+          onError={() => setErrored(true)}
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center bg-[#EEF4FB] text-[#1E56A0]">
