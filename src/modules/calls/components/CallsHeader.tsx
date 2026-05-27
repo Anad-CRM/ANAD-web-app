@@ -72,8 +72,8 @@ export const CallsHeader: React.FC<CallsHeaderProps> = ({
   };
 
   const handleStaffSelect = (s: Staff | null) => {
-    onStaffChange(s ? s.id : null);
-    setSelectedStaffName(s ? s.userName : "All Staff");
+    onStaffChange(s ? String(s.id) : null);
+    setSelectedStaffName(s?.userName || "All Staff");
     setShowStaffDropdown(false);
   };
 

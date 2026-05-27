@@ -1,8 +1,9 @@
-import { X, User, PhoneIncoming, Search, ArrowRight } from "lucide-react";
+import React from "react";
+import { X, User, PhoneIncoming, Search, ArrowRight, PlayCircle } from "lucide-react";
 import { Text } from "@/core/components/ui/Text";
 import { useRouter } from "next/navigation";
 import { CallLog } from "../types";
-import { AudioPlayer } from "@/core/components/ui/AudioPlayer";
+import { AudioPlayerModal } from "@/core/components/ui/AudioPlayerModal";
 import { getRecordingUrl } from "../api/callsApi";
 
 interface CallDetailsModalProps {
@@ -43,6 +44,8 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
   filters,
 }) => {
   const router = useRouter();
+  const [playingRecordingUrl, setPlayingRecordingUrl] = React.useState<string | null>(null);
+  
   if (!isOpen) return null;
 
   const displayedCalls = calls.slice(0, 4);
@@ -144,15 +147,20 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
 
                   <div className="mt-4">
                     {call.recordingFile ? (
-                      <div className="space-y-1.5">
-                        <Text weight="bold" className="text-slate-800" style={{ fontSize: '13px' }}>Call Recording</Text>
-                        <AudioPlayer 
-                          src={getRecordingUrl(call.recordingFile)} 
-                          className="w-full !bg-transparent !p-0 !border-0"
-                        />
-                      </div>
+                      <button 
+                        onClick={() => setPlayingRecordingUrl(getRecordingUrl(call.recordingFile!))}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-50/40 hover:bg-blue-50 transition-colors rounded-xl border border-blue-100/50 w-full sm:w-auto active:scale-[0.98]"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-blue-100/50 flex items-center justify-center flex-shrink-0">
+                          <PlayCircle size={16} className="text-[#1E40AF]" />
+                        </div>
+                        <div className="flex flex-col items-start min-w-0">
+                          <Text weight="semibold" className="text-[#1E40AF] text-left truncate w-full" style={{ fontSize: '12px' }}>Play Recording</Text>
+                          <Text className="text-blue-600/60" style={{ fontSize: '10px' }}>{call.duration}</Text>
+                        </div>
+                      </button>
                     ) : (
-                       <div className="flex items-center gap-3 px-4 py-3 bg-white/40 rounded-2xl border border-dashed border-slate-200">
+                      <div className="flex items-center gap-3 px-4 py-3 bg-white/40 rounded-2xl border border-dashed border-slate-200">
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                         <Text weight="medium" className="text-slate-400 italic" style={{ fontSize: '11px' }}>No recording available</Text>
                       </div>
@@ -192,6 +200,12 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
           }
         `}</style>
       </div>
+
+      <AudioPlayerModal 
+        isOpen={!!playingRecordingUrl}
+        onClose={() => setPlayingRecordingUrl(null)}
+        src={playingRecordingUrl || ""}
+      />
     </div>
   );
 };

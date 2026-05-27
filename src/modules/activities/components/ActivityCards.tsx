@@ -1,11 +1,11 @@
-import React from 'react';
-import { User } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, PlayCircle } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
 import { Text } from '@/core/components/ui/Text';
 import { AuthImage } from '@/core/components/ui/AuthImage';
-import { AudioPlayer } from '@/core/components/ui/AudioPlayer';
+import { AudioPlayerModal } from '@/core/components/ui/AudioPlayerModal';
+import { getRecordingUrl } from '@/modules/calls/api/callsApi';
 import { Activity, FollowupConfig, StatusConfig } from '../types/activity.types';
-import { API_ENDPOINTS } from '@/core/api/api';
 
 export const SmallAvatar: React.FC<{ user: { avatar?: string, userName?: string } | null | undefined; size?: number }> = ({ user, size = 20 }) => {
   const av = user?.avatar;
@@ -48,12 +48,17 @@ const ActivityNotes: React.FC<{ notes?: string }> = ({ notes }) => {
 };
 
 export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) => {
+  const [playingRecordingUrl, setPlayingRecordingUrl] = useState<string | null>(null);
   const title = activity.title ?? 'Call Recording';
-  const duration = Number(activity.duration ?? 0);
-  const fileSize = Number(activity.fileSize ?? 0);
   const user = activity.user;
+  
   return (
     <div className="flex flex-col">
+      <AudioPlayerModal 
+        isOpen={!!playingRecordingUrl}
+        onClose={() => setPlayingRecordingUrl(null)}
+        src={playingRecordingUrl || ""}
+      />
       <Text weight="bold" className="text-black leading-tight" style={{ fontSize: '14px' }}>
         {title}
       </Text>
@@ -62,14 +67,20 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
       </Text>
 
       {activity.fileName && (
-        <div className="mt-2 text-left">
-          <AudioPlayer 
-            src={API_ENDPOINTS.CALLS.RECORDING(activity.fileName || "")} 
-            initialDuration={duration} 
-            fileSize={fileSize} 
-            className="w-full max-w-[300px]" 
-          />
-        </div>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            setPlayingRecordingUrl(getRecordingUrl(activity.fileName!));
+          }}
+          className="mt-3 flex items-center gap-2 px-3 py-2 bg-blue-50/40 hover:bg-blue-50 transition-colors rounded-xl border border-blue-100/50 w-full sm:w-auto active:scale-[0.98]"
+        >
+          <div className="w-6 h-6 rounded-full bg-blue-100/50 flex items-center justify-center flex-shrink-0">
+            <PlayCircle size={14} className="text-[#1E40AF]" />
+          </div>
+          <div className="flex flex-col items-start min-w-0">
+            <span className="font-semibold text-[#1E40AF] text-left truncate w-full" style={{ fontSize: '11px' }}>Play Recording</span>
+          </div>
+        </button>
       )}
 
       <ActivityNotes notes={activity.description ?? activity.notes} />

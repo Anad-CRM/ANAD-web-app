@@ -10,7 +10,6 @@ import {
 import { Lead, LeadStatus } from "../types/lead.types";
 import { getUser } from "@/core/utils/auth";
 import { api } from "@/core/api/axios";
-import { API_ENDPOINTS } from "@/core/api/api";
 import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 import { STATUS_COLORS, STATUS_TRANSITIONS, DEFAULT_TRANSITIONS } from "../constants/leadConstants";
 
@@ -153,7 +152,6 @@ export function LeadCard({
   const statusLabel = lead.status === "Closed" ? "Enrolled"
     : lead.status === "Follow Up" ? "Follow-Up"
       : lead.status;
-
   async function handleStatusChange(newStatus: string) {
     setConfirm({
       title: "Change Status",
@@ -161,7 +159,7 @@ export function LeadCard({
       onConfirm: async () => {
         setConfirm(null);
         try {
-          await api.post(API_ENDPOINTS.LEADS.UPDATE_STATUS, { leadId: lead.id, status: newStatus });
+          await api.post("/lead/update/LeadStatus", { leadId: lead.id, status: newStatus });
           onStatusChange?.(lead.id, newStatus);
         } catch (e) {
           console.error("Status update failed", e);
@@ -172,9 +170,10 @@ export function LeadCard({
 
   return (
     <>
+
       <div
         onClick={onClick}
-        className="relative overflow-hidden rounded-[18px] p-3.5 sm:p-4 md:p-5 transition-all duration-300 cursor-pointer group"
+        className="relative flex items-center p-4 md:p-5 rounded-[20px] transition-all duration-300 cursor-pointer overflow-hidden group"
         style={{
           background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryDark})`,
           border: isSelected
@@ -213,124 +212,138 @@ export function LeadCard({
           </div>
         )}
 
-        <div className="relative z-10 pr-14 sm:pr-16">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0">
-              <div
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-[15px] sm:text-[18px] font-bold shadow-inner"
-                style={{
-                  background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
-                  color: "rgba(255,255,255,0.92)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  backdropFilter: "blur(5px)",
-                }}
-              >
-                {getInitials(name)}
-              </div>
+        {/* ── Avatar ── */}
+        <div className="mr-4 md:mr-5 flex-shrink-0 relative z-10">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center text-[22px] font-bold shadow-inner"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
+              color: "rgba(255,255,255,0.9)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              backdropFilter: "blur(5px)"
+            }}
+          >
+            {getInitials(name)}
+          </div>
+
+        </div>
+
+        {/* ── Content columns ── */}
+        <div className="flex flex-1 flex-col md:flex-row md:items-start justify-between min-w-0 gap-3 relative z-10">
+
+          {/* Left column */}
+          <div className="flex flex-col gap-1.5 flex-1 min-w-0 pr-2">
+            {/* Name + status badge */}
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <Text as="h3" size="custom" weight="bold" className="text-white text-[15px] truncate leading-tight tracking-wide">
+                {searchKeyword ? highlight(name, searchKeyword) : name}
+              </Text>
+              {showStatusBadge && (
+                <div
+                  className="px-2 py-0.5 rounded-md flex-shrink-0 flex items-center gap-1.5 shadow-sm"
+                  style={{
+                    backgroundColor: "rgba(0,0,0,0.2)",
+                    border: `1px solid ${statusColor}50`,
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: statusColor }} />
+                  <Text weight="bold" className="text-[9px] uppercase tracking-wider" style={{ color: statusColor }}>
+                    {statusLabel}
+                  </Text>
+                </div>
+              )}
             </div>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <Text as="h3" size="custom" weight="bold" className="text-white text-[14px] sm:text-[15px] leading-tight tracking-wide truncate">
-                  {searchKeyword ? highlight(name, searchKeyword) : name}
+            <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
+              <div className="p-1 rounded-md bg-white/10"><Mail size={12} /></div>
+              <Text weight="medium" style={{ fontSize: '11.5px' }} className="truncate">
+                {searchKeyword ? highlight(email, searchKeyword) : email}
+              </Text>
+            </div>
+
+            <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
+              <div className="p-1 rounded-md bg-white/10"><Phone size={12} /></div>
+              <Text weight="medium" style={{ fontSize: '11.5px' }} className="truncate">
+                {searchKeyword ? highlight(mobile, searchKeyword) : mobile}
+              </Text>
+            </div>
+
+            {/* Ad / campaign */}
+            {adName && (
+              <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors">
+                <div className="p-1 rounded-md bg-white/10"><User size={12} /></div>
+                <Text weight="medium" style={{ fontSize: '11.5px' }} className="truncate">
+                  {adName}
                 </Text>
-                {showStatusBadge && (
-                  <div
-                    className="px-2 py-0.5 rounded-md flex-shrink-0 flex items-center gap-1.5 shadow-sm"
-                    style={{
-                      backgroundColor: "rgba(0,0,0,0.2)",
-                      border: `1px solid ${statusColor}50`,
-                    }}
+              </div>
+            )}
+
+            {createdAt && (
+              <div className="flex items-center gap-2 text-white/60 mt-1">
+                <CalendarDays size={12} className="flex-shrink-0" />
+                <Text weight="medium" className="tracking-wide" style={{ fontSize: '10px' }}>
+                  CREATED {createdAt}
+                </Text>
+              </div>
+            )}
+          </div>
+
+          {/* Right column */}
+          <div className="md:min-w-[160px] shrink-0 md:mt-8 md:ml-6 self-start">
+            <div
+              className="flex flex-col gap-2 pl-0 md:pl-4 md:border-l"
+              style={{ borderColor: "rgba(255,255,255,0.15)" }}
+            >
+              {/* Assigned staff */}
+              <div className="flex items-center gap-2 text-white/80 truncate bg-black/10 px-2 py-1.5 rounded-lg">
+                {assignedUser ? (
+                  <AvatarCircle avatar={assignedUser.avatar} size={18} />
+                ) : (
+                  <span
+                    className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center bg-white/20"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: statusColor }} />
-                    <Text weight="bold" className="text-[9px] uppercase tracking-wider" style={{ color: statusColor }}>
-                      {statusLabel}
-                    </Text>
-                  </div>
+                    <User size={10} color="#fff" />
+                  </span>
                 )}
+                <Text weight="semibold" className="truncate" style={{ fontSize: '11px' }}>
+                  {assignedName}
+                </Text>
               </div>
 
-              <div className="mt-2 space-y-1.5">
-                <div className="flex items-center gap-2 text-white/90 group-hover:text-white transition-colors min-w-0">
-                  <div className="p-1 rounded-md bg-white/10 flex-shrink-0"><Phone size={11} /></div>
-                  <Text weight="medium" className="text-[11px] sm:text-[11.5px] leading-tight break-all sm:break-normal">
-                    {searchKeyword ? highlight(mobile, searchKeyword) : mobile}
-                  </Text>
-                </div>
-
-                <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors min-w-0">
-                  <div className="p-1 rounded-md bg-white/10 flex-shrink-0"><Mail size={11} /></div>
-                  <Text weight="medium" className="truncate min-w-0 text-[11px] sm:text-[11.5px]">
-                    {searchKeyword ? highlight(email, searchKeyword) : email}
-                  </Text>
-                </div>
-
-                {adName && (
-                  <div className="flex items-center gap-2 text-white/90 truncate group-hover:text-white transition-colors min-w-0">
-                    <div className="p-1 rounded-md bg-white/10 flex-shrink-0"><User size={11} /></div>
-                    <Text weight="medium" className="truncate min-w-0 text-[11px] sm:text-[11.5px]">
-                      {adName}
-                    </Text>
-                  </div>
-                )}
-
-                <div className="flex flex-wrap items-center gap-2 gap-y-1">
-                  {createdAt && (
-                    <div className="flex items-center gap-2 text-white/70 min-w-0">
-                      <CalendarDays size={11} className="flex-shrink-0" />
-                      <Text weight="medium" className="truncate tracking-wide text-[10px] sm:text-[10.5px]">
-                        CREATED {createdAt}
-                      </Text>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-2 text-white/80 truncate bg-black/10 px-2 py-1.5 rounded-lg min-w-0">
-                    {assignedUser ? (
-                      <AvatarCircle avatar={assignedUser.avatar} size={16} />
-                    ) : (
-                      <span className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center bg-white/20">
-                        <User size={9} color="#fff" />
-                      </span>
-                    )}
-                    <Text weight="semibold" className="truncate min-w-0 text-[11px]">
-                      {assignedName}
-                    </Text>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-white/80 truncate px-2 min-w-0">
-                    <SourceIcon source={source} />
-                    <Text weight="medium" className="truncate capitalize min-w-0 text-[11px]">
-                      {source}
-                    </Text>
-                  </div>
-                </div>
-
-                {lead.isDuplicated && (
-                  <div className="flex items-center gap-2 text-orange-300 truncate">
-                    <RefreshCw size={11} />
-                    <Text weight="semibold" className="truncate uppercase tracking-wider text-[10.5px]">
-                      Recaptured
-                    </Text>
-                  </div>
-                )}
+              {/* Source */}
+              <div className="flex items-center gap-2 text-white/80 truncate px-2">
+                <SourceIcon source={source} />
+                <Text weight="medium" className="truncate capitalize" style={{ fontSize: '11px' }}>
+                  {source}
+                </Text>
               </div>
+
+              {/* ── Recaptured badge ── */}
+              {lead.isDuplicated && (
+                <div className="flex items-center gap-2 text-orange-300 truncate px-2">
+                  <RefreshCw size={12} />
+                  <Text weight="semibold" className="truncate uppercase tracking-wider" style={{ fontSize: '11px' }}>
+                    Recaptured
+                  </Text>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* ── Top-right actions ── */}
         <div
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 z-20"
+          className="absolute top-4 right-4 flex items-center gap-1.5 z-20"
           onClick={e => e.stopPropagation()}
         >
           {/* Assign button */}
           {canAssign && !isClosed && (
             <button
               onClick={() => onAssignClick?.(lead.id)}
-              className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/20 transition-all shadow-sm backdrop-blur-sm group/btn"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/20 transition-all shadow-sm backdrop-blur-sm group/btn"
               title="Assign to staff"
             >
-              <UserPlus size={14} className="sm:w-4 sm:h-4 text-white/80 group-hover/btn:text-white" />
+              <UserPlus size={16} className="text-white/80 group-hover/btn:text-white" />
             </button>
           )}
 
@@ -338,10 +351,10 @@ export function LeadCard({
           {!isClosed && (
             <button
               onClick={() => setIsStatusModalOpen(true)}
-              className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/20 transition-all shadow-sm backdrop-blur-sm group/btn"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/20 transition-all shadow-sm backdrop-blur-sm group/btn"
               title="Change status"
             >
-              <MoreHorizontal size={14} className="sm:w-4 sm:h-4 text-white/80 group-hover/btn:text-white" />
+              <MoreHorizontal size={16} className="text-white/80 group-hover/btn:text-white" />
             </button>
           )}
         </div>
