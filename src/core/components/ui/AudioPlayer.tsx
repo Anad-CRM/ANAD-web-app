@@ -34,10 +34,13 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     let cancelled = false;
 
     async function loadAudio() {
-      // The backend may return a malformed relative redirect if the file is on DigitalOcean Spaces.
-      // We extract the URL and bypass the backend to play it directly, avoiding CORS and 404s.
-      let directUrl = src;
-      console.log("direct url ---------------", src);
+      if (!src || !src.trim()) {
+        setLoading(false);
+        return;
+      }
+      
+      let directUrl = src.trim();
+      console.log("direct url ---------------", directUrl);
       if (src.includes("digitaloceanspaces.com")) {
         const match = src.match(/([a-zA-Z0-9-]+\.digitaloceanspaces\.com.*)/);
         if (match) {
@@ -106,27 +109,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     };
   }, [playing, updateProgress]);
 
-  useEffect(() => {
-    if (blobUrl && audioRef.current) {
-      // Force the browser to evaluate the newly attached source
-      audioRef.current.load();
 
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          setPlaying(true);
-        }).catch((error) => {
-          if (error.name === 'NotSupportedError') {
-            setErrored(true);
-            setLoading(false);
-          } else if (error.name !== 'AbortError') {
-            console.error("Autoplay prevented or failed:", error);
-          }
-          setPlaying(false);
-        });
-      }
-    }
-  }, [blobUrl]);
 
   const togglePlayPause = () => {
     if (!audioRef.current) return;
@@ -190,19 +173,29 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     <div className={`flex flex-col gap-3 p-4 rounded-[20px] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-slate-100 ${className}`}>
       {blobUrl && (
         <audio
+          key={blobUrl}
           ref={audioRef}
-          src={blobUrl}
           preload="auto"
+          crossOrigin="anonymous"
+          autoPlay
           onLoadedMetadata={handleLoadedMetadata}
           onCanPlay={() => setLoading(false)}
           onEnded={handleEnded}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
-          onError={() => {
+          onError={(e) => {
+            const err = e.currentTarget.error;
+            console.error("Audio element error code:", err?.code, err?.message);
+            if (err?.code === 4) {
+              // Attempt to reload with <source> fallback
+              setErrored(true);
+            }
             setErrored(true);
             setLoading(false);
           }}
-        />
+        >
+          <source src={blobUrl} type="audio/mpeg" />
+        </audio>
       )}
 
       {/* Header Info */}
