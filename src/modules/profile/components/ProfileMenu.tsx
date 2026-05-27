@@ -96,7 +96,7 @@ export default function ProfileMenu() {
   const isTeamLeader = role === "Team Leader";
   const isStaff = role === "Staff Member";
 
-  const avatarSrc = user?.avatar ? `${API_BASE_URL}uploads/${user.avatar}` : "/login/login.png";
+  const avatarSrc = user?.avatar ? `${user.avatar}` : "/login/login.png";
   const orgName = user?.organization?.organizationName;
 
   const generalLinks: QuickLink[] = [

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { PlayCircle, PauseCircle, Headphones, Loader2 } from "lucide-react";
+import { Play, Pause, Headphones, Loader2 } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 import { Text } from "@/core/components/ui/Text";
 import { api } from "@/core/api/axios";
@@ -38,11 +38,11 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         setLoading(false);
         return;
       }
-      
+
       let directUrl = src.trim();
-      console.log("direct url ---------------", directUrl);
+      // console.log("direct url ---------------", directUrl);
       if (src.includes("digitaloceanspaces.com")) {
-        const match = src.match(/([a-zA-Z0-9-]+\.digitaloceanspaces\.com.*)/);
+        const match = src.match(/([a-zA-Z0-9-.]+\.digitaloceanspaces\.com.*)/);
         if (match) {
           directUrl = `https://${match[1]}`;
         }
@@ -176,7 +176,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           key={blobUrl}
           ref={audioRef}
           preload="auto"
-          crossOrigin="anonymous"
           autoPlay
           onLoadedMetadata={handleLoadedMetadata}
           onCanPlay={() => setLoading(false)}
@@ -262,9 +261,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           {loading ? (
             <Loader2 size={24} color="white" className="animate-spin" />
           ) : playing ? (
-            <PauseCircle size={28} color="white" fill="white" />
+            <Pause size={24} color="white" fill="white" />
           ) : (
-            <PlayCircle size={28} color="white" fill="white" className="ml-1" />
+            <Play size={24} color="white" fill="white" className="ml-1" />
           )}
         </button>
 

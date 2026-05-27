@@ -12,7 +12,7 @@ import { API_BASE_URL } from "@/core/api/axios";
 export default function Topbar() {
   const { user, logout } = useAuth();
   const { toggleSidebar } = useSidebar();
-  const avatarSrc = user?.avatar ? `${API_BASE_URL}uploads/${user.avatar}` : "/login/login.png";
+  const avatarSrc = user?.avatar ? `${user.avatar}` : "/login/login.png";
 
   const hour = new Date().getHours();
   let greeting = "Good evening";
@@ -98,7 +98,7 @@ export default function Topbar() {
 
         <div className="hidden sm:block w-[1px] h-8 mx-1" style={{ backgroundColor: COLORS.border }}></div>
 
-        <button 
+        <button
           onClick={logout}
           className="flex items-center justify-center gap-2 px-3 sm:px-4 h-10 rounded-lg transition-colors font-medium text-[14px]"
           style={{ backgroundColor: "rgba(239, 68, 68, 0.08)", color: "#DC2626" }}

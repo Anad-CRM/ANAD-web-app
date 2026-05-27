@@ -24,7 +24,7 @@ export const SmallAvatar: React.FC<{ user: { avatar?: string, userName?: string 
 };
 
 export const Chip: React.FC<{ label: string; color: string; grey?: boolean }> = ({ label, color, grey }) => (
-   <Text
+  <Text
     weight="semibold"
     className="inline-flex items-center px-2 py-0.5 rounded-full whitespace-nowrap"
     style={grey
@@ -41,7 +41,7 @@ const ActivityNotes: React.FC<{ notes?: string }> = ({ notes }) => {
   return (
     <div className="mt-2 p-2 bg-slate-50/80 rounded-lg border border-slate-100/50">
       <Text className="text-slate-600 italic leading-relaxed" style={{ fontSize: '11px' }}>
-        "{notes}"
+        {notes}
       </Text>
     </div>
   );
@@ -51,10 +51,10 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
   const [playingRecordingUrl, setPlayingRecordingUrl] = useState<string | null>(null);
   const title = activity.title ?? 'Call Recording';
   const user = activity.user;
-  
+
   return (
     <div className="flex flex-col">
-      <AudioPlayerModal 
+      <AudioPlayerModal
         isOpen={!!playingRecordingUrl}
         onClose={() => setPlayingRecordingUrl(null)}
         src={playingRecordingUrl || ""}
@@ -67,7 +67,7 @@ export const RecordingCard: React.FC<{ activity: Activity }> = ({ activity }) =>
       </Text>
 
       {activity.fileName && (
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             setPlayingRecordingUrl(getRecordingUrl(activity.fileName!));
