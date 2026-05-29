@@ -103,7 +103,7 @@ export function CreateTeamModal({ isOpen, onClose, organizationId, onSuccess }: 
         typeCategory: category.trim(),
         managerId: isAdmin ? (managerId || undefined) : userManagerId,
         iconIndex: iconIndex,
-      });
+      }) as { status?: string; data?: unknown; message?: string };
       if (res.status === "success" || res.data) {
         showToast("Team created successfully", "success");
         onSuccess();
