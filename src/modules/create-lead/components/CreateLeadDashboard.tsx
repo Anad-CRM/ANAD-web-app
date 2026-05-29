@@ -13,7 +13,7 @@ export const CreateLeadDashboard: React.FC = () => {
       </div>
 
       <div className="flex justify-center w-full flex-1 mt-3 px-4 pb-6">
-        <div className="bg-white w-full max-w-[500px] rounded-3xl p-6 shadow-sm border border-black/5 h-fit">
+        <div className="bg-white w-full max-w-[750px] rounded-3xl p-6 shadow-sm border border-black/5 h-fit">
            {activeTab === 'single' ? <SingleLeadForm /> : <BulkUploadForm />}
         </div>
       </div>
