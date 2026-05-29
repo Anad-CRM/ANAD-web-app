@@ -16,14 +16,14 @@ import "react-phone-input-2/lib/style.css";
 export const SingleLeadForm: React.FC = () => {
   const { showToast } = useFeedback();
   const [formData, setFormData] = useState<CreateLeadPayload>({
-     userName: '',
-     email: '',
-     mobileNumber: '+91',
-     leadSource: 'Manual',
-     adId: '',
-     staffId: ''
+    userName: '',
+    email: '',
+    mobileNumber: '+91',
+    leadSource: 'Manual',
+    adId: '',
+    staffId: ''
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
@@ -56,7 +56,7 @@ export const SingleLeadForm: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.userName.trim()) {
       newErrors.userName = "Full Name is required";
     }
@@ -80,34 +80,34 @@ export const SingleLeadForm: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-     e.preventDefault();
-     if (!validate()) return;
+    e.preventDefault();
+    if (!validate()) return;
 
-     setLoading(true);
-     setApiError(null);
-     try {
-        const payloadWithId = {
-          ...formData,
-          leadId: Date.now().toString()
-        };
-        await createSingleLead(payloadWithId);
-        showToast("Lead created successfully!", "success");
-        setFormData({
-           userName: '',
-           email: '',
-           mobileNumber: '+91',
-           leadSource: 'Manual',
-           adId: '',
-           staffId: ''
-        });
-        setErrors({});
-      } catch (err: any) {
-         const message = err?.response?.data?.message || err.message || "Failed to create lead";
-         setApiError(message);
-         showToast(message, "error");
-      } finally {
-        setLoading(false);
-     }
+    setLoading(true);
+    setApiError(null);
+    try {
+      const payloadWithId = {
+        ...formData,
+        leadId: Date.now().toString()
+      };
+      await createSingleLead(payloadWithId);
+      showToast("Lead created successfully!", "success");
+      setFormData({
+        userName: '',
+        email: '',
+        mobileNumber: '+91',
+        leadSource: 'Manual',
+        adId: '',
+        staffId: ''
+      });
+      setErrors({});
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err.message || "Failed to create lead";
+      setApiError(message);
+      showToast(message, "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (fetchingData) {
@@ -134,32 +134,32 @@ export const SingleLeadForm: React.FC = () => {
     <div className="flex flex-col pb-10">
       <Text as="h2" weight="semibold" className="text-black mb-3 tracking-wide" style={{ fontSize: '15px' }}>Lead Information</Text>
       {apiError && <p className="text-red-500 text-[11px] mb-2 bg-red-50 p-1.5 rounded-md border border-red-100">{apiError}</p>}
-      
+
       <div className="flex flex-col gap-4 mb-6">
         <div>
           <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 block">Full Name *</label>
-          <TextField 
-            type="text" 
+          <TextField
+            type="text"
             value={formData.userName}
             onChange={(e) => {
-              setFormData({...formData, userName: e.target.value});
-              if (errors.userName) setErrors({...errors, userName: ''});
+              setFormData({ ...formData, userName: e.target.value });
+              if (errors.userName) setErrors({ ...errors, userName: '' });
             }}
-            placeholder="Enter lead name" 
+            placeholder="Enter lead name"
             error={errors.userName}
           />
         </div>
 
         <div>
           <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 block">Email Address</label>
-          <TextField 
-            type="email" 
+          <TextField
+            type="email"
             value={formData.email}
             onChange={(e) => {
-              setFormData({...formData, email: e.target.value});
-              if (errors.email) setErrors({...errors, email: ''});
+              setFormData({ ...formData, email: e.target.value });
+              if (errors.email) setErrors({ ...errors, email: '' });
             }}
-            placeholder="example@gmail.com" 
+            placeholder="example@gmail.com"
             error={errors.email}
           />
         </div>
@@ -171,8 +171,8 @@ export const SingleLeadForm: React.FC = () => {
               country={"in"}
               value={formData.mobileNumber}
               onChange={(val) => {
-                setFormData({...formData, mobileNumber: "+" + val});
-                if (errors.mobileNumber) setErrors({...errors, mobileNumber: ''});
+                setFormData({ ...formData, mobileNumber: "+" + val });
+                if (errors.mobileNumber) setErrors({ ...errors, mobileNumber: '' });
               }}
               enableSearch={true}
               countryCodeEditable={false}
@@ -235,10 +235,10 @@ export const SingleLeadForm: React.FC = () => {
         <div>
           <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 px-1 block">Lead Source *</label>
           <div className="relative w-full h-[48px] bg-white rounded-[14px]">
-            <select 
-               value={formData.leadSource}
-               onChange={(e) => setFormData({...formData, leadSource: e.target.value})}
-               className="w-full h-full bg-transparent text-[#0D1B3E] appearance-none rounded-[14px] px-4 text-[15px] focus:outline-none transition-all duration-200"
+            <select
+              value={formData.leadSource}
+              onChange={(e) => setFormData({ ...formData, leadSource: e.target.value })}
+              className="w-full h-full bg-transparent text-[#0D1B3E] appearance-none rounded-[14px] px-4 text-[15px] focus:outline-none transition-all duration-200"
             >
               <option value="Manual">Manual</option>
               <option value="Facebook">Facebook</option>
@@ -256,7 +256,7 @@ export const SingleLeadForm: React.FC = () => {
           label="Ad Campaign"
           options={adOptions}
           value={formData.adId || ''}
-          onChange={(val) => setFormData({...formData, adId: val})}
+          onChange={(val) => setFormData({ ...formData, adId: val })}
           placeholder="Select Ad Campaign"
         />
 
@@ -264,20 +264,20 @@ export const SingleLeadForm: React.FC = () => {
           label="Assign To"
           options={staffOptions}
           value={formData.staffId || ''}
-          onChange={(val) => setFormData({...formData, staffId: val})}
+          onChange={(val) => setFormData({ ...formData, staffId: val })}
           placeholder="Select Staff Member"
         />
       </div>
 
       <div className="flex justify-center mt-4">
-        <Button 
-           variant="primary"
-           onClick={handleSubmit}
-           disabled={loading}
-           className="text-[14px] font-medium px-10 py-3 rounded-xl disabled:opacity-70 transition-all shadow-md active:scale-[0.98] min-w-[200px] flex justify-center items-center h-[48px]"
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={loading}
+          className="text-[14px] font-medium px-10 py-3 rounded-xl disabled:opacity-70 transition-all shadow-md active:scale-[0.98] min-w-[200px] flex justify-center items-center h-[48px]"
         >
           {loading ? (
-             <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             "Create Lead"
           )}

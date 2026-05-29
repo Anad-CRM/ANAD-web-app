@@ -209,4 +209,24 @@ export const leadsApi = {
       return { status: "failed", message: err?.response?.data?.message || "Failed to delete lead" };
     }
   },
+
+  getAutoAssignStatus: async (orgId: string): Promise<boolean> => {
+    try {
+      const response = await api.get(API_ENDPOINTS.AUTO_LEAD.GET_AUTO_ASSIGN_STATUS(orgId));
+      return response.data?.data?.organizationAutoAssign ?? false;
+    } catch (error) {
+      console.error("[leadsApi] Error fetching auto assign status:", error);
+      return false;
+    }
+  },
+
+  triggerAutoAssign: async (orgId: string): Promise<Record<string, unknown>> => {
+    try {
+      const response = await api.post("/autoAssign/trigger", { organizationId: orgId });
+      return response.data;
+    } catch (error) {
+      console.error("[leadsApi] Error triggering auto assign:", error);
+      throw error;
+    }
+  },
 };
