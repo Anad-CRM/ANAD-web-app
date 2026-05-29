@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Search, Filter, X, Users } from "lucide-react";
+import { Search, Filter, X, Users, Wand2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { COLORS } from "@/core/components/theme/colors";
 import { LeadCard } from "./LeadCard";
@@ -117,6 +117,9 @@ export function LeadList() {
   const [isAssigning, setIsAssigning] = useState(false);
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
   const [ads, setAds] = useState<{ id: string; adName: string; platform?: string }[]>([]);
+  const [isAutoAssignEnabled, setIsAutoAssignEnabled] = useState(false);
+  const [isTriggeringAutoAssign, setIsTriggeringAutoAssign] = useState(false);
+  const [userRole, setUserRole] = useState<string | undefined>();
   const selectedAdLabel = useMemo(() => {
     if (!adIdParam) return "";
     return ads.find((ad) => ad.id === adIdParam)?.adName || "Ad filtered";
@@ -166,7 +169,14 @@ export function LeadList() {
 
     // Using user info to fetch teams if available
     const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
+    if (user?.role) setUserRole(user.role);
     if (user?.organizationId) {
+      if (isUnassignedRef.current && (user.role === "Admin" || user.role === "Manager")) {
+        leadsApi.getAutoAssignStatus(user.organizationId).then(status => {
+          setIsAutoAssignEnabled(status);
+        }).catch(() => {});
+      }
+
       TeamsService.getAllTeams({ organizationId: user.organizationId }).then(res => {
         if (res.status === "success" && res.data) {
           setTeams(res.data);
@@ -315,6 +325,23 @@ export function LeadList() {
       console.error(e);
     } finally {
       setIsAssigning(false);
+    }
+  };
+
+  const handleTriggerAutoAssign = async () => {
+    const user = getUser<{ organizationId?: string }>();
+    if (!user?.organizationId) return;
+
+    setIsTriggeringAutoAssign(true);
+    try {
+      const res = await leadsApi.triggerAutoAssign(user.organizationId);
+      if (res.status === "success") {
+        loadLeads(true);
+      }
+    } catch (e) {
+      console.error("Auto assign failed", e);
+    } finally {
+      setIsTriggeringAutoAssign(false);
     }
   };
 
@@ -503,6 +530,27 @@ export function LeadList() {
             )}
           </div>
         </div>
+
+        {isUnassigned && isAutoAssignEnabled && (userRole === "Admin" || userRole === "Manager") && !isSelectionMode && (
+          <div className="mt-3 px-4 py-3 rounded-xl border flex items-center justify-between"
+            style={{ backgroundColor: COLORS.surface, borderColor: COLORS.border }}
+          >
+            <div className="flex items-center gap-3">
+              <Wand2 size={18} strokeWidth={2.5} style={{ color: COLORS.primary }} />
+              <Text weight="medium" className="text-[13px] sm:text-[14px]" style={{ color: COLORS.text }}>
+                Smart Auto-Assign
+              </Text>
+            </div>
+            <button
+              onClick={handleTriggerAutoAssign}
+              disabled={isTriggeringAutoAssign}
+              className="text-[12px] font-bold px-3 py-1.5 rounded-lg transition-opacity disabled:opacity-50"
+              style={{ color: COLORS.primary, backgroundColor: COLORS.primaryXlight }}
+            >
+              {isTriggeringAutoAssign ? "Assigning..." : "Assign Now"}
+            </button>
+          </div>
+        )}
 
         </div>
 
