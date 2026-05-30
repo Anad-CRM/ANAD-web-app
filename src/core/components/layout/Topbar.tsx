@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import Link from "next/link";
 import { Menu } from "lucide-react";
@@ -7,18 +8,21 @@ import { useSidebar } from "@/core/contexts/SidebarContext";
 import { COLORS } from "@/core/components/theme/colors";
 import { Text } from "@/core/components/ui/Text";
 import { AuthImage } from "@/core/components/ui/AuthImage";
+import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 
 
 export default function Topbar() {
   const { user, logout } = useAuth();
   const { toggleSidebar } = useSidebar();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const avatarSrc = user?.avatar ? `${user.avatar}` : "/login/login.png";
-
   const hour = new Date().getHours();
   let greeting = "Good evening";
   if (hour < 12) greeting = "Good morning";
   else if (hour < 18) greeting = "Good afternoon";
 
+
+  // console.log("prrofile image ------- ", user?.avatar);
   return (
     <header className="flex items-center justify-between px-4 sm:px-6 md:px-8 h-16 md:h-20 bg-white">
       <div className="flex items-center gap-3 sm:gap-6">
@@ -32,10 +36,10 @@ export default function Topbar() {
         </button>
 
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full border flex-shrink-0 overflow-hidden bg-white" style={{ borderColor: COLORS.border }}>
+          <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full border flex-shrink-0 overflow-hidden" style={{ borderColor: COLORS.border }}>
             <AuthImage
               src={avatarSrc}
-              fallbackSrc="/login/login.png"
+              fallbackSrc="/login/icon.png"
               alt={user?.userName || "Profile image"}
               className="w-full h-full object-cover"
             />
@@ -99,7 +103,7 @@ export default function Topbar() {
         <div className="hidden sm:block w-[1px] h-8 mx-1" style={{ backgroundColor: COLORS.border }}></div>
 
         <button
-          onClick={logout}
+          onClick={() => setShowLogoutConfirm(true)}
           className="flex items-center justify-center gap-2 px-3 sm:px-4 h-10 rounded-lg transition-colors font-medium text-[14px]"
           style={{ backgroundColor: "rgba(239, 68, 68, 0.08)", color: "#DC2626" }}
         >
@@ -111,6 +115,18 @@ export default function Topbar() {
           <span className="hidden sm:inline">Logout</span>
         </button>
       </div>
+
+      {showLogoutConfirm && (
+        <ConfirmDialog
+          title="Confirm Logout"
+          message="Are you sure you want to log out of your account?"
+          onConfirm={() => {
+            setShowLogoutConfirm(false);
+            logout();
+          }}
+          onCancel={() => setShowLogoutConfirm(false)}
+        />
+      )}
     </header>
   );
 }
