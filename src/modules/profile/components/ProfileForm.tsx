@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { clsx } from "clsx";
 import { useAuth } from "@/modules/auth/hooks/useAuth";
 import { ProfileService, UpdateProfileData } from "../services/profileService";
@@ -8,6 +8,8 @@ import { Text } from "@/core/components/ui/Text";
 import Button from "@/core/components/ui/Button";
 import TextField from "@/core/components/ui/TextField";
 import { COLORS } from "@/core/components/theme/colors";
+import Image from "next/image";
+import { User } from "../types";
 
 const BUSINESS_CATEGORIES = [
   "Automotive",
@@ -24,11 +26,40 @@ const BUSINESS_CATEGORIES = [
   "Tutoring Services",
 ];
 
+const convertTo24Hour = (timeStr: string) => {
+  if (!timeStr || typeof timeStr !== 'string') return "09:00";
+  const trimmed = timeStr.trim().toUpperCase();
+  if (!trimmed.includes("AM") && !trimmed.includes("PM")) {
+    return trimmed.length > 5 ? trimmed.slice(0, 5) : trimmed;
+  }
+  
+  const [time, modifier] = trimmed.split(" ");
+  if (!time) return "09:00";
+  const [hours, minutes = "00"] = time.split(":");
+  let h = parseInt(hours, 10);
+  if (modifier === "PM" && h < 12) h += 12;
+  if (modifier === "AM" && h === 12) h = 0;
+  return `${h.toString().padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+};
+
+const convertTo12Hour = (timeStr: string) => {
+  if (!timeStr) return "09:00 AM";
+  const [hours, minutes] = timeStr.split(":");
+  const h = parseInt(hours, 10);
+  const modifier = h >= 12 ? "PM" : "AM";
+  const h12 = (h % 12) || 12;
+  return `${h12.toString().padStart(2, "0")}:${minutes} ${modifier}`;
+};
+
 export default function ProfileForm() {
   const { user, updateUser } = useAuth();
   
   const isAdmin = user?.role === "Admin";
   
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
   const [formData, setFormData] = useState<UpdateProfileData>({
     userId: "",
     userName: "",
@@ -44,49 +75,32 @@ export default function ProfileForm() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const convertTo24Hour = (timeStr: string) => {
-    if (!timeStr || typeof timeStr !== 'string') return "09:00";
-    const trimmed = timeStr.trim().toUpperCase();
-    if (!trimmed.includes("AM") && !trimmed.includes("PM")) {
-      return trimmed.length > 5 ? trimmed.slice(0, 5) : trimmed;
-    }
-    
-    const [time, modifier] = trimmed.split(" ");
-    if (!time) return "09:00";
-    let [hours, minutes] = time.split(":");
-    if (!minutes) minutes = "00";
-    let h = parseInt(hours, 10);
-    if (modifier === "PM" && h < 12) h += 12;
-    if (modifier === "AM" && h === 12) h = 0;
-    return `${h.toString().padStart(2, "0")}:${minutes.padStart(2, "0")}`;
-  };
-
-  const convertTo12Hour = (timeStr: string) => {
-    if (!timeStr) return "09:00 AM";
-    let [hours, minutes] = timeStr.split(":");
-    const h = parseInt(hours, 10);
-    const modifier = h >= 12 ? "PM" : "AM";
-    const h12 = (h % 12) || 12;
-    return `${h12.toString().padStart(2, "0")}:${minutes} ${modifier}`;
-  };
-
   useEffect(() => {
     if (user) {
-      const org = user.organization as any;
-      
+      const typedUser = user as User;
+      const org = typedUser.organization;
+
       setFormData({
-        userId: user.id || "",
-        userName: user.userName || "",
-        email: user.email || "",
-        mobileNumber: (user as any).mobileNumber || "",
-        address: (user as any).address || "",
-        organizationName: org?.organizationName || (user as any).organizationName || "",
-        businessCategory: org?.businessCategory || (user as any).businessCategory || "",
-        startTime: convertTo24Hour(org?.startTime || (user as any).startTime || "09:00 AM"),
-        endTime: convertTo24Hour(org?.endTime || (user as any).endTime || "05:00 PM"),
+        userId: typedUser.id ?? "",
+        userName: typedUser.userName ?? "",
+        email: typedUser.email ?? "",
+        mobileNumber: typedUser.mobileNumber ?? "",
+        address: typedUser.address ?? "",
+        organizationName: org?.organizationName ?? typedUser.organizationName ?? "",
+        businessCategory: org?.businessCategory ?? typedUser.businessCategory ?? "",
+        startTime: convertTo24Hour(org?.startTime ?? typedUser.startTime ?? "09:00 AM"),
+        endTime: convertTo24Hour(org?.endTime ?? typedUser.endTime ?? "05:00 PM"),
       });
     }
   }, [user]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -96,12 +110,42 @@ export default function ProfileForm() {
     }));
   };
 
+  const getBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result.split(",")[1]);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setMessage("");
     
     try {
+      let avatarUrl = (user as User)?.avatar || "avatar.png";
+      
+      if (avatarFile) {
+        try {
+          const base64Data = await getBase64(avatarFile);
+          const fileContent = JSON.stringify(base64Data);
+          const mediaRes = await ProfileService.uploadMedia({ 
+            name: avatarFile.name.replace(/\s+/g, ""), 
+            file: fileContent 
+          });
+          if (mediaRes && mediaRes.status === "success") {
+            avatarUrl = mediaRes.data;
+          }
+        } catch (uploadErr) {
+          console.error("Avatar upload failed:", uploadErr);
+        }
+      }
+
       const payload: UpdateProfileData = {
         userId: formData.userId,
         userName: formData.userName,
@@ -112,7 +156,7 @@ export default function ProfileForm() {
         businessCategory: formData.businessCategory,
         startTime: convertTo12Hour(formData.startTime || "09:00"),
         endTime: convertTo12Hour(formData.endTime || "17:00"),
-        avatar: (user as any)?.avatar || "avatar.png"
+        avatar: avatarUrl
       };
 
       const response = await ProfileService.updateProfile(payload);
@@ -125,8 +169,12 @@ export default function ProfileForm() {
       } else {
         setMessage(response?.message || "Failed to update profile. Please check all fields.");
       }
-    } catch (err: any) {
-      setMessage(err.message || "An error occurred while saving profile");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setMessage(err.message || "An error occurred while saving profile");
+      } else {
+        setMessage("An error occurred while saving profile");
+      }
     } finally {
       setSaving(false);
     }
@@ -135,6 +183,57 @@ export default function ProfileForm() {
   return (
     <div className="w-full bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-black/5">
       <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="flex flex-col items-center mb-8">
+          <div className="relative">
+            <div className="relative w-[120px] h-[120px] rounded-full border-4 border-[#1E56A0]/20 overflow-hidden bg-gray-100 flex items-center justify-center">
+              {avatarPreview ? (
+                <Image src={avatarPreview} alt="Profile" fill className="object-cover" unoptimized />
+              ) : (user as User)?.avatar ? (
+                <Image 
+                  src={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${(user as User).avatar}`} 
+                  alt="Profile" 
+                  fill
+                  className="object-cover" 
+                  unoptimized
+                  onError={(e) => { 
+                    e.currentTarget.style.display='none'; 
+                    e.currentTarget.parentElement?.classList.add('fallback') 
+                  }} 
+                />
+              ) : (
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              )}
+            </div>
+            <button 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-0 right-0 w-10 h-10 bg-[#1E56A0] rounded-full border-4 border-white flex items-center justify-center cursor-pointer hover:bg-[#15427d] transition-colors"
+            >
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+              accept="image/*" 
+              className="hidden" 
+            />
+          </div>
+          <div className="mt-4 text-center">
+            <Text as="h3" size="2xl" weight="bold" className="text-gray-900">
+              {user?.userName || "User"}
+            </Text>
+            <Text size="sm" className="text-gray-600 mt-1">
+              {user?.role || "Role"}
+            </Text>
+          </div>
+        </div>
+
         <div>
           <div className="flex items-center gap-2 mb-6">
             <div className="w-8 h-8 rounded-lg bg-[#1E56A0]/10 flex items-center justify-center">

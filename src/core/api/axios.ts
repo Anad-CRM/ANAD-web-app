@@ -1,9 +1,9 @@
 import axios from "axios";
 import { getToken, clearToken } from "@/core/utils/auth";
 
-// export const API_BASE_URL = "http://192.168.0.201:3000"; //Nibin
-// export const API_BASE_URL = "http://localhost:3000/";  //Local host
-export const API_BASE_URL = "https://api.anad.ae/";  //Live server
+// export const API_BASE_URL = "http://192.168.0.201:3000"; // Nibin
+export const API_BASE_URL = "http://localhost:3000/";  // Local host
+// export const API_BASE_URL = "https://api.anad.ae/";  // Live server
 
 
 export const api = axios.create({
@@ -13,13 +13,16 @@ export const api = axios.create({
   },
 });
 
+
 api.interceptors.request.use((config) => {
   const token = getToken();
+  // console.log("access token-----", token)
   if (token) {
     config.headers.accesstoken = token;
   }
   return config;
 });
+
 
 api.interceptors.response.use(
   (response) => response,

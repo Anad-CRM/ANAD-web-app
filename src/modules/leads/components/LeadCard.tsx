@@ -289,7 +289,7 @@ export function LeadCard({
           </div>
 
           {/* Right column */}
-          <div className="md:min-w-[160px] shrink-0 md:mt-8 md:ml-6 self-start">
+          <div className="md:min-w-[50px] shrink-0 md:mt-8 md:ml-1ss self-start">
             <div
               className="flex flex-col gap-2 pl-0 md:pl-4 md:border-l"
               style={{ borderColor: "rgba(255,255,255,0.15)" }}

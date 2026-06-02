@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, Edit2, Trash2, Globe, Flag, Megaphone } from 'lucide-react';
+import { Phone, Mail, Edit2, Trash2, Globe, Flag, Megaphone, UserPlus } from 'lucide-react';
 import { Whatsapp } from '@thesvg/react';
 import { useRouter } from 'next/navigation';
 import { Lead } from '@/modules/leads/types/lead.types';
@@ -17,6 +17,24 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   const { showLoader, hideLoader, showToast } = useFeedback();
   const [showWhatsApp, setShowWhatsApp] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const [isAssignModalOpen, setIsAssignModalOpen] = React.useState(false);
+  const [staffToAssign, setStaffToAssign] = React.useState("");
+  const [isAssigning, setIsAssigning] = React.useState(false);
+  const [staffMembers, setStaffMembers] = React.useState<{ id: string; userName: string }[]>([]);
+
+  React.useEffect(() => {
+    if (isAssignModalOpen && staffMembers.length === 0) {
+      leadsApi.fetchStaffMembers().then(staff => {
+        setStaffMembers(staff as { id: string; userName: string }[]);
+      });
+    }
+  }, [isAssignModalOpen, staffMembers.length]);
+
+  const userData = getUser<Record<string, string>>();
+  const role = userData?.role ?? "";
+  const canAssign = ["Admin", "Manager", "Team Leader"].includes(role);
+  const isClosed = lead.status === "Closed" || lead.status === "Enrolled";
 
   const leadName = lead.userName || 'Unknown';
 
@@ -70,6 +88,22 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
     setShowWhatsApp(true);
   };
 
+  const handleAssign = async () => {
+    if (!staffToAssign || !lead.id) return;
+    setIsAssigning(true);
+    try {
+      await leadsApi.assignLeads([lead.id], staffToAssign);
+      showToast("Lead assigned successfully", "success");
+      setIsAssignModalOpen(false);
+      onRefresh?.();
+    } catch (e) {
+      showToast("Failed to assign lead", "error");
+      console.error(e);
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (isDeleting) return;
     const shouldDeleteLead = window.confirm("Do you want to delete this lead?");
@@ -110,11 +144,12 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
           </div>
         </div>
 
-        <div className="grid grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap justify-start sm:justify-end gap-2 sm:flex-nowrap sm:items-center sm:gap-3 w-full sm:w-auto">
           {[
             { icon: <Phone className="w-4 h-4" />, label: "Call", color: COLORS.primaryDark, onClick: handleCall },
             { icon: <Whatsapp className="w-4 h-4" />, label: "WhatsApp", color: COLORS.primaryDark, onClick: handleWhatsapp },
             { icon: <Mail className="w-4 h-4" />, label: "Email", color: COLORS.primaryDark, onClick: handleEmail },
+            ...(canAssign && !isClosed ? [{ icon: <UserPlus className="w-4 h-4" />, label: "Assign", color: COLORS.primaryDark, onClick: () => setIsAssignModalOpen(true) }] : []),
             { icon: <Edit2 className="w-4 h-4" />, label: "Edit", color: COLORS.primaryDark, onClick: () => {} },
             { icon: <Trash2 className="w-4 h-4" />, label: isDeleting ? "Deleting" : "Delete", color: COLORS.primaryDark, onClick: handleDelete }
           ].map((action, i) => (
@@ -193,6 +228,51 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
             onRefresh?.();
           }}
         />
+      )}
+
+      {isAssignModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: "rgba(13,27,62,0.55)", backdropFilter: "blur(3px)" }}>
+          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-gray-100">
+              <Text as="h3" weight="bold" className="text-gray-900" style={{ fontSize: '16px' }}>Assign Lead</Text>
+              <Text className="text-gray-500 mt-1" style={{ fontSize: '13px' }}>
+                Select a staff member to assign this lead to.
+              </Text>
+            </div>
+            <div className="p-5">
+              <Text className="block font-semibold text-gray-700 mb-2" style={{ fontSize: '13px' }}>Staff Member</Text>
+              <select
+                value={staffToAssign}
+                onChange={(e) => setStaffToAssign(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-[14px] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#1C3A76]/20 focus:border-[#1C3A76] outline-none transition-all"
+              >
+                <option value="">Select a staff member</option>
+                {staffMembers.map(staff => (
+                  <option key={staff.id} value={staff.id}>{staff.userName}</option>
+                ))}
+              </select>
+            </div>
+            <div className="p-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
+              <button
+                onClick={() => setIsAssignModalOpen(false)}
+                className="px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-200 transition-colors"
+                disabled={isAssigning}
+              >
+                <Text weight="semibold" style={{ fontSize: '13px' }}>Cancel</Text>
+              </button>
+              <button
+                onClick={handleAssign}
+                disabled={!staffToAssign || isAssigning}
+                className="px-5 py-2.5 rounded-xl text-white transition-colors disabled:opacity-50 flex items-center gap-2"
+                style={{ backgroundColor: COLORS.primary }}
+              >
+                <Text weight="bold" style={{ fontSize: '13px' }}>
+                  {isAssigning ? "Assigning..." : "Confirm"}
+                </Text>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
