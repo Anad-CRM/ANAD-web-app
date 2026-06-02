@@ -179,8 +179,11 @@ export default function TeamsPage() {
             {teams.map((team, idx) => {
               const membersCount = team.users?.length || 0;
               const totalLeads = team.totalLeads ?? (team.users?.reduce((acc, user) => acc + (user.leadCounts?.totalLeads || 0), 0) || 0);
-              const performance = totalLeads > 0 ? 60 : 0; // Standardizing to match Figma mockup value
+              const closedLeads = team.users?.reduce((acc, user) => acc + (user.leadCounts?.closedCount || 0), 0) || 0;
+              const registeredLeads = team.users?.reduce((acc, user) => acc + (user.leadCounts?.registerCount || user.leadCounts?.registered || 0), 0) || 0;
+              console.log("registered leads-----", registeredLeads);
 
+              const performance = totalLeads > 0 ? Math.round(((closedLeads + registeredLeads) / totalLeads) * 100) : 0;
               return (
                 <div key={team.id || idx} className="bg-white rounded-[28px] p-6 shadow-[0_4px_24px_rgba(30,49,99,0.04)] hover:shadow-[0_12px_32px_rgba(30,49,99,0.08)] transition-all duration-500 flex flex-col group min-h-[200px]" style={{ border: `1px solid ${COLORS.primaryXlight}` }}>
                   <div className="flex items-start justify-between mb-6 gap-4">
