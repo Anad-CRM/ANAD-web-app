@@ -20,11 +20,11 @@ export default function TeamsPage() {
   const { teams, stats, isLoading, error, refetch } = useTeams();
   const { user } = useAuthContext();
   const { showToast } = useFeedback();
-  
+
   const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
   const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
-  
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  const [openMenuId, setOpenMenuId] = useState<string | number | null>(null);
   const [editingTeam, setEditingTeam] = useState<any>(null);
   const [confirm, setConfirm] = useState<{
     title: string;
@@ -35,7 +35,10 @@ export default function TeamsPage() {
   const isAdminOrManager = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "superadmin" || user?.role?.toLowerCase() === "manager";
 
   useEffect(() => {
-    const handleOutsideClick = () => setOpenMenuId(null);
+    const handleOutsideClick = (e: MouseEvent) => {
+      if ((e.target as Element)?.closest?.('.team-actions-dropdown')) return;
+      setOpenMenuId(null);
+    };
     document.addEventListener("click", handleOutsideClick);
     return () => document.removeEventListener("click", handleOutsideClick);
   }, []);
@@ -109,7 +112,7 @@ export default function TeamsPage() {
     <div className="flex min-w-0 flex-col gap-6 min-h-screen pb-20 animate-in fade-in duration-700">
       {/* Header Buttons area */}
       <div className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 mb-2 w-full">
-        <button 
+        <button
           onClick={() => setIsCreateTeamOpen(true)}
           className="flex items-center justify-center sm:justify-start gap-2.5 h-10 w-full sm:w-auto px-5 bg-white/80 rounded-[12px] hover:bg-white shadow-sm transition-all active:scale-95 group font-medium"
           style={{ border: `1px solid ${COLORS.border}` }}
@@ -117,7 +120,7 @@ export default function TeamsPage() {
           <Plus size={18} className="transition-transform duration-300 group-hover:rotate-90" style={{ color: COLORS.subtle }} />
           <Text weight="bold" size="xs">Create Team</Text>
         </button>
-        <button 
+        <button
           onClick={() => setIsInviteMemberOpen(true)}
           className="flex items-center justify-center sm:justify-start gap-2.5 h-10 w-full sm:w-auto px-5 bg-white/80 rounded-[12px] hover:bg-white shadow-sm transition-all active:scale-95 group font-medium"
           style={{ border: `1px solid ${COLORS.border}` }}
@@ -131,7 +134,7 @@ export default function TeamsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mb-6">
         {TEAM_STATS.map((stat, idx) => (
           <div key={idx} className="bg-white rounded-[24px] p-4 flex items-center gap-5 shadow-sm" style={{ border: `1px solid ${COLORS.primaryXlight}` }}>
-            <div 
+            <div
               className="w-14 h-14 rounded-[12px] flex items-center justify-center text-white flex-shrink-0"
               style={{ backgroundColor: COLORS.primaryDark }}
             >
@@ -147,7 +150,7 @@ export default function TeamsPage() {
       {/* Main Content Area */}
       <div className="space-y-6">
         <Text weight="bold" className="ml-1" style={{ color: COLORS.text }}>All Teams</Text>
-        
+
         {isLoading ? (
           <div className="w-full h-[40vh] flex flex-col items-center justify-center gap-4">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2" style={{ borderColor: COLORS.primaryDark }}></div>
@@ -163,7 +166,7 @@ export default function TeamsPage() {
             <Users size={48} className="mx-auto mb-4" style={{ color: COLORS.subtle }} />
             <Text weight="bold" size="lg" className="block mb-2" style={{ color: COLORS.text }}>No Teams Yet</Text>
             <Text className="max-w-xs mx-auto block mb-6" style={{ color: COLORS.muted }}>Teams help you organize staff and track collective lead performance.</Text>
-            <button 
+            <button
               onClick={() => setIsCreateTeamOpen(true)}
               className="px-8 py-2.5 rounded-full font-bold shadow-lg text-white"
               style={{ backgroundColor: COLORS.primaryDark }}
@@ -190,27 +193,28 @@ export default function TeamsPage() {
                           {team.name}
                         </Text>
                         <div className="flex items-center gap-2 mt-1">
-                           <div className={`w-2 h-2 rounded-full ${team.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                           <Text size="xs" className="capitalize" style={{ color: COLORS.muted }}>{team.status || 'Active'}</Text>
+                          <div className={`w-2 h-2 rounded-full ${team.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                          <Text size="xs" className="capitalize" style={{ color: COLORS.muted }}>{team.status || 'Active'}</Text>
                         </div>
                       </div>
                     </div>
                     {isAdminOrManager && (
-                      <div className="relative" onClick={(e) => e.stopPropagation()}>
-                        <button 
+                      <div className="relative team-actions-dropdown">
+                        <button
                           onClick={(e) => {
-
-                            console.log("team", team);
-                             e.stopPropagation();
-                             setOpenMenuId(openMenuId === (team.id || (team as any)._id) ? null : (team.id || (team as any)._id));
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.nativeEvent.stopImmediatePropagation();
+                            const currentMenuId = team.id || (team as any)._id || idx;
+                            setOpenMenuId((prev) => prev === currentMenuId ? null : currentMenuId);
                           }}
                           className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-500"
                         >
-                          <MoreVertical size={20} />
+                          <MoreVertical size={20} className="pointer-events-none" />
                         </button>
-                        
-                        {openMenuId === (team.id || (team as any)._id) && (
-                          <div className="absolute top-10 right-0 w-40 bg-white rounded-xl shadow-lg border py-2 z-10" style={{ borderColor: COLORS.primaryXlight }}>
+
+                        {openMenuId === (team.id || (team as any)._id || idx) && (
+                          <div className="absolute top-10 right-0 w-40 bg-white rounded-xl shadow-lg border py-2 z-[100]" style={{ borderColor: COLORS.primaryXlight }}>
                             <button onClick={(e) => handleAction(e, "Edit", team)} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm font-medium text-slate-700">Edit</button>
                             {team.status === 'active' ? (
                               <button onClick={(e) => handleAction(e, "Deactivate", team)} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm font-medium text-amber-600">Deactivate</button>
@@ -232,8 +236,8 @@ export default function TeamsPage() {
                     <div className="bg-slate-50 rounded-[16px] p-4 flex flex-col gap-1 transition-colors group-hover:bg-blue-50/30" style={{ border: `1px solid ${COLORS.primaryXlight}` }}>
                       <Text size="xs" weight="medium" style={{ color: COLORS.muted }}>Team Leader</Text>
                       <Text size="sm" weight="bold" className="line-clamp-1" style={{ color: COLORS.text }}>
-                        {team.teamLeaders && team.teamLeaders.length > 0 
-                          ? team.teamLeaders.map(l => l.userName).join(', ') 
+                        {team.teamLeaders && team.teamLeaders.length > 0
+                          ? team.teamLeaders.map(l => l.userName).join(', ')
                           : 'Unassigned'}
                       </Text>
                     </div>
@@ -246,13 +250,13 @@ export default function TeamsPage() {
                     </div>
                     <div className="w-[1px] h-8" style={{ backgroundColor: COLORS.border }}></div>
                     <div className="flex flex-col gap-1 items-center">
-                       <Text size="xs" weight="medium" style={{ color: COLORS.muted }}>Leads</Text>
-                       <Text weight="bold" size="lg" style={{ color: COLORS.primaryDark }}>{totalLeads}</Text>
+                      <Text size="xs" weight="medium" style={{ color: COLORS.muted }}>Leads</Text>
+                      <Text weight="bold" size="lg" style={{ color: COLORS.primaryDark }}>{totalLeads}</Text>
                     </div>
                     <div className="w-[1px] h-8" style={{ backgroundColor: COLORS.border }}></div>
                     <div className="flex flex-col gap-1 items-end">
-                       <Text size="xs" weight="medium" style={{ color: COLORS.muted }}>Performance</Text>
-                       <Text weight="bold" size="lg" className="text-emerald-600">{performance}%</Text>
+                      <Text size="xs" weight="medium" style={{ color: COLORS.muted }}>Performance</Text>
+                      <Text weight="bold" size="lg" className="text-emerald-600">{performance}%</Text>
                     </div>
                   </div>
 
@@ -285,9 +289,9 @@ export default function TeamsPage() {
         senderName={user?.userName || ""}
         senderAvatar={user?.avatar || ""}
         teams={teams}
-        onSuccess={() => {}}
+        onSuccess={() => { }}
       />
-      
+
       <EditTeamModal
         isOpen={!!editingTeam}
         onClose={() => setEditingTeam(null)}
