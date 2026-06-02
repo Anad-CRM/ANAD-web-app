@@ -20,7 +20,7 @@ export default function TeamsPage() {
   const { teams, stats, isLoading, error, refetch } = useTeams();
   const { user } = useAuthContext();
   const { showToast } = useFeedback();
-
+  
   const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
   const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
 
