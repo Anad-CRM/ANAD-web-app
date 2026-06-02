@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useTeams } from "@/modules/teams/hooks/useTeams";
@@ -8,14 +9,95 @@ import { InviteMemberModal } from "@/modules/teams/components/InviteMemberModal"
 import { useAuthContext } from "@/modules/auth/stores/AuthContext";
 import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
-import { Plus, UserPlus, Users, ArrowRight, ShieldCheck } from "lucide-react";
+import { Plus, UserPlus, Users, ArrowRight, ShieldCheck, MoreVertical } from "lucide-react";
+import { EditTeamModal } from "@/modules/teams/components/EditTeamModal";
+import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
+import { useFeedback } from "@/core/contexts/FeedbackContext";
+import { TeamsService } from "@/modules/teams/services/teams.service";
+import { useEffect } from "react";
 
 export default function TeamsPage() {
   const { teams, stats, isLoading, error, refetch } = useTeams();
   const { user } = useAuthContext();
+  const { showToast } = useFeedback();
   
   const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
   const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
+  
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [editingTeam, setEditingTeam] = useState<any>(null);
+  const [confirm, setConfirm] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+
+  const isAdminOrManager = user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "superadmin" || user?.role?.toLowerCase() === "manager";
+
+  useEffect(() => {
+    const handleOutsideClick = () => setOpenMenuId(null);
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  const handleAction = (e: React.MouseEvent, action: string, team: any) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+
+    const teamId = team.id || team._id;
+
+    if (action === "Edit") {
+      setEditingTeam(team);
+    } else if (action === "Activate") {
+      setConfirm({
+        title: "Activate Team",
+        message: "Are you sure you want to activate this team?",
+        onConfirm: async () => {
+          setConfirm(null);
+          try {
+            await TeamsService.activateTeam({ teamId });
+            showToast("Team activated successfully", "success");
+            refetch?.();
+          } catch (e) {
+            console.error(e);
+            showToast("Failed to activate team", "error");
+          }
+        },
+      });
+    } else if (action === "Deactivate") {
+      setConfirm({
+        title: "Deactivate Team",
+        message: "Are you sure you want to deactivate this team?",
+        onConfirm: async () => {
+          setConfirm(null);
+          try {
+            await TeamsService.deactivateTeam({ teamId });
+            showToast("Team deactivated successfully", "success");
+            refetch?.();
+          } catch (e) {
+            console.error(e);
+            showToast("Failed to deactivate team", "error");
+          }
+        },
+      });
+    } else if (action === "Delete") {
+      setConfirm({
+        title: "Delete Team",
+        message: "Are you sure you want to delete this team?",
+        onConfirm: async () => {
+          setConfirm(null);
+          try {
+            await TeamsService.deleteTeam({ teamId });
+            showToast("Team deleted successfully", "success");
+            refetch?.();
+          } catch (e) {
+            console.error(e);
+            showToast("Failed to delete team", "error");
+          }
+        },
+      });
+    }
+  };
 
   const TEAM_STATS = [
     { label: `${stats.totalTeams} Teams`, icon: <Users size={24} /> },
@@ -113,6 +195,33 @@ export default function TeamsPage() {
                         </div>
                       </div>
                     </div>
+                    {isAdminOrManager && (
+                      <div className="relative" onClick={(e) => e.stopPropagation()}>
+                        <button 
+                          onClick={(e) => {
+
+                            console.log("team", team);
+                             e.stopPropagation();
+                             setOpenMenuId(openMenuId === (team.id || (team as any)._id) ? null : (team.id || (team as any)._id));
+                          }}
+                          className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-500"
+                        >
+                          <MoreVertical size={20} />
+                        </button>
+                        
+                        {openMenuId === (team.id || (team as any)._id) && (
+                          <div className="absolute top-10 right-0 w-40 bg-white rounded-xl shadow-lg border py-2 z-10" style={{ borderColor: COLORS.primaryXlight }}>
+                            <button onClick={(e) => handleAction(e, "Edit", team)} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm font-medium text-slate-700">Edit</button>
+                            {team.status === 'active' ? (
+                              <button onClick={(e) => handleAction(e, "Deactivate", team)} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm font-medium text-amber-600">Deactivate</button>
+                            ) : (
+                              <button onClick={(e) => handleAction(e, "Activate", team)} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm font-medium text-emerald-600">Activate</button>
+                            )}
+                            <button onClick={(e) => handleAction(e, "Delete", team)} className="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm font-medium text-red-600">Delete</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-6">
@@ -178,6 +287,23 @@ export default function TeamsPage() {
         teams={teams}
         onSuccess={() => {}}
       />
+      
+      <EditTeamModal
+        isOpen={!!editingTeam}
+        onClose={() => setEditingTeam(null)}
+        organizationId={user?.organizationId || user?.organization?.id || ""}
+        onSuccess={() => refetch?.()}
+        team={editingTeam}
+      />
+
+      {confirm && (
+        <ConfirmDialog
+          title={confirm.title}
+          message={confirm.message}
+          onConfirm={confirm.onConfirm}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
     </div>
   );
 }
