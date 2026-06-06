@@ -89,6 +89,7 @@ interface MessageThreadProps {
 
 function formatDateSeparator(dateStr: string): string {
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "Unknown Date";
   if (isToday(date)) return "Today";
   if (isYesterday(date)) return "Yesterday";
   return format(date, "MMMM d, yyyy");
@@ -194,7 +195,7 @@ export function MessageThread({
         .order("full_name");
       if (cancelled) return;
       if (error) {
-        console.error("Failed to fetch profiles:", error);
+        console.error("Failed to fetch profiles");
         return;
       }
       setProfiles((data as Profile[]) ?? []);
@@ -269,7 +270,7 @@ export function MessageThread({
       if (cancelled) return;
 
       if (error) {
-        console.error("Failed to fetch messages:", error);
+        console.error("Failed to fetch messages");
       } else {
         onMessagesLoadedRef.current(data ?? []);
       }
@@ -305,7 +306,7 @@ export function MessageThread({
         .eq("conversation_id", conversationId);
       if (cancelled) return;
       if (error) {
-        console.error("Failed to fetch reactions:", error);
+        console.error("Failed to fetch reactions");
         return;
       }
       setReactions((data as MessageReaction[]) ?? []);
