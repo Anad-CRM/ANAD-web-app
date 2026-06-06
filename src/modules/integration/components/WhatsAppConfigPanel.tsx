@@ -23,21 +23,23 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
   const { user } = useAuthContext();
   const isConnected = user?.isWhatsAppConnected === "Connected";
   const [token, setToken] = useState("");
+  const [phoneNumberId, setPhoneNumberId] = useState("");
+  const [wabaId, setWabaId] = useState("");
   const [loading, setLoading] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const { showToast } = useFeedback();
 
   const handleConnect = async () => {
-    if (!token) {
-      showToast("Please enter a valid access token", "error");
+    if (!token || !phoneNumberId || !wabaId) {
+      showToast("Please enter all required API credentials", "error");
       return;
     }
     setLoading(true);
     try {
       await connectWhatsAppIntegration({
-        whatsappBusinessAccountId: "pending",
-        phoneNumberId: "pending",
-        displayPhoneNumber: "pending",
+        whatsappBusinessAccountId: wabaId,
+        phoneNumberId: phoneNumberId,
+        displayPhoneNumber: phoneNumberId, // defaults to phone number ID since we fetch actual one on backend
         accessToken: token,
       });
       showToast("WhatsApp integrated successfully", "success");
@@ -97,40 +99,71 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
       </div>
 
       <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 lg:px-5 lg:py-4">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 mb-4">
           <Key className="h-5 w-5 text-[#0D1B3E]" strokeWidth={2.5} />
-          <Text as="h3" weight="bold" className="text-[#0D1B3E]" style={{ fontSize: '16px' }}>Access Token</Text>
+          <Text as="h3" weight="bold" className="text-[#0D1B3E]" style={{ fontSize: '16px' }}>API Credentials</Text>
         </div>
 
-        <div className="mt-3 rounded-[16px] bg-white px-4 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent focus-within:border-gray-200 transition-all">
-          <div className="flex items-center gap-1">
-            <input
-              type={showToken ? "text" : "password"}
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="paste your permanent access token"
-              className="min-w-0 flex-1 bg-transparent px-1 py-2 text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none"
-            />
-            <button 
-              type="button" 
-              onClick={() => setShowToken(!showToken)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black" 
-              aria-label={showToken ? "Hide token" : "Show token"}
-            >
-              {showToken ? <EyeOff className="h-4 w-4" strokeWidth={2.5} /> : <Eye className="h-4 w-4" strokeWidth={2.5} />}
-            </button>
-            <button 
-              type="button" 
-              onClick={copyToClipboard}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black" 
-              aria-label="Copy token"
-            >
-              <ClipboardList className="h-4 w-4" strokeWidth={2.5} />
-            </button>
+        <div className="space-y-4">
+          <div>
+            <Text size="xs" weight="semibold" className="text-[#0D1B3E] mb-1.5 ml-1">Phone Number ID</Text>
+            <div className="rounded-[16px] bg-white px-4 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent focus-within:border-gray-200 transition-all">
+              <input
+                type="text"
+                value={phoneNumberId}
+                onChange={(e) => setPhoneNumberId(e.target.value)}
+                placeholder="e.g. 100234567890123"
+                className="w-full bg-transparent px-1 py-2 text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Text size="xs" weight="semibold" className="text-[#0D1B3E] mb-1.5 ml-1">WhatsApp Business Account ID</Text>
+            <div className="rounded-[16px] bg-white px-4 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent focus-within:border-gray-200 transition-all">
+              <input
+                type="text"
+                value={wabaId}
+                onChange={(e) => setWabaId(e.target.value)}
+                placeholder="e.g. 100234567890456"
+                className="w-full bg-transparent px-1 py-2 text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Text size="xs" weight="semibold" className="text-[#0D1B3E] mb-1.5 ml-1">Permanent Access Token</Text>
+            <div className="rounded-[16px] bg-white px-4 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.06)] border border-transparent focus-within:border-gray-200 transition-all">
+              <div className="flex items-center gap-1">
+                <input
+                  type={showToken ? "text" : "password"}
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  placeholder="paste your permanent access token"
+                  className="min-w-0 flex-1 bg-transparent px-1 py-2 text-[14px] text-[#374151] placeholder:text-[#6B7280] focus:outline-none"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowToken(!showToken)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black" 
+                  aria-label={showToken ? "Hide token" : "Show token"}
+                >
+                  {showToken ? <EyeOff className="h-4 w-4" strokeWidth={2.5} /> : <Eye className="h-4 w-4" strokeWidth={2.5} />}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={copyToClipboard}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black" 
+                  aria-label="Copy token"
+                >
+                  <ClipboardList className="h-4 w-4" strokeWidth={2.5} />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-6">
           {isConnected ? (
             <Button 
               variant="primary"
