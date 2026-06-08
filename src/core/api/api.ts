@@ -87,6 +87,22 @@ export const API_ENDPOINTS = {
     DELETE_GOOGLE: "/ad/disconnectGoogleAds",
     GENERATE_KEY: "/leads/generateKey",
     DISCONNECT_KEY: "/leads/disconnectSecretKey",
+    // Embedded Signup
+    WHATSAPP_EMBEDDED_CALLBACK: "/whatsapp/embedded-signup/callback",
+    WHATSAPP_ACCOUNTS: "/whatsapp/embedded-signup/accounts",
+    WHATSAPP_DISCONNECT: (phoneNumberId: string) => `/whatsapp/embedded-signup/disconnect/${phoneNumberId}`,
+  },
+  WHATSAPP: {
+    SEND: "/whatsapp/send",
+    REACT: "/whatsapp/react",
+    CONVERSATIONS: "/whatsapp/conversations",
+    MESSAGES: (waId: string) => `/whatsapp/messages/${encodeURIComponent(waId)}`,
+    CONFIG: "/whatsapp/config",
+    TEMPLATES: "/whatsapp/broadcast/templates",
+    BROADCAST_CREATE: "/whatsapp/broadcast/create",
+    BROADCAST_SEND: (id: string) => `/whatsapp/broadcast/send/${id}`,
+    BROADCAST_HISTORY: "/whatsapp/broadcast/history",
+    BROADCAST_RECIPIENTS: (id: string) => `/whatsapp/broadcast/${id}/recipients`,
   },
   CREATE_LEADS: {
     SINGLE: "/lead/createLead",

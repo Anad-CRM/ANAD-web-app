@@ -29,6 +29,30 @@ export const connectWhatsAppIntegration = async (data: WhatsAppIntegrationPayloa
   return api.post(API_ENDPOINTS.INTEGRATION.CREATE_WHATSAPP, payload);
 };
 
+/**
+ * Handle Embedded Signup OAuth callback:
+ * Sends the code returned by Meta's JS SDK to the backend
+ * which exchanges it for a token and provisions the WABA.
+ */
+export const handleEmbeddedSignupCallback = async (code: string) => {
+  return api.post(API_ENDPOINTS.INTEGRATION.WHATSAPP_EMBEDDED_CALLBACK, { code });
+};
+
+/**
+ * Fetch all connected WhatsApp accounts for the current organization.
+ */
+export const getConnectedWhatsAppAccounts = async () => {
+  return api.get(API_ENDPOINTS.INTEGRATION.WHATSAPP_ACCOUNTS);
+};
+
+/**
+ * Disconnect a specific WhatsApp phone number.
+ */
+export const disconnectWhatsAppAccount = async (phoneNumberId: string) => {
+  return api.delete(API_ENDPOINTS.INTEGRATION.WHATSAPP_DISCONNECT(phoneNumberId));
+};
+
+
 export const disconnectWhatsAppIntegration = async () => {
   const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
   if (!user || !user.organizationId) {
