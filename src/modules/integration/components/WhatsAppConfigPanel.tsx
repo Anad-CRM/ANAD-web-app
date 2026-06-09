@@ -114,28 +114,30 @@ export const WhatsAppConfigPanel: React.FC<Props> = ({ activeIndex, total }) => 
     setLoading(true);
 
     window.FB.login(
-      async (response: FBLoginResponse) => {
-        if (!response.authResponse?.code) {
-          setLoading(false);
-          showToast('WhatsApp authorization was cancelled or failed.', 'error');
-          return;
-        }
+      (response: FBLoginResponse) => {
+        (async () => {
+          if (!response.authResponse?.code) {
+            setLoading(false);
+            showToast('WhatsApp authorization was cancelled or failed.', 'error');
+            return;
+          }
 
-        try {
-          const result = await handleEmbeddedSignupCallback(response.authResponse.code);
-          const connected: ConnectedAccount[] = result.data?.data || [];
-          setAccounts(prev => {
-            const existing = prev.filter(a => !connected.some(c => c.phoneNumberId === a.phoneNumberId));
-            return [...existing, ...connected];
-          });
-          showToast(`✅ ${connected.length} WhatsApp account(s) connected successfully!`, 'success');
-        } catch (err) {
-          const e = err as { response?: { data?: { error?: string } } };
-          const msg = e?.response?.data?.error || 'Failed to complete WhatsApp setup.';
-          showToast(msg, 'error');
-        } finally {
-          setLoading(false);
-        }
+          try {
+            const result = await handleEmbeddedSignupCallback(response.authResponse.code);
+            const connected: ConnectedAccount[] = result.data?.data || [];
+            setAccounts(prev => {
+              const existing = prev.filter(a => !connected.some(c => c.phoneNumberId === a.phoneNumberId));
+              return [...existing, ...connected];
+            });
+            showToast(`✅ ${connected.length} WhatsApp account(s) connected successfully!`, 'success');
+          } catch (err) {
+            const e = err as { response?: { data?: { error?: string } } };
+            const msg = e?.response?.data?.error || 'Failed to complete WhatsApp setup.';
+            showToast(msg, 'error');
+          } finally {
+            setLoading(false);
+          }
+        })();
       },
       {
         config_id: META_CONFIG_ID,
