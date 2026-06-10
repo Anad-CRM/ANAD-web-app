@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, KeyboardEvent } from "react";
+import { useState, useRef, useCallback, useEffect, KeyboardEvent } from "react";
 import { Send, LayoutTemplate } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "../lib/utils";
@@ -20,19 +20,43 @@ interface MessageComposerProps {
   onOpenTemplates: () => void;
   replyTo?: ReplyDraft | null;
   onClearReply?: () => void;
+  /** Pre-fills the textarea with this text (e.g. after selecting a template). */
+  prefillText?: string;
+  /** Called once the prefill has been consumed so the parent can clear its state. */
+  onPrefillConsumed?: () => void;
 }
 
 export function MessageComposer({
-  conversationId,
+  // conversationId is accepted but unused in this component
   sessionExpired,
   onSend,
   onOpenTemplates,
   replyTo,
   onClearReply,
+  prefillText,
+  onPrefillConsumed,
 }: MessageComposerProps) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Sync prefill text from parent (e.g. template selection) into local state.
+  // The empty-string guard prevents clearing an already-typed message.
+  useEffect(() => {
+    if (!prefillText) return;
+    setText(prefillText);
+    onPrefillConsumed?.();
+    // Let the DOM settle before focusing so height adjustment is correct.
+    requestAnimationFrame(() => {
+      const el = textareaRef.current;
+      if (!el) return;
+      el.style.height = "auto";
+      el.style.height = `${Math.min(el.scrollHeight, 96)}px`;
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillText]);
   // Viewers (read-only role) can browse the inbox but never send.
   // For solo users this is always true — single-owner accounts pass
   // every capability — so the disabled branch is a no-op there.

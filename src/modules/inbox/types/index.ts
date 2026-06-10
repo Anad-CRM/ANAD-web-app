@@ -70,6 +70,15 @@ export type MessageTemplate = {
   buttons?: Record<string, unknown>[];
 };
 
+/** ANAD backend quick-reply template — a saved text snippet (title + message). */
+export type AnadMessageTemplate = {
+  id: number;
+  title: string;
+  message: string;
+  userId: number;
+  createdAt: string;
+};
+
 export type DealStage = {
   id: string;
   name: string;

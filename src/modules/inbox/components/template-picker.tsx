@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { createClient } from "../lib/utils";
-import type { MessageTemplate } from "../types";
+import { useEffect, useState, useCallback } from "react";
+import { api } from "@/core/api/axios";
+import type { AnadMessageTemplate } from "../types";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -14,327 +14,215 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Badge } from "./ui/badge";
-import {
-  ArrowLeft,
-  ChevronRight,
-  LayoutTemplate,
-  Loader2,
-} from "lucide-react";
-import { extractVariableIndices } from "../lib/whatsapp-template-validators";
-
-export interface TemplateSendValues {
-  body: string[];
-  headerText?: string;
-  buttonParams?: Record<number, string>;
-}
+import { LayoutTemplate, Loader2, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface TemplatePickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (template: MessageTemplate, values: TemplateSendValues) => void;
+  /** Called with the template's message text so the composer can be pre-filled. */
+  onSelect: (text: string) => void;
 }
 
-function renderBodyPreview(body: string, params: string[]): string {
-  return body.replace(/\{\{(\d+)\}\}/g, (_, raw) => {
-    const idx = Number(raw) - 1;
-    const value = params[idx];
-    return value && value.trim().length > 0 ? value : `{{${raw}}}`;
-  });
-}
-
-interface UrlButtonSlot {
-  index: number;
-  text: string;
-  url: string;
-}
-
-/**
- * Templates may need values for: body variables, a text-header
- * variable, and per-URL-button suffixes. Collect them all so the
- * send-message path doesn't 400 on missing parameters.
- */
-function collectVariableSlots(template: MessageTemplate): {
-  bodyVars: number[];
-  headerVarCount: number;
-  urlButtonSlots: UrlButtonSlot[];
-} {
-  const bodyVars = extractVariableIndices(template.body_text ?? "");
-  const headerVarCount =
-    template.header_type === "text" && template.header_content
-      ? extractVariableIndices(template.header_content).length
-      : 0;
-  const urlButtonSlots: UrlButtonSlot[] = [];
-  (template.buttons ?? []).forEach((b: Record<string, unknown>, i) => {
-    if (b.type === "URL" && typeof b.url === "string" && extractVariableIndices(b.url).length > 0) {
-      urlButtonSlots.push({ index: i, text: b.text as string, url: b.url });
-    }
-  });
-  return { bodyVars, headerVarCount, urlButtonSlots };
-}
-
-export function TemplatePicker({
-  open,
-  onOpenChange,
-  onSelect,
-}: TemplatePickerProps) {
-  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
+export function TemplatePicker({ open, onOpenChange, onSelect }: TemplatePickerProps) {
+  const [templates, setTemplates] = useState<AnadMessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<MessageTemplate | null>(null);
-  const [params, setParams] = useState<string[]>([]);
-  const [headerText, setHeaderText] = useState<string>("");
-  const [buttonParams, setButtonParams] = useState<Record<number, string>>({});
+  const [showCreate, setShowCreate] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const fetchTemplates = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get("/whatsapp/getTemplateMessage");
+      if (data.success) {
+        setTemplates(data.data ?? []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch templates:", err);
+      toast.error("Failed to load templates");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!open) return;
+    setShowCreate(false);
+    fetchTemplates();
+  }, [open, fetchTemplates]);
 
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        if (!cancelled) {
-          setTemplates([]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("message_templates")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("status", "APPROVED")
-        .order("created_at", { ascending: false });
-
-      if (cancelled) return;
-      if (error) {
-        console.error("Failed to fetch templates:", error);
-        setTemplates([]);
-      } else {
-        setTemplates((data as MessageTemplate[]) ?? []);
-      }
-      setLoading(false);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [open]);
-
-  function resetSelection() {
-    setSelected(null);
-    setParams([]);
-    setHeaderText("");
-    setButtonParams({});
-  }
-
-  function handleOpenChange(next: boolean) {
-    if (!next) resetSelection();
-    onOpenChange(next);
-  }
-
-  function pickTemplate(template: MessageTemplate) {
-    const slots = collectVariableSlots(template);
-    const noInputsNeeded =
-      slots.bodyVars.length === 0 &&
-      slots.headerVarCount === 0 &&
-      slots.urlButtonSlots.length === 0;
-    if (noInputsNeeded) {
-      onSelect(template, { body: [] });
-      handleOpenChange(false);
-      return;
+  const handleCreate = async () => {
+    if (!newTitle.trim() || !newMessage.trim()) return;
+    setCreating(true);
+    try {
+      await api.post("/whatsapp/createMessageTemplate", {
+        title: newTitle.trim(),
+        message: newMessage.trim(),
+      });
+      toast.success("Template created");
+      setNewTitle("");
+      setNewMessage("");
+      setShowCreate(false);
+      await fetchTemplates();
+    } catch (err) {
+      console.error("Failed to create template:", err);
+      toast.error("Failed to create template");
+    } finally {
+      setCreating(false);
     }
-    setSelected(template);
-    setParams(new Array(slots.bodyVars.length).fill(""));
-    setHeaderText("");
-    setButtonParams({});
-  }
+  };
 
-  function confirm() {
-    if (!selected) return;
-    const values: TemplateSendValues = { body: params };
-    if (headerText.trim()) values.headerText = headerText.trim();
-    if (Object.keys(buttonParams).length > 0) {
-      values.buttonParams = Object.fromEntries(
-        Object.entries(buttonParams).map(([k, v]) => [Number(k), v.trim()]),
-      );
+  const handleDelete = async (id: number) => {
+    setDeletingId(id);
+    try {
+      await api.delete(`/whatsapp/deleteTemplateMessage/${id}`);
+      setTemplates((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Template deleted");
+    } catch (err) {
+      console.error("Failed to delete template:", err);
+      toast.error("Failed to delete template");
+    } finally {
+      setDeletingId(null);
     }
-    onSelect(selected, values);
-    handleOpenChange(false);
-  }
+  };
 
-  const slots = useMemo(
-    () => (selected ? collectVariableSlots(selected) : null),
-    [selected],
-  );
-  const canConfirm =
-    !!selected &&
-    !!slots &&
-    slots.bodyVars.every((_, i) => (params[i] ?? "").trim().length > 0) &&
-    (slots.headerVarCount === 0 || headerText.trim().length > 0) &&
-    slots.urlButtonSlots.every(
-      (s) => (buttonParams[s.index] ?? "").trim().length > 0,
-    );
+  const handleSelect = (template: AnadMessageTemplate) => {
+    onSelect(template.message);
+    onOpenChange(false);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-slate-700 bg-slate-900 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
             <LayoutTemplate className="h-4 w-4 text-primary" />
-            {selected ? selected.name : "Send template"}
+            {showCreate ? "New Template" : "Message Templates"}
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            {selected
-              ? "Fill in the placeholders to render this template. Meta requires every variable to be set."
-              : "Pick an approved WhatsApp template to send to this contact."}
+            {showCreate
+              ? "Save a new quick-reply template for reuse."
+              : "Click a template to pre-fill your message, or create a new one."}
           </DialogDescription>
         </DialogHeader>
 
-        {!selected ? (
-          <div className="max-h-[60vh] space-y-2 overflow-y-auto">
+        {showCreate ? (
+          /* ── Create form ── */
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-slate-300">Title</Label>
+              <Input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="e.g. Follow-up greeting"
+                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-slate-300">Message</Label>
+              <textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type the template message text…"
+                rows={5}
+                className="w-full resize-none rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none transition-colors focus:border-primary/50"
+              />
+            </div>
+          </div>
+        ) : (
+          /* ── Templates list ── */
+          <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
               </div>
             ) : templates.length === 0 ? (
               <div className="rounded-md border border-slate-800 bg-slate-950/50 p-6 text-center">
-                <p className="text-sm text-slate-300">No approved templates</p>
+                <p className="text-sm text-slate-300">No templates yet</p>
                 <p className="mt-1 text-xs text-slate-500">
-                  Approve a template in Meta WhatsApp Manager, then sync it
-                  from Settings → Templates.
+                  Create a template to save commonly used messages for quick re-use.
                 </p>
               </div>
             ) : (
               templates.map((t) => (
-                <button
+                <div
                   key={t.id}
-                  type="button"
-                  onClick={() => pickTemplate(t)}
-                  className="w-full rounded-md border border-slate-800 bg-slate-950/50 p-3 text-left transition-colors hover:border-primary/40 hover:bg-slate-900"
+                  className="group flex items-start gap-2 rounded-md border border-slate-800 bg-slate-950/50 p-3 transition-colors hover:border-primary/40 hover:bg-slate-900"
                 >
-                  <div className="flex items-start gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-sm font-medium text-white">
-                          {t.name}
-                        </p>
-                        <Badge className="border border-primary/30 bg-primary/20 text-[10px] text-primary">
-                          {t.category}
-                        </Badge>
-                        {t.language && (
-                          <span className="text-[10px] uppercase text-slate-500">
-                            {t.language}
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-1 line-clamp-2 text-xs text-slate-400">
-                        {t.body_text}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-500" />
-                  </div>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(t)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <p className="truncate text-sm font-medium text-white">{t.title}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-slate-400">{t.message}</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(t.id)}
+                    disabled={deletingId === t.id}
+                    aria-label="Delete template"
+                    className="shrink-0 rounded p-1 text-slate-600 transition-colors hover:text-red-400 disabled:opacity-50"
+                  >
+                    {deletingId === t.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </div>
               ))
             )}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="rounded-md border border-slate-800 bg-slate-950/50 p-3">
-              <p className="mb-1 text-xs text-slate-400">Preview</p>
-              <p className="whitespace-pre-wrap text-sm text-slate-200">
-                {renderBodyPreview(selected.body_text ?? "", params)}
-              </p>
-              {selected.footer_text && (
-                <p className="mt-2 text-xs italic text-slate-500">
-                  {selected.footer_text}
-                </p>
-              )}
-            </div>
-            {slots && slots.headerVarCount > 0 && (
-              <div className="space-y-1">
-                <Label className="text-xs text-slate-300">
-                  {`Header {{1}}`}
-                </Label>
-                <Input
-                  value={headerText}
-                  onChange={(e) => setHeaderText(e.target.value)}
-                  placeholder="Value for the header variable"
-                  className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500"
-                />
-              </div>
-            )}
-            {slots?.bodyVars.map((v, i) => (
-              <div key={v} className="space-y-1">
-                <Label className="text-xs text-slate-300">{`Body {{${v}}}`}</Label>
-                <Input
-                  value={params[i] ?? ""}
-                  onChange={(e) => {
-                    const next = [...params];
-                    next[i] = e.target.value;
-                    setParams(next);
-                  }}
-                  placeholder={`Value for {{${v}}}`}
-                  className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500"
-                />
-              </div>
-            ))}
-            {slots?.urlButtonSlots.map((slot) => (
-              <div key={slot.index} className="space-y-1">
-                <Label className="text-xs text-slate-300">
-                  {`URL button "${slot.text}" — value for `}{`{{1}}`}
-                </Label>
-                <Input
-                  value={buttonParams[slot.index] ?? ""}
-                  onChange={(e) =>
-                    setButtonParams((prev) => ({
-                      ...prev,
-                      [slot.index]: e.target.value,
-                    }))
-                  }
-                  placeholder="URL suffix value"
-                  className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500"
-                />
-                <p className="text-[10px] text-slate-500 break-all">
-                  Final URL: {slot.url.replace(/\{\{1\}\}/g, buttonParams[slot.index] || "{{1}}")}
-                </p>
-              </div>
-            ))}
           </div>
         )}
 
         <DialogFooter className="gap-2">
-          {selected ? (
+          {showCreate ? (
             <>
               <Button
                 variant="outline"
-                onClick={resetSelection}
+                size="sm"
+                onClick={() => {
+                  setShowCreate(false);
+                  setNewTitle("");
+                  setNewMessage("");
+                }}
                 className="border-slate-700 text-slate-300 hover:bg-slate-800"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back
+                Cancel
               </Button>
               <Button
-                disabled={!canConfirm}
-                onClick={confirm}
+                size="sm"
+                onClick={handleCreate}
+                disabled={creating || !newTitle.trim() || !newMessage.trim()}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               >
-                Send template
+                {creating && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+                Save Template
               </Button>
             </>
           ) : (
-            <Button
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800"
-            >
-              Cancel
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCreate(true)}
+                className="border-slate-700 text-slate-300 hover:bg-slate-800"
+              >
+                <Plus className="mr-1 h-3.5 w-3.5" />
+                New Template
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="border-slate-700 text-slate-300 hover:bg-slate-800"
+              >
+                Close
+              </Button>
+            </>
           )}
         </DialogFooter>
       </DialogContent>

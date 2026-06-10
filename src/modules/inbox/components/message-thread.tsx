@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { cn, createClient } from "../lib/utils";
+import { api } from "@/core/api/axios";
 import type {
   Conversation,
   Message,
   MessageReaction,
   Contact,
   ConversationStatus,
-  MessageTemplate,
   Profile,
 } from "../types";
 import {
@@ -43,12 +43,6 @@ interface ReplyDraft {
   preview: string;
 }
 
-function renderTemplateBody(body: string, params: string[]): string {
-  return body.replace(/\{\{(\d+)\}\}/g, (_, raw) => {
-    const idx = Number(raw) - 1;
-    return params[idx] ?? `{{${raw}}}`;
-  });
-}
 
 interface MessageThreadProps {
   conversation: Conversation | null;
@@ -158,6 +152,8 @@ export function MessageThread({
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [reactions, setReactions] = useState<MessageReaction[]>([]);
+  /** Text to pre-fill the composer with after a template is selected. */
+  const [prefillText, setPrefillText] = useState("");
   // Purely visual spin state for the manual-refresh button. The actual
   // refetch is fire-and-forget through `onRefresh` (which bumps the
   // parent's resyncToken); the 700ms spin is just feedback so the click
@@ -449,31 +445,14 @@ export function MessageThread({
       setReplyTo(null);
 
       try {
-        const res = await fetch("/api/whatsapp/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            conversation_id: conversation.id,
-            message_type: "text",
-            content_text: text,
-            reply_to_message_id: replyToId,
-          }),
+        // ANAD backend expects { waId, message_type, content_text }.
+        // conversation.id is the waId (phone number) — set in inbox/page.tsx.
+        await api.post("/whatsapp/send", {
+          waId: conversation.id,
+          message_type: "text",
+          content_text: text,
+          reply_to_message_id: replyToId,
         });
-
-        const payload = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          const reason = payload?.error || `HTTP ${res.status}`;
-          console.error("Failed to send message:", reason);
-          toast.error(`Failed to send: ${reason}`);
-          // Mark the optimistic bubble as failed so the user sees what happened
-          onUpdateMessage(tempId, { status: "failed" });
-          return;
-        }
-
-        // Success — the realtime INSERT event will replace the temp bubble
-        // with the real DB row. If realtime hasn't arrived yet, at least
-        // flip status to 'sent' so the UI stops showing "sending".
         onUpdateMessage(tempId, { status: "sent" });
       } catch (err) {
         console.error("Failed to send message:", err);
@@ -504,77 +483,16 @@ export function MessageThread({
     setTemplateModalOpen(true);
   }, []);
 
-  const handleSendTemplate = useCallback(
-    async (
-      template: MessageTemplate,
-      values: {
-        body: string[];
-        headerText?: string;
-        buttonParams?: Record<number, string>;
-      },
-    ) => {
-      if (!conversation) return;
-
-      const renderedBody = renderTemplateBody(template.body_text ?? "", values.body);
-      const tempId = `temp-${Date.now()}`;
-
-      const optimisticMsg: Message = {
-        id: tempId,
-        conversation_id: conversation.id,
-        sender_type: "agent",
-        content_type: "template",
-        content_text: renderedBody,
-        template_name: template.name,
-        status: "sending",
-        created_at: new Date().toISOString(),
-        direction: "outbound",
-        message_type: "template",
-      };
-      onNewMessage(optimisticMsg);
-
-      try {
-        const res = await fetch("/api/whatsapp/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            conversation_id: conversation.id,
-            message_type: "template",
-            template_name: template.name,
-            template_language: template.language,
-            // Structured params drive the new send-builder path
-            // (header media + URL button substitution). Body values
-            // are mirrored under both shapes so the route can fall
-            // back if the template row isn't found locally.
-            template_message_params: {
-              body: values.body,
-              headerText: values.headerText,
-              buttonParams: values.buttonParams,
-            },
-            template_params: values.body,
-            content_text: renderedBody,
-          }),
-        });
-
-        const payload = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          const reason = payload?.error || `HTTP ${res.status}`;
-          console.error("Failed to send template:", reason);
-          toast.error(`Failed to send template: ${reason}`);
-          onUpdateMessage(tempId, { status: "failed" });
-          return;
-        }
-
-        onUpdateMessage(tempId, { status: "sent" });
-      } catch (err) {
-        console.error("Failed to send template:", err);
-        const reason = err instanceof Error ? err.message : "network error";
-        toast.error(`Failed to send template: ${reason}`);
-        onUpdateMessage(tempId, { status: "failed" });
-      }
-    },
-    [conversation, onNewMessage, onUpdateMessage],
-  );
+  /**
+   * Called by TemplatePicker when the agent selects a template.
+   * ANAD templates are plain-text quick-reply snippets — we pre-fill the
+   * composer so the agent can review/edit before sending (rather than
+   * auto-sending, which could send the wrong text if something goes wrong).
+   */
+  const handleTemplateSelect = useCallback((text: string) => {
+    setPrefillText(text);
+    setTemplateModalOpen(false);
+  }, []);
 
   // Build a quick id → Message map so reply quotes can be rendered without
   // an extra fetch — the thread already holds the full conversation.
@@ -960,12 +878,14 @@ export function MessageThread({
         onOpenTemplates={handleOpenTemplates}
         replyTo={replyTo}
         onClearReply={() => setReplyTo(null)}
+        prefillText={prefillText}
+        onPrefillConsumed={() => setPrefillText("")}
       />
 
       <TemplatePicker
         open={templateModalOpen}
         onOpenChange={setTemplateModalOpen}
-        onSelect={handleSendTemplate}
+        onSelect={handleTemplateSelect}
       />
     </div>
   );
