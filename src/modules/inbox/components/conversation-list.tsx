@@ -225,7 +225,7 @@ function ConversationItem({
   onSelect,
 }: ConversationItemProps) {
   const contact = conversation.contact;
-  const displayName = contact?.name || contact?.phone || "Unknown";
+  const displayName = contact?.name || contact?.phone || contact?.phone_number || "Unknown";
   const initials = displayName.charAt(0).toUpperCase();
 
   const handleClick = useCallback(() => {

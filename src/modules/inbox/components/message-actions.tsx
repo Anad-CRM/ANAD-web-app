@@ -11,8 +11,6 @@ import {
 } from "./ui/popover";
 import type { Message } from "../types";
 
-// WhatsApp's own quick-reaction bar starts with these six. Picking the same
-// set keeps the affordance familiar without pulling in a 300KB emoji library.
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
 interface MessageActionsProps {

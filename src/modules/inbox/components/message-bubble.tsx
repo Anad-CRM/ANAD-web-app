@@ -30,15 +30,15 @@ interface MessageBubbleProps {
 function StatusIcon({ status }: { status: Message["status"] }) {
   switch (status) {
     case "sending":
-      return <Clock className="h-3 w-3 text-slate-400" />;
+      return <Clock className="h-3 w-3 text-[#5A7190]" />;
     case "sent":
-      return <Check className="h-3 w-3 text-slate-400" />;
+      return <Check className="h-3 w-3 text-[#5A7190]" />;
     case "delivered":
-      return <CheckCheck className="h-3 w-3 text-slate-400" />;
+      return <CheckCheck className="h-3 w-3 text-[#5A7190]" />;
     case "read":
-      return <CheckCheck className="h-3 w-3 text-blue-400" />;
+      return <CheckCheck className="h-3 w-3 text-[#1E56A0]" />;
     case "failed":
-      return <XCircle className="h-3 w-3 text-red-400" />;
+      return <XCircle className="h-3 w-3 text-[#9B2226]" />;
     default:
       return null;
   }
@@ -46,8 +46,8 @@ function StatusIcon({ status }: { status: Message["status"] }) {
 
 function MediaUnavailable({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg bg-slate-700/40 px-3 py-2 text-xs text-slate-300">
-      <ImageOff className="h-4 w-4 shrink-0 text-slate-500" />
+    <div className="flex items-center gap-2 rounded-lg bg-[#EEF4FB] border border-[#D6E4F0] px-3 py-2 text-xs text-[#5A7190]">
+      <ImageOff className="h-4 w-4 shrink-0 text-[#8BA5C0]" />
       <span>{label} unavailable</span>
     </div>
   );
@@ -92,16 +92,16 @@ function MediaImage({ url, alt }: { url: string; alt: string }) {
 
   if (error) {
     return (
-      <div className="flex h-40 w-60 items-center justify-center rounded-lg bg-slate-700">
-        <ImageOff className="h-8 w-8 text-slate-500" />
+      <div className="flex h-40 w-60 items-center justify-center rounded-lg bg-[#EEF4FB] border border-[#D6E4F0]">
+        <ImageOff className="h-8 w-8 text-[#8BA5C0]" />
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex h-40 w-60 items-center justify-center rounded-lg bg-slate-700">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <div className="flex h-40 w-60 items-center justify-center rounded-lg bg-[#EEF4FB] border border-[#D6E4F0]">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#1E56A0] border-t-transparent" />
       </div>
     );
   }
@@ -110,7 +110,7 @@ function MediaImage({ url, alt }: { url: string; alt: string }) {
     <img
       src={src ?? ""}
       alt={alt}
-      className="max-h-64 max-w-60 rounded-lg object-cover"
+      className="max-h-64 max-w-60 rounded-lg object-cover shadow-sm"
       onError={() => setError(true)}
     />
   );
@@ -120,7 +120,7 @@ function MessageContent({ message }: { message: Message }) {
   switch (message.content_type) {
     case "text":
       return (
-        <p className="whitespace-pre-wrap break-words text-sm">
+        <p className="whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
           {message.content_text}
         </p>
       );
@@ -134,7 +134,7 @@ function MessageContent({ message }: { message: Message }) {
             <MediaUnavailable label="Image" />
           )}
           {message.content_text && (
-            <p className="mt-1 whitespace-pre-wrap break-words text-sm">
+            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
               {message.content_text}
             </p>
           )}
@@ -148,13 +148,13 @@ function MessageContent({ message }: { message: Message }) {
             <video
               src={message.media_url}
               controls
-              className="max-h-64 max-w-60 rounded-lg"
+              className="max-h-64 max-w-60 rounded-lg shadow-sm"
             />
           ) : (
             <MediaUnavailable label="Video" />
           )}
           {message.content_text && (
-            <p className="mt-1 whitespace-pre-wrap break-words text-sm">
+            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
               {message.content_text}
             </p>
           )}
@@ -181,9 +181,9 @@ function MessageContent({ message }: { message: Message }) {
           href={message.media_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 rounded-lg bg-slate-700/50 px-3 py-2 text-sm hover:bg-slate-700"
+          className="flex items-center gap-2 rounded-lg bg-[#EEF4FB] hover:bg-[#D6E4F0] border border-[#D6E4F0] px-3 py-2 text-sm text-[#0D1B3E] font-medium transition-colors"
         >
-          <FileText className="h-5 w-5 shrink-0 text-slate-400" />
+          <FileText className="h-5 w-5 shrink-0 text-[#1E56A0]" />
           <span className="truncate">
             {message.content_text || "Document"}
           </span>
@@ -193,12 +193,12 @@ function MessageContent({ message }: { message: Message }) {
     case "template":
       return (
         <div>
-          <span className="mb-1 inline-flex items-center gap-1 rounded bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+          <span className="mb-1 inline-flex items-center gap-1 rounded bg-[#1E56A0]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#1E56A0]">
             <LayoutTemplate className="h-3 w-3" />
             Template
           </span>
           {message.content_text && (
-            <p className="mt-1 whitespace-pre-wrap break-words text-sm">
+            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
               {message.content_text}
             </p>
           )}
@@ -207,8 +207,8 @@ function MessageContent({ message }: { message: Message }) {
 
     case "location":
       return (
-        <div className="flex items-center gap-2 text-sm">
-          <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+        <div className="flex items-center gap-2 text-sm text-[#0D1B3E]">
+          <MapPin className="h-4 w-4 shrink-0 text-[#5A7190]" />
           <span>{message.content_text || "Location shared"}</span>
         </div>
       );
@@ -221,11 +221,11 @@ function MessageContent({ message }: { message: Message }) {
       // tap rather than the customer typing the same words.
       return (
         <div className="flex flex-col gap-0.5">
-          <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-[#1E56A0]">
             <CornerDownLeft className="h-3 w-3" />
             Button reply
           </span>
-          <p className="whitespace-pre-wrap break-words text-sm">
+          <p className="whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
             {message.content_text || "[Interactive reply]"}
           </p>
         </div>
@@ -234,7 +234,7 @@ function MessageContent({ message }: { message: Message }) {
 
     default:
       return (
-        <p className="whitespace-pre-wrap break-words text-sm">
+        <p className="whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
           {message.content_text || "[Unsupported message type]"}
         </p>
       );
@@ -269,10 +269,10 @@ export function MessageBubble({
     >
       <div
         className={cn(
-          "relative rounded-2xl px-3 py-2",
+          "relative rounded-2xl px-3 py-2.5 shadow-sm max-w-full",
           isAgent
-            ? "rounded-br-md bg-primary text-primary-foreground"
-            : "rounded-bl-md bg-slate-800 text-slate-100",
+            ? "rounded-tr-none bg-[#D6E4F0] text-[#0D1B3E]"
+            : "rounded-tl-none bg-white text-[#0D1B3E]",
         )}
       >
         {reply && (
@@ -281,11 +281,10 @@ export function MessageBubble({
         <MessageContent message={message} />
         <div
           className={cn(
-            "mt-1 flex items-center gap-1",
-            isAgent ? "justify-end" : "justify-start",
+            "mt-1.5 flex items-center gap-1.5 justify-end",
           )}
         >
-          <span className="text-[10px] text-white/60">{time}</span>
+          <span className="text-[9px] text-[#5A7190]/75 font-medium">{time}</span>
           {isAgent && <StatusIcon status={message.status} />}
         </div>
       </div>

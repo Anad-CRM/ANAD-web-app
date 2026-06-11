@@ -73,7 +73,7 @@ export function MessageComposer({
 
   const handleSend = useCallback(async () => {
     const trimmed = text.trim();
-    if (!trimmed || sending || sessionExpired) return;
+    if (!trimmed || sending) return;
 
     setSending(true);
     try {
@@ -85,7 +85,7 @@ export function MessageComposer({
     } finally {
       setSending(false);
     }
-  }, [text, sending, sessionExpired, onSend, replyTo?.id]);
+  }, [text, sending, onSend, replyTo?.id]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -106,7 +106,7 @@ export function MessageComposer({
   );
 
   return (
-    <div className="border-t border-slate-800 bg-slate-900 p-3">
+    <div className="border-t border-[#D6E4F0] bg-[#F6F6F6] p-3 shadow-inner">
       {replyTo && (
         <div className="mb-2">
           <ReplyQuote
@@ -117,14 +117,14 @@ export function MessageComposer({
         </div>
       )}
       {sessionExpired && (
-        <div className="mb-2 flex items-center justify-between rounded-lg bg-amber-500/10 px-3 py-2">
-          <p className="text-xs text-amber-400">
+        <div className="mb-2 flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200/80 px-3 py-2">
+          <p className="text-xs text-amber-700 font-medium">
             24-hour session expired. Use a template to re-engage.
           </p>
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-amber-400 hover:text-amber-300"
+            className="h-7 text-xs text-amber-700 hover:text-amber-800 hover:bg-amber-100/50"
             onClick={onOpenTemplates}
           >
             <LayoutTemplate className="mr-1 h-3 w-3" />
@@ -138,7 +138,7 @@ export function MessageComposer({
           variant="ghost"
           size="sm"
           title={readOnly ? undefined : "Send template"}
-          className="h-9 w-9 shrink-0 p-0 text-slate-400 hover:text-white"
+          className="h-9 w-9 shrink-0 p-0 text-[#5A7190] hover:text-[#1E56A0] hover:bg-[#EEF4FB]"
           onClick={onOpenTemplates}
           disabled={readOnly}
         >
@@ -153,27 +153,25 @@ export function MessageComposer({
           placeholder={
             readOnly
               ? "Read-only — viewers can browse but not reply"
-              : sessionExpired
-                ? "Session expired - use a template"
-                : "Type a message... (Shift+Enter for new line)"
+              : "Type a message... (Shift+Enter for new line)"
           }
-          disabled={sessionExpired || readOnly}
+          disabled={readOnly}
           rows={1}
           // Textarea keeps its own inline title — the GatedButton
           // wrapping pattern doesn't apply to non-button inputs.
           // The placeholder text also surfaces the read-only state.
           title={readOnly ? "Read-only — your role can't send messages" : undefined}
           className={cn(
-            "flex-1 resize-none rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition-colors focus:border-primary/50",
-            (sessionExpired || readOnly) && "cursor-not-allowed opacity-50"
+            "flex-1 resize-none rounded-xl border border-[#D6E4F0] bg-white px-4 py-2.5 text-sm text-[#0D1B3E] placeholder-slate-400 outline-none transition-colors focus:border-[#1E56A0]/70 focus:ring-1 focus:ring-[#1E56A0]/20",
+            readOnly && "cursor-not-allowed opacity-50"
           )}
         />
 
         <Button
           size="sm"
-          disabled={readOnly || !text.trim() || sessionExpired || sending}
+          disabled={readOnly || !text.trim() || sending}
           onClick={handleSend}
-          className="h-9 w-9 shrink-0 bg-primary p-0 hover:bg-primary/90 disabled:opacity-40"
+          className="h-9 w-9 shrink-0 bg-[#1E56A0] text-white p-0 hover:bg-[#163172] rounded-full shadow-sm disabled:opacity-40 disabled:hover:bg-[#1E56A0]"
         >
           <Send className="h-4 w-4" />
         </Button>
@@ -182,7 +180,7 @@ export function MessageComposer({
       {/* Hint sits outside the flex row so its height doesn't push
           `items-end` buttons below the textarea. Indented to line up
           under the textarea left edge (w-9 button + gap-2 = 44px). */}
-      <p className="mt-1 pl-11 text-[10px] text-slate-600">
+      <p className="mt-1 pl-11 text-[10px] text-[#5A7190]">
         Type &apos;/&apos; for quick replies
       </p>
     </div>

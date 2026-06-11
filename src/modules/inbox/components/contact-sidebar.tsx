@@ -74,13 +74,11 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
   }, [fetchContactData]);
 
   const handleCopyPhone = useCallback(async () => {
-    if (!contact?.phone) return;
-    await navigator.clipboard.writeText(contact.phone);
+    if (!contact?.phone && !contact?.phone_number) return;
+    const phoneToCopy = contact.phone || contact.phone_number;
+    await navigator.clipboard.writeText(phoneToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    // Dep is the whole `contact` object (not `contact?.phone`) so the
-    // React Compiler's inference agrees with the manual dep list —
-    // fixes the `preserve-manual-memoization` lint error.
   }, [contact]);
 
   const handleAddNote = useCallback(async () => {
@@ -112,22 +110,22 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
 
   if (!contact) {
     return (
-      <div className="flex h-full w-70 items-center justify-center border-l border-slate-800 bg-slate-900">
-        <p className="text-sm text-slate-500">Select a conversation</p>
+      <div className="flex h-full w-70 items-center justify-center border-l border-[#D6E4F0] bg-[#F6F6F6]">
+        <p className="text-sm text-[#5A7190] font-medium">Select a conversation</p>
       </div>
     );
   }
 
-  const displayName = contact.name || contact.phone || "";
+  const displayName = contact.name || contact.phone || contact.phone_number || "";
   const initials = displayName ? displayName.charAt(0).toUpperCase() : "?";
 
   return (
-    <div className="flex h-full w-70 flex-col border-l border-slate-800 bg-slate-900">
+    <div className="flex h-full w-70 flex-col border-l border-[#D6E4F0] bg-[#F6F6F6]">
       <ScrollArea className="flex-1">
         <div className="p-4">
           {/* Contact Info */}
           <div className="flex flex-col items-center text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-700 text-lg font-semibold text-white">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1E56A0] text-lg font-semibold text-white shadow-sm">
               {contact.avatar_url ? (
                 <img
                   src={contact.avatar_url}
@@ -138,11 +136,11 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
                 initials
               )}
             </div>
-            <h3 className="mt-3 text-sm font-semibold text-white">
+            <h3 className="mt-3 text-sm font-semibold text-[#0D1B3E]">
               {displayName}
             </h3>
             {contact.company && (
-              <p className="text-xs text-slate-400">{contact.company}</p>
+              <p className="text-xs text-[#5A7190]">{contact.company}</p>
             )}
           </div>
 
@@ -150,45 +148,46 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
           <div className="mt-4 space-y-2">
             <button
               onClick={handleCopyPhone}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-800"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#0D1B3E] transition-colors hover:bg-[#EEF4FB]"
             >
-              <Phone className="h-4 w-4 text-slate-500" />
-              <span className="flex-1 text-left">{contact.phone}</span>
+              <Phone className="h-4 w-4 text-[#5A7190]" />
+              <span className="flex-1 text-left">{contact.phone || contact.phone_number}</span>
               {copied ? (
-                <Check className="h-3 w-3 text-primary" />
+                <Check className="h-3.5 w-3.5 text-[#1E56A0]" />
               ) : (
-                <Copy className="h-3 w-3 text-slate-600" />
+                <Copy className="h-3 w-3 text-[#8BA5C0]" />
               )}
             </button>
 
             {contact.email && (
-              <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300">
-                <Mail className="h-4 w-4 text-slate-500" />
+              <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#0D1B3E]">
+                <Mail className="h-4 w-4 text-[#5A7190]" />
                 <span className="truncate">{contact.email}</span>
               </div>
             )}
           </div>
 
           {/* Divider */}
-          <div className="my-4 border-t border-slate-800" />
+          <div className="my-4 border-t border-[#D6E4F0]" />
 
           {/* Tags */}
           <div>
-            <div className="flex items-center gap-2 px-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wider text-[#5A7190]">
               <TagIcon className="h-3 w-3" />
               Tags
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
               {tags.length === 0 ? (
-                <p className="px-1 text-xs text-slate-600">No tags</p>
+                <p className="px-1 text-xs text-[#8BA5C0]">No tags</p>
               ) : (
                 tags.map((tag) => (
                   <span
                     key={tag.contact_tag_id}
-                    className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium shadow-sm border border-[#D6E4F0]"
                     style={{
-                      backgroundColor: `${tag.color}20`,
+                      backgroundColor: `${tag.color}15`,
                       color: tag.color,
+                      borderColor: `${tag.color}30`,
                     }}
                   >
                     {tag.name}
@@ -199,37 +198,38 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
           </div>
 
           {/* Divider */}
-          <div className="my-4 border-t border-slate-800" />
+          <div className="my-4 border-t border-[#D6E4F0]" />
 
           {/* Active Deals */}
           <div>
-            <div className="flex items-center gap-2 px-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wider text-[#5A7190]">
               <DollarSign className="h-3 w-3" />
               Active Deals
             </div>
             <div className="mt-2 space-y-2">
               {deals.length === 0 ? (
-                <p className="px-1 text-xs text-slate-600">No deals</p>
+                <p className="px-1 text-xs text-[#8BA5C0]">No deals</p>
               ) : (
                 deals.map((deal) => (
                   <div
                     key={deal.id}
-                    className="rounded-lg bg-slate-800 px-3 py-2"
+                    className="rounded-lg bg-white border border-[#D6E4F0] px-3 py-2 shadow-sm"
                   >
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-semibold text-[#0D1B3E]">
                       {deal.title}
                     </p>
-                    <div className="mt-1 flex items-center justify-between text-xs text-slate-400">
-                      <span>
+                    <div className="mt-1 flex items-center justify-between text-xs text-[#5A7190]">
+                      <span className="font-medium">
                         {deal.currency ?? "$"}
                         {deal.value.toLocaleString()}
                       </span>
                       {deal.stage && (
                         <span
-                          className="rounded-full px-1.5 py-0.5 text-[10px]"
+                          className="rounded-full px-1.5 py-0.5 text-[10px] border border-[#D6E4F0]"
                           style={{
-                            backgroundColor: `${deal.stage.color}20`,
+                            backgroundColor: `${deal.stage.color}15`,
                             color: deal.stage.color,
+                            borderColor: `${deal.stage.color}30`,
                           }}
                         >
                           {deal.stage.name}
@@ -243,11 +243,11 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
           </div>
 
           {/* Divider */}
-          <div className="my-4 border-t border-slate-800" />
+          <div className="my-4 border-t border-[#D6E4F0]" />
 
           {/* Notes */}
           <div>
-            <div className="flex items-center gap-2 px-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-2 px-1 text-xs font-semibold uppercase tracking-wider text-[#5A7190]">
               <StickyNote className="h-3 w-3" />
               Notes
             </div>
@@ -258,28 +258,28 @@ export function ContactSidebar({ contact }: ContactSidebarProps) {
                   onChange={(e) => setNewNote(e.target.value)}
                   placeholder="Add a note..."
                   rows={2}
-                  className="flex-1 resize-none rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-primary/50"
+                  className="flex-1 resize-none rounded-lg border border-[#D6E4F0] bg-white px-3 py-2 text-xs text-[#0D1B3E] placeholder-slate-400 outline-none focus:border-[#1E56A0]"
                 />
                 <Button
                   size="sm"
-                  className="h-auto bg-primary px-2 hover:bg-primary/90"
+                  className="h-auto bg-[#1E56A0] text-white px-2 hover:bg-[#163172] rounded-lg"
                   onClick={handleAddNote}
                   disabled={!newNote.trim() || addingNote}
                 >
-                  <Plus className="h-3 w-3" />
+                  <Plus className="h-3.5 w-3.5" />
                 </Button>
               </div>
 
-              <div className="mt-2 space-y-2">
+              <div className="mt-3 space-y-2">
                 {notes.map((note) => (
                   <div
                     key={note.id}
-                    className="rounded-lg bg-slate-800 px-3 py-2"
+                    className="rounded-lg bg-white border border-[#D6E4F0] px-3 py-2 shadow-sm"
                   >
-                    <p className="whitespace-pre-wrap text-xs text-slate-300">
+                    <p className="whitespace-pre-wrap text-xs text-[#0D1B3E]">
                       {note.note_text}
                     </p>
-                    <p className="mt-1 text-[10px] text-slate-600">
+                    <p className="mt-1 text-[9px] text-[#8BA5C0] font-medium">
                       {format(new Date(note.created_at), "MMM d, yyyy HH:mm")}
                     </p>
                   </div>

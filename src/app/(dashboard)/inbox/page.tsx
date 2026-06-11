@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { Conversation, Message, Contact } from "@/modules/inbox/types";
 import { ConversationList } from "@/modules/inbox/components/conversation-list";
@@ -14,6 +14,7 @@ export default function InboxPage() {
   const router = useRouter();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [contactsMap, setContactsMap] = useState<Record<string, Contact>>({});
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [activeContact, setActiveContact] = useState<Contact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -47,8 +48,9 @@ export default function InboxPage() {
           last_message_text: c.lastMessage as string,
           contact: {
             id: c.waId as string,
-            name: c.name as string,
-            phone_number: c.waId as string
+            name: (c.name !== 'Agent' && c.name !== c.waId) ? c.name as string : null,
+            phone_number: c.waId as string,
+            phone: c.waId as string,
           }
         })));
       }
@@ -61,15 +63,19 @@ export default function InboxPage() {
     try {
       const { data } = await api.get(`/whatsapp/messages/${waId}`);
       if (data.success) {
-        setMessages(data.data.map((m: Record<string, unknown>) => ({
-          id: m.id as string,
-          conversation_id: m.waId as string,
-          content_text: m.message as string,
-          created_at: (m.timestamp as string) || new Date().toISOString(),
-          direction: m.messageId ? 'inbound' : 'outbound',
-          status: 'delivered',
-          message_type: 'text'
-        })));
+        setMessages(data.data.map((m: Record<string, unknown>) => {
+          const direction = m.direction === 'outbound' ? 'outbound' : 'inbound';
+          return {
+            id: m.id as string,
+            conversation_id: m.waId as string,
+            content_text: m.message as string,
+            created_at: (m.timestamp as string) || new Date().toISOString(),
+            direction,
+            sender_type: direction === 'outbound' ? 'agent' : 'customer',
+            status: (m.status as string) || 'delivered',
+            message_type: 'text'
+          };
+        }));
       }
     } catch (err) {
       console.error("Failed to fetch messages", err);
@@ -96,6 +102,16 @@ export default function InboxPage() {
     }
     setResyncToken(n => n + 1);
   }, [fetchConversations, activeConversation, fetchMessages]);
+
+  const handleConversationsLoaded = useCallback((loaded: Conversation[]) => {
+    const newMap: Record<string, Contact> = {};
+    loaded.forEach(c => {
+      if (c.contact) {
+        newMap[c.id] = c.contact;
+      }
+    });
+    setContactsMap(prev => ({ ...prev, ...newMap }));
+  }, []);
 
   const handleSelectConversation = useCallback((conv: Conversation) => {
     if (activeConversation?.id === conv.id) return;
@@ -130,6 +146,36 @@ export default function InboxPage() {
     }
   }, [fetchMessages]);
 
+  const conversationsWithContacts = useMemo(() => {
+    return conversations.map(conv => {
+      const existingContact = contactsMap[conv.id];
+      const name = (existingContact?.name && existingContact.name !== existingContact.id)
+        ? existingContact.name
+        : (conv.contact?.name && conv.contact.name !== conv.id)
+          ? conv.contact.name
+          : conv.id;
+      return {
+        ...conv,
+        contact: {
+          ...conv.contact,
+          name: name,
+          avatar_url: existingContact?.avatar_url || conv.contact?.avatar_url,
+          phone: conv.id,
+          phone_number: conv.id,
+        } as Contact
+      };
+    });
+  }, [conversations, contactsMap]);
+
+  const activeConversationWithContact = useMemo(() => {
+    if (!activeConversation) return null;
+    return conversationsWithContacts.find(c => c.id === activeConversation.id) || activeConversation;
+  }, [activeConversation, conversationsWithContacts]);
+
+  const activeContactWithContact = useMemo(() => {
+    return activeConversationWithContact?.contact ?? null;
+  }, [activeConversationWithContact]);
+
   const hasActiveConv = !!activeConversation;
 
   return (
@@ -148,16 +194,16 @@ export default function InboxPage() {
           <ConversationList
             activeConversationId={activeConversation?.id ?? null}
             onSelect={handleSelectConversation}
-            conversations={conversations}
-            onConversationsLoaded={() => { }}
+            conversations={conversationsWithContacts}
+            onConversationsLoaded={handleConversationsLoaded}
             resyncToken={resyncToken}
           />
         </div>
 
         <div className={cn("flex h-full min-w-0 flex-1 lg:flex", hasActiveConv ? "flex" : "hidden lg:flex")}>
           <MessageThread
-            conversation={activeConversation}
-            contact={activeContact}
+            conversation={activeConversationWithContact}
+            contact={activeContactWithContact}
             messages={messages}
             onMessagesLoaded={() => { }}
             onNewMessage={handleNewMessage}
@@ -171,7 +217,7 @@ export default function InboxPage() {
         </div>
 
         <div className="hidden lg:block">
-          <ContactSidebar contact={activeContact} />
+          <ContactSidebar contact={activeContactWithContact} />
         </div>
       </div>
     </div>

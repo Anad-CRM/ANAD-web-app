@@ -25,14 +25,14 @@ export function ReplyQuote({
   return (
     <div
       className={cn(
-        "flex items-start gap-2 border-l-2 border-primary px-2 py-1",
+        "flex items-start gap-2 border-l-2 border-[#1E56A0] px-2 py-1",
         isChip
-          ? "rounded-md bg-slate-800/80"
-          : "mb-1.5 rounded-md bg-black/20",
+          ? "rounded-md bg-[#EEF4FB] border border-[#D6E4F0]"
+          : "mb-1.5 rounded-md bg-[#0D1B3E]/5",
       )}
     >
       <div className="min-w-0 flex-1 overflow-hidden">
-        <div className="truncate text-[11px] font-medium text-primary">
+        <div className="truncate text-[11px] font-semibold text-[#1E56A0]">
           {authorLabel}
         </div>
         {/* Wrap the preview instead of truncating to a single line.
@@ -42,7 +42,7 @@ export function ReplyQuote({
          *  layout wider, shoving the contact sidebar off-screen.
          *  `break-words` also wraps long URLs that have no whitespace
          *  to break on. Issue #165. */}
-        <div className="whitespace-pre-wrap break-words text-xs text-slate-200/80">
+        <div className="whitespace-pre-wrap break-words text-xs text-[#5A7190]">
           {preview}
         </div>
       </div>
@@ -51,7 +51,7 @@ export function ReplyQuote({
           type="button"
           onClick={onDismiss}
           aria-label="Cancel reply"
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-400 hover:bg-slate-700 hover:text-white"
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#5A7190] hover:bg-[#D6E4F0] hover:text-[#0D1B3E]"
         >
           <X className="h-3.5 w-3.5" />
         </button>
