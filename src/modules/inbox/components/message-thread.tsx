@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { cn, createClient } from "../lib/utils";
+import { cn, createClient, parseSafeDate } from "../lib/utils";
 import { api } from "@/core/api/axios";
 import type {
   Conversation,
@@ -82,7 +82,7 @@ interface MessageThreadProps {
 }
 
 function formatDateSeparator(dateStr: string): string {
-  const date = new Date(dateStr);
+  const date = parseSafeDate(dateStr);
   if (isNaN(date.getTime())) return "Unknown Date";
   if (isToday(date)) return "Today";
   if (isYesterday(date)) return "Yesterday";
@@ -96,7 +96,7 @@ function groupMessagesByDate(messages: Message[]) {
   for (const msg of messages) {
     let day = "unknown";
     if (msg.created_at) {
-      const d = new Date(msg.created_at);
+      const d = parseSafeDate(msg.created_at);
       if (!isNaN(d.getTime())) {
         day = format(d, "yyyy-MM-dd");
       }
@@ -210,7 +210,7 @@ export function MessageThread({
 
     if (!lastCustomerMsg) return { expired: true, remaining: "No customer messages" };
 
-    const hoursSince = differenceInHours(new Date(), new Date(lastCustomerMsg.created_at));
+    const hoursSince = differenceInHours(new Date(), parseSafeDate(lastCustomerMsg.created_at));
     const expired = hoursSince >= 24;
 
     if (expired) {

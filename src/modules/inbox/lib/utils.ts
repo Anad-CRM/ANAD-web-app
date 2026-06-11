@@ -27,3 +27,17 @@ export const createClient = () => {
   });
   return mock;
 };
+
+export function parseSafeDate(dateInput: Date | string | number | null | undefined): Date {
+  if (!dateInput) return new Date(NaN);
+  if (dateInput instanceof Date) return dateInput;
+  const str = String(dateInput).trim();
+  if (/^\d+$/.test(str)) {
+    const num = Number(str);
+    // If it's in seconds (under 10 billion), convert to milliseconds
+    const ms = num < 10000000000 ? num * 1000 : num;
+    return new Date(ms);
+  }
+  return new Date(str);
+}
+

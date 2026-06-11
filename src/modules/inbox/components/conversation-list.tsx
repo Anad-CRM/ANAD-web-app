@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { cn, createClient } from "../lib/utils";
+import { cn, createClient, parseSafeDate } from "../lib/utils";
 import type { Conversation, ConversationStatus } from "../types";
 import { Search, ChevronDown } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { isToday, isYesterday, format } from "date-fns";
 import { Input } from "./ui/input";
 import {
   DropdownMenu,
@@ -12,7 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 
 interface ConversationListProps {
@@ -234,9 +233,15 @@ function ConversationItem({
 
   let timeAgo = "";
   if (conversation.last_message_at) {
-    const d = new Date(conversation.last_message_at);
+    const d = parseSafeDate(conversation.last_message_at);
     if (!isNaN(d.getTime())) {
-      timeAgo = formatDistanceToNow(d, { addSuffix: false });
+      if (isToday(d)) {
+        timeAgo = format(d, "h:mm a");
+      } else if (isYesterday(d)) {
+        timeAgo = "Yesterday";
+      } else {
+        timeAgo = format(d, "MMM d");
+      }
     }
   }
 

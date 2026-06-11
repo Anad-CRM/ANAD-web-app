@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { cn } from "../lib/utils";
+import { cn, parseSafeDate } from "../lib/utils";
 import type { Message, MessageReaction } from "../types";
 import {
   Clock,
@@ -252,7 +252,7 @@ export function MessageBubble({
   
   let time = "";
   if (message.created_at) {
-    const d = new Date(message.created_at);
+    const d = parseSafeDate(message.created_at);
     if (!isNaN(d.getTime())) {
       time = format(d, "HH:mm");
     }
