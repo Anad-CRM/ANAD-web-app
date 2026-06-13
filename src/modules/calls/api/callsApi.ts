@@ -40,7 +40,7 @@ export const getSpecificCallLogs = async (params: {
         callType?: string;
         duration?: number | string;
         timestamp?: string;
-        recording?: { fileName?: string };
+        recording?: { fileName?: string; duration?: number | string; audioDuration?: number | string };
         createdUserName?: string;
         lead?: {
           id: string;
@@ -66,6 +66,9 @@ export const getSpecificCallLogs = async (params: {
           : item.duration,
         timestamp: item.timestamp,
         recordingFile: item.recording?.fileName,
+        recordingDuration: typeof item.recording?.audioDuration === 'number'
+          ? `${Math.floor(item.recording.audioDuration / 60)}m ${item.recording.audioDuration % 60}s`
+          : typeof item.recording?.audioDuration === 'string' ? item.recording.audioDuration : undefined,
         userName: item.createdUserName,
         lead: item.lead ? {
           id: item.lead.id,

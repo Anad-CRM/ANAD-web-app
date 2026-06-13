@@ -8,6 +8,7 @@ export interface CallLog {
   duration?: string;
   timestamp?: string;
   recordingFile?: string;
+  recordingDuration?: string;
   userName?: string; 
   lead?: {
     id: string;

@@ -27,6 +27,38 @@ export const TeamsService = {
     return response.data;
   },
 
+  async updateTeam(teamId: string, payload: { name: string; category?: string; typeCategory?: string; managerId?: string; iconIndex?: number }): Promise<unknown> {
+    const response = await api.post(
+      `${API_ENDPOINTS.TEAM.UPDATE}/${teamId}`,
+      payload
+    );
+    return response.data;
+  },
+
+  async activateTeam(payload: { teamId: string }): Promise<unknown> {
+    const response = await api.post(
+      API_ENDPOINTS.TEAM.ACTIVATE,
+      payload
+    );
+    return response.data;
+  },
+
+  async deactivateTeam(payload: { teamId: string }): Promise<unknown> {
+    const response = await api.post(
+      API_ENDPOINTS.TEAM.DEACTIVATE,
+      payload
+    );
+    return response.data;
+  },
+
+  async deleteTeam(payload: { teamId: string }): Promise<unknown> {
+    const response = await api.post(
+      API_ENDPOINTS.TEAM.DELETE,
+      payload
+    );
+    return response.data;
+  },
+
   async getStaffExcludeTeam(payload: { teamId: string; organizationId: string }): Promise<unknown> {
     const response = await api.post(
       API_ENDPOINTS.TEAM.GET_STAFF_EXCLUDE_TEAM,

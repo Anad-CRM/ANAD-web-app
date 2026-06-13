@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { User, Search, Phone, PlayCircle } from "lucide-react";
+import { User, Search, Phone, PlayCircle, AlertTriangle } from "lucide-react";
 import { getSpecificCallLogs, getRecordingUrl } from "@/modules/calls/api/callsApi";
 import { CallLog } from "@/modules/calls/types";
 import { AudioPlayerModal } from "@/core/components/ui/AudioPlayerModal";
@@ -147,7 +147,7 @@ const LogsPage = () => {
                     <div className="text-right">
                       <Text weight="bold" className="text-slate-900 block">{call.timestamp ? formatDate(call.timestamp) : "Unknown Date"}</Text>
                       <Text weight="bold" className="text-slate-400 uppercase tracking-widest mt-1 block" style={{ fontSize: '10px' }}>
-                        {call.timestamp ? new Date(call.timestamp as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--"}
+                        {call.timestamp ? new Date(call.timestamp as string).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: true }) : "--:--"}
                       </Text>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-xl border border-blue-100/30">
@@ -157,23 +157,52 @@ const LogsPage = () => {
                   </div>
                 </div>
 
-                {/* Audio Component - Adopting RecordingCard style */}
+                {/* Audio Component - Premium Style */}
                 <div className="mt-4 sm:mt-5">
                   {call.recordingFile ? (
-                    <button
-                      onClick={() => setPlayingRecordingUrl(getRecordingUrl(call.recordingFile!))}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-50/40 hover:bg-blue-50 transition-colors rounded-xl border border-blue-100/50 w-full sm:w-auto active:scale-[0.98]"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-blue-100/50 flex items-center justify-center flex-shrink-0">
-                        <PlayCircle size={18} className="text-[#1E40AF]" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-100 transition-all duration-300 group-hover:bg-slate-50 group-hover:border-slate-200">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setPlayingRecordingUrl(getRecordingUrl(call.recordingFile!))}
+                          className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1C3A76] hover:bg-[#152e5d] active:scale-95 shadow-md shadow-[#1C3A76]/20 text-white transition-all"
+                          title="Play Call Recording"
+                        >
+                          <PlayCircle size={22} className="text-white" />
+                        </button>
+                        <div>
+                          <Text weight="bold" className="text-slate-800 text-sm">Call Recording</Text>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Text className="text-slate-400" style={{ fontSize: '11px' }}>Call Duration: {call.duration}</Text>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-start min-w-0">
-                        <Text weight="semibold" className="text-[#1E40AF] text-left truncate w-full" style={{ fontSize: '13px' }}>Play Recording</Text>
-                        <Text className="text-blue-600/60" style={{ fontSize: '11px' }}>{call.duration}</Text>
-                      </div>
-                    </button>
+
+                      {call.recordingDuration && call.duration && call.recordingDuration !== call.duration ? (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-50/80 border border-rose-100/50 rounded-xl text-rose-800 self-start sm:self-auto shadow-sm">
+                          <AlertTriangle size={14} className="text-rose-500 animate-pulse flex-shrink-0" />
+                          <div className="flex flex-col">
+                            <Text weight="bold" className="text-rose-700" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                              Audio Duration: {call.recordingDuration}
+                            </Text>
+                            <Text weight="medium" className="text-rose-500" style={{ fontSize: '9px', lineHeight: '1.2' }}>
+                              Audio is not fully captured
+                            </Text>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50/60 border border-emerald-100/40 rounded-xl text-emerald-800 self-start sm:self-auto shadow-sm">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                          </span>
+                          <Text weight="bold" className="text-emerald-700" style={{ fontSize: '11px' }}>
+                            Fully Captured
+                          </Text>
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-white/40 px-4 py-3 text-slate-400 sm:px-5">
+                    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/40 px-4 py-3.5 text-slate-400 sm:px-5">
                       <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                       <Text size="sm" weight="medium" className="italic">No recording available for this session</Text>
                     </div>
