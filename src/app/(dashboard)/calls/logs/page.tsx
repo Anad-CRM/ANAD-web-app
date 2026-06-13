@@ -147,7 +147,7 @@ const LogsPage = () => {
                     <div className="text-right">
                       <Text weight="bold" className="text-slate-900 block">{call.timestamp ? formatDate(call.timestamp) : "Unknown Date"}</Text>
                       <Text weight="bold" className="text-slate-400 uppercase tracking-widest mt-1 block" style={{ fontSize: '10px' }}>
-                        {call.timestamp ? new Date(call.timestamp as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--"}
+                        {call.timestamp ? new Date(call.timestamp as string).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: true }) : "--:--"}
                       </Text>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-xl border border-blue-100/30">
@@ -170,6 +170,9 @@ const LogsPage = () => {
                       <div className="flex flex-col items-start min-w-0">
                         <Text weight="semibold" className="text-[#1E40AF] text-left truncate w-full" style={{ fontSize: '13px' }}>Play Recording</Text>
                         <Text className="text-blue-600/60" style={{ fontSize: '11px' }}>{call.duration}</Text>
+                        {call.recordingDuration && call.duration && call.recordingDuration !== call.duration && (
+                          <Text className="text-red-500/80 mt-0.5 font-bold" style={{ fontSize: '10px' }}>Audio: {call.recordingDuration}</Text>
+                        )}
                       </div>
                     </button>
                   ) : (
