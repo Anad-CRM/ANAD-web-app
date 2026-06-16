@@ -24,10 +24,16 @@ export function useAuth() {
         new Promise((resolve) => setTimeout(resolve, 800)),
       ]);
       const { user, token } = loginResult;
-      
+
+      console.log("role of the user--------", user.role)
+
+      if (user.role !== "Admin" && user.role !== "organization_admin") {
+        throw new Error("Web access only for Admin");
+      }
+
       const { rememberMe, email, password } = payload;
       const { setRememberMe, saveCredentials, clearCredentials } = await import("@/core/utils/auth");
-      
+
       if (rememberMe) {
         setRememberMe(true);
         saveCredentials(email, password);
@@ -37,18 +43,19 @@ export function useAuth() {
 
       setAuthData(user, token);
       showToast("Logged in successfully", "success");
-      
+
       await new Promise((resolve) => setTimeout(resolve, 800));
       router.push("/overview");
-    } catch (e: any) {
+    } catch (error: unknown) {
+      const e = error as { message?: string; data?: { status?: string } };
       const errMsg = e.message || "Login failed";
       setError(errMsg);
-      
+
       if (!e.data || e.data.status !== "failed") {
         showToast(errMsg, "error");
       }
-      
-      throw e; 
+
+      throw error;
     } finally {
       setIsPending(false);
       hideLoader();
@@ -64,10 +71,10 @@ export function useAuth() {
         authService.signup(payload),
         new Promise((resolve) => setTimeout(resolve, 1000)),
       ]);
-      
+
       showToast("Sign up successful!", "success");
       await new Promise((resolve) => setTimeout(resolve, 800));
-      
+
       router.push("/login?registered=true");
     } catch (e: unknown) {
       const errMsg = e instanceof Error ? e.message : "Signup failed";
@@ -84,9 +91,9 @@ export function useAuth() {
     setTimeout(async () => {
       ctxLogout();
       showToast("Logged out securely", "info");
-      
+
       await new Promise((resolve) => setTimeout(resolve, 800));
-      
+
       hideLoader();
       router.push("/login");
     }, 600);

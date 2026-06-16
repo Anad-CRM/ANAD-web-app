@@ -1,10 +1,11 @@
 "use client";
 import { useEffect } from 'react';
+import type { FacebookSDK } from '../types/facebook';
 
 declare global {
   interface Window {
     fbAsyncInit: () => void;
-    FB: any;
+    FB: FacebookSDK;
   }
 }
 
