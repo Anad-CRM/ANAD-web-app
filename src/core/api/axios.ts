@@ -3,8 +3,8 @@ import { getToken, clearToken } from "@/core/utils/auth";
 
 // export const API_BASE_URL = "http://192.168.0.201:3000"; // Nibin
 // export const API_BASE_URL = "http://localhost:3000/";  // Local host (direct - causes Mixed Content on HTTPS)
-export const API_BASE_URL = "/api/";  // ✅ Proxied through Next.js (works on both localhost & ngrok)
-// export const API_BASE_URL = "https://api.anad.ae/";  // Live server
+// export const API_BASE_URL = "/api/";  // ✅ Proxied through Next.js (works on both localhost & ngrok)
+export const API_BASE_URL = "https://api.anad.ae/";  // Live server
 
 
 export const api = axios.create({
@@ -18,7 +18,7 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = getToken();
-  console.log("access token-----", token)
+  // console.log("access token-----", token)
   if (token) {
     config.headers.accesstoken = token;
   }
