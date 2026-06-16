@@ -181,7 +181,7 @@ export default function TeamsPage() {
               const totalLeads = team.totalLeads ?? (team.users?.reduce((acc, user) => acc + (user.leadCounts?.totalLeads || 0), 0) || 0);
               const closedLeads = team.users?.reduce((acc, user) => acc + (user.leadCounts?.closedCount || 0), 0) || 0;
               const registeredLeads = team.users?.reduce((acc, user) => acc + (user.leadCounts?.registerCount || user.leadCounts?.registered || 0), 0) || 0;
-              console.log("registered leads-----", registeredLeads);
+              // console.log("registered leads-----", registeredLeads);
 
               const performance = totalLeads > 0 ? Math.round(((closedLeads + registeredLeads) / totalLeads) * 100) : 0;
               return (

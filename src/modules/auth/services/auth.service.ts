@@ -5,15 +5,15 @@ import type { LoginPayload, SignupPayload, User } from "@/modules/auth/types/aut
 
 export const authService = {
   async login(payload: LoginPayload): Promise<{ user: User; token: string }> {
-    console.log("Calling login API with payload:", payload);
+    // console.log("Calling login API with payload:", payload);
     try {
       const res = await api.post(API_ENDPOINTS.AUTH.LOGIN, payload);
-      
+
       if (res.data.status === "failed") {
         const message = res.data.message || "Login failed";
-        const error = new Error(message);
-        (error as any).status = "failed";
-        (error as any).data = res.data;
+        const error = new Error(message) as Error & { status?: string; data?: unknown };
+        error.status = "failed";
+        error.data = res.data;
         throw error;
       }
 
