@@ -20,10 +20,10 @@ export default function CallAnalyticsPage() {
   
   // Filtering state
   const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>({
-    startDate: null,
-    endDate: null
+    startDate: new Date().toISOString(),
+    endDate: new Date().toISOString()
   });
-  const [dateLabel, setDateLabel] = useState("Overall");
+  const [dateLabel, setDateLabel] = useState("Today");
   const [staffId, setStaffId] = useState<string | null>(null);
 
   // Modal state
