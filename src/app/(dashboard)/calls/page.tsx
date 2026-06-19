@@ -20,10 +20,10 @@ export default function CallAnalyticsPage() {
   
   // Filtering state
   const [dateRange, setDateRange] = useState<{ startDate: string | null; endDate: string | null }>({
-    startDate: null,
-    endDate: null
+    startDate: new Date().toISOString(),
+    endDate: new Date().toISOString()
   });
-  const [dateLabel, setDateLabel] = useState("Overall");
+  const [dateLabel, setDateLabel] = useState("Today");
   const [staffId, setStaffId] = useState<string | null>(null);
 
   // Modal state
@@ -67,7 +67,7 @@ export default function CallAnalyticsPage() {
         }),
       ]);
       
-      if (analyticsData) setAnalytics(analyticsData);
+      setAnalytics(analyticsData);
       setTableData(staffData || []);
       setIncomingTrend(incomingTrendData);
       setOutgoingTrend(outgoingTrendData);
@@ -154,7 +154,7 @@ export default function CallAnalyticsPage() {
             <CallsOverTimeChart
               incomingTrend={incomingTrend?.dailyBreakdown}
               outgoingTrend={outgoingTrend?.dailyBreakdown}
-              isLoading={isLoading && !analytics}
+              isLoading={isLoading}
             />
           </div>
           <div className="flex flex-col justify-center">
