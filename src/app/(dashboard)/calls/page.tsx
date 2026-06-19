@@ -67,7 +67,7 @@ export default function CallAnalyticsPage() {
         }),
       ]);
       
-      if (analyticsData) setAnalytics(analyticsData);
+      setAnalytics(analyticsData);
       setTableData(staffData || []);
       setIncomingTrend(incomingTrendData);
       setOutgoingTrend(outgoingTrendData);
@@ -154,7 +154,7 @@ export default function CallAnalyticsPage() {
             <CallsOverTimeChart
               incomingTrend={incomingTrend?.dailyBreakdown}
               outgoingTrend={outgoingTrend?.dailyBreakdown}
-              isLoading={isLoading && !analytics}
+              isLoading={isLoading}
             />
           </div>
           <div className="flex flex-col justify-center">
