@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     CALLS_ANALYTICS: "/calls/getCallAnalytics",
     SPECIFIC_CALL_TYPE: "/calls/specificCallType",
     SPECIFIC_CALL_TYPE_ANALYTICS: "/calls/getSpecificCallTypeAnalytics",
+    STAFF_CALL_BREAKDOWN: "/calls/staffCallBreakdown",
     TEAMS: "/dashboard/teams",
     EOD: "/dashboard/eod",
     GET_LEAD_COUNTS: "/lead/getLeadCounts",

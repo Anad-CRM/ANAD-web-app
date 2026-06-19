@@ -122,25 +122,20 @@ export const getStaffCallBreakdown = async (params?: Record<string, unknown>) =>
     const user = getUser<{ id?: string; organizationId?: string; role?: string; }>();
     const orgId = params?.organizationId || user?.organizationId;
 
-    const response = await api.get(API_ENDPOINTS.DASHBOARD.GET_AUTO_EOD, {
+    const response = await api.get(API_ENDPOINTS.DASHBOARD.STAFF_CALL_BREAKDOWN, {
       params: { ...params, organizationId: orgId }
     });
 
     if (response.data.success) {
-      return response.data.data.map((user: { eods: { userId: string, callStats: { totalCalls: number, totalIncomingCalls: number, totalMissedCalls: number, totalDuration: number } }[], userName: string }) => {
-        const stats = user.eods[0]?.callStats || {};
-        return {
-          id: user.eods[0]?.userId || Math.random().toString(),
-          name: user.userName,
-          avatarUrl: undefined,
-          callsMade: stats.totalCalls || 0,
-          received: stats.totalIncomingCalls || 0,
-          missed: stats.totalMissedCalls || 0,
-          avgDuration: stats.totalDuration && stats.totalCalls
-            ? `${Math.floor((stats.totalDuration / stats.totalCalls) / 60)}:${String(Math.floor((stats.totalDuration / stats.totalCalls) % 60)).padStart(2, '0')}`
-            : "0:00"
-        };
-      });
+      return response.data.data as Array<{
+        id: string;
+        name: string;
+        avatarUrl?: string;
+        callsMade: number;
+        received: number;
+        missed: number;
+        avgDuration: string;
+      }>;
     }
     return [];
   } catch (error) {

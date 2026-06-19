@@ -29,7 +29,7 @@ export const DetailedCallBreakdown = ({ data, isLoading }: { data: CallTeamRow[]
                 <Text weight="medium" size="sm">No call data found for this period.</Text>
               </div>
             ) : (
-              data.map((row) => (
+              [...data].sort((a, b) => b.callsMade - a.callsMade).map((row) => (
                   <div key={row.id} className="bg-[#3561A5] text-white rounded-[24px] p-4 px-6 sm:px-10 grid grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] items-center text-center transition-all hover:translate-x-1 hover:shadow-md active:scale-[0.99] group">
                       
                       <div className="flex items-center gap-5 text-left">
