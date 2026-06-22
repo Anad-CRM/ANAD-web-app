@@ -82,7 +82,11 @@ export default function InboxPage() {
             status: (m.status as string) || 'delivered',
             message_type: (rawMsgType as Message['message_type']),
             content_type: contentTypeMap[rawMsgType] || 'text',
-            media_url: (m.mediaUrl as string) || undefined,
+            media_url: m.mediaUrl ? (
+              (m.mediaUrl as string).startsWith('/whatsapp/media/')
+                ? `/api${m.mediaUrl as string}`
+                : (m.mediaUrl as string)
+            ) : undefined,
             errorMessage: (m.errorMessage as string) || undefined,
           };
         }));

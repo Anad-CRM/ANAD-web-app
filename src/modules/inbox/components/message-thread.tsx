@@ -150,6 +150,51 @@ export function MessageThread({
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [reactions, setReactions] = useState<MessageReaction[]>([]);
+
+  // Reactions extracted dynamically from messages (reaction type or starting with [reaction]:)
+  const parsedReactions = useMemo(() => {
+    const map = new Map<string, MessageReaction>();
+
+    messages.forEach((m) => {
+      if (m.message_type === "reaction" || (m.content_text && m.content_text.startsWith("[reaction]:"))) {
+        const text = m.content_text || "";
+        const parts = text.split(":");
+        if (parts.length >= 3) {
+          const targetMessageId = parts[1];
+          const emoji = parts[2];
+          const actorId = m.direction === "outbound" ? "agent" : "customer";
+          const key = `${targetMessageId}-${actorId}`;
+          
+          if (!emoji) {
+            map.delete(key);
+          } else {
+            map.set(key, {
+              id: m.id,
+              message_id: targetMessageId,
+              emoji: emoji,
+              user_id: actorId,
+              actor_type: m.direction === "outbound" ? "agent" : "customer",
+              actor_id: actorId,
+              conversation_id: m.conversation_id,
+            });
+          }
+        }
+      }
+    });
+
+    return Array.from(map.values());
+  }, [messages]);
+
+  useEffect(() => {
+    setReactions(parsedReactions);
+  }, [parsedReactions]);
+
+  const visibleMessages = useMemo(() => {
+    return messages.filter(
+      (m) => m.message_type !== "reaction" && !(m.content_text && m.content_text.startsWith("[reaction]:"))
+    );
+  }, [messages]);
+
   /** Text to pre-fill the composer with after a template is selected. */
   const [prefillText, setPrefillText] = useState("");
   // Purely visual spin state for the manual-refresh button. The actual
@@ -280,109 +325,6 @@ export function MessageThread({
     // realtime is best-effort and any message events sent while the WS
     // was disconnected or throttled are otherwise lost.
   }, [conversationId, resyncToken]);
-
-  // Reactions fetch — pulls the current state from the DB. Kept separate
-  // from the channel subscription below so a `resyncToken` bump just
-  // refetches the rows without also tearing down and rebuilding the
-  // realtime channel.
-  useEffect(() => {
-    if (!conversationId) {
-      setReactions([]);
-      return;
-    }
-    const supabase = createClient();
-    let cancelled = false;
-
-    (async () => {
-      const { data, error } = await supabase
-        .from("message_reactions")
-        .select("*")
-        .eq("conversation_id", conversationId);
-      if (cancelled) return;
-      if (error) {
-        console.error("Failed to fetch reactions");
-        return;
-      }
-      setReactions((data as MessageReaction[]) ?? []);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [conversationId, resyncToken]);
-
-  // Reactions realtime subscription per conversation. Subscribing here
-  // (not at the page level) keeps the channel scoped to the visible
-  // conversation and avoids cross-conversation chatter on a busy inbox.
-  useEffect(() => {
-    if (!conversationId) return;
-    const supabase = createClient();
-
-    const channel = supabase
-      .channel(`reactions:${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "message_reactions",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload: Record<string, unknown>) => {
-          const row = payload.new as MessageReaction;
-          setReactions((prev) => {
-            if (prev.some((r) => r.id === row.id)) return prev;
-            // Swap any matching optimistic temp row for the real one so
-            // the pill doesn't double up after a successful POST.
-            const tempIdx = prev.findIndex(
-              (r) =>
-                r.id.startsWith("temp-") &&
-                r.message_id === row.message_id &&
-                r.actor_type === row.actor_type &&
-                r.actor_id === row.actor_id,
-            );
-            if (tempIdx >= 0) {
-              const copy = prev.slice();
-              copy[tempIdx] = row;
-              return copy;
-            }
-            return [...prev, row];
-          });
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "message_reactions",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload: Record<string, unknown>) => {
-          const row = payload.new as MessageReaction;
-          setReactions((prev) => prev.map((r) => (r.id === row.id ? row : r)));
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: "message_reactions",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload: Record<string, unknown>) => {
-          const old = payload.old as Partial<MessageReaction>;
-          if (!old?.id) return;
-          setReactions((prev) => prev.filter((r) => r.id !== old.id));
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [conversationId]);
 
   // Clear any in-progress reply draft when the active conversation changes —
   // a quote pulled from conversation A shouldn't bleed into conversation B.
@@ -698,7 +640,7 @@ export function MessageThread({
   }
 
   const displayName = contact.name || contact.phone || "Customer";
-  const messageGroups = groupMessagesByDate(messages);
+  const messageGroups = groupMessagesByDate(visibleMessages);
   const currentStatus = STATUS_OPTIONS.find(
     (s) => s.value === conversation.status
   );

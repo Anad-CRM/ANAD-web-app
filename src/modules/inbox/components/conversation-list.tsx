@@ -218,6 +218,18 @@ interface ConversationItemProps {
   onSelect: (conversation: Conversation) => void;
 }
 
+function formatLastMessageText(text: string | null | undefined): string {
+  if (!text) return "No messages yet";
+  const clean = text.trim();
+  if (clean === "[Image]") return "📷 Photo";
+  if (clean === "[Sticker]") return "💟 Sticker";
+  if (clean === "[Voice Note]" || clean === "[audio]" || clean === "[voice]") return "🎵 Voice Note";
+  if (clean === "[Video]") return "🎥 Video";
+  if (clean === "[Document]") return "📄 Document";
+  if (clean === "[reaction]" || clean.startsWith("[reaction]:")) return "❤️ Reaction";
+  return text;
+}
+
 function ConversationItem({
   conversation,
   isActive,
@@ -276,7 +288,7 @@ function ConversationItem({
         </div>
         <div className="mt-0.5 flex items-center justify-between gap-2">
           <p className="truncate text-xs text-slate-400">
-            {conversation.last_message_text || "No messages yet"}
+            {formatLastMessageText(conversation.last_message_text)}
           </p>
           <div className="flex shrink-0 items-center gap-1.5">
             {conversation.unread_count > 0 && (

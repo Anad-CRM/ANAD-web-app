@@ -50,7 +50,7 @@ export type Message = {
   created_at: string;
   direction: 'inbound' | 'outbound';
   status: 'sent' | 'delivered' | 'read' | 'failed' | 'pending' | 'sending';
-  message_type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'template';
+  message_type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'template' | 'sticker' | 'voice' | 'reaction';
   media_url?: string;
   reactions?: MessageReaction[];
   template_name?: string;

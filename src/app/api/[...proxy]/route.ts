@@ -32,9 +32,7 @@ async function handler(req: NextRequest) {
     responseHeaders.delete("content-length");
     responseHeaders.set("Access-Control-Allow-Origin", "*");
 
-    const responseBody = await backendRes.text();
-
-    return new NextResponse(responseBody, {
+    return new NextResponse(backendRes.body, {
       status: backendRes.status,
       headers: responseHeaders,
     });

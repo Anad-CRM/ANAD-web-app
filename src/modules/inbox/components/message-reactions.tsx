@@ -51,25 +51,41 @@ export function MessageReactions({
 
   if (groups.length === 0) return null;
 
+  const totalCount = reactions.length;
+  const hasCurrentUserReacted = groups.some((g) => g.byCurrentUser);
+  // Find which emoji the current user reacted with, so we can toggle/remove it
+  const currentUserEmoji = groups.find((g) => g.byCurrentUser)?.emoji;
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Avoid triggering any bubble click handlers
+    if (currentUserEmoji) {
+      onToggle(currentUserEmoji);
+    } else {
+      onToggle(groups[0].emoji);
+    }
+  };
+
   return (
-    <div className="mt-1 flex flex-wrap gap-1">
-      {groups.map((g) => (
-        <button
-          key={g.emoji}
-          type="button"
-          onClick={() => onToggle(g.emoji)}
-          aria-pressed={g.byCurrentUser}
-          className={cn(
-            "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[11px] leading-none transition-colors shadow-sm",
-            g.byCurrentUser
-              ? "border-[#1E56A0]/60 bg-[#1E56A0]/15 text-[#1E56A0] hover:bg-[#1E56A0]/25"
-              : "border-[#D6E4F0] bg-[#F6F6F6] text-[#0D1B3E] hover:bg-[#EEF4FB]",
-          )}
-        >
-          <span className="text-sm leading-none">{g.emoji}</span>
-          {g.count > 1 && <span>{g.count}</span>}
-        </button>
-      ))}
-    </div>
+    <button
+      type="button"
+      onClick={handleClick}
+      className={cn(
+        "flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold leading-none shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 select-none",
+        hasCurrentUserReacted
+          ? "border-[#1E56A0]/45 bg-[#E8F1FC] text-[#1E56A0]"
+          : "border-[#D6E4F0] bg-white text-[#5A7190]",
+      )}
+    >
+      <div className="flex items-center -space-x-0.5">
+        {groups.map((g) => (
+          <span key={g.emoji} className="text-xs leading-none select-none">
+            {g.emoji}
+          </span>
+        ))}
+      </div>
+      {totalCount > 1 && (
+        <span className="pl-0.5 text-[9px] font-bold leading-none">{totalCount}</span>
+      )}
+    </button>
   );
 }
