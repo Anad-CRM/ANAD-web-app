@@ -54,6 +54,7 @@ export type Message = {
   media_url?: string;
   reactions?: MessageReaction[];
   template_name?: string;
+  errorMessage?: string;
 };
 
 export type MessageTemplate = {

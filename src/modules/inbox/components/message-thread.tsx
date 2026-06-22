@@ -21,6 +21,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { format, isToday, isYesterday, differenceInHours } from "date-fns";
+import { isAxiosError } from "axios";
 import { Badge } from "./ui/badge";
 import {
   DropdownMenu,
@@ -451,11 +452,16 @@ export function MessageThread({
           reply_to_message_id: replyToId,
         });
         onUpdateMessage(tempId, { status: "sent" });
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Failed to send message:", err);
-        const reason = err instanceof Error ? err.message : "network error";
+        let reason = "network error";
+        if (isAxiosError(err) && err.response?.data?.error) {
+          reason = err.response.data.error;
+        } else if (err instanceof Error) {
+          reason = err.message;
+        }
         toast.error(`Failed to send: ${reason}`);
-        onUpdateMessage(tempId, { status: "failed" });
+        onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },
     [conversation, onNewMessage, onUpdateMessage]
