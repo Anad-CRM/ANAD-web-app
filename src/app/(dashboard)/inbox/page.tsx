@@ -65,15 +65,25 @@ export default function InboxPage() {
       if (data.success) {
         setMessages(data.data.map((m: Record<string, unknown>) => {
           const direction = m.direction === 'outbound' ? 'outbound' : 'inbound';
+          const rawMsgType = (m.messageType as string) || 'text';
+          // Map backend message types to frontend content_type
+          const contentTypeMap: Record<string, string> = {
+            text: 'text', image: 'image', audio: 'audio',
+            video: 'video', document: 'document', template: 'template',
+            sticker: 'image', voice: 'audio',
+          };
           return {
             id: m.id as string,
             conversation_id: m.waId as string,
-            content_text: m.message as string,
+            content_text: (m.message as string) || null,
             created_at: (m.timestamp as string) || new Date().toISOString(),
             direction,
             sender_type: direction === 'outbound' ? 'agent' : 'customer',
             status: (m.status as string) || 'delivered',
-            message_type: 'text'
+            message_type: (rawMsgType as Message['message_type']),
+            content_type: contentTypeMap[rawMsgType] || 'text',
+            media_url: (m.mediaUrl as string) || undefined,
+            errorMessage: (m.errorMessage as string) || undefined,
           };
         }));
       }
@@ -131,20 +141,19 @@ export default function InboxPage() {
     router.replace("/inbox", { scroll: false });
   }, [router]);
 
-  const handleNewMessage = useCallback(async (msg: Message) => {
-    // Optimistic UI update
-    setMessages(prev => [...prev, msg]);
-    try {
-      await api.post('/whatsapp/send', {
-        conversation_id: msg.conversation_id,
-        content_text: msg.content_text,
-        message_type: msg.message_type
-      });
-      fetchMessages(msg.conversation_id); // Refresh after sending
-    } catch (err) {
-      console.error("Failed to send message", err);
-    }
-  }, [fetchMessages]);
+  const handleNewMessage = useCallback((msg: Message) => {
+    // message-thread.tsx handles the actual API send.
+    // Here we only do the optimistic UI update for messages that
+    // don't already exist in the list (avoid duplicates on refresh).
+    setMessages(prev => {
+      if (prev.some(m => m.id === msg.id)) return prev;
+      return [...prev, msg];
+    });
+  }, []);
+
+  const handleUpdateMessage = useCallback((id: string, updates: Partial<Message>) => {
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+  }, []);
 
   const conversationsWithContacts = useMemo(() => {
     return conversations.map(conv => {
@@ -207,7 +216,7 @@ export default function InboxPage() {
             messages={messages}
             onMessagesLoaded={() => { }}
             onNewMessage={handleNewMessage}
-            onUpdateMessage={() => { }}
+            onUpdateMessage={handleUpdateMessage}
             onStatusChange={() => { }}
             onAssignChange={() => { }}
             onBack={handleCloseConversation}

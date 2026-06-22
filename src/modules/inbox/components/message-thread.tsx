@@ -33,7 +33,7 @@ import {
 
 import { MessageBubble } from "./message-bubble";
 import { MessageActions } from "./message-actions";
-import { MessageComposer } from "./message-composer";
+import { MessageComposer, type SendMediaPayload } from "./message-composer";
 import { TemplatePicker } from "./template-picker";
 import { buildReplyPreview } from "./reply-quote";
 import { toast } from "sonner";
@@ -467,6 +467,58 @@ export function MessageThread({
     [conversation, onNewMessage, onUpdateMessage]
   );
 
+  const handleSendMedia = useCallback(
+    async (payload: SendMediaPayload, replyToId?: string) => {
+      if (!conversation) return;
+
+      const tempId = `temp-${Date.now()}`;
+      const label =
+        payload.message_type === "image"
+          ? "[Image]"
+          : payload.message_type === "audio"
+          ? "[Voice Note]"
+          : `[Document]`;
+
+      const optimisticMsg: Message = {
+        id: tempId,
+        conversation_id: conversation.id,
+        sender_type: "agent",
+        content_type: payload.message_type,
+        content_text: payload.caption || label,
+        status: "sending",
+        created_at: new Date().toISOString(),
+        reply_to_message_id: replyToId,
+        direction: "outbound",
+        message_type: payload.message_type,
+      };
+      onNewMessage(optimisticMsg);
+      setReplyTo(null);
+
+      try {
+        await api.post("/whatsapp/send", {
+          waId: conversation.id,
+          message_type: payload.message_type,
+          media_id: payload.media_id,
+          caption: payload.caption,
+          filename: payload.filename,
+          reply_to_message_id: replyToId,
+        });
+        onUpdateMessage(tempId, { status: "sent" });
+      } catch (err: unknown) {
+        console.error("Failed to send media:", err);
+        let reason = "network error";
+        if (isAxiosError(err) && err.response?.data?.error) {
+          reason = err.response.data.error;
+        } else if (err instanceof Error) {
+          reason = err.message;
+        }
+        toast.error(`Failed to send: ${reason}`);
+        onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
+      }
+    },
+    [conversation, onNewMessage, onUpdateMessage]
+  );
+
   const handleStatusChange = useCallback(
     async (status: ConversationStatus) => {
       if (!conversation) return;
@@ -878,6 +930,7 @@ export function MessageThread({
         conversationId={conversation.id}
         sessionExpired={sessionInfo.expired}
         onSend={handleSend}
+        onSendMedia={handleSendMedia}
         onOpenTemplates={handleOpenTemplates}
         replyTo={replyTo}
         onClearReply={() => setReplyTo(null)}

@@ -117,7 +117,10 @@ function MediaImage({ url, alt }: { url: string; alt: string }) {
 }
 
 function MessageContent({ message }: { message: Message }) {
-  switch (message.content_type) {
+  // Backend stores `messageType`; frontend maps it to `content_type`.
+  // Fall back to `message_type` so existing and newly fetched messages both work.
+  const displayType = message.content_type || message.message_type || 'text';
+  switch (displayType) {
     case "text":
       return (
         <p className="whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
