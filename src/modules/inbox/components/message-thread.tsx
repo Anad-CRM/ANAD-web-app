@@ -387,13 +387,17 @@ export function MessageThread({
       try {
         // ANAD backend expects { waId, message_type, content_text }.
         // conversation.id is the waId (phone number) — set in inbox/page.tsx.
-        await api.post("/whatsapp/send", {
+        const res = await api.post("/whatsapp/send", {
           waId: conversation.id,
           message_type: "text",
           content_text: text,
           reply_to_message_id: replyToId,
         });
-        onUpdateMessage(tempId, { status: "sent" });
+        const messageId = res.data?.data?.messageId;
+        onUpdateMessage(tempId, {
+          id: messageId || tempId,
+          status: "sent",
+        });
       } catch (err: unknown) {
         console.error("Failed to send message:", err);
         let reason = "network error";
@@ -432,12 +436,13 @@ export function MessageThread({
         reply_to_message_id: replyToId,
         direction: "outbound",
         message_type: payload.message_type,
+        media_url: `/api/whatsapp/media/${payload.media_id}`,
       };
       onNewMessage(optimisticMsg);
       setReplyTo(null);
 
       try {
-        await api.post("/whatsapp/send", {
+        const res = await api.post("/whatsapp/send", {
           waId: conversation.id,
           message_type: payload.message_type,
           media_id: payload.media_id,
@@ -445,7 +450,12 @@ export function MessageThread({
           filename: payload.filename,
           reply_to_message_id: replyToId,
         });
-        onUpdateMessage(tempId, { status: "sent" });
+        const messageId = res.data?.data?.messageId;
+        onUpdateMessage(tempId, {
+          id: messageId || tempId,
+          status: "sent",
+          media_url: `/api/whatsapp/media/${payload.media_id}`,
+        });
       } catch (err: unknown) {
         console.error("Failed to send media:", err);
         let reason = "network error";
@@ -581,15 +591,12 @@ export function MessageThread({
       });
 
       try {
-        const res = await fetch("/api/whatsapp/react", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message_id: messageId, emoji }),
+        // Use api (which auto-attaches the accesstoken header) instead of raw fetch
+        await api.post("/whatsapp/react", {
+          message_id: messageId,
+          emoji,
+          waId: conversation.id,
         });
-        if (!res.ok) {
-          const payload = await res.json().catch(() => ({}));
-          throw new Error(payload?.error || `HTTP ${res.status}`);
-        }
       } catch (err) {
         const reason = err instanceof Error ? err.message : "network error";
         toast.error(`Reaction failed: ${reason}`);

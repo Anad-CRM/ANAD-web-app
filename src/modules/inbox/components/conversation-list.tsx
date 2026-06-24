@@ -220,12 +220,12 @@ interface ConversationItemProps {
 
 function formatLastMessageText(text: string | null | undefined): string {
   if (!text) return "No messages yet";
-  const clean = text.trim();
-  if (clean === "[Image]") return "📷 Photo";
-  if (clean === "[Sticker]") return "💟 Sticker";
-  if (clean === "[Voice Note]" || clean === "[audio]" || clean === "[voice]") return "🎵 Voice Note";
-  if (clean === "[Video]") return "🎥 Video";
-  if (clean === "[Document]") return "📄 Document";
+  const clean = text.trim().toLowerCase();
+  if (clean === "[image]") return "📷 Photo";
+  if (clean === "[sticker]") return "💟 Sticker";
+  if (clean === "[voice note]" || clean === "[audio]" || clean === "[voice]") return "🎵 Voice Note";
+  if (clean === "[video]") return "🎥 Video";
+  if (clean === "[document]") return "📄 Document";
   if (clean === "[reaction]" || clean.startsWith("[reaction]:")) return "❤️ Reaction";
   return text;
 }

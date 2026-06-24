@@ -226,7 +226,24 @@ export function MessageComposer({
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+
+      // Detect the best MIME type the browser actually supports.
+      // WhatsApp Cloud API accepts audio/aac, audio/mp4, audio/ogg, audio/mpeg.
+      // Browsers mostly record to audio/webm — Meta accepts webm as well.
+      const preferredTypes = [
+        "audio/mp4",          // Safari, modern Chrome
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/ogg;codecs=opus",
+      ];
+      const mimeType = preferredTypes.find((t) => MediaRecorder.isTypeSupported(t)) || "";
+      const ext = mimeType.startsWith("audio/mp4") ? "m4a"
+        : mimeType.startsWith("audio/ogg") ? "ogg"
+        : "webm";
+
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
       audioChunksRef.current = [];
 
@@ -236,8 +253,9 @@ export function MessageComposer({
 
       recorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(audioChunksRef.current, { type: "audio/ogg; codecs=opus" });
-        const file = new File([blob], `voice-note-${Date.now()}.ogg`, { type: "audio/ogg" });
+        const actualMime = recorder.mimeType || mimeType || "audio/webm";
+        const blob = new Blob(audioChunksRef.current, { type: actualMime });
+        const file = new File([blob], `voice-note-${Date.now()}.${ext}`, { type: actualMime });
 
         setSending(true);
         try {

@@ -12,9 +12,10 @@ async function handler(req: NextRequest) {
   const headers = new Headers(req.headers);
   headers.delete("host");
 
-  let body: string | undefined;
+  let body: ReadableStream<Uint8Array> | null | undefined;
   if (req.method !== "GET" && req.method !== "HEAD") {
-    body = await req.text();
+    // Forward the stream directly to preserve binary data for multipart/form-data
+    body = req.body;
   }
 
   try {

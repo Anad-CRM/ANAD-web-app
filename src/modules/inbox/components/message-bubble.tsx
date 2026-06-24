@@ -274,13 +274,15 @@ function MediaImage({ url, alt, isSticker }: { url: string; alt: string; isStick
 
 function checkRealCaption(text: string | null | undefined): boolean {
   if (!text) return false;
-  const clean = text.trim();
+  const clean = text.trim().toLowerCase();
   return (
-    clean !== "[Image]" &&
-    clean !== "[Sticker]" &&
-    clean !== "[Voice Note]" &&
-    clean !== "[Video]" &&
-    clean !== "[Document]" &&
+    clean !== "[image]" &&
+    clean !== "[sticker]" &&
+    clean !== "[voice note]" &&
+    clean !== "[audio]" &&
+    clean !== "[voice]" &&
+    clean !== "[video]" &&
+    clean !== "[document]" &&
     clean !== "[reaction]" &&
     !clean.startsWith("[reaction]:")
   );
