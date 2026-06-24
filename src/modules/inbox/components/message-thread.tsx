@@ -135,13 +135,13 @@ export function MessageThread({
   conversation,
   contact,
   messages,
-  onMessagesLoaded,
+  onMessagesLoaded: _onMessagesLoaded,
   onNewMessage,
   onUpdateMessage,
   onStatusChange,
   onAssignChange,
   onBack,
-  resyncToken = 0,
+  resyncToken: _resyncToken = 0,
   onRefresh,
 }: MessageThreadProps) {
   const { user } = useAuthContext();
@@ -149,7 +149,7 @@ export function MessageThread({
   // (the parent sets messages=[] when switching conversations then fills
   // it after the API call). We do NOT fetch from Supabase here — messages
   // live in MySQL and are polled by the parent page.
-  const loading = messages.length === 0 && !!conversationId;
+  const loading = messages.length === 0 && !!conversation?.id;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
