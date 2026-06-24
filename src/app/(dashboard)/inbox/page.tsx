@@ -88,7 +88,9 @@ export default function InboxPage() {
                 : (m.mediaUrl as string)
             ) : undefined,
             errorMessage: (m.errorMessage as string) || undefined,
+            reply_to_message_id: (m.replyToMessageId as string) || undefined,
           };
+
         }));
       }
     } catch (err) {

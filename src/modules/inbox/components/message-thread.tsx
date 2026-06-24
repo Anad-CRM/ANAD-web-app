@@ -145,7 +145,11 @@ export function MessageThread({
   onRefresh,
 }: MessageThreadProps) {
   const { user } = useAuthContext();
-  const [loading, setLoading] = useState(false);
+  // loading is driven by the parent: true while messages array is empty
+  // (the parent sets messages=[] when switching conversations then fills
+  // it after the API call). We do NOT fetch from Supabase here — messages
+  // live in MySQL and are polled by the parent page.
+  const loading = messages.length === 0 && !!conversationId;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -272,59 +276,7 @@ export function MessageThread({
     return { expired, remaining };
   }, [messages]);
 
-  // Store latest callback in a ref so fetchMessages doesn't need to
-  // depend on `onMessagesLoaded` — otherwise parent re-renders cause
-  // fetchMessages to change → useEffect re-fires → refetch → realtime
-  // UPDATE on conversations.unread_count → parent re-renders → LOOP.
-  // The ref is written inside an effect so the mutation doesn't happen
-  // during render (React 19 refs rule); consumers only read `.current`
-  // inside the async fetch completion, which runs after the render.
-  const onMessagesLoadedRef = useRef(onMessagesLoaded);
-  useEffect(() => {
-    onMessagesLoadedRef.current = onMessagesLoaded;
-  });
-
   const conversationId = conversation?.id;
-  const hasUnread = (conversation?.unread_count ?? 0) > 0;
-
-  // Fetch messages whenever the selected conversation changes. Kept
-  // separate from the unread-reset effect so that incoming messages
-  // arriving while the thread is open don't trigger a full refetch —
-  // they only flip hasUnread, which only the reset effect listens to.
-  useEffect(() => {
-    if (!conversationId) return;
-
-    const supabase = createClient();
-    let cancelled = false;
-
-    (async () => {
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
-
-      if (cancelled) return;
-
-      if (error) {
-        console.error("Failed to fetch messages");
-      } else {
-        onMessagesLoadedRef.current(data ?? []);
-      }
-
-      if (!cancelled) setLoading(false);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-    // `resyncToken` is included so the parent can force a refetch when
-    // the realtime channel reconnects or the tab regains focus —
-    // realtime is best-effort and any message events sent while the WS
-    // was disconnected or throttled are otherwise lost.
-  }, [conversationId, resyncToken]);
 
   // Clear any in-progress reply draft when the active conversation changes —
   // a quote pulled from conversation A shouldn't bleed into conversation B.
@@ -332,27 +284,6 @@ export function MessageThread({
     setReplyTo(null);
   }, [conversationId]);
 
-  // Reset the server-side unread_count to 0 whenever an unread count
-  // surfaces on the active conversation — covers both (a) opening a
-  // conversation that had unread messages and (b) new messages arriving
-  // while the user is already viewing the thread (webhook server-bumps
-  // unread_count to N+1; the realtime UPDATE propagates it into the
-  // client, which re-runs this effect and flips it back to 0).
-  //
-  // Guarding on hasUnread prevents the eq-update loop: once unread_count
-  // is 0 the condition is false, so no further UPDATE is issued.
-  useEffect(() => {
-    if (!conversationId || !hasUnread) return;
-    const supabase = createClient();
-    const resetUnread = async () => {
-      const { error }: Record<string, unknown> = await supabase
-        .from("conversations")
-        .update({ unread_count: 0 })
-        .eq("id", conversationId);
-      if (error) console.error("Failed to reset unread_count:", error);
-    };
-    resetUnread();
-  }, [conversationId, hasUnread]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
