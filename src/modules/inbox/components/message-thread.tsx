@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { cn, createClient, parseSafeDate } from "../lib/utils";
 import { api } from "@/core/api/axios";
+import { getToken } from "@/core/utils/auth";
+
 import type {
   Conversation,
   Message,
@@ -535,11 +537,19 @@ export function MessageThread({
       });
 
       try {
-        // Use api (which auto-attaches the accesstoken header) instead of raw fetch
+        const token = getToken();
+        if (!token) {
+          console.error("[postReaction] No auth token in localStorage — user may need to log in again");
+          throw new Error("Not authenticated");
+        }
+        console.log("[postReaction] Sending reaction:", { messageId, emoji, waId: conversation.id });
+        // Explicitly pass accesstoken header as a fallback in case the interceptor misses it
         const result = await api.post("/whatsapp/react", {
           message_id: messageId,
           emoji,
           waId: conversation.id,
+        }, {
+          headers: { accesstoken: token },
         });
         if (!result.data?.success) {
           throw new Error(result.data?.error || "Reaction failed");
