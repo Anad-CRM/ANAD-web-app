@@ -89,6 +89,7 @@ export default function InboxPage() {
             ) : undefined,
             errorMessage: (m.errorMessage as string) || undefined,
             reply_to_message_id: (m.replyToMessageId as string) || undefined,
+            wamid: (m.messageId as string) || undefined,
           };
 
         }));

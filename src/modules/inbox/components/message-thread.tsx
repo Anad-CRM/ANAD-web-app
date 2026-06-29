@@ -157,31 +157,44 @@ export function MessageThread({
 
   // Reactions extracted dynamically from messages (reaction type or starting with [reaction]:)
   const parsedReactions = useMemo(() => {
+    // Build a reverse map: wamid → internal DB uuid, so customer reactions
+    // (which store the target's wamid) can be matched to the right bubble.
+    const wamidToId = new Map<string, string>();
+    messages.forEach((m) => {
+      if (m.wamid) wamidToId.set(m.wamid, m.id);
+    });
+
     const map = new Map<string, MessageReaction>();
 
     messages.forEach((m) => {
       if (m.message_type === "reaction" || (m.content_text && m.content_text.startsWith("[reaction]:"))) {
         const text = m.content_text || "";
-        const parts = text.split(":");
-        if (parts.length >= 3) {
-          const targetMessageId = parts[1];
-          const emoji = parts[2];
-          const actorId = m.direction === "outbound" ? "agent" : "customer";
-          const key = `${targetMessageId}-${actorId}`;
-          
-          if (!emoji) {
-            map.delete(key);
-          } else {
-            map.set(key, {
-              id: m.id,
-              message_id: targetMessageId,
-              emoji: emoji,
-              user_id: actorId,
-              actor_type: m.direction === "outbound" ? "agent" : "customer",
-              actor_id: actorId,
-              conversation_id: m.conversation_id,
-            });
-          }
+        // Format: [reaction]:<targetWamid>:<emoji>
+        // Emoji may contain ':', so split only on the FIRST two colons after the prefix.
+        const firstColon = text.indexOf(":");           // after "[reaction]"
+        const secondColon = text.indexOf(":", firstColon + 1); // after targetWamid
+        if (firstColon === -1 || secondColon === -1) return;
+
+        const targetWamid = text.substring(firstColon + 1, secondColon);
+        const emoji = text.substring(secondColon + 1); // everything after the second ':' is the emoji
+        
+        // Resolve wamid → internal DB uuid so the reaction attaches to the right bubble
+        const targetInternalId = wamidToId.get(targetWamid) ?? targetWamid;
+        const actorId = m.direction === "outbound" ? "agent" : "customer";
+        const key = `${targetInternalId}-${actorId}`;
+
+        if (!emoji || !targetWamid) {
+          map.delete(key);
+        } else {
+          map.set(key, {
+            id: m.id,
+            message_id: targetInternalId,
+            emoji: emoji,
+            user_id: actorId,
+            actor_type: m.direction === "outbound" ? "agent" : "customer",
+            actor_id: actorId,
+            conversation_id: m.conversation_id,
+          });
         }
       }
     });
@@ -523,11 +536,14 @@ export function MessageThread({
 
       try {
         // Use api (which auto-attaches the accesstoken header) instead of raw fetch
-        await api.post("/whatsapp/react", {
+        const result = await api.post("/whatsapp/react", {
           message_id: messageId,
           emoji,
           waId: conversation.id,
         });
+        if (!result.data?.success) {
+          throw new Error(result.data?.error || "Reaction failed");
+        }
       } catch (err) {
         const reason = err instanceof Error ? err.message : "network error";
         toast.error(`Reaction failed: ${reason}`);

@@ -448,6 +448,8 @@ export function MessageBubble({
       className={cn(
         "flex flex-col relative",
         isAgent ? "items-end" : "items-start",
+        // Add bottom padding when reactions exist so pills don't clip into the next bubble
+        reactions && reactions.length > 0 ? "pb-4" : "",
       )}
     >
       <div
@@ -471,23 +473,24 @@ export function MessageBubble({
             {isAgent && <StatusIcon status={message.status} />}
           </div>
         )}
-
-        {/* Floating Message Reactions Pill overlapping bubble bottom border */}
-        {reactions && reactions.length > 0 && onToggleReaction && (
-          <div
-            className={cn(
-              "absolute z-20 -bottom-3 select-none",
-              isAgent ? "right-3" : "left-3"
-            )}
-          >
-            <MessageReactions
-              reactions={reactions}
-              currentUserId={currentUserId}
-              onToggle={onToggleReaction}
-            />
-          </div>
-        )}
       </div>
+
+      {/* Reaction pills — rendered outside the bubble so they don't clip,
+          positioned slightly overlapping the bubble bottom edge, WhatsApp-style. */}
+      {reactions && reactions.length > 0 && onToggleReaction && (
+        <div
+          className={cn(
+            "absolute bottom-0 z-20 select-none",
+            isAgent ? "right-2" : "left-2",
+          )}
+        >
+          <MessageReactions
+            reactions={reactions}
+            currentUserId={currentUserId}
+            onToggle={onToggleReaction}
+          />
+        </div>
+      )}
 
       {isSticker && (
         <div className="mt-1 flex items-center gap-1 justify-end px-1 select-none">

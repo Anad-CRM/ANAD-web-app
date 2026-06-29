@@ -51,41 +51,40 @@ export function MessageReactions({
 
   if (groups.length === 0) return null;
 
-  const totalCount = reactions.length;
-  const hasCurrentUserReacted = groups.some((g) => g.byCurrentUser);
-  // Find which emoji the current user reacted with, so we can toggle/remove it
-  const currentUserEmoji = groups.find((g) => g.byCurrentUser)?.emoji;
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Avoid triggering any bubble click handlers
-    if (currentUserEmoji) {
-      onToggle(currentUserEmoji);
-    } else {
-      onToggle(groups[0].emoji);
-    }
-  };
-
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className={cn(
-        "flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold leading-none shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 select-none",
-        hasCurrentUserReacted
-          ? "border-[#1E56A0]/45 bg-[#E8F1FC] text-[#1E56A0]"
-          : "border-[#D6E4F0] bg-white text-[#5A7190]",
-      )}
-    >
-      <div className="flex items-center -space-x-0.5">
-        {groups.map((g) => (
-          <span key={g.emoji} className="text-xs leading-none select-none">
-            {g.emoji}
-          </span>
-        ))}
-      </div>
-      {totalCount > 1 && (
-        <span className="pl-0.5 text-[9px] font-bold leading-none">{totalCount}</span>
-      )}
-    </button>
+    <div className="flex flex-wrap items-center gap-0.5">
+      {groups.map((g) => (
+        <button
+          key={g.emoji}
+          type="button"
+          title={g.byCurrentUser ? "Click to remove your reaction" : `React with ${g.emoji}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            // Toggle: if this is the user's own emoji, remove it; otherwise add/swap
+            onToggle(g.byCurrentUser ? "" : g.emoji);
+          }}
+          className={cn(
+            // WhatsApp-style pill: compact, rounded, border, shadow
+            "inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[11px] leading-none shadow-sm",
+            "transition-all duration-150 select-none",
+            "hover:scale-110 active:scale-95",
+            // Highlight own reaction with blue tint (like WhatsApp)
+            g.byCurrentUser
+              ? "border-[#1E56A0]/50 bg-[#DCE8F8] text-[#1E56A0] font-semibold"
+              : "border-[#D0D7DE] bg-white/95 text-[#444] font-medium",
+          )}
+        >
+          <span className="text-sm leading-none">{g.emoji}</span>
+          {g.count > 1 && (
+            <span className={cn(
+              "text-[9px] font-bold leading-none",
+              g.byCurrentUser ? "text-[#1E56A0]" : "text-[#666]",
+            )}>
+              {g.count}
+            </span>
+          )}
+        </button>
+      ))}
+    </div>
   );
 }

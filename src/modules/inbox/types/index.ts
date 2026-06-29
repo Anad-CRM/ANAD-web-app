@@ -55,6 +55,8 @@ export type Message = {
   reactions?: MessageReaction[];
   template_name?: string;
   errorMessage?: string;
+  /** WhatsApp message ID (wamid) — used to match incoming reactions to target messages */
+  wamid?: string;
 };
 
 export type MessageTemplate = {
