@@ -300,8 +300,9 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
         </p>
       );
 
-    case "image": {
-      const isSticker = message.message_type === "sticker";
+    case "image":
+    case "sticker": {
+      const isSticker = displayType === "sticker" || message.message_type === "sticker";
       return (
         <div className="relative overflow-hidden rounded-xl">
           {message.media_url ? (
@@ -310,7 +311,7 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
             <MediaUnavailable label={isSticker ? "Sticker" : "Image"} />
           )}
           {!isSticker && overlay}
-          {hasRealCaption && (
+          {hasRealCaption && !isSticker && (
             <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[#0D1B3E] px-2 pb-1">
               {message.content_text}
             </p>
