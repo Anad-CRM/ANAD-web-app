@@ -21,6 +21,8 @@ import {
   Clock,
   ArrowLeft,
   RefreshCw,
+  Bot,
+  Loader2,
 } from "lucide-react";
 import { format, isToday, isYesterday, differenceInHours } from "date-fns";
 import { isAxiosError } from "axios";
@@ -82,6 +84,7 @@ interface MessageThreadProps {
    * working; the button is only rendered when this is provided.
    */
   onRefresh?: () => void;
+  onAiToggle?: (conversationId: string, isAiEnabled: boolean) => void;
 }
 
 function formatDateSeparator(dateStr: string): string {
@@ -145,8 +148,32 @@ export function MessageThread({
   onBack,
   resyncToken: _resyncToken = 0,
   onRefresh,
+  onAiToggle,
 }: MessageThreadProps) {
   const { user } = useAuthContext();
+  const [togglingAi, setTogglingAi] = useState(false);
+
+  const isAiEnabled = conversation?.is_ai_enabled !== false;
+
+  const handleAiToggleClick = async () => {
+    if (!conversation) return;
+    setTogglingAi(true);
+    const nextVal = !isAiEnabled;
+    try {
+      await api.post("/whatsapp/toggle-ai", {
+        waId: conversation.id,
+        isAiEnabled: nextVal,
+      });
+      if (onAiToggle) {
+        onAiToggle(conversation.id, nextVal);
+      }
+      toast.success(`AI Auto Responder ${nextVal ? 'enabled' : 'disabled'} for this chat`);
+    } catch {
+      toast.error("Failed to toggle AI responder");
+    } finally {
+      setTogglingAi(false);
+    }
+  };
   // loading is driven by the parent: true while messages array is empty
   // (the parent sets messages=[] when switching conversations then fills
   // it after the API call). We do NOT fetch from Supabase here — messages
@@ -676,6 +703,30 @@ export function MessageThread({
             </button>
           )}
 
+          {/* AI Toggle */}
+          <button
+            type="button"
+            onClick={handleAiToggleClick}
+            disabled={togglingAi}
+            className={cn(
+              "inline-flex items-center justify-center h-7 gap-1.5 px-2.5 text-xs font-semibold rounded-md transition-all border shrink-0",
+              isAiEnabled
+                ? "bg-violet-600 border-violet-600 text-white shadow-sm hover:bg-violet-700"
+                : "bg-white border-[#D6E4F0] text-[#5A7190] hover:bg-[#EEF4FB]"
+            )}
+            title={isAiEnabled ? "AI Responder is Active" : "AI Responder is Paused"}
+          >
+            {togglingAi ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Bot className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">AI Responder</span>
+            {isAiEnabled ? (
+              <span className="h-1.5 w-1.5 rounded-full bg-green-300 animate-pulse" />
+            ) : null}
+          </button>
+
           {/* Status dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger className={cn(
@@ -809,6 +860,7 @@ export function MessageThread({
                       <MessageActions
                         key={msg.id}
                         message={msg}
+                        contact={contact}
                         onReply={() => handleStartReply(msg)}
                         onReact={(emoji) => {
                           if (emoji) void postReaction(msg.id, emoji);

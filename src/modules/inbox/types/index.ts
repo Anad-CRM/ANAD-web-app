@@ -27,6 +27,7 @@ export type Conversation = {
   last_message_at?: string;
   last_message_text?: string;
   contact?: Contact;
+  is_ai_enabled?: boolean;
 };
 
 export type MessageReaction = {
@@ -57,6 +58,7 @@ export type Message = {
   errorMessage?: string;
   /** WhatsApp message ID (wamid) — used to match incoming reactions to target messages */
   wamid?: string;
+  name?: string;
 };
 
 export type MessageTemplate = {

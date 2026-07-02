@@ -46,6 +46,7 @@ export default function InboxPage() {
           unread_count: c.unreadCount as number,
           last_message_at: c.lastMessageTime as string,
           last_message_text: c.lastMessage as string,
+          is_ai_enabled: c.isAiEnabled !== false,
           contact: {
             id: c.waId as string,
             name: (c.name !== 'Agent' && c.name !== c.waId) ? c.name as string : null,
@@ -90,6 +91,7 @@ export default function InboxPage() {
             errorMessage: (m.errorMessage as string) || undefined,
             reply_to_message_id: (m.replyToMessageId as string) || undefined,
             wamid: (m.messageId as string) || undefined,
+            name: (m.name as string) || undefined,
           };
 
         }));
@@ -192,6 +194,10 @@ export default function InboxPage() {
     return activeConversationWithContact?.contact ?? null;
   }, [activeConversationWithContact]);
 
+  const handleAiToggle = useCallback((conversationId: string, isAiEnabled: boolean) => {
+    setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, is_ai_enabled: isAiEnabled } : c));
+  }, []);
+
   const hasActiveConv = !!activeConversation;
 
   return (
@@ -229,6 +235,7 @@ export default function InboxPage() {
             onBack={handleCloseConversation}
             resyncToken={resyncToken}
             onRefresh={handleManualRefresh}
+            onAiToggle={handleAiToggle}
           />
         </div>
 

@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "./ui/popover";
-import type { Message } from "../types";
+import type { Message, Contact } from "../types";
 
 // WhatsApp's 6 core quick-reaction emojis
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -19,6 +19,7 @@ interface MessageActionsProps {
   onReply: () => void;
   onReact: (emoji: string) => void;
   children: ReactNode;
+  contact: Contact | null;
 }
 
 /**
@@ -34,6 +35,7 @@ export function MessageActions({
   onReply,
   onReact,
   children,
+  contact,
 }: MessageActionsProps) {
   // Touch devices have no hover. Long-press fires `contextmenu`; we capture
   // it, suppress the native menu, and pin the toolbar open until the user
@@ -75,20 +77,65 @@ export function MessageActions({
     setTouchOpen(false);
   };
 
+  const renderAvatar = () => {
+    if (isAgent) {
+      const isAi = message.name === "AI Agent";
+      if (isAi) {
+        return (
+          <div
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-sm select-none"
+            style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)' }}
+            title="AI Auto Responder"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none" />
+              <circle cx="12" cy="12" r="10" fill="rgba(255,255,255,0.15)" />
+              <path d="M8 12.5C8 10.57 9.57 9 11.5 9S15 10.57 15 12.5 13.43 16 11.5 16 8 14.43 8 12.5z" fill="white" opacity="0.9"/>
+              <circle cx="11.5" cy="12.5" r="1.5" fill="#7c3aed"/>
+            </svg>
+          </div>
+        );
+      }
+
+      const initials = message.name ? message.name.charAt(0).toUpperCase() : "A";
+      return (
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1E56A0] text-[10px] font-bold text-white shadow-sm select-none"
+          title={message.name || "Agent"}
+        >
+          {initials}
+        </div>
+      );
+    } else {
+      const displayName = contact?.name || contact?.phone || "Customer";
+      const initials = displayName.charAt(0).toUpperCase();
+      return (
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#5A7190] text-[10px] font-bold text-white shadow-sm select-none"
+          title={displayName}
+        >
+          {initials}
+        </div>
+      );
+    }
+  };
+
   // Row alignment lives here (not in MessageBubble) so the `group/actions`
   // hover region matches the bubble's content width — hovering empty space
   // in the row no longer reveals the toolbar.
   return (
     <div
       className={cn(
-        "flex w-full",
-        isAgent ? "justify-end" : "justify-start",
+        "flex w-full items-end gap-2 mb-1",
+        isAgent ? "justify-end flex-row-reverse" : "justify-start flex-row",
       )}
       onContextMenu={handleContextMenu}
       onBlur={() => setTouchOpen(false)}
     >
+      {renderAvatar()}
+
       {/* `min-w-0` lets this flex child actually respect the 75% cap. */}
-      <div className="group/actions relative min-w-0 max-w-[75%]">
+      <div className="group/actions relative min-w-0 max-w-[70%]">
         {children}
 
         {/* Action toolbar — appears on hover/touch */}
