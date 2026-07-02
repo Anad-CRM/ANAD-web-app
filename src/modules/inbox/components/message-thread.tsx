@@ -371,6 +371,9 @@ export function MessageThread({
           id: messageId || tempId,
           status: "sent",
         });
+        if (onAiToggle) {
+          onAiToggle(conversation.id, false);
+        }
       } catch (err: unknown) {
         console.error("Failed to send message:", err);
         let reason = "network error";
@@ -383,7 +386,7 @@ export function MessageThread({
         onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },
-    [conversation, onNewMessage, onUpdateMessage]
+    [conversation, onNewMessage, onUpdateMessage, onAiToggle]
   );
 
   const handleSendMedia = useCallback(
@@ -429,6 +432,9 @@ export function MessageThread({
           status: "sent",
           media_url: `/api/whatsapp/media/${payload.media_id}`,
         });
+        if (onAiToggle) {
+          onAiToggle(conversation.id, false);
+        }
       } catch (err: unknown) {
         console.error("Failed to send media:", err);
         let reason = "network error";
@@ -441,7 +447,7 @@ export function MessageThread({
         onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },
-    [conversation, onNewMessage, onUpdateMessage]
+    [conversation, onNewMessage, onUpdateMessage, onAiToggle]
   );
 
   const handleStatusChange = useCallback(
