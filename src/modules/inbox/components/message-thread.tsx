@@ -153,7 +153,7 @@ export function MessageThread({
   const { user } = useAuthContext();
   const [togglingAi, setTogglingAi] = useState(false);
 
-  const isAiEnabled = conversation?.is_ai_enabled !== false;
+  const isAiEnabled = conversation?.is_ai_enabled === true;
 
   const handleAiToggleClick = async () => {
     if (!conversation) return;
@@ -371,9 +371,6 @@ export function MessageThread({
           id: messageId || tempId,
           status: "sent",
         });
-        if (onAiToggle) {
-          onAiToggle(conversation.id, false);
-        }
       } catch (err: unknown) {
         console.error("Failed to send message:", err);
         let reason = "network error";
@@ -386,7 +383,7 @@ export function MessageThread({
         onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },
-    [conversation, onNewMessage, onUpdateMessage, onAiToggle]
+    [conversation, onNewMessage, onUpdateMessage]
   );
 
   const handleSendMedia = useCallback(
@@ -432,9 +429,6 @@ export function MessageThread({
           status: "sent",
           media_url: `/api/whatsapp/media/${payload.media_id}`,
         });
-        if (onAiToggle) {
-          onAiToggle(conversation.id, false);
-        }
       } catch (err: unknown) {
         console.error("Failed to send media:", err);
         let reason = "network error";
@@ -447,7 +441,7 @@ export function MessageThread({
         onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },
-    [conversation, onNewMessage, onUpdateMessage, onAiToggle]
+    [conversation, onNewMessage, onUpdateMessage]
   );
 
   const handleStatusChange = useCallback(
@@ -709,28 +703,37 @@ export function MessageThread({
             </button>
           )}
 
-          {/* AI Toggle */}
+          {/* AI Responder Toggle */}
           <button
             type="button"
             onClick={handleAiToggleClick}
             disabled={togglingAi}
+            title={isAiEnabled ? "AI Responder is ON — Click to turn OFF" : "AI Responder is OFF — Click to turn ON"}
             className={cn(
-              "inline-flex items-center justify-center h-7 gap-1.5 px-2.5 text-xs font-semibold rounded-md transition-all border shrink-0",
+              "inline-flex items-center gap-2 h-7 pl-2 pr-1.5 text-xs font-semibold rounded-full transition-all duration-200 border shrink-0 select-none",
               isAiEnabled
-                ? "bg-violet-600 border-violet-600 text-white shadow-sm hover:bg-violet-700"
-                : "bg-white border-[#D6E4F0] text-[#5A7190] hover:bg-[#EEF4FB]"
+                ? "bg-violet-600 border-violet-600 text-white shadow-[0_0_10px_2px_rgba(124,58,237,0.35)] hover:bg-violet-700"
+                : "bg-white border-[#D6E4F0] text-[#5A7190] hover:border-violet-300 hover:text-violet-600"
             )}
-            title={isAiEnabled ? "AI Responder is Active" : "AI Responder is Paused"}
           >
             {togglingAi ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Bot className="h-3.5 w-3.5" />
+              <Bot className={cn("h-3.5 w-3.5 shrink-0", isAiEnabled ? "text-white" : "text-[#5A7190]")} />
             )}
-            <span className="hidden sm:inline">AI Responder</span>
-            {isAiEnabled ? (
-              <span className="h-1.5 w-1.5 rounded-full bg-green-300 animate-pulse" />
-            ) : null}
+
+            {/* Track + thumb pill */}
+            <span className={cn(
+              "relative flex h-4.5 w-8 items-center rounded-full transition-colors duration-200 shrink-0",
+              isAiEnabled ? "bg-white/25" : "bg-[#D6E4F0]"
+            )}>
+              <span className={cn(
+                "absolute h-3.5 w-3.5 rounded-full shadow transition-all duration-200",
+                isAiEnabled
+                  ? "translate-x-[18px] bg-white"
+                  : "translate-x-[1px] bg-[#8BA5C0]"
+              )} />
+            </span>
           </button>
 
           {/* Status dropdown */}
