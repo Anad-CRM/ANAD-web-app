@@ -157,7 +157,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
         ? { provider, apiKey, systemPrompt }
         : undefined;
 
-      const reply = await testAiPrompt(userMsg, overrides);
+      const reply = await testAiPrompt(userMsg, chatHistory, overrides);
       setChatHistory(prev => [...prev, { role: 'ai', text: reply }]);
     } catch (err) {
       const e = err as { response?: { data?: { message?: string } } };

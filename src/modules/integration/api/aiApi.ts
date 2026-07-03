@@ -63,12 +63,14 @@ export const deleteAiConfig = async (): Promise<void> => {
  */
 export const testAiPrompt = async (
   testMessage: string,
+  chatHistory: { role: 'user' | 'ai'; text: string }[],
   overrides?: Partial<AiConfigPayload>
 ): Promise<string> => {
   const organizationId = getOrgId();
 
   const resp = await api.post(API_ENDPOINTS.AI.TEST_PROMPT, {
     testMessage,
+    chatHistory,
     organizationId,
     ...(overrides?.provider ? { provider: overrides.provider } : {}),
     ...(overrides?.apiKey ? { apiKey: overrides.apiKey } : {}),
