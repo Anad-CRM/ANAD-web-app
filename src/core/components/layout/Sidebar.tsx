@@ -9,11 +9,18 @@ import Button from "@/core/components/ui/Button";
 import { COLORS } from "@/core/components/theme/colors";
 import { Text } from "@/core/components/ui/Text";
 
-const NAV = [
+type NavItem = {
+  href: string;
+  label: string;
+  svgIcon: React.ReactNode;
+  subItems?: { href: string; label: string }[];
+};
+
+const NAV: NavItem[] = [
   { href: "/overview", label: "Dashboard", svgIcon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
-  { 
-    href: "/inbox", 
-    label: "Inbox", 
+  {
+    href: "/inbox",
+    label: "Inbox",
     svgIcon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
     subItems: [
       { href: "/inbox", label: "Chats" },
@@ -64,20 +71,20 @@ export default function Sidebar() {
             Navigation
           </Text>
         </div>
-        {NAV.map((item: any) => {
+        {NAV.map((item) => {
           if (item.href === "/teams" && !isAuthorizedForTeams) {
             return null;
           }
           if (item.href === "/export-log" && !isAdmin) {
             return null;
           }
-          
+
           const hasSubItems = item.subItems && item.subItems.length > 0;
           const isMenuOpen = openMenus[item.href];
-          
+
           let active = pathname === item.href || pathname.startsWith(item.href + "/");
           if (hasSubItems) {
-            active = active || item.subItems.some((sub: any) => pathname === sub.href || pathname.startsWith(sub.href + "/"));
+            active = active || item.subItems!.some((sub) => pathname === sub.href || pathname.startsWith(sub.href + "/"));
           }
 
           return (
@@ -115,10 +122,10 @@ export default function Sidebar() {
                   <span>{item.label}</span>
                 </Link>
               )}
-              
+
               {hasSubItems && isMenuOpen && (
                 <div className="flex flex-col gap-1 pl-11 pr-2 mt-1">
-                  {item.subItems.map((subItem: any) => {
+                  {item.subItems!.map((subItem) => {
                     const subActive = pathname === subItem.href || (subItem.href !== "/inbox" && pathname.startsWith(subItem.href + "/"));
                     return (
                       <Link
