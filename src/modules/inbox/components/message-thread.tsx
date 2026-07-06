@@ -373,13 +373,26 @@ export function MessageThread({
         });
       } catch (err: unknown) {
         console.error("Failed to send message:", err);
-        let reason = "network error";
-        if (isAxiosError(err) && err.response?.data?.error) {
-          reason = err.response.data.error;
+        let reason = "Failed to send message. Please try again.";
+        let is24hError = false;
+
+        if (isAxiosError(err) && err.response?.data) {
+          const data = err.response.data;
+          if (data.errorType === '24_hour_window' || (data.error && (
+            data.error.includes('24 hours') || data.error.includes('more than 24')
+          ))) {
+            is24hError = true;
+            reason = 'Message failed to send because more than 24 hours have passed since the customer last replied to this number.';
+          } else if (data.error) {
+            reason = data.error;
+          }
         } else if (err instanceof Error) {
           reason = err.message;
         }
-        toast.error(`Failed to send: ${reason}`);
+
+        toast.error(reason, {
+          duration: is24hError ? 6000 : 4000,
+        });
         onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },
@@ -431,13 +444,26 @@ export function MessageThread({
         });
       } catch (err: unknown) {
         console.error("Failed to send media:", err);
-        let reason = "network error";
-        if (isAxiosError(err) && err.response?.data?.error) {
-          reason = err.response.data.error;
+        let reason = "Failed to send message. Please try again.";
+        let is24hError = false;
+
+        if (isAxiosError(err) && err.response?.data) {
+          const data = err.response.data;
+          if (data.errorType === '24_hour_window' || (data.error && (
+            data.error.includes('24 hours') || data.error.includes('more than 24')
+          ))) {
+            is24hError = true;
+            reason = 'Message failed to send because more than 24 hours have passed since the customer last replied to this number.';
+          } else if (data.error) {
+            reason = data.error;
+          }
         } else if (err instanceof Error) {
           reason = err.message;
         }
-        toast.error(`Failed to send: ${reason}`);
+
+        toast.error(reason, {
+          duration: is24hError ? 6000 : 4000,
+        });
         onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },

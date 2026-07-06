@@ -501,8 +501,9 @@ export function MessageBubble({
       )}
 
       {message.status === "failed" && message.errorMessage && (
-        <div className="mt-1 text-xs text-red-500 italic max-w-xs break-words">
-          {message.errorMessage}
+        <div className="mt-1.5 flex items-start gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 max-w-xs">
+          <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500" />
+          <p className="text-xs text-red-600 leading-snug break-words">{message.errorMessage}</p>
         </div>
       )}
     </div>
