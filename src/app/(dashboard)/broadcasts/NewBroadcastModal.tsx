@@ -193,6 +193,7 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
               Create WhatsApp Broadcast
             </h2>
             <button
+              type="button"
               onClick={onClose}
               className="rounded-full p-1.5 transition-colors hover:bg-gray-100"
               style={{ color: COLORS.muted }}
@@ -266,9 +267,10 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
                     No approved templates found in Meta.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2.5 max-h-[220px] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-1 gap-2.5 overflow-y-auto pr-1">
                     {templates.map((tpl) => (
                       <button
+                        type="button"
                         key={tpl.id}
                         onClick={() => setSelectedTemplate(tpl)}
                         className="flex flex-col text-left rounded-xl border p-3.5 transition-all"
@@ -315,6 +317,7 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
                 <div className="grid grid-cols-1 gap-2 mt-2">
                   {LEAD_STATUSES.map((status) => (
                     <button
+                      type="button"
                       key={status.value}
                       onClick={() => setAudienceType(status.value)}
                       className="flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition-all"
@@ -349,6 +352,7 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
                   <p className="text-sm font-semibold" style={{ color: COLORS.text }}>No template selected</p>
                   <p className="text-xs" style={{ color: COLORS.muted }}>Please go back and select a template first.</p>
                   <button
+                    type="button"
                     onClick={() => setStep(1)}
                     className="mt-2 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold"
                     style={{ color: COLORS.text }}
@@ -434,6 +438,7 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
         <div className="flex items-center justify-between border-t px-6 py-4 bg-gray-50" style={{ borderColor: "#E5E7EB" }}>
           {step > 1 ? (
             <button
+              type="button"
               onClick={() => setStep((s) => s - 1)}
               disabled={submitting}
               className="flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold transition-colors hover:bg-gray-50 disabled:opacity-50"
@@ -448,6 +453,7 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
 
           {step < 3 ? (
             <button
+              type="button"
               onClick={() => {
                 if (step === 1) {
                   if (!campaignName.trim()) {
@@ -484,6 +490,7 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
             </button>
           ) : (
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={submitting || !selectedTemplate}
               className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
