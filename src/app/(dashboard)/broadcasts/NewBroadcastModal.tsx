@@ -187,22 +187,49 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
         style={{ borderColor: COLORS.border }}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b px-6 py-4" style={{ borderColor: "#E5E7EB" }}>
-          <div>
+        <div className="border-b px-6 pt-4 pb-3" style={{ borderColor: "#E5E7EB" }}>
+          <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold" style={{ color: COLORS.text }}>
               Create WhatsApp Broadcast
             </h2>
-            <p className="text-xs" style={{ color: COLORS.muted }}>
-              Step {step} of 3
-            </p>
+            <button
+              onClick={onClose}
+              className="rounded-full p-1.5 transition-colors hover:bg-gray-100"
+              style={{ color: COLORS.muted }}
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-full p-1.5 transition-colors hover:bg-gray-100"
-            style={{ color: COLORS.muted }}
-          >
-            <X className="h-5 w-5" />
-          </button>
+          {/* Step Progress */}
+          <div className="flex items-center gap-2">
+            {[1, 2, 3].map((s) => (
+              <React.Fragment key={s}>
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold transition-colors"
+                    style={{
+                      backgroundColor: s <= step ? COLORS.primary : "#E5E7EB",
+                      color: s <= step ? "white" : COLORS.muted,
+                    }}
+                  >
+                    {s < step ? <CheckCircle2 className="h-3.5 w-3.5" /> : s}
+                  </div>
+                  <span
+                    className="text-[11px] font-semibold hidden sm:block"
+                    style={{ color: s === step ? COLORS.primary : COLORS.muted }}
+                  >
+                    {s === 1 ? "Template" : s === 2 ? "Audience" : "Personalize"}
+                  </span>
+                </div>
+                {s < 3 && (
+                  <div
+                    className="h-0.5 flex-1 rounded-full transition-colors"
+                    style={{ backgroundColor: s < step ? COLORS.primary : "#E5E7EB" }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
 
         {/* Modal Body / Steps */}
@@ -315,74 +342,90 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
             </div>
           )}
 
-          {step === 3 && selectedTemplate && (
+          {step === 3 && (
             <div className="flex flex-col gap-5">
-              {/* Variables personalization */}
-              {placeholders.length > 0 && (
-                <div className="flex flex-col gap-3">
-                  <label className="text-xs font-semibold" style={{ color: COLORS.text }}>
-                    Personalize Template Variables
+              {!selectedTemplate ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+                  <p className="text-sm font-semibold" style={{ color: COLORS.text }}>No template selected</p>
+                  <p className="text-xs" style={{ color: COLORS.muted }}>Please go back and select a template first.</p>
+                  <button
+                    onClick={() => setStep(1)}
+                    className="mt-2 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold"
+                    style={{ color: COLORS.text }}
+                  >
+                    ← Go Back to Step 1
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Variables personalization */}
+                  {placeholders.length > 0 && (
+                    <div className="flex flex-col gap-3">
+                      <label className="text-xs font-semibold" style={{ color: COLORS.text }}>
+                        Personalize Template Variables
+                      </label>
+                      <div className="flex flex-col gap-3 rounded-2xl border p-4 bg-gray-50/50">
+                        {placeholders.map((ph) => {
+                          const num = ph.replace(/\D/g, "");
+                          return (
+                            <div key={ph} className="flex items-center gap-4">
+                              <span
+                                className="inline-flex h-8 w-12 items-center justify-center rounded-lg text-xs font-mono font-bold flex-shrink-0"
+                                style={{ backgroundColor: `${COLORS.primary}12`, color: COLORS.primary }}
+                              >
+                                {ph}
+                              </span>
+                              <input
+                                type="text"
+                                placeholder={`Value for ${ph}...`}
+                                value={bodyVariables[num] || ""}
+                                onChange={(e) => handleVariableChange(num, e.target.value)}
+                                className="flex-1 rounded-xl border px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                                style={{ borderColor: "#D1D5DB", backgroundColor: "white" }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Message Live Preview */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold" style={{ color: COLORS.text }}>
+                      Message Preview
+                    </label>
+                    <div className="rounded-2xl p-4 bg-[#F0F2F5] border" style={{ borderColor: "#E5E7EB" }}>
+                      <div className="max-w-[85%] rounded-2xl bg-white p-3.5 shadow-sm">
+                        <p className="whitespace-pre-wrap text-sm" style={{ color: COLORS.text }}>
+                          {previewText}
+                        </p>
+                        <span className="mt-1 block text-right text-[10px]" style={{ color: COLORS.muted }}>
+                          {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Send immediately option */}
+                  <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={sendImmediately}
+                      onChange={(e) => setSendImmediately(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: COLORS.text }}>
+                        Send Broadcast Campaign Immediately
+                      </p>
+                      <p className="text-xs" style={{ color: COLORS.muted }}>
+                        If unchecked, the broadcast will be saved as a draft.
+                      </p>
+                    </div>
                   </label>
-                  <div className="flex flex-col gap-3 rounded-2xl border p-4 bg-gray-50/50">
-                    {placeholders.map((ph) => {
-                      const num = ph.replace(/\D/g, "");
-                      return (
-                        <div key={ph} className="flex items-center gap-4">
-                          <span
-                            className="inline-flex h-8 w-12 items-center justify-center rounded-lg text-xs font-mono font-bold"
-                            style={{ backgroundColor: `${COLORS.primary}12`, color: COLORS.primary }}
-                          >
-                            {ph}
-                          </span>
-                          <input
-                            type="text"
-                            placeholder={`Value for ${ph}...`}
-                            value={bodyVariables[num] || ""}
-                            onChange={(e) => handleVariableChange(num, e.target.value)}
-                            className="flex-1 rounded-xl border px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                            style={{ borderColor: "#D1D5DB", backgroundColor: "white" }}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                </>
               )}
-
-              {/* Message Live Preview */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold" style={{ color: COLORS.text }}>
-                  Message Preview
-                </label>
-                <div className="rounded-2xl p-4 bg-[#F0F2F5] border" style={{ borderColor: "#E5E7EB" }}>
-                  <div className="max-w-[85%] rounded-2xl bg-white p-3.5 shadow-sm">
-                    <p className="whitespace-pre-wrap text-sm" style={{ color: COLORS.text }}>
-                      {previewText}
-                    </p>
-                    <span className="mt-1 block text-right text-[10px]" style={{ color: COLORS.muted }}>
-                      {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Send immediately option */}
-              <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={sendImmediately}
-                  onChange={(e) => setSendImmediately(e.target.checked)}
-                  className="h-4.5 w-4.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: COLORS.text }}>
-                    Send Broadcast Campaign Immediately
-                  </p>
-                  <p className="text-xs" style={{ color: COLORS.muted }}>
-                    If unchecked, the broadcast will be saved as a draft.
-                  </p>
-                </div>
-              </label>
             </div>
           )}
         </div>
@@ -406,33 +449,50 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
           {step < 3 ? (
             <button
               onClick={() => {
-                if (step === 1 && !campaignName.trim()) {
-                  toast.error("Please enter a campaign name");
-                  return;
+                if (step === 1) {
+                  if (!campaignName.trim()) {
+                    toast.error("Please enter a campaign name");
+                    return;
+                  }
+                  if (!selectedTemplate) {
+                    toast.error("Please select a message template");
+                    return;
+                  }
+                  if (loadingTemplates) {
+                    toast.error("Please wait for templates to finish loading");
+                    return;
+                  }
                 }
-                if (step === 1 && !selectedTemplate) {
-                  toast.error("Please select a template");
-                  return;
-                }
+                // Step 2: audienceType always has a default value so no extra check needed
                 setStep((s) => s + 1);
               }}
-              className="flex items-center gap-1.5 rounded-xl px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              disabled={loadingTemplates && step === 1}
+              className="flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: COLORS.primary }}
             >
-              Next
-              <ChevronRight className="h-4 w-4" />
+              {loadingTemplates && step === 1 ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </>
+              )}
             </button>
           ) : (
             <button
               onClick={handleSubmit}
-              disabled={submitting}
-              className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:opacity-50"
+              disabled={submitting || !selectedTemplate}
+              className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: COLORS.success }}
             >
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating...
+                  Creating Broadcast...
                 </>
               ) : sendImmediately ? (
                 <>
@@ -442,7 +502,7 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
               ) : (
                 <>
                   <CheckCircle2 className="h-4 w-4" />
-                  Save Draft
+                  Save as Draft
                 </>
               )}
             </button>
