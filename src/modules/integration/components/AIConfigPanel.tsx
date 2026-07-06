@@ -207,7 +207,26 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
           <div className="flex items-center gap-2">
             {/* Enable / Disable toggle */}
             <button
-              onClick={() => setIsEnabled(v => !v)}
+              onClick={async () => {
+                const nextVal = !isEnabled;
+                if (nextVal && !isConnected) {
+                  showToast('Please configure and save an AI provider first', 'error');
+                  return;
+                }
+                
+                setIsEnabled(nextVal);
+                
+                // Immediately save the toggle state if we are already connected
+                if (isConnected) {
+                  try {
+                    await saveAiConfig({ provider, apiKey, systemPrompt, isEnabled: nextVal });
+                    showToast(`AI Auto Responder ${nextVal ? 'enabled' : 'disabled'}`, 'success');
+                  } catch {
+                    setIsEnabled(!nextVal);
+                    showToast('Failed to toggle AI responder', 'error');
+                  }
+                }
+              }}
               title={isEnabled ? 'Disable AI Responder' : 'Enable AI Responder'}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 isEnabled ? 'bg-violet-600' : 'bg-[#CBD5E1]'
