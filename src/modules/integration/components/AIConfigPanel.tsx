@@ -73,8 +73,8 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
     activeIndex === 0
       ? 'rounded-tr-[28px] rounded-bl-[28px] rounded-br-[28px] rounded-tl-0'
       : activeIndex === total - 1
-      ? 'rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0'
-      : 'rounded-[28px]';
+        ? 'rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0'
+        : 'rounded-[28px]';
 
   // ── Fetch config on mount ──────────────────────────────────────────
   const fetchConfig = useCallback(async () => {
@@ -213,9 +213,9 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
                   showToast('Please configure and save an AI provider first', 'error');
                   return;
                 }
-                
+
                 setIsEnabled(nextVal);
-                
+
                 // Immediately save the toggle state if we are already connected
                 if (isConnected) {
                   try {
@@ -228,14 +228,12 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
                 }
               }}
               title={isEnabled ? 'Disable AI Responder' : 'Enable AI Responder'}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isEnabled ? 'bg-violet-600' : 'bg-[#CBD5E1]'
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isEnabled ? 'bg-violet-600' : 'bg-[#CBD5E1]'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  isEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${isEnabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
 
@@ -253,11 +251,10 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
         {/* Status badge */}
         <div className="mt-3 flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${
-              isConnected
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${isConnected
                 ? 'bg-violet-100 text-violet-700'
                 : 'bg-[#F1F5F9] text-[#94A3B8]'
-            }`}
+              }`}
           >
             {isConnected ? (
               <>
@@ -301,11 +298,10 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
                 <button
                   key={p}
                   onClick={() => setProvider(p)}
-                  className={`rounded-[14px] px-3 py-2.5 text-[12px] font-semibold transition-all border-2 ${
-                    provider === p
+                  className={`rounded-[14px] px-3 py-2.5 text-[12px] font-semibold transition-all border-2 ${provider === p
                       ? 'border-violet-500 bg-white text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.18)]'
                       : 'border-transparent bg-white/60 text-[#64748B] hover:bg-white hover:text-[#0D1B3E]'
-                  }`}
+                    }`}
                 >
                   {p === 'none' ? '🚫 None' : p === 'gemini' ? '✨ Gemini' : '🤖 OpenAI'}
                 </button>
@@ -456,11 +452,10 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
                         className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[80%] rounded-[14px] px-3 py-2 text-[12px] leading-relaxed ${
-                            msg.role === 'user'
+                          className={`max-w-[80%] rounded-[14px] px-3 py-2 text-[12px] leading-relaxed ${msg.role === 'user'
                               ? 'bg-violet-600 text-white rounded-br-[4px]'
                               : 'bg-white text-[#374151] shadow-sm rounded-bl-[4px]'
-                          }`}
+                            }`}
                         >
                           {msg.text}
                         </div>
