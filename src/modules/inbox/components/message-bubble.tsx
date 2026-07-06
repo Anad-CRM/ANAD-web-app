@@ -30,26 +30,22 @@ interface MessageBubbleProps {
   onToggleReaction?: (emoji: string) => void;
 }
 
-function StatusIcon({ status, isDarkBg }: { status: Message["status"]; isDarkBg?: boolean }) {
-  const colorClass = isDarkBg
-    ? status === "read"
-      ? "text-[#34B7F1]"
-      : "text-white/80"
-    : status === "read"
-      ? "text-[#1E56A0]"
-      : "text-[#5A7190]";
+function StatusIcon({ status, isOutbound }: { status: Message["status"]; isOutbound?: boolean }) {
+  const baseColor = isOutbound
+    ? status === "read" ? "text-blue-200" : "text-white/70"
+    : status === "read" ? "text-blue-500" : "text-slate-400";
 
   switch (status) {
     case "sending":
-      return <Clock className={cn("h-3 w-3", colorClass)} />;
+      return <Clock className={cn("h-3 w-3", baseColor)} />;
     case "sent":
-      return <Check className={cn("h-3 w-3", colorClass)} />;
+      return <Check className={cn("h-3 w-3", baseColor)} />;
     case "delivered":
-      return <CheckCheck className={cn("h-3 w-3", colorClass)} />;
+      return <CheckCheck className={cn("h-3 w-3", baseColor)} />;
     case "read":
-      return <CheckCheck className={cn("h-3 w-3", colorClass)} />;
+      return <CheckCheck className={cn("h-3 w-3", baseColor)} />;
     case "failed":
-      return <XCircle className="h-3 w-3 text-[#9B2226]" />;
+      return <XCircle className="h-3 w-3 text-red-400" />;
     default:
       return null;
   }
@@ -288,14 +284,17 @@ function checkRealCaption(text: string | null | undefined): boolean {
   );
 }
 
-function MessageContent({ message, overlay }: { message: Message; overlay?: React.ReactNode }) {
+function MessageContent({ message, overlay, isOutbound }: { message: Message; overlay?: React.ReactNode; isOutbound?: boolean }) {
   const displayType = message.content_type || message.message_type || 'text';
   const hasRealCaption = checkRealCaption(message.content_text);
+  // Text color adapts to the bubble background
+  const textClass = isOutbound ? "text-white" : "text-slate-800";
+  const subTextClass = isOutbound ? "text-white/90" : "text-slate-800";
 
   switch (displayType) {
     case "text":
       return (
-        <p className="whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
+        <p className={`whitespace-pre-wrap break-words text-sm ${textClass}`}>
           {message.content_text}
         </p>
       );
@@ -312,7 +311,7 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
           )}
           {!isSticker && overlay}
           {hasRealCaption && !isSticker && (
-            <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[#0D1B3E] px-2 pb-1">
+            <p className={`mt-2 whitespace-pre-wrap break-words text-sm px-2 pb-1 ${subTextClass}`}>
               {message.content_text}
             </p>
           )}
@@ -333,7 +332,7 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
             <MediaUnavailable label="Video" />
           )}
           {hasRealCaption && (
-            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
+            <p className={`mt-1 whitespace-pre-wrap break-words text-sm ${subTextClass}`}>
               {message.content_text}
             </p>
           )}
@@ -362,9 +361,14 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
           href={message.media_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 rounded-lg bg-[#EEF4FB] hover:bg-[#D6E4F0] border border-[#D6E4F0] px-3 py-2 text-sm text-[#0D1B3E] font-medium transition-colors"
+          className={cn(
+            "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            isOutbound
+              ? "bg-white/15 hover:bg-white/25 text-white"
+              : "bg-[#EEF4FB] hover:bg-[#D6E4F0] border border-[#D6E4F0] text-[#0D1B3E]"
+          )}
         >
-          <FileText className="h-5 w-5 shrink-0 text-[#1E56A0]" />
+          <FileText className={cn("h-5 w-5 shrink-0", isOutbound ? "text-white/80" : "text-[#1E56A0]")} />
           <span className="truncate">
             {message.content_text || "Document"}
           </span>
@@ -374,12 +378,15 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
     case "template":
       return (
         <div>
-          <span className="mb-1 inline-flex items-center gap-1 rounded bg-[#1E56A0]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#1E56A0]">
+          <span className={cn(
+            "mb-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold",
+            isOutbound ? "bg-white/20 text-white" : "bg-[#1E56A0]/10 text-[#1E56A0]"
+          )}>
             <LayoutTemplate className="h-3 w-3" />
             Template
           </span>
           {message.content_text && (
-            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
+            <p className={`mt-1 whitespace-pre-wrap break-words text-sm ${subTextClass}`}>
               {message.content_text}
             </p>
           )}
@@ -388,8 +395,8 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
 
     case "location":
       return (
-        <div className="flex items-center gap-2 text-sm text-[#0D1B3E]">
-          <MapPin className="h-4 w-4 shrink-0 text-[#5A7190]" />
+        <div className={`flex items-center gap-2 text-sm ${textClass}`}>
+          <MapPin className={cn("h-4 w-4 shrink-0", isOutbound ? "text-white/70" : "text-[#5A7190]")} />
           <span>{message.content_text || "Location shared"}</span>
         </div>
       );
@@ -397,11 +404,14 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
     case "interactive": {
       return (
         <div className="flex flex-col gap-0.5">
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-[#1E56A0]">
+          <span className={cn(
+            "inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide",
+            isOutbound ? "text-white/70" : "text-[#1E56A0]"
+          )}>
             <CornerDownLeft className="h-3 w-3" />
             Button reply
           </span>
-          <p className="whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
+          <p className={`whitespace-pre-wrap break-words text-sm ${textClass}`}>
             {message.content_text || "[Interactive reply]"}
           </p>
         </div>
@@ -410,7 +420,7 @@ function MessageContent({ message, overlay }: { message: Message; overlay?: Reac
 
     default:
       return (
-        <p className="whitespace-pre-wrap break-words text-sm text-[#0D1B3E]">
+        <p className={`whitespace-pre-wrap break-words text-sm ${textClass}`}>
           {message.content_text || "[Unsupported message type]"}
         </p>
       );
@@ -429,6 +439,10 @@ export function MessageBubble({
   const hasRealCaption = checkRealCaption(message.content_text);
   const isImageOnly = (message.content_type === "image" || message.message_type === "image") && !hasRealCaption && !isSticker;
 
+  // Detect system notification messages (AI quota errors saved by webhookProcessor)
+  // The backend stores these with name='System'
+  const isSystemMessage = message.name === "System";
+
   let time = "";
   if (message.created_at) {
     const d = parseSafeDate(message.created_at);
@@ -437,10 +451,29 @@ export function MessageBubble({
     }
   }
 
+  // ── System / AI-error notification pill ─────────────────────────────────
+  // Rendered as a centred amber warning chip, NOT as a regular chat bubble.
+  // This prevents the duplicate: "blue bubble + red box below" problem.
+  if (isSystemMessage) {
+    // Strip the leading emoji if present (we re-add our own icon)
+    const rawText = (message.content_text ?? "").replace(/^[⚠️\s]+/, "").trim();
+    return (
+      <div className="flex w-full justify-center py-1">
+        <div className="flex max-w-sm items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm">
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400 text-white text-[11px] font-bold select-none">!</span>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-amber-800 leading-snug">{rawText}</p>
+            <p className="mt-0.5 text-[10px] text-amber-500">{time}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const imageOverlay = isImageOnly ? (
-    <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-black/45 px-2 py-0.5 text-white backdrop-blur-[2px] shadow-sm select-none">
-      <span className="text-[9px] text-white/95 font-medium">{time}</span>
-      {isAgent && <StatusIcon status={message.status} isDarkBg={true} />}
+    <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur-sm shadow-sm select-none">
+      <span className="text-[9px] text-white/90 font-medium">{time}</span>
+      {isAgent && <StatusIcon status={message.status} isOutbound={true} />}
     </div>
   ) : null;
 
@@ -449,35 +482,51 @@ export function MessageBubble({
       className={cn(
         "flex flex-col relative",
         isAgent ? "items-end" : "items-start",
-        // Add bottom padding when reactions exist so pills don't clip into the next bubble
-        reactions && reactions.length > 0 ? "pb-4" : "",
+        reactions && reactions.length > 0 ? "pb-5" : "",
       )}
     >
       <div
         className={cn(
-          "relative shadow-sm max-w-full transition-all duration-200",
+          "relative max-w-full transition-all duration-150",
           isSticker
             ? "bg-transparent shadow-none p-0"
             : isAgent
-              ? cn("rounded-2xl rounded-tr-none bg-[#D6E4F0] text-[#0D1B3E]", isImageOnly ? "p-1" : "px-3 py-2.5")
-              : cn("rounded-2xl rounded-tl-none bg-white text-[#0D1B3E]", isImageOnly ? "p-1" : "px-3 py-2.5"),
+            ? cn(
+                "rounded-2xl rounded-tr-sm shadow-md",
+                "bg-gradient-to-br from-[#1E56A0] to-[#2563EB]",
+                isImageOnly ? "p-1" : "px-3.5 py-2.5"
+              )
+            : cn(
+                "rounded-2xl rounded-tl-sm bg-white shadow-sm ring-1 ring-slate-200/80",
+                isImageOnly ? "p-1" : "px-3.5 py-2.5"
+              )
         )}
       >
         {reply && !isSticker && (
           <ReplyQuote authorLabel={reply.authorLabel} preview={reply.preview} />
         )}
-        <MessageContent message={message} overlay={isImageOnly ? imageOverlay : undefined} />
+        <MessageContent
+          message={message}
+          overlay={isImageOnly ? imageOverlay : undefined}
+          isOutbound={isAgent}
+        />
 
         {!isSticker && !isImageOnly && (
           <div className="mt-1 flex items-center gap-1 justify-end select-none">
-            <span className="text-[9px] text-[#5A7190]/75 font-semibold">{time}</span>
-            {isAgent && <StatusIcon status={message.status} />}
+            <span
+              className={cn(
+                "text-[9px] font-medium",
+                isAgent ? "text-white/60" : "text-slate-400"
+              )}
+            >
+              {time}
+            </span>
+            {isAgent && <StatusIcon status={message.status} isOutbound={true} />}
           </div>
         )}
       </div>
 
-      {/* Reaction pills — rendered outside the bubble so they don't clip,
-          positioned slightly overlapping the bubble bottom edge, WhatsApp-style. */}
+      {/* Reaction pills */}
       {reactions && reactions.length > 0 && onToggleReaction && (
         <div
           className={cn(
@@ -495,13 +544,15 @@ export function MessageBubble({
 
       {isSticker && (
         <div className="mt-1 flex items-center gap-1 justify-end px-1 select-none">
-          <span className="text-[9px] text-[#5A7190]/70 font-semibold">{time}</span>
-          {isAgent && <StatusIcon status={message.status} />}
+          <span className="text-[9px] text-slate-400 font-medium">{time}</span>
+          {isAgent && <StatusIcon status={message.status} isOutbound={true} />}
         </div>
       )}
 
-      {message.status === "failed" && message.errorMessage && (
-        <div className="mt-1.5 flex items-start gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 max-w-xs">
+      {/* Only show error box for non-system failed messages.
+          System messages already render the error as content above. */}
+      {message.status === "failed" && message.errorMessage && !isSystemMessage && (
+        <div className="mt-1.5 flex items-start gap-1.5 rounded-xl border border-red-200 bg-red-50 px-2.5 py-2 max-w-xs shadow-sm">
           <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500" />
           <p className="text-xs text-red-600 leading-snug break-words">{message.errorMessage}</p>
         </div>

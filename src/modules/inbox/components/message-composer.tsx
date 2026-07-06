@@ -286,7 +286,8 @@ export function MessageComposer({
   };
 
   return (
-    <div className="border-t border-[#D6E4F0] bg-[#F6F6F6] p-3 shadow-inner">
+    <div className="px-4 py-3">
+      {/* Reply quote */}
       {replyTo && (
         <div className="mb-2">
           <ReplyQuote
@@ -297,18 +298,22 @@ export function MessageComposer({
         </div>
       )}
 
+      {/* Session-expired banner */}
       {sessionExpired && (
-        <div className="mb-2 flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200/80 px-3 py-2">
-          <p className="text-xs text-amber-700 font-medium">
-            24-hour session expired. Use a template to re-engage.
-          </p>
+        <div className="mb-2.5 flex items-center justify-between rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
+            <p className="text-xs font-medium text-amber-700">
+              24-hour session expired — use a template to re-engage
+            </p>
+          </div>
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-amber-700 hover:text-amber-800 hover:bg-amber-100/50"
+            className="h-7 shrink-0 text-xs font-semibold text-amber-700 hover:text-amber-800 hover:bg-amber-100 rounded-lg"
             onClick={onOpenTemplates}
           >
-            <LayoutTemplate className="mr-1 h-3 w-3" />
+            <LayoutTemplate className="mr-1 h-3.5 w-3.5" />
             Templates
           </Button>
         </div>
@@ -321,48 +326,52 @@ export function MessageComposer({
 
       {/* Recording indicator */}
       {isRecording && (
-        <div className="mb-2 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
-          <span className="text-xs font-medium text-red-600">
+        <div className="mb-2 flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-red-500 shrink-0" />
+          <span className="text-xs font-semibold text-red-600">
             Recording… {formatRecordingTime(recordingSeconds)}
           </span>
-          <span className="text-[10px] text-red-400">Tap mic to stop &amp; send</span>
+          <span className="text-[10px] text-red-400 ml-auto">Tap mic to stop & send</span>
         </div>
       )}
 
+      {/* Composer row */}
       <div className="flex items-end gap-2">
-        {/* Templates */}
-        <Button
-          variant="ghost"
-          size="sm"
-          title="Send template"
-          className="h-9 w-9 shrink-0 p-0 text-[#5A7190] hover:text-[#1E56A0] hover:bg-[#EEF4FB]"
-          onClick={onOpenTemplates}
-          disabled={readOnly || isRecording}
-        >
-          <LayoutTemplate className="h-4 w-4" />
-        </Button>
+        {/* Action buttons */}
+        <div className="flex items-center gap-0.5 pb-0.5">
+          {/* Templates */}
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Insert template"
+            className="h-9 w-9 shrink-0 rounded-xl p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            onClick={onOpenTemplates}
+            disabled={readOnly || isRecording}
+          >
+            <LayoutTemplate className="h-4.5 w-4.5" />
+          </Button>
 
-        {/* Attachment */}
-        <Button
-          variant="ghost"
-          size="sm"
-          title="Attach file (image / document / audio)"
-          className="h-9 w-9 shrink-0 p-0 text-[#5A7190] hover:text-[#1E56A0] hover:bg-[#EEF4FB]"
-          onClick={handleAttachmentClick}
-          disabled={readOnly || isRecording || sending}
-        >
-          <Paperclip className="h-4 w-4" />
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip"
-          className="hidden"
-          onChange={handleFileChange}
-        />
+          {/* Attachment */}
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Attach file"
+            className="h-9 w-9 shrink-0 rounded-xl p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            onClick={handleAttachmentClick}
+            disabled={readOnly || isRecording || sending}
+          >
+            <Paperclip className="h-4.5 w-4.5" />
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
 
-        {/* Text area — hidden while recording */}
+        {/* Text area */}
         {!isRecording && (
           <textarea
             ref={textareaRef}
@@ -373,13 +382,14 @@ export function MessageComposer({
               pendingFile
                 ? "Add a caption (optional)…"
                 : readOnly
-                ? "Read-only — viewers can browse but not reply"
-                : "Type a message… (Shift+Enter for new line)"
+                ? "Read-only"
+                : "Message…"
             }
             disabled={readOnly}
             rows={1}
             className={cn(
-              "flex-1 resize-none rounded-xl border border-[#D6E4F0] bg-white px-4 py-2.5 text-sm text-[#0D1B3E] placeholder-slate-400 outline-none transition-colors focus:border-[#1E56A0]/70 focus:ring-1 focus:ring-[#1E56A0]/20",
+              "flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all",
+              "focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100",
               readOnly && "cursor-not-allowed opacity-50"
             )}
           />
@@ -394,23 +404,23 @@ export function MessageComposer({
             onClick={handleMicClick}
             disabled={readOnly || sending}
             className={cn(
-              "h-9 w-9 shrink-0 p-0 transition-colors",
+              "h-9 w-9 shrink-0 rounded-xl p-0 transition-colors pb-0.5",
               isRecording
                 ? "text-red-500 hover:text-red-600 hover:bg-red-50"
-                : "text-[#5A7190] hover:text-[#1E56A0] hover:bg-[#EEF4FB]"
+                : "text-slate-400 hover:text-blue-600 hover:bg-blue-50"
             )}
           >
             {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
         )}
 
-        {/* Send */}
+        {/* Send button */}
         {(text.trim() || pendingFile) && !isRecording && (
           <Button
             size="sm"
             disabled={readOnly || sending}
             onClick={handleSend}
-            className="h-9 w-9 shrink-0 bg-[#1E56A0] text-white p-0 hover:bg-[#163172] rounded-full shadow-sm disabled:opacity-40 disabled:hover:bg-[#1E56A0]"
+            className="h-9 w-9 shrink-0 rounded-xl p-0 bg-gradient-to-br from-[#1E56A0] to-[#2563EB] text-white shadow-md hover:shadow-lg hover:from-[#163e78] hover:to-[#1d4ed8] transition-all duration-150 disabled:opacity-50"
           >
             {sending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -421,8 +431,8 @@ export function MessageComposer({
         )}
       </div>
 
-      <p className="mt-1 pl-[108px] text-[10px] text-[#5A7190]">
-        Shift+Enter for new line · 📎 images, docs, audio · 🎤 voice note
+      <p className="mt-2 pl-2 text-[10px] text-slate-400">
+        Enter to send · Shift+Enter for new line · 📎 image, doc, audio · 🎤 voice
       </p>
     </div>
   );

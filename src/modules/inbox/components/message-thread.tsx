@@ -23,10 +23,11 @@ import {
   RefreshCw,
   Bot,
   Loader2,
+  Sparkles,
+  Phone,
 } from "lucide-react";
 import { format, isToday, isYesterday, differenceInHours } from "date-fns";
 import { isAxiosError } from "axios";
-import { Badge } from "./ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,7 +49,6 @@ interface ReplyDraft {
   preview: string;
 }
 
-
 interface MessageThreadProps {
   conversation: Conversation | null;
   contact: Contact | null;
@@ -61,28 +61,8 @@ interface MessageThreadProps {
     conversationId: string,
     assignedAgentId: string | null,
   ) => void;
-  /**
-   * On mobile, the thread is shown full-screen with the conversation list
-   * hidden. This callback lets the page deselect the active conversation
-   * and reveal the list again. Rendered as a back-arrow in the header on
-   * mobile only.
-   */
   onBack?: () => void;
-  /**
-   * Increment to force the messages + reactions fetch effects to refire.
-   * Parent bumps this on realtime reconnect / tab visibility → visible
-   * so the open thread catches up on any events sent while the WS was
-   * disconnected or the tab was throttled. Optional so existing callers
-   * keep working.
-   */
   resyncToken?: number;
-  /**
-   * Fired by the manual-refresh button in the thread header. The parent
-   * typically bumps the same `resyncToken` it controls — this gives the
-   * user a way to force a refetch when they suspect realtime missed an
-   * event (or they're impatient). Optional so existing callers keep
-   * working; the button is only rendered when this is provided.
-   */
   onRefresh?: () => void;
   onAiToggle?: (conversationId: string, isAiEnabled: boolean) => void;
 }
@@ -107,7 +87,7 @@ function groupMessagesByDate(messages: Message[]) {
         day = format(d, "yyyy-MM-dd");
       }
     }
-    
+
     if (day !== currentDate) {
       currentDate = day;
       groups.push({ date: msg.created_at || new Date().toISOString(), messages: [msg] });
@@ -119,22 +99,43 @@ function groupMessagesByDate(messages: Message[]) {
   return groups;
 }
 
-const STATUS_OPTIONS: { label: string; value: ConversationStatus; color: string }[] = [
-  { label: "Open", value: "open", color: "text-[#1E56A0]" },
-  { label: "Pending", value: "pending", color: "text-amber-500" },
-  { label: "Closed", value: "closed", color: "text-slate-500" },
+const STATUS_OPTIONS: { label: string; value: ConversationStatus; color: string; dot: string }[] = [
+  { label: "Open", value: "open", color: "text-blue-600", dot: "bg-blue-500" },
+  { label: "Pending", value: "pending", color: "text-amber-500", dot: "bg-amber-400" },
+  { label: "Closed", value: "closed", color: "text-slate-400", dot: "bg-slate-400" },
 ];
 
-/**
- * WhatsApp-style doodle background applied to the chat area (both the
- * active thread and the empty state). The SVG tile lives at
- * `/public/inbox-doodle.svg`; the warm light `#efeae2` color sits underneath so
- * the doodles read as a subtle pattern rather than a dark grid.
- */
-const DOODLE_BG_CLASSES =
-  "bg-[#efeae2] bg-[url('/inbox-doodle.svg')] bg-repeat";
+/** Subtle warm WhatsApp-ish background */
+const CHAT_BG = "bg-slate-50 bg-[url('/inbox-doodle.svg')] bg-repeat";
 
 import { useAuthContext } from "@/modules/auth/stores/AuthContext";
+
+/* ─── Avatar Helper ───────────────────────────────────────────────────────── */
+function AvatarCircle({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
+  const initials = name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+
+  const sizeClasses = {
+    sm: "h-8 w-8 text-xs",
+    md: "h-10 w-10 text-sm",
+    lg: "h-12 w-12 text-base",
+  }[size];
+
+  return (
+    <div
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-full font-semibold text-white shadow-md",
+        "bg-gradient-to-br from-[#1E56A0] to-[#2563EB]",
+        sizeClasses
+      )}
+    >
+      {initials || "?"}
+    </div>
+  );
+}
 
 export function MessageThread({
   conversation,
@@ -167,27 +168,21 @@ export function MessageThread({
       if (onAiToggle) {
         onAiToggle(conversation.id, nextVal);
       }
-      toast.success(`AI Auto Responder ${nextVal ? 'enabled' : 'disabled'} for this chat`);
+      toast.success(`AI Auto Responder ${nextVal ? "enabled" : "disabled"} for this chat`);
     } catch {
       toast.error("Failed to toggle AI responder");
     } finally {
       setTogglingAi(false);
     }
   };
-  // loading is driven by the parent: true while messages array is empty
-  // (the parent sets messages=[] when switching conversations then fills
-  // it after the API call). We do NOT fetch from Supabase here — messages
-  // live in MySQL and are polled by the parent page.
+
   const loading = messages.length === 0 && !!conversation?.id;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [reactions, setReactions] = useState<MessageReaction[]>([]);
 
-  // Reactions extracted dynamically from messages (reaction type or starting with [reaction]:)
   const parsedReactions = useMemo(() => {
-    // Build a reverse map: wamid → internal DB uuid, so customer reactions
-    // (which store the target's wamid) can be matched to the right bubble.
     const wamidToId = new Map<string, string>();
     messages.forEach((m) => {
       if (m.wamid) wamidToId.set(m.wamid, m.id);
@@ -198,16 +193,13 @@ export function MessageThread({
     messages.forEach((m) => {
       if (m.message_type === "reaction" || (m.content_text && m.content_text.startsWith("[reaction]:"))) {
         const text = m.content_text || "";
-        // Format: [reaction]:<targetWamid>:<emoji>
-        // Emoji may contain ':', so split only on the FIRST two colons after the prefix.
-        const firstColon = text.indexOf(":");           // after "[reaction]"
-        const secondColon = text.indexOf(":", firstColon + 1); // after targetWamid
+        const firstColon = text.indexOf(":");
+        const secondColon = text.indexOf(":", firstColon + 1);
         if (firstColon === -1 || secondColon === -1) return;
 
         const targetWamid = text.substring(firstColon + 1, secondColon);
-        const emoji = text.substring(secondColon + 1); // everything after the second ':' is the emoji
-        
-        // Resolve wamid → internal DB uuid so the reaction attaches to the right bubble
+        const emoji = text.substring(secondColon + 1);
+
         const targetInternalId = wamidToId.get(targetWamid) ?? targetWamid;
         const actorId = m.direction === "outbound" ? "agent" : "customer";
         const key = `${targetInternalId}-${actorId}`;
@@ -237,16 +229,13 @@ export function MessageThread({
 
   const visibleMessages = useMemo(() => {
     return messages.filter(
-      (m) => m.message_type !== "reaction" && !(m.content_text && m.content_text.startsWith("[reaction]:"))
+      (m) =>
+        m.message_type !== "reaction" &&
+        !(m.content_text && m.content_text.startsWith("[reaction]:"))
     );
   }, [messages]);
 
-  /** Text to pre-fill the composer with after a template is selected. */
   const [prefillText, setPrefillText] = useState("");
-  // Purely visual spin state for the manual-refresh button. The actual
-  // refetch is fire-and-forget through `onRefresh` (which bumps the
-  // parent's resyncToken); the 700ms spin is just feedback so the click
-  // doesn't feel like a no-op. Cleared via the timer ref on unmount.
   const [isRefreshing, setIsRefreshing] = useState(false);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -265,11 +254,9 @@ export function MessageThread({
       refreshTimerRef.current = null;
     }, 700);
   }, [isRefreshing, onRefresh]);
+
   const [replyTo, setReplyTo] = useState<ReplyDraft | null>(null);
 
-  // Profiles are bounded by RLS to rows the current user is allowed to
-  // see — today that's just the current user, but the dropdown keeps the
-  // shape ready for shared-team workspaces without a refactor.
   useEffect(() => {
     let cancelled = false;
     const supabase = createClient();
@@ -291,11 +278,9 @@ export function MessageThread({
     };
   }, []);
 
-  // 24-hour session timer
   const sessionInfo = useMemo(() => {
     if (!messages.length) return { expired: false, remaining: "" };
 
-    // Find last customer message
     const lastCustomerMsg = [...messages]
       .reverse()
       .find((m) => m.sender_type === "customer");
@@ -306,28 +291,24 @@ export function MessageThread({
     const expired = hoursSince >= 24;
 
     if (expired) {
-      return { expired: true, remaining: "Expired" };
+      return { expired: true, remaining: "Session expired" };
     }
 
     const hoursLeft = 24 - hoursSince;
     const remaining =
       hoursLeft >= 1
-        ? `${Math.floor(hoursLeft)}h remaining`
-        : `${Math.floor(hoursLeft * 60)}m remaining`;
+        ? `${Math.floor(hoursLeft)}h left`
+        : `${Math.floor(hoursLeft * 60)}m left`;
 
     return { expired, remaining };
   }, [messages]);
 
   const conversationId = conversation?.id;
 
-  // Clear any in-progress reply draft when the active conversation changes —
-  // a quote pulled from conversation A shouldn't bleed into conversation B.
   useEffect(() => {
     setReplyTo(null);
   }, [conversationId]);
 
-
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
       const el = scrollRef.current;
@@ -335,13 +316,12 @@ export function MessageThread({
     }
   }, [messages]);
 
+  /* ─── Send handlers ─────────────────────────────────────────────────── */
   const handleSend = useCallback(
     async (text: string, replyToId?: string) => {
       if (!conversation) return;
 
       const tempId = `temp-${Date.now()}`;
-
-      // Optimistic update — shows the message immediately with "sending" status
       const optimisticMsg: Message = {
         id: tempId,
         conversation_id: conversation.id,
@@ -358,8 +338,6 @@ export function MessageThread({
       setReplyTo(null);
 
       try {
-        // ANAD backend expects { waId, message_type, content_text }.
-        // conversation.id is the waId (phone number) — set in inbox/page.tsx.
         const res = await api.post("/whatsapp/send", {
           waId: conversation.id,
           message_type: "text",
@@ -378,11 +356,13 @@ export function MessageThread({
 
         if (isAxiosError(err) && err.response?.data) {
           const data = err.response.data;
-          if (data.errorType === '24_hour_window' || (data.error && (
-            data.error.includes('24 hours') || data.error.includes('more than 24')
-          ))) {
+          if (
+            data.errorType === "24_hour_window" ||
+            (data.error && (data.error.includes("24 hours") || data.error.includes("more than 24")))
+          ) {
             is24hError = true;
-            reason = 'Message failed to send because more than 24 hours have passed since the customer last replied to this number.';
+            reason =
+              "Message failed to send because more than 24 hours have passed since the customer last replied to this number.";
           } else if (data.error) {
             reason = data.error;
           }
@@ -390,9 +370,7 @@ export function MessageThread({
           reason = err.message;
         }
 
-        toast.error(reason, {
-          duration: is24hError ? 6000 : 4000,
-        });
+        toast.error(reason, { duration: is24hError ? 6000 : 4000 });
         onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },
@@ -409,7 +387,7 @@ export function MessageThread({
           ? "[Image]"
           : payload.message_type === "audio"
           ? "[Voice Note]"
-          : `[Document]`;
+          : "[Document]";
 
       const optimisticMsg: Message = {
         id: tempId,
@@ -449,11 +427,13 @@ export function MessageThread({
 
         if (isAxiosError(err) && err.response?.data) {
           const data = err.response.data;
-          if (data.errorType === '24_hour_window' || (data.error && (
-            data.error.includes('24 hours') || data.error.includes('more than 24')
-          ))) {
+          if (
+            data.errorType === "24_hour_window" ||
+            (data.error && (data.error.includes("24 hours") || data.error.includes("more than 24")))
+          ) {
             is24hError = true;
-            reason = 'Message failed to send because more than 24 hours have passed since the customer last replied to this number.';
+            reason =
+              "Message failed to send because more than 24 hours have passed since the customer last replied to this number.";
           } else if (data.error) {
             reason = data.error;
           }
@@ -461,9 +441,7 @@ export function MessageThread({
           reason = err.message;
         }
 
-        toast.error(reason, {
-          duration: is24hError ? 6000 : 4000,
-        });
+        toast.error(reason, { duration: is24hError ? 6000 : 4000 });
         onUpdateMessage(tempId, { status: "failed", errorMessage: reason });
       }
     },
@@ -473,13 +451,8 @@ export function MessageThread({
   const handleStatusChange = useCallback(
     async (status: ConversationStatus) => {
       if (!conversation) return;
-
       const supabase = createClient();
-      await supabase
-        .from("conversations")
-        .update({ status })
-        .eq("id", conversation.id);
-
+      await supabase.from("conversations").update({ status }).eq("id", conversation.id);
       onStatusChange(conversation.id, status);
     },
     [conversation, onStatusChange]
@@ -489,26 +462,17 @@ export function MessageThread({
     setTemplateModalOpen(true);
   }, []);
 
-  /**
-   * Called by TemplatePicker when the agent selects a template.
-   * ANAD templates are plain-text quick-reply snippets — we pre-fill the
-   * composer so the agent can review/edit before sending (rather than
-   * auto-sending, which could send the wrong text if something goes wrong).
-   */
   const handleTemplateSelect = useCallback((text: string) => {
     setPrefillText(text);
     setTemplateModalOpen(false);
   }, []);
 
-  // Build a quick id → Message map so reply quotes can be rendered without
-  // an extra fetch — the thread already holds the full conversation.
   const messagesById = useMemo(() => {
     const map = new Map<string, Message>();
     for (const m of messages) map.set(m.id, m);
     return map;
   }, [messages]);
 
-  // Bucket reactions by their target message_id for O(1) per-bubble lookup.
   const reactionsByMessageId = useMemo(() => {
     const map = new Map<string, MessageReaction[]>();
     for (const r of reactions) {
@@ -521,15 +485,12 @@ export function MessageThread({
 
   const contactDisplayName = contact?.name || contact?.phone || "Customer";
 
-  // Author label for a quoted message: "You" when we sent the parent,
-  // contact name when the customer sent it.
   const authorLabelFor = useCallback(
     (m: Message): string => {
-      const isAgentMsg =
-        m.sender_type === "agent" || m.sender_type === "bot";
+      const isAgentMsg = m.sender_type === "agent" || m.sender_type === "bot";
       return isAgentMsg ? "You" : contactDisplayName;
     },
-    [contactDisplayName],
+    [contactDisplayName]
   );
 
   const handleStartReply = useCallback(
@@ -540,13 +501,9 @@ export function MessageThread({
         preview: buildReplyPreview(msg),
       });
     },
-    [authorLabelFor],
+    [authorLabelFor]
   );
 
-  // Single reaction-set primitive. emoji === "" removes; otherwise adds/swaps.
-  // The "toggle" semantic (pill click) is computed at the call site where the
-  // current reactions for the bubble are already in scope — keeps this
-  // function dependency-free w.r.t. the reaction list.
   const postReaction = useCallback(
     async (messageId: string, emoji: string) => {
       if (!user?.id || !conversation) {
@@ -562,15 +519,10 @@ export function MessageThread({
       const userId = user.id;
       let snapshot: MessageReaction[] = [];
 
-      // Functional updater — captures the freshest reactions list, never a
-      // stale closure. Snapshot stored for rollback on POST failure.
       setReactions((prev) => {
         snapshot = prev;
         const own = prev.find(
-          (r) =>
-            r.message_id === messageId &&
-            r.actor_type === "agent" &&
-            r.actor_id === userId,
+          (r) => r.message_id === messageId && r.actor_type === "agent" && r.actor_id === userId
         );
         if (emoji === "") return own ? prev.filter((r) => r !== own) : prev;
         if (own) return prev.map((r) => (r === own ? { ...own, emoji } : r));
@@ -592,18 +544,14 @@ export function MessageThread({
       try {
         const token = getToken();
         if (!token) {
-          console.error("[postReaction] No auth token in localStorage — user may need to log in again");
+          console.error("[postReaction] No auth token in localStorage");
           throw new Error("Not authenticated");
         }
-        console.log("[postReaction] Sending reaction:", { messageId, emoji, waId: conversation.id });
-        // Explicitly pass accesstoken header as a fallback in case the interceptor misses it
-        const result = await api.post("/whatsapp/react", {
-          message_id: messageId,
-          emoji,
-          waId: conversation.id,
-        }, {
-          headers: { accesstoken: token },
-        });
+        const result = await api.post(
+          "/whatsapp/react",
+          { message_id: messageId, emoji, waId: conversation.id },
+          { headers: { accesstoken: token } }
+        );
         if (!result.data?.success) {
           throw new Error(result.data?.error || "Reaction failed");
         }
@@ -613,13 +561,12 @@ export function MessageThread({
         setReactions(snapshot);
       }
     },
-    [conversation, user?.id],
+    [conversation, user?.id]
   );
 
   const handleAssignChange = useCallback(
     async (agentId: string | null) => {
       if (!conversation) return;
-
       const supabase = createClient();
       const { error } = await supabase
         .from("conversations")
@@ -631,156 +578,165 @@ export function MessageThread({
         toast.error("Failed to update assignment");
         return;
       }
-
       onAssignChange(conversation.id, agentId);
     },
-    [conversation, onAssignChange],
+    [conversation, onAssignChange]
   );
 
-  // Empty state — same WhatsApp-style doodle background as the active
-  // thread below, so swapping between empty/selected doesn't change the
-  // pattern under the user's eye.
+  /* ─── Empty state ─────────────────────────────────────────────────────── */
   if (!conversation || !contact) {
     return (
-      <div className={cn("flex flex-1 flex-col items-center justify-center", DOODLE_BG_CLASSES)}>
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#D6E4F0] text-[#1E56A0] shadow-sm">
-          <MessageSquare className="h-8 w-8" />
+      <div
+        className={cn(
+          "flex flex-1 flex-col items-center justify-center gap-4",
+          CHAT_BG
+        )}
+      >
+        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-xl ring-1 ring-black/5">
+          <MessageSquare className="h-10 w-10 text-[#1E56A0]" />
         </div>
-        <h3 className="mt-4 text-sm font-semibold text-[#0D1B3E]">
-          Select a conversation
-        </h3>
-        <p className="mt-1 text-xs text-[#5A7190]">
-          Choose a conversation from the left to start messaging
-        </p>
+        <div className="text-center">
+          <h3 className="text-base font-semibold text-slate-700">
+            No conversation selected
+          </h3>
+          <p className="mt-1 text-sm text-slate-400">
+            Pick a conversation from the list to start messaging
+          </p>
+        </div>
       </div>
     );
   }
 
   const displayName = contact.name || contact.phone || "Customer";
   const messageGroups = groupMessagesByDate(visibleMessages);
-  const currentStatus = STATUS_OPTIONS.find(
-    (s) => s.value === conversation.status
-  );
+  const currentStatus = STATUS_OPTIONS.find((s) => s.value === conversation.status);
   const assignedAgentId = conversation.assigned_agent_id ?? null;
   const currentAssignee = profiles.find((p) => p.user_id === assignedAgentId);
-  const assignLabel = assignedAgentId
-    ? (currentAssignee?.full_name ?? "Assigned")
-    : "Assign";
+  const assignLabel = assignedAgentId ? (currentAssignee?.full_name ?? "Assigned") : "Assign";
 
   return (
-    <div className={cn("flex flex-1 flex-col", DOODLE_BG_CLASSES)}>
-      {/* Header — light bg-[#F6F6F6] sits on top of the doodle so the
-          name/avatar/dropdowns stay legible. */}
-      <div className="flex items-center justify-between gap-2 border-b border-[#D6E4F0] bg-[#F6F6F6] px-3 py-3 sm:px-4">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          {/* Back-to-list button — mobile only. Hidden on lg+ where the
-              conversation list is always visible next to the thread. */}
+    <div className="flex flex-1 flex-col overflow-hidden">
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="relative flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white px-4 py-3 shadow-sm">
+
+        <div className="flex min-w-0 items-center gap-3">
+          {/* Mobile back */}
           {onBack && (
             <button
               type="button"
               onClick={onBack}
               aria-label="Back to conversations"
-              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md text-[#5A7190] hover:bg-[#EEF4FB] hover:text-[#0D1B3E] lg:hidden"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors lg:hidden"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4.5 w-4.5" />
             </button>
           )}
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#1E56A0] text-sm font-medium text-white shadow-sm">
-            {displayName.charAt(0).toUpperCase()}
-          </div>
+
+          <AvatarCircle name={displayName} size="md" />
+
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-[#0D1B3E]">{displayName}</h2>
-            <p className="truncate text-xs text-[#5A7190]">{contact.phone}</p>
+            <h2 className="truncate text-[14px] font-semibold leading-tight text-slate-800">
+              {displayName}
+            </h2>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Phone className="h-3 w-3 text-slate-400" />
+              <p className="text-[11px] text-slate-400 font-medium">{contact.phone}</p>
+            </div>
           </div>
-          {/* Session timer badge — hidden on the narrowest phones so
-              the name + back arrow keep their room. */}
-          <Badge
-            variant="outline"
-            className={cn(
-              "ml-1 hidden gap-1 border-[#D6E4F0] text-[10px] sm:inline-flex sm:ml-2 bg-[#EEF4FB]",
-              sessionInfo.expired ? "text-red-500" : "text-[#1E56A0]"
-            )}
-          >
-            <Clock className="h-3 w-3" />
-            {sessionInfo.remaining}
-          </Badge>
+
+          {/* Session timer */}
+          {sessionInfo.remaining && (
+            <div
+              className={cn(
+                "hidden sm:flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                sessionInfo.expired
+                  ? "bg-red-50 text-red-500 ring-1 ring-red-200"
+                  : "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200"
+              )}
+            >
+              <Clock className="h-3 w-3" />
+              {sessionInfo.remaining}
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Manual refresh — forces a refetch of the messages + the
-              conversation list (the parent bumps its resyncToken). Useful
-              when realtime missed an event or the agent just wants to be
-              sure nothing's stale. Only rendered when the parent wires
-              up `onRefresh`. */}
+        {/* Right controls */}
+        <div className="flex items-center gap-1.5">
+
+          {/* Refresh */}
           {onRefresh && (
             <button
               type="button"
               onClick={handleRefreshClick}
               disabled={isRefreshing}
               aria-label="Refresh conversation"
-              title="Refresh"
-              className={cn(
-                "inline-flex h-7 w-7 items-center justify-center rounded-md text-[#5A7190] transition-colors hover:bg-[#EEF4FB] hover:text-[#0D1B3E] disabled:opacity-60",
-              )}
+              title="Refresh messages"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors disabled:opacity-50"
             >
-              <RefreshCw
-                className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")}
-              />
+              <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
             </button>
           )}
 
-          {/* AI Responder Toggle */}
+          {/* AI toggle pill */}
           <button
             type="button"
             onClick={handleAiToggleClick}
             disabled={togglingAi}
-            title={isAiEnabled ? "AI Responder is ON — Click to turn OFF" : "AI Responder is OFF — Click to turn ON"}
+            title={isAiEnabled ? "AI is ON — click to disable" : "AI is OFF — click to enable"}
             className={cn(
-              "inline-flex items-center gap-2 h-7 pl-2 pr-1.5 text-xs font-semibold rounded-full transition-all duration-200 border shrink-0 select-none",
+              "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[12px] font-semibold transition-all duration-200 border select-none",
               isAiEnabled
-                ? "bg-violet-600 border-violet-600 text-white shadow-[0_0_10px_2px_rgba(124,58,237,0.35)] hover:bg-violet-700"
-                : "bg-white border-[#D6E4F0] text-[#5A7190] hover:border-violet-300 hover:text-violet-600"
+                ? "bg-violet-600 border-violet-600 text-white shadow-[0_0_12px_3px_rgba(124,58,237,0.30)] hover:bg-violet-700"
+                : "bg-white border-slate-200 text-slate-500 hover:border-violet-300 hover:text-violet-600"
             )}
           >
             {togglingAi ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Bot className={cn("h-3.5 w-3.5 shrink-0", isAiEnabled ? "text-white" : "text-[#5A7190]")} />
+              <>
+                {isAiEnabled
+                  ? <Sparkles className="h-3.5 w-3.5 text-white" />
+                  : <Bot className="h-3.5 w-3.5" />
+                }
+              </>
             )}
-
-            {/* Track + thumb pill */}
+            <span className="hidden sm:inline">{isAiEnabled ? "AI On" : "AI"}</span>
+            {/* Toggle track */}
             <span className={cn(
-              "relative flex h-4.5 w-8 items-center rounded-full transition-colors duration-200 shrink-0",
-              isAiEnabled ? "bg-white/25" : "bg-[#D6E4F0]"
+              "relative flex h-4 w-7 items-center rounded-full transition-colors duration-200 shrink-0",
+              isAiEnabled ? "bg-white/30" : "bg-slate-200"
             )}>
               <span className={cn(
-                "absolute h-3.5 w-3.5 rounded-full shadow transition-all duration-200",
-                isAiEnabled
-                  ? "translate-x-[18px] bg-white"
-                  : "translate-x-[1px] bg-[#8BA5C0]"
+                "absolute h-3 w-3 rounded-full shadow transition-all duration-200",
+                isAiEnabled ? "translate-x-3.5 bg-white" : "translate-x-0.5 bg-slate-400"
               )} />
             </span>
           </button>
 
           {/* Status dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger className={cn(
-                  "inline-flex items-center justify-center h-7 gap-1 px-2 text-xs rounded-md hover:bg-[#EEF4FB] border border-[#D6E4F0]",
-                  currentStatus?.color ?? "text-[#5A7190]"
-                )}>
-                {currentStatus?.label ?? "Status"}
-                <ChevronDown className="h-3 w-3" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="border-[#D6E4F0] bg-white shadow-lg"
+            <DropdownMenuTrigger
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 h-8 px-2.5 text-[12px] font-medium rounded-lg border transition-colors hover:bg-slate-50",
+                currentStatus
+                  ? `${currentStatus.color} border-slate-200`
+                  : "text-slate-500 border-slate-200"
+              )}
             >
+              {currentStatus && (
+                <span className={cn("h-2 w-2 rounded-full", currentStatus.dot)} />
+              )}
+              {currentStatus?.label ?? "Status"}
+              <ChevronDown className="h-3 w-3 opacity-60" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[130px] rounded-xl border-slate-200 bg-white shadow-xl">
               {STATUS_OPTIONS.map((opt) => (
                 <DropdownMenuItem
                   key={opt.value}
                   onClick={() => handleStatusChange(opt.value)}
-                  className={cn("text-sm text-[#0D1B3E] hover:bg-[#EEF4FB] rounded-sm")}
+                  className="flex items-center gap-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer"
                 >
+                  <span className={cn("h-2 w-2 rounded-full", opt.dot)} />
                   <span className={opt.color}>{opt.label}</span>
                 </DropdownMenuItem>
               ))}
@@ -791,20 +747,19 @@ export function MessageThread({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex items-center justify-center h-7 gap-1 px-2 text-xs rounded-md hover:bg-[#EEF4FB] border border-[#D6E4F0]",
-                assignedAgentId ? "text-[#1E56A0] bg-[#EEF4FB]" : "text-[#5A7190]"
+                "inline-flex items-center justify-center gap-1.5 h-8 px-2.5 text-[12px] font-medium rounded-lg border transition-colors hover:bg-slate-50",
+                assignedAgentId
+                  ? "text-blue-600 bg-blue-50 border-blue-200"
+                  : "text-slate-500 border-slate-200"
               )}
             >
-              <UserPlus className="h-3 w-3" />
+              <UserPlus className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{assignLabel}</span>
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className="h-3 w-3 opacity-60" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="border-[#D6E4F0] bg-white shadow-lg"
-            >
+            <DropdownMenuContent align="end" className="min-w-[170px] rounded-xl border-slate-200 bg-white shadow-xl">
               {profiles.length === 0 ? (
-                <DropdownMenuItem disabled className="text-sm text-[#5A7190]">
+                <DropdownMenuItem disabled className="text-sm text-slate-400">
                   No teammates available
                 </DropdownMenuItem>
               ) : (
@@ -815,15 +770,15 @@ export function MessageThread({
                       key={p.id}
                       onClick={() => handleAssignChange(p.user_id ?? null)}
                       className={cn(
-                        "text-sm hover:bg-[#EEF4FB] rounded-sm",
-                        isSelected ? "text-[#1E56A0] font-semibold" : "text-[#0D1B3E]"
+                        "text-sm rounded-lg cursor-pointer",
+                        isSelected ? "text-blue-600 font-semibold bg-blue-50" : "text-slate-700 hover:bg-slate-50"
                       )}
                     >
                       <span className="flex-1">
                         {p.full_name}
                         {p.user_id === user?.id ? " (me)" : ""}
                       </span>
-                      {isSelected && <Check className="ml-2 h-3 w-3 text-[#1E56A0]" />}
+                      {isSelected && <Check className="ml-2 h-3.5 w-3.5 text-blue-600" />}
                     </DropdownMenuItem>
                   );
                 })
@@ -833,7 +788,7 @@ export function MessageThread({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => handleAssignChange(null)}
-                    className="text-sm text-red-500 hover:bg-red-50 rounded-sm"
+                    className="text-sm text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"
                   >
                     Unassign
                   </DropdownMenuItem>
@@ -844,31 +799,68 @@ export function MessageThread({
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 bg-transparent">
+      {/* ── Messages Area ───────────────────────────────────────────────── */}
+      <div
+        ref={scrollRef}
+        className={cn("flex-1 overflow-y-auto px-4 py-5", CHAT_BG)}
+        style={{ scrollBehavior: "smooth" }}
+      >
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#1E56A0] border-t-transparent" />
+          /* Loading skeleton */
+          <div className="flex flex-col gap-4 pt-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={cn(
+                  "flex",
+                  i % 2 === 0 ? "justify-end" : "justify-start"
+                )}
+              >
+                <div
+                  className={cn(
+                    "h-10 animate-pulse rounded-2xl bg-white/80",
+                    i % 2 === 0 ? "w-48 rounded-tr-none" : "w-56 rounded-tl-none"
+                  )}
+                />
+              </div>
+            ))}
+            <div className="flex items-center justify-center py-4">
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading messages…
+              </div>
+            </div>
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <p className="text-sm text-[#5A7190] font-medium">No messages yet</p>
-            <p className="text-xs text-[#5A7190]/80">
-              Send a template to start the conversation
-            </p>
+          /* Empty state */
+          <div className="flex h-full flex-col items-center justify-center gap-3 py-16">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg ring-1 ring-black/5">
+              <MessageSquare className="h-8 w-8 text-slate-300" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-slate-500">No messages yet</p>
+              <p className="mt-0.5 text-xs text-slate-400">
+                Send a template message to start the conversation
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-1">
             {messageGroups.map((group) => (
               <div key={group.date}>
-                {/* Date separator */}
-                <div className="mb-4 flex items-center justify-center">
-                  <span className="rounded-full bg-white/90 shadow-sm border border-[#D6E4F0]/70 px-3 py-1 text-[10px] font-semibold text-[#5A7190]">
-                    {formatDateSeparator(group.date)}
-                  </span>
+                {/* ── Date separator ── */}
+                <div className="my-4 flex items-center justify-center">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px w-12 bg-slate-300/60" />
+                    <span className="rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-slate-500 shadow-sm ring-1 ring-slate-200/60 backdrop-blur-sm">
+                      {formatDateSeparator(group.date)}
+                    </span>
+                    <div className="h-px w-12 bg-slate-300/60" />
+                  </div>
                 </div>
-                {/* Messages */}
-                <div className="space-y-2">
+
+                {/* ── Message bubbles ── */}
+                <div className="space-y-1.5">
                   {group.messages.map((msg) => {
                     const parent = msg.reply_to_message_id
                       ? messagesById.get(msg.reply_to_message_id)
@@ -880,17 +872,15 @@ export function MessageThread({
                         }
                       : null;
                     const msgReactions = reactionsByMessageId.get(msg.id);
-                    // Toggle is computed at the call site — `msgReactions`
-                    // and `user?.id` are already in scope, no extra hook.
+
                     const handlePillToggle = (emoji: string) => {
                       const own = msgReactions?.find(
-                        (r) =>
-                          r.actor_type === "agent" &&
-                          r.actor_id === user?.id,
+                        (r) => r.actor_type === "agent" && r.actor_id === user?.id
                       );
                       const next = own?.emoji === emoji ? "" : emoji;
                       void postReaction(msg.id, next);
                     };
+
                     return (
                       <MessageActions
                         key={msg.id}
@@ -918,18 +908,20 @@ export function MessageThread({
         )}
       </div>
 
-      {/* Composer */}
-      <MessageComposer
-        conversationId={conversation.id}
-        sessionExpired={sessionInfo.expired}
-        onSend={handleSend}
-        onSendMedia={handleSendMedia}
-        onOpenTemplates={handleOpenTemplates}
-        replyTo={replyTo}
-        onClearReply={() => setReplyTo(null)}
-        prefillText={prefillText}
-        onPrefillConsumed={() => setPrefillText("")}
-      />
+      {/* ── Composer ────────────────────────────────────────────────────── */}
+      <div className="border-t border-slate-200 bg-white">
+        <MessageComposer
+          conversationId={conversation.id}
+          sessionExpired={sessionInfo.expired}
+          onSend={handleSend}
+          onSendMedia={handleSendMedia}
+          onOpenTemplates={handleOpenTemplates}
+          replyTo={replyTo}
+          onClearReply={() => setReplyTo(null)}
+          prefillText={prefillText}
+          onPrefillConsumed={() => setPrefillText("")}
+        />
+      </div>
 
       <TemplatePicker
         open={templateModalOpen}
