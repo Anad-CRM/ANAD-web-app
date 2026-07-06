@@ -120,22 +120,31 @@ export function MessageActions({
     }
   };
 
+  // Detect system notification messages (AI quota errors saved by webhookProcessor)
+  // The backend stores these with name='System' or we can fallback to checking text
+  const isSystemMessage =
+    message.name === "System" ||
+    (message.content_text || "").includes("AI credit limit reached");
+
+  if (isSystemMessage) {
+    return <div className="w-full">{children}</div>;
+  }
+
   // Row alignment lives here (not in MessageBubble) so the `group/actions`
-  // hover region matches the bubble's content width — hovering empty space
-  // in the row no longer reveals the toolbar.
+  // hover region matches the bubble's content width.
   return (
     <div
       className={cn(
         "flex w-full items-end gap-2 mb-1",
-        isAgent ? "justify-end flex-row-reverse" : "justify-start flex-row",
+        isAgent ? "justify-end" : "justify-start flex-row",
       )}
       onContextMenu={handleContextMenu}
       onBlur={() => setTouchOpen(false)}
     >
-      {renderAvatar()}
+      {!isAgent && renderAvatar()}
 
       {/* `min-w-0` lets this flex child actually respect the 75% cap. */}
-      <div className="group/actions relative min-w-0 max-w-[70%]">
+      <div className="group/actions relative min-w-0 max-w-[75%]">
         {children}
 
         {/* Action toolbar — appears on hover/touch */}

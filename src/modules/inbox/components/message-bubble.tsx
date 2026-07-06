@@ -440,8 +440,10 @@ export function MessageBubble({
   const isImageOnly = (message.content_type === "image" || message.message_type === "image") && !hasRealCaption && !isSticker;
 
   // Detect system notification messages (AI quota errors saved by webhookProcessor)
-  // The backend stores these with name='System'
-  const isSystemMessage = message.name === "System";
+  // The backend stores these with name='System' or we can fallback to checking text
+  const isSystemMessage =
+    message.name === "System" ||
+    (message.content_text || "").includes("AI credit limit reached");
 
   let time = "";
   if (message.created_at) {
