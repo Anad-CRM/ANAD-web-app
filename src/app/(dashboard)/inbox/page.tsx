@@ -299,6 +299,7 @@ function InboxPageContent() {
 
         <div className={cn("flex h-full min-w-0 flex-1 lg:flex", hasActiveConv ? "flex" : "hidden lg:flex")}>
           <MessageThread
+            key={activeConversation?.id || 'empty'}
             conversation={activeConversationWithContact}
             contact={activeContactWithContact}
             messages={messages}
@@ -318,7 +319,7 @@ function InboxPageContent() {
         </div>
 
         <div className="hidden lg:block">
-          <ContactSidebar contact={activeContactWithContact} />
+          <ContactSidebar key={activeContactWithContact?.id || 'empty'} contact={activeContactWithContact} />
         </div>
       </div>
     </div>

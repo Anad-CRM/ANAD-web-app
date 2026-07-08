@@ -158,6 +158,7 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
 
   return (
     <MessageThread
+      key={waId || 'empty'}
       embedded
       conversation={conversation}
       contact={contact}
