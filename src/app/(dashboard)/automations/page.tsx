@@ -24,8 +24,7 @@ export default function AutomationsPage() {
   const [rules, setRules] = useState<TemplateMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Active status mock storage
-  const [activeStatusMap, setActiveStatusMap] = useState<Record<string, boolean>>({});
+  // Active status mock storage removed
 
   // Modal control
   const [modalOpen, setModalOpen] = useState(false);
@@ -43,19 +42,6 @@ export default function AutomationsPage() {
     try {
       const data = await getTemplateMessages();
       setRules(data);
-
-      // Load toggles state from localStorage to persist mock toggles
-      const stored = localStorage.getItem("anad_automation_rules_toggles");
-      if (stored) {
-        setActiveStatusMap(JSON.parse(stored));
-      } else {
-        // Default all to active
-        const defaults: Record<string, boolean> = {};
-        data.forEach((r) => {
-          defaults[r.id] = true;
-        });
-        setActiveStatusMap(defaults);
-      }
     } catch {
       toast.error("Failed to load automation rules");
     } finally {
@@ -67,11 +53,17 @@ export default function AutomationsPage() {
     loadRules();
   }, []);
 
-  const persistToggle = (id: string, val: boolean) => {
-    const updated = { ...activeStatusMap, [id]: val };
-    setActiveStatusMap(updated);
-    localStorage.setItem("anad_automation_rules_toggles", JSON.stringify(updated));
-    toast.success(val ? "Auto-reply rule enabled" : "Auto-reply rule disabled");
+  const persistToggle = async (rule: TemplateMessage, val: boolean) => {
+    // Optimistic UI update
+    setRules(prev => prev.map(r => r.id === rule.id ? { ...r, isActive: val } : r));
+    try {
+      await updateTemplateMessage(rule.id, rule.title, rule.message, val);
+      toast.success(val ? "Auto-reply rule enabled" : "Auto-reply rule disabled");
+    } catch (error) {
+      toast.error("Failed to update rule status");
+      // Revert on failure
+      setRules(prev => prev.map(r => r.id === rule.id ? { ...r, isActive: !val } : r));
+    }
   };
 
   const openCreateModal = () => {
@@ -108,9 +100,7 @@ export default function AutomationsPage() {
         await updateTemplateMessage(editingRule.id, trigger.trim(), replyMessage.trim());
         toast.success("Automation rule updated!");
       } else {
-        const created = await createTemplateMessage(trigger.trim(), replyMessage.trim());
-        // set default active toggle
-        persistToggle(created.id, true);
+        await createTemplateMessage(trigger.trim(), replyMessage.trim());
         toast.success("Automation rule created!");
       }
       setModalOpen(false);
@@ -246,7 +236,7 @@ export default function AutomationsPage() {
         ) : (
           <div className="grid grid-cols-1 gap-3.5">
             {rules.map((rule) => {
-              const isActive = activeStatusMap[rule.id] !== false;
+              const isActive = rule.isActive !== false;
               return (
                 <div
                   key={rule.id}
@@ -293,7 +283,7 @@ export default function AutomationsPage() {
                       <input
                         type="checkbox"
                         checked={isActive}
-                        onChange={(e) => persistToggle(rule.id, e.target.checked)}
+                        onChange={(e) => persistToggle(rule, e.target.checked)}
                         className="sr-only peer"
                       />
                       <div className="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
