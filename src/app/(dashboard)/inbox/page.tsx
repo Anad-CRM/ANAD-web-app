@@ -18,8 +18,8 @@ function InboxPageContent() {
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [contactsMap, setContactsMap] = useState<Record<string, Contact>>({});
-  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
-  const [activeContact, setActiveContact] = useState<Contact | null>(null);
+  // Only store the active ID — derive the full enriched conversation from the list
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [whatsappConnected, setWhatsappConnected] = useState<boolean | null>(null);
   const [resyncToken, setResyncToken] = useState(0);
@@ -138,24 +138,26 @@ function InboxPageContent() {
 
   // Polling for updates
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    fetchConversations();
+    const initFetch = async () => {
+      await fetchConversations();
+    };
+    initFetch();
     const interval = setInterval(() => {
       fetchConversations();
-      if (activeConversation) {
-        fetchMessages(activeConversation.id);
+      if (activeConversationId) {
+        fetchMessages(activeConversationId);
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [fetchConversations, activeConversation, fetchMessages]);
+  }, [fetchConversations, activeConversationId, fetchMessages]);
 
   const handleManualRefresh = useCallback(() => {
     fetchConversations();
-    if (activeConversation) {
-      fetchMessages(activeConversation.id);
+    if (activeConversationId) {
+      fetchMessages(activeConversationId);
     }
     setResyncToken(n => n + 1);
-  }, [fetchConversations, activeConversation, fetchMessages]);
+  }, [fetchConversations, activeConversationId, fetchMessages]);
 
   const handleConversationsLoaded = useCallback((loaded: Conversation[]) => {
     const newMap: Record<string, Contact> = {};
@@ -177,22 +179,21 @@ function InboxPageContent() {
   }, []);
 
   const handleSelectConversation = useCallback((conv: Conversation) => {
-    if (activeConversation?.id === conv.id) return;
-    setActiveConversation(conv);
-    setActiveContact(conv.contact ?? null);
+    if (activeConversationId === conv.id) return;
+    setActiveConversationId(conv.id);
     setMessages([]);
     setHasMore(true);
     fetchMessages(conv.id, 30, 0);
     autoSelectedForDeepLinkRef.current = conv.id;
     router.replace(`/inbox?c=${conv.id}`, { scroll: false });
-  }, [activeConversation?.id, router, fetchMessages]);
+  }, [activeConversationId, router, fetchMessages]);
 
   const handleLoadMore = useCallback(async () => {
-    if (!activeConversation || loadingMore || !hasMore) return;
+    if (!activeConversationId || loadingMore || !hasMore) return;
     setLoadingMore(true);
-    await fetchMessages(activeConversation.id, 30, messages.length);
+    await fetchMessages(activeConversationId, 30, messages.length);
     setLoadingMore(false);
-  }, [activeConversation, loadingMore, hasMore, messages.length, fetchMessages]);
+  }, [activeConversationId, loadingMore, hasMore, messages.length, fetchMessages]);
 
   useEffect(() => {
     if (c && conversations.length > 0) {
@@ -211,14 +212,15 @@ function InboxPageContent() {
         return cleanX.slice(-10) === cleanC10;
       });
       if (conv) {
-        handleSelectConversation(conv);
+        setTimeout(() => {
+          handleSelectConversation(conv);
+        }, 0);
       }
     }
   }, [c, conversations, handleSelectConversation]);
 
   const handleCloseConversation = useCallback(() => {
-    setActiveConversation(null);
-    setActiveContact(null);
+    setActiveConversationId(null);
     setMessages([]);
     autoSelectedForDeepLinkRef.current = null;
     router.replace("/inbox", { scroll: false });
@@ -260,10 +262,12 @@ function InboxPageContent() {
     });
   }, [conversations, contactsMap]);
 
+  // Derive the active conversation and contact directly from the enriched list
+  // This ensures the header always has the latest data without stale state
   const activeConversationWithContact = useMemo(() => {
-    if (!activeConversation) return null;
-    return conversationsWithContacts.find(c => c.id === activeConversation.id) || activeConversation;
-  }, [activeConversation, conversationsWithContacts]);
+    if (!activeConversationId) return null;
+    return conversationsWithContacts.find(c => c.id === activeConversationId) ?? null;
+  }, [activeConversationId, conversationsWithContacts]);
 
   const activeContactWithContact = useMemo(() => {
     return activeConversationWithContact?.contact ?? null;
@@ -273,7 +277,7 @@ function InboxPageContent() {
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, is_ai_enabled: isAiEnabled } : c));
   }, []);
 
-  const hasActiveConv = !!activeConversation;
+  const hasActiveConv = !!activeConversationId;
 
   return (
     <div className="-m-4 flex h-[calc(100vh-3.5rem)] flex-col overflow-hidden sm:-m-6">
@@ -289,7 +293,7 @@ function InboxPageContent() {
       <div className="flex flex-1 overflow-hidden">
         <div className={cn("flex h-full flex-1 lg:flex-none", hasActiveConv ? "hidden lg:flex" : "flex")}>
           <ConversationList
-            activeConversationId={activeConversation?.id ?? null}
+            activeConversationId={activeConversationId}
             onSelect={handleSelectConversation}
             conversations={conversationsWithContacts}
             onConversationsLoaded={handleConversationsLoaded}
@@ -299,7 +303,7 @@ function InboxPageContent() {
 
         <div className={cn("flex h-full min-w-0 flex-1 lg:flex", hasActiveConv ? "flex" : "hidden lg:flex")}>
           <MessageThread
-            key={activeConversation?.id || 'empty'}
+            key={activeConversationId || 'empty'}
             conversation={activeConversationWithContact}
             contact={activeContactWithContact}
             messages={messages}
@@ -319,7 +323,7 @@ function InboxPageContent() {
         </div>
 
         <div className="hidden lg:block">
-          <ContactSidebar key={activeContactWithContact?.id || 'empty'} contact={activeContactWithContact} />
+          <ContactSidebar key={activeConversationId || 'empty'} contact={activeContactWithContact} />
         </div>
       </div>
     </div>
