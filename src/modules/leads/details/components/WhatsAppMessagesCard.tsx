@@ -1,61 +1,119 @@
-import React from 'react';
-import { Clock, ChevronRight } from 'lucide-react';
-import { Text } from '@/core/components/ui/Text';
-import { WhatsAppMessage } from '@/modules/leads/api/leadsApi';
-import { Whatsapp } from '@thesvg/react';
+"use client";
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/core/api/axios';
+import type { Message, Conversation, Contact } from '@/modules/inbox/types';
+import { MessageThread } from '@/modules/inbox/components/message-thread';
+
 interface Props {
-  messages: WhatsAppMessage[];
   leadId: string;
+  waId?: string;
 }
 
-export const WhatsAppMessagesCard: React.FC<Props> = ({ messages }) => {
-  if (messages.length === 0) return null;
-  // Show only latest 3 messages
-  const displayMessages = messages.slice(0, 3);
-  const hasMore = messages.length > 3;
+/** Maps the raw backend message shape to the shared inbox Message type */
+function mapToMessage(m: Record<string, unknown>, waId: string): Message {
+  const direction = m.direction === 'outbound' ? 'outbound' : 'inbound';
+  const rawType = (m.messageType as string) || 'text';
+  const typeMap: Record<string, Message['message_type']> = {
+    text: 'text', image: 'image', audio: 'audio', voice: 'audio',
+    video: 'video', document: 'document', template: 'template',
+    sticker: 'sticker', reaction: 'reaction',
+  };
+
+  // Backend stores timestamps as unix epoch seconds — convert to ISO
+  const ts = m.timestamp as string;
+  const num = Number(ts);
+  const created_at =
+    !isNaN(num) && num > 1_000_000_000
+      ? new Date(num * 1000).toISOString()
+      : (ts ?? new Date().toISOString());
+
+  return {
+    id: (m.id as string) ?? `msg-${Math.random()}`,
+    conversation_id: waId,
+    content_text: (m.message as string) ?? null,
+    content_type: typeMap[rawType] ?? 'text',
+    sender_type: direction === 'outbound' ? 'agent' : 'customer',
+    direction,
+    status: (m.status as Message['status']) ?? 'delivered',
+    message_type: typeMap[rawType] ?? 'text',
+    created_at,
+    media_url: m.mediaUrl
+      ? (m.mediaUrl as string).startsWith('/whatsapp/media/')
+        ? `/api${m.mediaUrl as string}`
+        : (m.mediaUrl as string)
+      : undefined,
+    reply_to_message_id: (m.replyToMessageId as string) || undefined,
+    wamid: (m.messageId as string) || undefined,
+    name: (m.name as string) || undefined,
+    errorMessage: (m.errorMessage as string) || undefined,
+  };
+}
+
+export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId: _leadId, waId }) => {
+  const router = useRouter();
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Build minimal Conversation + Contact objects from waId
+  const conversation: Conversation | null = waId
+    ? { id: waId, contact_id: waId, status: 'open', unread_count: 0, is_ai_enabled: false }
+    : null;
+
+  const contact: Contact | null = waId
+    ? { id: waId, name: null, phone_number: waId, phone: waId }
+    : null;
+
+  const fetchMessages = useCallback(async () => {
+    if (!waId) return;
+    setLoading(true);
+    try {
+      const { data } = await api.get(`/whatsapp/messages/${waId}`);
+      if (data.success && Array.isArray(data.data)) {
+        const mapped = (data.data as Record<string, unknown>[])
+          .filter((m) => m.messageType !== 'reaction' && !(m.message as string)?.startsWith('[reaction]:'))
+          .map((m) => mapToMessage(m, waId));
+        setMessages(mapped);
+      }
+    } catch {
+      // silent — user can refresh manually
+    } finally {
+      setLoading(false);
+    }
+  }, [waId]);
+
+  useEffect(() => {
+    fetchMessages();
+    // Poll every 10 s while the card is mounted
+    const interval = setInterval(fetchMessages, 10_000);
+    return () => clearInterval(interval);
+  }, [fetchMessages]);
+
+  /** Called by MessageThread when the user sends a new message */
+  const handleNewMessage = useCallback((msg: Message) => {
+    setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+  }, []);
+
+  /** Called by MessageThread after send confirms (update id / status) */
+  const handleUpdateMessage = useCallback((id: string, updates: Partial<Message>) => {
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates } : m)));
+  }, []);
 
   return (
-    <div className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] p-4 sm:p-6 shadow-sm border border-black/5 flex flex-col relative h-fit">
-      <div className="flex items-start sm:items-center justify-between gap-3 mb-4 sm:mb-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-[#E8F5E9] flex items-center justify-center">
-            <Whatsapp width={18} height={18} className="text-[#4CAF50]" />
-          </div>
-          <Text weight="bold" className="text-slate-800" style={{ fontSize: '16px' }}>
-            WhatsApp Messages
-          </Text>
-        </div>
-        <div className="bg-[#4CAF50]/10 px-2.5 py-0.5 rounded-full">
-          <Text weight="bold" className="text-[#4CAF50]" style={{ fontSize: '12px' }}>
-            {messages.length}
-          </Text>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2.5 sm:gap-3">
-        {displayMessages.map((msg, i) => (
-          <div key={i} className="bg-[#F8F9FA] rounded-2xl p-3 sm:p-4 border border-slate-100/50">
-            <Text className="text-slate-700 leading-relaxed break-words" style={{ fontSize: '13.5px' }}>
-              {msg.text}
-            </Text>
-            <div className="flex items-center gap-1.5 mt-2.5 opacity-60">
-              <Clock size={12} className="text-slate-500" />
-              <Text style={{ fontSize: '11px' }} className="text-slate-500">
-                {msg.date} • {msg.time}
-              </Text>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {hasMore && (
-        <button className="w-full mt-4 py-3 bg-slate-50 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors group">
-          <Text weight="semibold" className="text-slate-500 group-hover:text-slate-800 transition-colors" style={{ fontSize: '13px' }}>
-            View all {messages.length} messages
-          </Text>
-          <ChevronRight size={14} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
-        </button>
-      )}
-    </div>
+    <MessageThread
+      embedded
+      conversation={conversation}
+      contact={contact}
+      messages={loading && messages.length === 0 ? [] : messages}
+      onMessagesLoaded={() => {}}
+      onNewMessage={handleNewMessage}
+      onUpdateMessage={handleUpdateMessage}
+      onStatusChange={() => {}}
+      onAssignChange={() => {}}
+      onRefresh={fetchMessages}
+      onOpenInInbox={waId ? () => router.push(`/inbox?c=${waId}`) : undefined}
+    />
   );
 };

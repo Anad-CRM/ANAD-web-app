@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { cn, createClient, parseSafeDate } from "../lib/utils";
 import { api } from "@/core/api/axios";
 import { getToken } from "@/core/utils/auth";
+import { Whatsapp as WhatsappIcon } from "@thesvg/react";
 
 import type {
   Conversation,
@@ -65,6 +66,10 @@ interface MessageThreadProps {
   resyncToken?: number;
   onRefresh?: () => void;
   onAiToggle?: (conversationId: string, isAiEnabled: boolean) => void;
+  /** When true renders as a compact embedded card (lead details) — no Supabase controls */
+  embedded?: boolean;
+  /** Called when user clicks "Open in Inbox" in embedded mode */
+  onOpenInInbox?: () => void;
 }
 
 function formatDateSeparator(dateStr: string): string {
@@ -150,6 +155,8 @@ export function MessageThread({
   resyncToken: _resyncToken = 0,
   onRefresh,
   onAiToggle,
+  embedded = false,
+  onOpenInInbox,
 }: MessageThreadProps) {
   const { user } = useAuthContext();
   const [togglingAi, setTogglingAi] = useState(false);
@@ -582,8 +589,141 @@ export function MessageThread({
     },
     [conversation, onAssignChange]
   );
+  /* ─── Embedded card layout (lead details) ──────────────────────────── */
+  if (embedded) {
+    const messageGroups = groupMessagesByDate(visibleMessages);
+    return (
+      <div
+        className="flex flex-col overflow-hidden rounded-[24px] sm:rounded-[32px] border border-black/5 shadow-sm bg-white"
+        style={{ height: "520px" }}
+      >
+        {/* Compact embedded header */}
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-100 bg-white shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-[#E8F5E9] flex items-center justify-center shrink-0">
+              <WhatsappIcon width={18} height={18} className="text-[#4CAF50]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-slate-800 truncate">
+                {contact ? contact.name || contact.phone || "WhatsApp Chat" : "WhatsApp Chat"}
+              </p>
+              {visibleMessages.length > 0 && (
+                <p className="text-[10px] text-slate-400">{visibleMessages.length} messages</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {onRefresh && (
+              <button
+                type="button"
+                onClick={handleRefreshClick}
+                disabled={isRefreshing}
+                title="Refresh"
+                className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+              </button>
+            )}
+            {onOpenInInbox && (
+              <button
+                type="button"
+                onClick={onOpenInInbox}
+                title="Open in Inbox"
+                className="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-[#1E56A0] transition-colors"
+              >
+                <ArrowLeft className="h-3.5 w-3.5 -rotate-[135deg]" />
+              </button>
+            )}
+          </div>
+        </div>
 
-  /* ─── Empty state ─────────────────────────────────────────────────────── */
+        {/* Messages */}
+        <div
+          ref={scrollRef}
+          className={cn("flex-1 overflow-y-auto px-4 py-3", CHAT_BG)}
+          style={{ scrollBehavior: "smooth" }}
+        >
+          {loading ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#1E56A0] border-t-transparent" />
+            </div>
+          ) : visibleMessages.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center gap-2">
+              <WhatsappIcon width={32} height={32} className="text-slate-300" />
+              <p className="text-sm text-slate-400">No messages yet</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {messageGroups.map((group) => (
+                <div key={group.date}>
+                  <div className="my-3 flex items-center justify-center">
+                    <span className="rounded-full bg-white/80 px-3 py-0.5 text-[10px] font-semibold text-slate-500 shadow-sm ring-1 ring-slate-200/60 backdrop-blur-sm">
+                      {formatDateSeparator(group.date)}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {group.messages.map((msg) => {
+                      const parent = msg.reply_to_message_id
+                        ? messagesById.get(msg.reply_to_message_id)
+                        : null;
+                      const reply = parent
+                        ? { authorLabel: authorLabelFor(parent), preview: buildReplyPreview(parent) }
+                        : null;
+                      const msgReactions = reactionsByMessageId.get(msg.id);
+                      const handlePillToggle = (emoji: string) => {
+                        const own = msgReactions?.find((r) => r.actor_type === "agent" && r.actor_id === user?.id);
+                        void postReaction(msg.id, own?.emoji === emoji ? "" : emoji);
+                      };
+                      return (
+                        <MessageActions
+                          key={msg.id}
+                          message={msg}
+                          contact={contact}
+                          onReply={() => handleStartReply(msg)}
+                          onReact={(emoji) => { if (emoji) void postReaction(msg.id, emoji); }}
+                        >
+                          <MessageBubble
+                            message={msg}
+                            reply={reply}
+                            reactions={msgReactions}
+                            currentUserId={user?.id}
+                            onToggleReaction={handlePillToggle}
+                          />
+                        </MessageActions>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Composer */}
+        <div className="border-t border-slate-100 bg-white shrink-0">
+          <MessageComposer
+            conversationId={conversation?.id ?? ""}
+            sessionExpired={sessionInfo.expired}
+            onSend={handleSend}
+            onSendMedia={handleSendMedia}
+            onOpenTemplates={handleOpenTemplates}
+            replyTo={replyTo}
+            onClearReply={() => setReplyTo(null)}
+            prefillText={prefillText}
+            onPrefillConsumed={() => setPrefillText("")}
+          />
+        </div>
+
+        <TemplatePicker
+          open={templateModalOpen}
+          onOpenChange={setTemplateModalOpen}
+          onSelect={handleTemplateSelect}
+        />
+      </div>
+    );
+  }
+
+  /* ─── Empty state (full-page inbox only) ────────────────────────────── */
   if (!conversation || !contact) {
     return (
       <div

@@ -1,17 +1,20 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Conversation, Message, Contact } from "@/modules/inbox/types";
 import { ConversationList } from "@/modules/inbox/components/conversation-list";
 import { MessageThread } from "@/modules/inbox/components/message-thread";
 import { ContactSidebar } from "@/modules/inbox/components/contact-sidebar";
 import { WifiOff } from "lucide-react";
+import { Suspense } from "react";
 import { cn } from "@/modules/inbox/lib/utils";
 import { api } from "@/core/api/axios";
 
-export default function InboxPage() {
+function InboxPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const c = searchParams.get('c');
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [contactsMap, setContactsMap] = useState<Record<string, Contact>>({});
@@ -142,6 +145,15 @@ export default function InboxPage() {
     router.replace(`/inbox?c=${conv.id}`, { scroll: false });
   }, [activeConversation?.id, router, fetchMessages]);
 
+  useEffect(() => {
+    if (c && conversations.length > 0 && autoSelectedForDeepLinkRef.current !== c) {
+      const conv = conversations.find(x => x.id === c);
+      if (conv) {
+        handleSelectConversation(conv);
+      }
+    }
+  }, [c, conversations, handleSelectConversation]);
+
   const handleCloseConversation = useCallback(() => {
     setActiveConversation(null);
     setActiveContact(null);
@@ -244,5 +256,17 @@ export default function InboxPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function InboxPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    }>
+      <InboxPageContent />
+    </Suspense>
   );
 }
