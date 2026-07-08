@@ -51,6 +51,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [savedConfig, setSavedConfig] = useState<AiConfigResponse | null>(null);
 
   // ── Form state ────────────────────────────────────────────────────
   const [provider, setProvider] = useState<Provider>('none');
@@ -81,6 +82,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
     setLoading(true);
     try {
       const data: AiConfigResponse = await getAiConfig();
+      setSavedConfig(data);
       setProvider(data.provider || 'none');
       setApiKey(data.apiKey || '');
       setSystemPrompt(data.systemPrompt || '');
@@ -101,6 +103,17 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory]);
 
+  const handleProviderChange = (p: Provider) => {
+    setProvider(p);
+    if (savedConfig && savedConfig.provider === p) {
+      setApiKey(savedConfig.apiKey || '');
+      setSystemPrompt(savedConfig.systemPrompt || '');
+    } else {
+      setApiKey('');
+      setSystemPrompt('');
+    }
+  };
+
   // ── Save config ────────────────────────────────────────────────────
   const handleSave = async () => {
     if (provider !== 'none' && !apiKey) {
@@ -112,6 +125,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
     try {
       const payload: AiConfigPayload = { provider, apiKey, systemPrompt, isEnabled };
       await saveAiConfig(payload);
+      setSavedConfig({ provider, apiKey, systemPrompt, isEnabled, hasApiKey: !!apiKey });
       setIsConnected(provider !== 'none' && !!apiKey);
       setIsDefault(false);
       showToast('✅ AI configuration saved successfully', 'success');
@@ -297,7 +311,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
               {(['none', 'gemini', 'openai'] as Provider[]).map((p) => (
                 <button
                   key={p}
-                  onClick={() => setProvider(p)}
+                  onClick={() => handleProviderChange(p)}
                   className={`rounded-[14px] px-3 py-2.5 text-[12px] font-semibold transition-all border-2 ${provider === p
                       ? 'border-violet-500 bg-white text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.18)]'
                       : 'border-transparent bg-white/60 text-[#64748B] hover:bg-white hover:text-[#0D1B3E]'
