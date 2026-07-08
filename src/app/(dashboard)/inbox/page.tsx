@@ -20,6 +20,8 @@ function InboxPageContent() {
   const [contactsMap, setContactsMap] = useState<Record<string, Contact>>({});
   // Only store the active ID — derive the full enriched conversation from the list
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  // Keep a ref so async callbacks always see the latest active conversation
+  const activeConversationIdRef = useRef<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [whatsappConnected, setWhatsappConnected] = useState<boolean | null>(null);
   const [resyncToken, setResyncToken] = useState(0);
@@ -70,6 +72,10 @@ function InboxPageContent() {
       const { data } = await api.get(`/whatsapp/messages/${waId}`, {
         params: { limit, offset }
       });
+
+      // Guard: if the user switched chats while the request was in-flight, discard the result
+      if (activeConversationIdRef.current !== waId) return;
+
       if (data.success) {
         const mapped: Message[] = data.data.map((m: Record<string, unknown>) => {
           const direction = m.direction === 'outbound' ? 'outbound' : 'inbound';
@@ -82,7 +88,7 @@ function InboxPageContent() {
           };
           return {
             id: m.id as string,
-            conversation_id: m.waId as string,
+            conversation_id: waId,
             content_text: (m.message as string) || null,
             created_at: (m.timestamp as string) || new Date().toISOString(),
             direction,
@@ -103,20 +109,19 @@ function InboxPageContent() {
         });
 
         if (offset === 0) {
+          // Initial load or poll refresh: replace only messages that belong to this conversation
+          // (merge with optimistic outbound messages already in state for this same waId)
           setMessages(prev => {
-            if (prev.length === 0) return mapped;
-            const merged = [...prev];
-            mapped.forEach((newMsg) => {
-              const idx = merged.findIndex(m => m.id === newMsg.id);
-              if (idx !== -1) {
-                merged[idx] = newMsg;
-              } else {
-                merged.push(newMsg);
-              }
+            // Keep any optimistic temp messages for THIS conversation
+            const optimistic = prev.filter(m => m.id.startsWith('temp-') && m.conversation_id === waId);
+            const merged = [...mapped];
+            optimistic.forEach(opt => {
+              if (!merged.some(m => m.id === opt.id)) merged.push(opt);
             });
             return merged.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
           });
         } else {
+          // Pagination: prepend older messages
           if (mapped.length < limit) {
             setHasMore(false);
           }
@@ -136,20 +141,19 @@ function InboxPageContent() {
     }
   }, []);
 
-  // Polling for updates
+  // Polling for updates — use the ref so the interval always sees the latest active conversation
+  // without needing to tear down / recreate the interval on every selection change
   useEffect(() => {
-    const initFetch = async () => {
-      await fetchConversations();
-    };
-    initFetch();
+    void (async () => { await fetchConversations(); })();
     const interval = setInterval(() => {
       fetchConversations();
-      if (activeConversationId) {
-        fetchMessages(activeConversationId);
+      const currentId = activeConversationIdRef.current;
+      if (currentId) {
+        fetchMessages(currentId);
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [fetchConversations, activeConversationId, fetchMessages]);
+  }, [fetchConversations, fetchMessages]);
 
   const handleManualRefresh = useCallback(() => {
     fetchConversations();
@@ -179,14 +183,17 @@ function InboxPageContent() {
   }, []);
 
   const handleSelectConversation = useCallback((conv: Conversation) => {
-    if (activeConversationId === conv.id) return;
+    if (activeConversationIdRef.current === conv.id) return;
+    // Update the ref FIRST so that any in-flight request for the old conversation
+    // is discarded immediately when its response arrives
+    activeConversationIdRef.current = conv.id;
     setActiveConversationId(conv.id);
     setMessages([]);
     setHasMore(true);
     fetchMessages(conv.id, 30, 0);
     autoSelectedForDeepLinkRef.current = conv.id;
     router.replace(`/inbox?c=${conv.id}`, { scroll: false });
-  }, [activeConversationId, router, fetchMessages]);
+  }, [router, fetchMessages]);
 
   const handleLoadMore = useCallback(async () => {
     if (!activeConversationId || loadingMore || !hasMore) return;
@@ -220,6 +227,7 @@ function InboxPageContent() {
   }, [c, conversations, handleSelectConversation]);
 
   const handleCloseConversation = useCallback(() => {
+    activeConversationIdRef.current = null;
     setActiveConversationId(null);
     setMessages([]);
     autoSelectedForDeepLinkRef.current = null;

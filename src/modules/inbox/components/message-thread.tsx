@@ -283,7 +283,7 @@ export function MessageThread({
         .order("full_name");
       if (cancelled) return;
       if (error) {
-        console.error("Failed to fetch profiles");
+        // Silently ignore profile fetch errors if Supabase is unavailable
         return;
       }
       setProfiles((data as Profile[]) ?? []);
@@ -804,6 +804,8 @@ export function MessageThread({
   const assignedAgentId = conversation.assigned_agent_id ?? null;
   const currentAssignee = profiles.find((p) => p.user_id === assignedAgentId);
   const assignLabel = assignedAgentId ? (currentAssignee?.full_name ?? "Assigned") : "Assign";
+
+
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
