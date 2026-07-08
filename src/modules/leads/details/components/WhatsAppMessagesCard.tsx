@@ -9,6 +9,7 @@ import { MessageThread } from '@/modules/inbox/components/message-thread';
 interface Props {
   leadId: string;
   waId?: string; // hint from lead.mobileNumber, not used for fetching
+  leadName?: string;
 }
 
 /** Maps the raw backend whatsapp row to the shared inbox Message type */
@@ -56,7 +57,7 @@ function mapToMessage(m: Record<string, unknown>, conversationWaId: string): Mes
   };
 }
 
-export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId }) => {
+export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
   const router = useRouter();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -114,7 +115,7 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId }) => {
     : null;
 
   const contact: Contact | null = waId
-    ? { id: waId, name: null, phone_number: waId, phone: waId }
+    ? { id: waId, name: leadName || null, phone_number: waId, phone: waId }
     : null;
 
   return (

@@ -70,6 +70,12 @@ interface MessageThreadProps {
   embedded?: boolean;
   /** Called when user clicks "Open in Inbox" in embedded mode */
   onOpenInInbox?: () => void;
+  /** Callback to fetch more older messages when scrolling to the top */
+  onLoadMore?: () => Promise<void>;
+  /** Whether there are more older messages available to load */
+  hasMore?: boolean;
+  /** Whether a load-more API request is currently in progress */
+  loadingMore?: boolean;
 }
 
 function formatDateSeparator(dateStr: string): string {
@@ -157,6 +163,9 @@ export function MessageThread({
   onAiToggle,
   embedded = false,
   onOpenInInbox,
+  onLoadMore,
+  hasMore = false,
+  loadingMore = false,
 }: MessageThreadProps) {
   const { user } = useAuthContext();
   const [togglingAi, setTogglingAi] = useState(false);
@@ -312,16 +321,52 @@ export function MessageThread({
 
   const conversationId = conversation?.id;
 
+  const prevFirstMessageIdRef = useRef<string | undefined>(undefined);
+  const prevLastMessageIdRef = useRef<string | undefined>(undefined);
+
   useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const firstMsg = messages[0];
+    const lastMsg = messages[messages.length - 1];
+
+    // Case 1: Initial load or conversation change (prevFirstMessageIdRef is undefined)
+    if (prevFirstMessageIdRef.current === undefined && firstMsg) {
+      el.scrollTop = el.scrollHeight;
+    }
+    // Case 2: New message appended at bottom (sent/received)
+    else if (lastMsg && lastMsg.id !== prevLastMessageIdRef.current) {
+      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
+      if (isNearBottom || lastMsg.direction === "outbound") {
+        el.scrollTop = el.scrollHeight;
+      }
+    }
+
+    prevFirstMessageIdRef.current = firstMsg?.id;
+    prevLastMessageIdRef.current = lastMsg?.id;
+  }, [messages]);
+
+  useEffect(() => {
+    prevFirstMessageIdRef.current = undefined;
+    prevLastMessageIdRef.current = undefined;
     setReplyTo(null);
   }, [conversationId]);
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      const el = scrollRef.current;
-      el.scrollTop = el.scrollHeight;
-    }
-  }, [messages]);
+  const handleScroll = useCallback(
+    async (e: React.UIEvent<HTMLDivElement>) => {
+      const el = e.currentTarget;
+      if (el.scrollTop === 0 && hasMore && !loadingMore && onLoadMore) {
+        const prevScrollHeight = el.scrollHeight;
+        await onLoadMore();
+        // Adjust the scroll position so it doesn't jump after prepend
+        requestAnimationFrame(() => {
+          el.scrollTop = el.scrollHeight - prevScrollHeight;
+        });
+      }
+    },
+    [hasMore, loadingMore, onLoadMore]
+  );
 
   /* ─── Send handlers ─────────────────────────────────────────────────── */
   const handleSend = useCallback(

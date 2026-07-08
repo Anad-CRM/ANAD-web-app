@@ -159,7 +159,7 @@ export const LeadDetailsDashboard: React.FC = () => {
             </div>
 
             <div className="xl:col-span-2">
-              <WhatsAppMessagesCard leadId={leadId} waId={lead.mobileNumber} />
+              <WhatsAppMessagesCard leadId={leadId} waId={lead.mobileNumber} leadName={lead.userName} />
             </div>
           </div>
         )}
