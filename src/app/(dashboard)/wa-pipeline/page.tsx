@@ -15,9 +15,7 @@ interface Column {
   title: string;
   color: string;
   bg: string;
-  // The lead statuses that map to this column
   statuses: LeadStatus[];
-  // Default status to assign when a card is dropped here
   defaultStatus: LeadStatus;
 }
 

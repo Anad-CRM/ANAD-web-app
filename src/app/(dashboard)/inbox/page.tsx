@@ -147,7 +147,12 @@ function InboxPageContent() {
 
   useEffect(() => {
     if (c && conversations.length > 0 && autoSelectedForDeepLinkRef.current !== c) {
-      const conv = conversations.find(x => x.id === c);
+      const cleanC = c.replace(/\D/g, '');
+      const cleanC10 = cleanC.slice(-10);
+      const conv = conversations.find(x => {
+        const cleanX = x.id.replace(/\D/g, '');
+        return cleanX.slice(-10) === cleanC10;
+      });
       if (conv) {
         handleSelectConversation(conv);
       }
