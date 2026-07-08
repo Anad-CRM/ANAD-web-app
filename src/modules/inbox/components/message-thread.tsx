@@ -685,6 +685,7 @@ export function MessageThread({
         {/* Messages */}
         <div
           ref={scrollRef}
+          onScroll={handleScroll}
           className={cn("flex-1 overflow-y-auto px-4 py-3", CHAT_BG)}
           style={{ scrollBehavior: "smooth" }}
         >
@@ -699,6 +700,11 @@ export function MessageThread({
             </div>
           ) : (
             <div className="space-y-1">
+              {loadingMore && (
+                <div className="flex items-center justify-center py-2 shrink-0">
+                  <Loader2 className="h-4 w-4 animate-spin text-slate-450" />
+                </div>
+              )}
               {messageGroups.map((group) => (
                 <div key={group.date}>
                   <div className="my-3 flex items-center justify-center">
@@ -987,6 +993,7 @@ export function MessageThread({
       {/* ── Messages Area ───────────────────────────────────────────────── */}
       <div
         ref={scrollRef}
+        onScroll={handleScroll}
         className={cn("flex-1 overflow-y-auto px-4 py-5", CHAT_BG)}
         style={{ scrollBehavior: "smooth" }}
       >
@@ -1031,6 +1038,11 @@ export function MessageThread({
           </div>
         ) : (
           <div className="space-y-1">
+            {loadingMore && (
+              <div className="flex items-center justify-center py-2 shrink-0">
+                <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+              </div>
+            )}
             {messageGroups.map((group) => (
               <div key={group.date}>
                 {/* ── Date separator ── */}

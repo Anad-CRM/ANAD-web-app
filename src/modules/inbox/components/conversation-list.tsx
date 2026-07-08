@@ -52,18 +52,6 @@ export function ConversationList({
   const [filter, setFilter] = useState<ConversationStatus | "all">("all");
   const [loading, setLoading] = useState(true);
 
-  // Keep the latest callback in a ref so the fetch effect below can
-  // have a stable, empty-dep identity. Previously the fetch useCallback
-  // depended on `onConversationsLoaded`, which depends on the parent's
-  // `deepLinkConvId` — so every URL change (including one the parent
-  // triggered via router.replace after a click) caused a fresh
-  // conversations fetch. That extra refetch was the trigger for the
-  // deep-link auto-select running a second time and wiping the active
-  // thread's messages.
-  // Mutation lives in an effect (not render) per React 19's refs rule;
-  // the fetch runs once on mount so it's fine to read the slightly
-  // older value — the very next render updates the ref for any
-  // subsequent async completion.
   const onConversationsLoadedRef = useRef(onConversationsLoaded);
   useEffect(() => {
     onConversationsLoadedRef.current = onConversationsLoaded;

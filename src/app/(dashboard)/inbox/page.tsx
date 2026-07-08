@@ -23,6 +23,8 @@ function InboxPageContent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [whatsappConnected, setWhatsappConnected] = useState<boolean | null>(null);
   const [resyncToken, setResyncToken] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const autoSelectedForDeepLinkRef = useRef<string | null>(null);
 
@@ -63,11 +65,13 @@ function InboxPageContent() {
     }
   }, []);
 
-  const fetchMessages = useCallback(async (waId: string) => {
+  const fetchMessages = useCallback(async (waId: string, limit = 30, offset = 0) => {
     try {
-      const { data } = await api.get(`/whatsapp/messages/${waId}`);
+      const { data } = await api.get(`/whatsapp/messages/${waId}`, {
+        params: { limit, offset }
+      });
       if (data.success) {
-        setMessages(data.data.map((m: Record<string, unknown>) => {
+        const mapped: Message[] = data.data.map((m: Record<string, unknown>) => {
           const direction = m.direction === 'outbound' ? 'outbound' : 'inbound';
           const rawMsgType = (m.messageType as string) || 'text';
           // Map backend message types to frontend content_type
@@ -96,8 +100,36 @@ function InboxPageContent() {
             wamid: (m.messageId as string) || undefined,
             name: (m.name as string) || undefined,
           };
+        });
 
-        }));
+        if (offset === 0) {
+          setMessages(prev => {
+            if (prev.length === 0) return mapped;
+            const merged = [...prev];
+            mapped.forEach((newMsg) => {
+              const idx = merged.findIndex(m => m.id === newMsg.id);
+              if (idx !== -1) {
+                merged[idx] = newMsg;
+              } else {
+                merged.push(newMsg);
+              }
+            });
+            return merged.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          });
+        } else {
+          if (mapped.length < limit) {
+            setHasMore(false);
+          }
+          setMessages(prev => {
+            const merged = [...mapped];
+            prev.forEach((existingMsg) => {
+              if (!merged.some(m => m.id === existingMsg.id)) {
+                merged.push(existingMsg);
+              }
+            });
+            return merged.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          });
+        }
       }
     } catch (err) {
       console.error("Failed to fetch messages", err);
@@ -129,6 +161,15 @@ function InboxPageContent() {
     const newMap: Record<string, Contact> = {};
     loaded.forEach(c => {
       if (c.contact) {
+        // Key contact by cleaned phone number so it matches waId
+        const phone = c.contact.phone || c.contact.phone_number;
+        if (phone) {
+          const cleanPhone = phone.replace(/\D/g, '');
+          if (cleanPhone) {
+            newMap[cleanPhone] = c.contact;
+          }
+        }
+        // Also map by primary Supabase ID
         newMap[c.id] = c.contact;
       }
     });
@@ -140,15 +181,31 @@ function InboxPageContent() {
     setActiveConversation(conv);
     setActiveContact(conv.contact ?? null);
     setMessages([]);
-    fetchMessages(conv.id);
+    setHasMore(true);
+    fetchMessages(conv.id, 30, 0);
     autoSelectedForDeepLinkRef.current = conv.id;
     router.replace(`/inbox?c=${conv.id}`, { scroll: false });
   }, [activeConversation?.id, router, fetchMessages]);
 
+  const handleLoadMore = useCallback(async () => {
+    if (!activeConversation || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchMessages(activeConversation.id, 30, messages.length);
+    setLoadingMore(false);
+  }, [activeConversation, loadingMore, hasMore, messages.length, fetchMessages]);
+
   useEffect(() => {
-    if (c && conversations.length > 0 && autoSelectedForDeepLinkRef.current !== c) {
+    if (c && conversations.length > 0) {
       const cleanC = c.replace(/\D/g, '');
       const cleanC10 = cleanC.slice(-10);
+
+      // Avoid double selections by checking if the currently loaded thread matches
+      const currentClean = autoSelectedForDeepLinkRef.current?.replace(/\D/g, '') || '';
+      const currentClean10 = currentClean.slice(-10);
+      if (currentClean10 === cleanC10) {
+        return;
+      }
+
       const conv = conversations.find(x => {
         const cleanX = x.id.replace(/\D/g, '');
         return cleanX.slice(-10) === cleanC10;
@@ -183,7 +240,8 @@ function InboxPageContent() {
 
   const conversationsWithContacts = useMemo(() => {
     return conversations.map(conv => {
-      const existingContact = contactsMap[conv.id];
+      const cleanId = conv.id.replace(/\D/g, '');
+      const existingContact = contactsMap[cleanId] || contactsMap[cleanId.slice(-10)] || contactsMap[conv.id];
       const name = (existingContact?.name && existingContact.name !== existingContact.id)
         ? existingContact.name
         : (conv.contact?.name && conv.contact.name !== conv.id)
@@ -253,6 +311,9 @@ function InboxPageContent() {
             resyncToken={resyncToken}
             onRefresh={handleManualRefresh}
             onAiToggle={handleAiToggle}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadingMore={loadingMore}
           />
         </div>
 

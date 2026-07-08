@@ -64,12 +64,16 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
   const [loading, setLoading] = useState(false);
   // waId discovered from the server response (guaranteed to match DB)
   const [resolvedWaId, setResolvedWaId] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async (limit = 30, offset = 0) => {
     if (!leadId) return;
-    setLoading(true);
+    if (offset === 0) setLoading(true);
     try {
-      const { data } = await api.get(`/whatsapp/messages-by-lead/${leadId}`);
+      const { data } = await api.get(`/whatsapp/messages-by-lead/${leadId}`, {
+        params: { limit, offset }
+      });
       if (data.success && Array.isArray(data.data)) {
         const waId: string = data.waId ?? '';
         setResolvedWaId(waId || null);
@@ -82,7 +86,34 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
           )
           .map((m) => mapToMessage(m, waId));
 
-        setMessages(mapped);
+        if (offset === 0) {
+          setMessages((prev) => {
+            if (prev.length === 0) return mapped;
+            const merged = [...prev];
+            mapped.forEach((newMsg) => {
+              const idx = merged.findIndex((m) => m.id === newMsg.id);
+              if (idx !== -1) {
+                merged[idx] = newMsg;
+              } else {
+                merged.push(newMsg);
+              }
+            });
+            return merged.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          });
+        } else {
+          if (mapped.length < limit) {
+            setHasMore(false);
+          }
+          setMessages((prev) => {
+            const merged = [...mapped];
+            prev.forEach((existingMsg) => {
+              if (!merged.some((m) => m.id === existingMsg.id)) {
+                merged.push(existingMsg);
+              }
+            });
+            return merged.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          });
+        }
       }
     } catch {
       // silent — user can refresh manually
@@ -92,10 +123,17 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
   }, [leadId]);
 
   useEffect(() => {
-    fetchMessages();
-    const interval = setInterval(fetchMessages, 10_000);
+    fetchMessages(30, 0);
+    const interval = setInterval(() => fetchMessages(30, 0), 10_000);
     return () => clearInterval(interval);
   }, [fetchMessages]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchMessages(30, messages.length);
+    setLoadingMore(false);
+  }, [loadingMore, hasMore, messages.length, fetchMessages]);
 
   /** Called by MessageThread on optimistic send */
   const handleNewMessage = useCallback((msg: Message) => {
@@ -131,6 +169,9 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
       onAssignChange={() => {}}
       onRefresh={fetchMessages}
       onOpenInInbox={waId ? () => router.push(`/inbox?c=${waId}`) : undefined}
+      onLoadMore={handleLoadMore}
+      hasMore={hasMore}
+      loadingMore={loadingMore}
     />
   );
 };
