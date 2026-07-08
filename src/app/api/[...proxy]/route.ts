@@ -12,9 +12,10 @@ async function handler(req: NextRequest) {
   const headers = new Headers(req.headers);
   headers.delete("host");
 
-  let body: string | undefined;
+  let body: ReadableStream<Uint8Array> | null | undefined;
   if (req.method !== "GET" && req.method !== "HEAD") {
-    body = await req.text();
+    // Forward the stream directly to preserve binary data for multipart/form-data
+    body = req.body;
   }
 
   try {
@@ -32,9 +33,7 @@ async function handler(req: NextRequest) {
     responseHeaders.delete("content-length");
     responseHeaders.set("Access-Control-Allow-Origin", "*");
 
-    const responseBody = await backendRes.text();
-
-    return new NextResponse(responseBody, {
+    return new NextResponse(backendRes.body, {
       status: backendRes.status,
       headers: responseHeaders,
     });
