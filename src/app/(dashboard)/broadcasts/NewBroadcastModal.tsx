@@ -56,7 +56,7 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
       setAudienceType("all");
       setBodyVariables({});
       setSendImmediately(true);
-      
+
       const fetchTpl = async () => {
         setLoadingTemplates(true);
         try {
@@ -97,30 +97,6 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
     }));
   };
 
-  // Next button handler — validates step 1 before advancing
-  const handleNext = () => {
-    if (step === 1) {
-      if (loadingTemplates) {
-        toast.error("Please wait for templates to finish loading");
-        return;
-      }
-      if (!campaignName.trim()) {
-        toast.error("Please enter a campaign name");
-        return;
-      }
-      if (!selectedTemplate) {
-        toast.error("Please select a message template");
-        return;
-      }
-    }
-    setStep((s) => s + 1);
-  };
-
-  // Derived: is the Next button logically blocked on step 1?
-  const nextDisabled =
-    step === 1 &&
-    (loadingTemplates || !campaignName.trim() || !selectedTemplate);
-
   // Preview body with current variables
   const previewText = useMemo(() => {
     let text = bodyText;
@@ -131,6 +107,25 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
     });
     return text;
   }, [bodyText, placeholders, bodyVariables]);
+
+  const handleNext = () => {
+    if (step === 1) {
+      if (!campaignName.trim()) {
+        toast.error("Please enter a campaign name");
+        return;
+      }
+      if (!selectedTemplate) {
+        toast.error("Please select a message template");
+        return;
+      }
+      if (loadingTemplates) {
+        toast.error("Please wait for templates to finish loading");
+        return;
+      }
+    }
+    // Step 2 → 3: audienceType always has a default, no extra check needed
+    setStep((s) => s + 1);
+  };
 
   const handleSubmit = async () => {
     if (!campaignName.trim()) {
@@ -160,17 +155,17 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
       // components: [{ type: "body", parameters: [{ type: "text", text: "val1" }, ...] }]
       const templateParams = placeholders.length > 0
         ? [
-            {
-              type: "body",
-              parameters: placeholders.map((ph) => {
-                const num = ph.replace(/\D/g, "");
-                return {
-                  type: "text",
-                  text: bodyVariables[num] || "",
-                };
-              }),
-            },
-          ]
+          {
+            type: "body",
+            parameters: placeholders.map((ph) => {
+              const num = ph.replace(/\D/g, "");
+              return {
+                type: "text",
+                text: bodyVariables[num] || "",
+              };
+            }),
+          },
+        ]
         : [];
 
       // Create broadcast
@@ -479,19 +474,8 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
             <button
               type="button"
               onClick={handleNext}
-              disabled={nextDisabled}
-              title={
-                step === 1
-                  ? loadingTemplates
-                    ? "Please wait for templates to load"
-                    : !campaignName.trim()
-                    ? "Please enter a campaign name"
-                    : !selectedTemplate
-                    ? "Please select a message template"
-                    : undefined
-                  : undefined
-              }
-              className="flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={loadingTemplates && step === 1}
+              className="flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: COLORS.primary }}
             >
               {loadingTemplates && step === 1 ? (
