@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Conversation, Message, Contact } from "@/modules/inbox/types";
@@ -40,6 +39,17 @@ function InboxPageContent() {
       }
     };
     checkConnection();
+  }, []);
+
+  useEffect(() => {
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      const originalOverflow = mainEl.style.overflow;
+      mainEl.style.overflow = 'hidden';
+      return () => {
+        mainEl.style.overflow = originalOverflow;
+      };
+    }
   }, []);
 
   const fetchConversations = useCallback(async () => {
@@ -284,7 +294,7 @@ function InboxPageContent() {
   const hasActiveConv = !!activeConversationId;
 
   return (
-    <div className="-m-4 flex h-[calc(100vh-3.5rem)] flex-col overflow-hidden sm:-m-6">
+    <div className="-m-4 sm:-m-6 md:-m-8 flex h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] flex-col overflow-hidden">
       {whatsappConnected === false && (
         <div className="flex shrink-0 items-center justify-center gap-2 border-b border-amber-500/20 bg-amber-500/10 px-4 py-2">
           <WifiOff className="h-4 w-4 text-amber-400" />
