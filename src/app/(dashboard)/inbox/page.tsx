@@ -184,8 +184,6 @@ function InboxPageContent() {
 
   const handleSelectConversation = useCallback((conv: Conversation) => {
     if (activeConversationIdRef.current === conv.id) return;
-    // Update the ref FIRST so that any in-flight request for the old conversation
-    // is discarded immediately when its response arrives
     activeConversationIdRef.current = conv.id;
     setActiveConversationId(conv.id);
     setMessages([]);
@@ -206,8 +204,6 @@ function InboxPageContent() {
     if (c && conversations.length > 0) {
       const cleanC = c.replace(/\D/g, '');
       const cleanC10 = cleanC.slice(-10);
-
-      // Avoid double selections by checking if the currently loaded thread matches
       const currentClean = autoSelectedForDeepLinkRef.current?.replace(/\D/g, '') || '';
       const currentClean10 = currentClean.slice(-10);
       if (currentClean10 === cleanC10) {
