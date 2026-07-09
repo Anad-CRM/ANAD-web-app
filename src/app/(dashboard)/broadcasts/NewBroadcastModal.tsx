@@ -97,6 +97,30 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
     }));
   };
 
+  // Next button handler — validates step 1 before advancing
+  const handleNext = () => {
+    if (step === 1) {
+      if (loadingTemplates) {
+        toast.error("Please wait for templates to finish loading");
+        return;
+      }
+      if (!campaignName.trim()) {
+        toast.error("Please enter a campaign name");
+        return;
+      }
+      if (!selectedTemplate) {
+        toast.error("Please select a message template");
+        return;
+      }
+    }
+    setStep((s) => s + 1);
+  };
+
+  // Derived: is the Next button logically blocked on step 1?
+  const nextDisabled =
+    step === 1 &&
+    (loadingTemplates || !campaignName.trim() || !selectedTemplate);
+
   // Preview body with current variables
   const previewText = useMemo(() => {
     let text = bodyText;
@@ -454,26 +478,20 @@ export default function NewBroadcastModal({ open, onClose, onCreated }: NewBroad
           {step < 3 ? (
             <button
               type="button"
-              onClick={() => {
-                if (step === 1) {
-                  if (!campaignName.trim()) {
-                    toast.error("Please enter a campaign name");
-                    return;
-                  }
-                  if (!selectedTemplate) {
-                    toast.error("Please select a message template");
-                    return;
-                  }
-                  if (loadingTemplates) {
-                    toast.error("Please wait for templates to finish loading");
-                    return;
-                  }
-                }
-                // Step 2: audienceType always has a default value so no extra check needed
-                setStep((s) => s + 1);
-              }}
-              disabled={loadingTemplates && step === 1}
-              className="flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={handleNext}
+              disabled={nextDisabled}
+              title={
+                step === 1
+                  ? loadingTemplates
+                    ? "Please wait for templates to load"
+                    : !campaignName.trim()
+                    ? "Please enter a campaign name"
+                    : !selectedTemplate
+                    ? "Please select a message template"
+                    : undefined
+                  : undefined
+              }
+              className="flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
               style={{ backgroundColor: COLORS.primary }}
             >
               {loadingTemplates && step === 1 ? (
