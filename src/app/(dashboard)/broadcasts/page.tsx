@@ -8,9 +8,6 @@ import {
   Plus,
   Loader2,
   Send,
-  Clock,
-  CheckCheck,
-  XCircle,
   RefreshCw,
   ChevronRight,
 } from "lucide-react";
@@ -20,7 +17,7 @@ import {
   getBroadcastHistory,
 } from "@/core/api/broadcastApi";
 import { COLORS } from "@/core/components/theme/colors";
-import NewBroadcastModal from "./NewBroadcastModal";
+import { NewBroadcastModal } from "@/modules/broadcasts";
 
 const POLL_MS = 5_000;
 
@@ -82,7 +79,12 @@ export default function BroadcastsPage() {
     }
     function onVisibility() {
       if (!anySending) return;
-      document.visibilityState === "hidden" ? stop() : (load(), start());
+      if (document.visibilityState === "hidden") {
+        stop();
+      } else {
+        load();
+        start();
+      }
     }
     if (anySending && document.visibilityState === "visible") start();
     else stop();
