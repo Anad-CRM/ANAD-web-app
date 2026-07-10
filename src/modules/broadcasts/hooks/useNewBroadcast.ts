@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { getTemplates, createBroadcast, sendBroadcast } from "@/core/api/broadcastApi";
+import {
+  getTemplateMessages,
+  createTemplateMessage,
+  deleteTemplateMessage,
+} from "@/core/api/templateApi";
 import type { MetaTemplate } from "@/core/api/broadcastApi";
+import type { TemplateMessage } from "@/core/api/templateApi";
+import type { TemplateSource } from "@/modules/broadcasts/types/broadcast.types";
 
 export interface UseNewBroadcastReturn {
   // Navigation
@@ -12,15 +19,21 @@ export interface UseNewBroadcastReturn {
   handleNext: () => void;
   handleBack: () => void;
 
-  // Data
-  templates: MetaTemplate[];
+  // Template data
+  metaTemplates: MetaTemplate[];
+  customTemplates: TemplateMessage[];
   loadingTemplates: boolean;
+  selectedTemplate: TemplateSource | null;
+  setSelectedTemplate: React.Dispatch<React.SetStateAction<TemplateSource | null>>;
+
+  // Custom template CRUD
+  addCustomTemplate: (title: string, message: string) => Promise<void>;
+  deleteCustomTemplate: (id: string) => Promise<void>;
+  addingCustomTemplate: boolean;
 
   // Form state
   campaignName: string;
   setCampaignName: React.Dispatch<React.SetStateAction<string>>;
-  selectedTemplate: MetaTemplate | null;
-  setSelectedTemplate: React.Dispatch<React.SetStateAction<MetaTemplate | null>>;
   audienceType: string;
   setAudienceType: React.Dispatch<React.SetStateAction<string>>;
   bodyVariables: Record<string, string>;
@@ -40,18 +53,20 @@ export interface UseNewBroadcastReturn {
 
 /**
  * Encapsulates all state and business logic for the New Broadcast Modal.
- * The `open` prop drives reset + template fetch on mount.
+ * Loads both Meta-approved templates and local custom templates.
  */
 export function useNewBroadcast(
   open: boolean,
   onCreated: () => void
 ): UseNewBroadcastReturn {
   const [step, setStep] = useState(1);
-  const [templates, setTemplates] = useState<MetaTemplate[]>([]);
+  const [metaTemplates, setMetaTemplates] = useState<MetaTemplate[]>([]);
+  const [customTemplates, setCustomTemplates] = useState<TemplateMessage[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [addingCustomTemplate, setAddingCustomTemplate] = useState(false);
 
   const [campaignName, setCampaignName] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState<MetaTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateSource | null>(null);
   const [audienceType, setAudienceType] = useState("all");
   const [bodyVariables, setBodyVariables] = useState<Record<string, string>>({});
   const [sendImmediately, setSendImmediately] = useState(true);
@@ -71,10 +86,25 @@ export function useNewBroadcast(
     const fetchTemplates = async () => {
       setLoadingTemplates(true);
       try {
-        const tpls = await getTemplates();
-        setTemplates(tpls);
-      } catch {
-        toast.error("Failed to fetch WhatsApp templates");
+        // Load both sources concurrently; gracefully handle Meta failures
+        const [metaResult, customResult] = await Promise.allSettled([
+          getTemplates(),
+          getTemplateMessages(),
+        ]);
+
+        if (metaResult.status === "fulfilled") {
+          setMetaTemplates(metaResult.value);
+        } else {
+          console.warn("Meta templates unavailable:", metaResult.reason);
+          setMetaTemplates([]);
+        }
+
+        if (customResult.status === "fulfilled") {
+          setCustomTemplates(customResult.value.filter((t) => t.isActive));
+        } else {
+          console.warn("Custom templates unavailable:", customResult.reason);
+          setCustomTemplates([]);
+        }
       } finally {
         setLoadingTemplates(false);
       }
@@ -83,10 +113,45 @@ export function useNewBroadcast(
     fetchTemplates();
   }, [open]);
 
+  /** Add a new custom template and refresh the list */
+  const addCustomTemplate = useCallback(async (title: string, message: string) => {
+    setAddingCustomTemplate(true);
+    try {
+      const created = await createTemplateMessage(title, message);
+      setCustomTemplates((prev) => [created, ...prev]);
+      toast.success("Template created!");
+    } catch {
+      toast.error("Failed to create template");
+    } finally {
+      setAddingCustomTemplate(false);
+    }
+  }, []);
+
+  /** Delete a custom template and remove from list; deselect if selected */
+  const deleteCustomTemplate = useCallback(async (id: string) => {
+    try {
+      await deleteTemplateMessage(id);
+      setCustomTemplates((prev) => prev.filter((t) => t.id !== id));
+      setSelectedTemplate((prev) => {
+        if (prev?.source === "custom" && prev.id === id) return null;
+        return prev;
+      });
+      toast.success("Template deleted");
+    } catch {
+      toast.error("Failed to delete template");
+    }
+  }, []);
+
   // Derived: body text from selected template
   const bodyText = useMemo(() => {
     if (!selectedTemplate) return "";
-    return selectedTemplate.components.find((c) => c.type === "BODY")?.text ?? "";
+    if (selectedTemplate.source === "meta") {
+      return (
+        selectedTemplate.components.find((c) => c.type === "BODY")?.text ?? ""
+      );
+    }
+    // custom
+    return selectedTemplate.body;
   }, [selectedTemplate]);
 
   // Derived: sorted unique placeholders like {{1}}, {{2}}
@@ -152,6 +217,13 @@ export function useNewBroadcast(
       return;
     }
 
+    if (selectedTemplate.source === "custom") {
+      toast.error(
+        "Custom templates cannot be used for broadcast — please select a Meta-approved WhatsApp template."
+      );
+      return;
+    }
+
     setSubmitting(true);
     try {
       const templateParams =
@@ -195,12 +267,16 @@ export function useNewBroadcast(
     setStep,
     handleNext,
     handleBack,
-    templates,
+    metaTemplates,
+    customTemplates,
     loadingTemplates,
-    campaignName,
-    setCampaignName,
     selectedTemplate,
     setSelectedTemplate,
+    addCustomTemplate,
+    deleteCustomTemplate,
+    addingCustomTemplate,
+    campaignName,
+    setCampaignName,
     audienceType,
     setAudienceType,
     bodyVariables,

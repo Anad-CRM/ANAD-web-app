@@ -1,8 +1,5 @@
 import { api } from "./axios";
 
-// ─────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────
 
 export type BroadcastStatus = "draft" | "running" | "completed" | "failed" | "cancelled";
 export type RecipientStatus = "pending" | "sent" | "failed" | "skipped";

@@ -1,13 +1,13 @@
 "use client";
 
-import { X, Loader2, Play, ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react";
+import { X, Loader2, Play, ChevronRight, ChevronLeft, CheckCircle2, AlertCircle } from "lucide-react";
 import { COLORS } from "@/core/components/theme/colors";
 import { useNewBroadcast } from "@/modules/broadcasts/hooks/useNewBroadcast";
 import { StepProgress } from "./StepProgress";
 import { StepTemplate } from "./StepTemplate";
 import { StepAudience } from "./StepAudience";
 import { StepPersonalize } from "./StepPersonalize";
-import type { NewBroadcastModalProps } from "@/modules/broadcasts/types/broadcast.types";
+import type { NewBroadcastModalProps, MetaTemplate } from "@/modules/broadcasts/types/broadcast.types";
 
 /**
  * Multi-step modal for creating a WhatsApp broadcast campaign.
@@ -25,12 +25,16 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
     setStep,
     handleNext,
     handleBack,
-    templates,
+    metaTemplates,
+    customTemplates,
     loadingTemplates,
-    campaignName,
-    setCampaignName,
     selectedTemplate,
     setSelectedTemplate,
+    addCustomTemplate,
+    deleteCustomTemplate,
+    addingCustomTemplate,
+    campaignName,
+    setCampaignName,
     audienceType,
     setAudienceType,
     bodyVariables,
@@ -45,13 +49,28 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
 
   if (!open) return null;
 
+  const canSubmit = selectedTemplate?.source === "meta" && !submitting;
+
+  // Convert TemplateSource to MetaTemplate-compatible shape for StepPersonalize
+  const templateForPreview: MetaTemplate | null =
+    selectedTemplate?.source === "meta"
+      ? {
+          id: selectedTemplate.id,
+          name: selectedTemplate.name,
+          status: selectedTemplate.status,
+          language: selectedTemplate.language,
+          category: selectedTemplate.category,
+          components: selectedTemplate.components as MetaTemplate["components"],
+        }
+      : null;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(13,27,62,0.45)", backdropFilter: "blur(4px)" }}
     >
       <div
-        className="flex h-[90vh] max-h-[620px] w-full max-w-2xl flex-col rounded-3xl bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="flex h-[90vh] max-h-[640px] w-full max-w-2xl flex-col rounded-3xl bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         style={{ borderColor: COLORS.border }}
       >
         {/* ── Header ──────────────────────────────────────── */}
@@ -78,10 +97,14 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
             <StepTemplate
               campaignName={campaignName}
               onCampaignNameChange={setCampaignName}
-              templates={templates}
+              metaTemplates={metaTemplates}
+              customTemplates={customTemplates}
               selectedTemplate={selectedTemplate}
               onSelectTemplate={setSelectedTemplate}
               loadingTemplates={loadingTemplates}
+              onAddCustomTemplate={addCustomTemplate}
+              onDeleteCustomTemplate={deleteCustomTemplate}
+              addingCustomTemplate={addingCustomTemplate}
             />
           )}
 
@@ -94,7 +117,7 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
 
           {step === 3 && (
             <StepPersonalize
-              selectedTemplate={selectedTemplate}
+              selectedTemplate={templateForPreview}
               placeholders={placeholders}
               bodyVariables={bodyVariables}
               onVariableChange={handleVariableChange}
@@ -127,53 +150,63 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
             <div />
           )}
 
-          {/* Next / Submit button */}
-          {step < 3 ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={loadingTemplates && step === 1}
-              className="flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ backgroundColor: COLORS.primary }}
-            >
-              {loadingTemplates && step === 1 ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading…
-                </>
-              ) : (
-                <>
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting || !selectedTemplate}
-              className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: COLORS.success }}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating Broadcast…
-                </>
-              ) : sendImmediately ? (
-                <>
-                  <Play className="h-4 w-4" />
-                  Send Broadcast
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="h-4 w-4" />
-                  Save as Draft
-                </>
-              )}
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {/* Warning when custom template is selected at submit step */}
+            {step === 3 && selectedTemplate?.source === "custom" && (
+              <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                Switch to a Meta template to send
+              </div>
+            )}
+
+            {/* Next / Submit button */}
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={loadingTemplates && step === 1}
+                className="flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{ backgroundColor: COLORS.primary }}
+              >
+                {loadingTemplates && step === 1 ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading…
+                  </>
+                ) : (
+                  <>
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: COLORS.success }}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Creating Broadcast…
+                  </>
+                ) : sendImmediately ? (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Send Broadcast
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Save as Draft
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
