@@ -11,7 +11,6 @@ import { Lead } from '@/modules/leads/types/lead.types';
 import { Activity } from '@/modules/activities/types/activity.types';
 import { getUser } from '@/core/utils/auth';
 import { Text } from '@/core/components/ui/Text';
-import { WhatsAppMessage } from '@/modules/leads/api/leadsApi';
 import { WhatsAppMessagesCard } from './WhatsAppMessagesCard';
 import { FormDetailsCard } from './FormDetailsCard';
 
@@ -23,7 +22,6 @@ export const LeadDetailsDashboard: React.FC = () => {
   const [lead, setLead] = useState<Lead | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [followups, setFollowups] = useState<Record<string, unknown>[]>([]);
-  const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([]);
   const summaryCardRef = useRef<HTMLDivElement | null>(null);
   const [summaryCardHeight, setSummaryCardHeight] = useState<number | null>(null);
 
@@ -61,15 +59,13 @@ export const LeadDetailsDashboard: React.FC = () => {
 
         // Step 3: Fetch activities, followups, and WhatsApp messages in parallel
 
-        const [activitiesData, followupsData, whatsappData] = await Promise.all([
+        const [activitiesData, followupsData] = await Promise.all([
           activityService.fetchLeadActivities(leadId, loggedInUserId),
           leadsApi.fetchFollowupsByLead(leadId, userIdForFollowups),
-          leadsApi.fetchWhatsAppMessages(leadId),
         ]);
 
         setActivities(activitiesData || []);
         setFollowups(followupsData || []);
-        setWhatsappMessages(whatsappData || []);
       }
     } catch (error) {
       console.error('Failed to load lead details:', error);
@@ -101,7 +97,7 @@ export const LeadDetailsDashboard: React.FC = () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateHeight);
     };
-  }, [lead, activities, followups, whatsappMessages]);
+  }, [lead, activities, followups]);
 
   return (
     <div className="flex flex-col w-full min-h-0 overflow-y-auto [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/20">
@@ -162,11 +158,9 @@ export const LeadDetailsDashboard: React.FC = () => {
               />
             </div>
 
-            {whatsappMessages.length > 0 && (
-              <div className="xl:col-span-2">
-                <WhatsAppMessagesCard messages={whatsappMessages} leadId={leadId} />
-              </div>
-            )}
+            <div className="xl:col-span-2">
+              <WhatsAppMessagesCard leadId={leadId} waId={lead.mobileNumber} leadName={lead.userName} />
+            </div>
           </div>
         )}
       </div>

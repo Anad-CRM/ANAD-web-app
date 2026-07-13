@@ -52,22 +52,37 @@ export function MessageReactions({
   if (groups.length === 0) return null;
 
   return (
-    <div className="mt-1 flex flex-wrap gap-1">
+    <div className="flex flex-wrap items-center gap-0.5">
       {groups.map((g) => (
         <button
           key={g.emoji}
           type="button"
-          onClick={() => onToggle(g.emoji)}
-          aria-pressed={g.byCurrentUser}
+          title={g.byCurrentUser ? "Click to remove your reaction" : `React with ${g.emoji}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            // Toggle: if this is the user's own emoji, remove it; otherwise add/swap
+            onToggle(g.byCurrentUser ? "" : g.emoji);
+          }}
           className={cn(
-            "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[11px] leading-none transition-colors shadow-sm",
+            // WhatsApp-style pill: compact, rounded, border, shadow
+            "inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[11px] leading-none shadow-sm",
+            "transition-all duration-150 select-none",
+            "hover:scale-110 active:scale-95",
+            // Highlight own reaction with blue tint (like WhatsApp)
             g.byCurrentUser
-              ? "border-[#1E56A0]/60 bg-[#1E56A0]/15 text-[#1E56A0] hover:bg-[#1E56A0]/25"
-              : "border-[#D6E4F0] bg-[#F6F6F6] text-[#0D1B3E] hover:bg-[#EEF4FB]",
+              ? "border-[#1E56A0]/50 bg-[#DCE8F8] text-[#1E56A0] font-semibold"
+              : "border-[#D0D7DE] bg-white/95 text-[#444] font-medium",
           )}
         >
           <span className="text-sm leading-none">{g.emoji}</span>
-          {g.count > 1 && <span>{g.count}</span>}
+          {g.count > 1 && (
+            <span className={cn(
+              "text-[9px] font-bold leading-none",
+              g.byCurrentUser ? "text-[#1E56A0]" : "text-[#666]",
+            )}>
+              {g.count}
+            </span>
+          )}
         </button>
       ))}
     </div>

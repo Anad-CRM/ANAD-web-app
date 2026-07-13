@@ -2,6 +2,6 @@ export interface IntegrationItem {
   id: string;
   name: string;
   description: string;
-  iconType: "whatsapp" | "whatsapp-green" | "fb-insta" | "google" | "web";
+  iconType: "whatsapp" | "whatsapp-green" | "fb-insta" | "google" | "web" | "ai";
   actionText: string;
 }

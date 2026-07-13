@@ -13,6 +13,10 @@ interface CallsOverTimeChartProps {
 const formatLabel = (dateKey: string) => {
   const date = new Date(dateKey);
   if (Number.isNaN(date.getTime())) return dateKey;
+  
+  if (dateKey.includes("T")) {
+    return date.toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
+  }
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 

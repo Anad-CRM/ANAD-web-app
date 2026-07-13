@@ -34,7 +34,21 @@ export const IntegrationIcons: Record<string, React.FC<{ active?: boolean }>> = 
     <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
       <img src="/website.png" alt="Website" className="w-10 h-10 object-contain" />
     </div>
-  )
+  ),
+  "ai": ({ active }) => (
+    <div
+      className={`w-16 h-16 rounded-full flex items-center justify-center shadow-[0_10px_24px_rgba(124,58,237,0.25)] ${active ? 'bg-white/15' : ''}`}
+      style={active ? undefined : { background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)' }}
+    >
+      <svg viewBox="0 0 24 24" fill="none" className="w-9 h-9" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" fill={active ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.2)'} />
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none" />
+        <path d="M8 12.5C8 10.57 9.57 9 11.5 9S15 10.57 15 12.5 13.43 16 11.5 16 8 14.43 8 12.5z" fill="white" opacity="0.9"/>
+        <path d="M16 8l-1.5 1.5M8 8l1.5 1.5M12 6V4M16 16l-1.5-1.5M8 16l1.5-1.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+        <circle cx="11.5" cy="12.5" r="1.5" fill={active ? 'rgba(124,58,237,0.8)' : '#7c3aed'}/>
+      </svg>
+    </div>
+  ),
 };
 
 interface Props {

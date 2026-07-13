@@ -9,8 +9,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "./ui/popover";
-import type { Message } from "../types";
+import type { Message, Contact } from "../types";
 
+// WhatsApp's 6 core quick-reaction emojis
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
 interface MessageActionsProps {
@@ -18,18 +19,23 @@ interface MessageActionsProps {
   onReply: () => void;
   onReact: (emoji: string) => void;
   children: ReactNode;
+  contact: Contact | null;
 }
 
 /**
  * Hover/long-press toolbar wrapper around a `<MessageBubble>`. The bubble
  * itself stays a pure presenter — this component owns the action surface so
  * the bubble's render path is unaffected when the toolbar isn't visible.
+ *
+ * Emoji picker is styled like WhatsApp: large emoji buttons in a rounded
+ * floating panel with subtle shadow + backdrop blur.
  */
 export function MessageActions({
   message,
   onReply,
   onReact,
   children,
+  contact,
 }: MessageActionsProps) {
   // Touch devices have no hover. Long-press fires `contextmenu`; we capture
   // it, suppress the native menu, and pin the toolbar open until the user
@@ -71,75 +77,151 @@ export function MessageActions({
     setTouchOpen(false);
   };
 
+  const renderAvatar = () => {
+    if (isAgent) {
+      const isAi = message.name === "AI Agent";
+      if (isAi) {
+        return (
+          <div
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-sm select-none"
+            style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)' }}
+            title="AI Auto Responder"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none" />
+              <circle cx="12" cy="12" r="10" fill="rgba(255,255,255,0.15)" />
+              <path d="M8 12.5C8 10.57 9.57 9 11.5 9S15 10.57 15 12.5 13.43 16 11.5 16 8 14.43 8 12.5z" fill="white" opacity="0.9"/>
+              <circle cx="11.5" cy="12.5" r="1.5" fill="#7c3aed"/>
+            </svg>
+          </div>
+        );
+      }
+
+      const initials = message.name ? message.name.charAt(0).toUpperCase() : "A";
+      return (
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1E56A0] text-[10px] font-bold text-white shadow-sm select-none"
+          title={message.name || "Agent"}
+        >
+          {initials}
+        </div>
+      );
+    } else {
+      const displayName = contact?.name || contact?.phone || "Customer";
+      const initials = displayName.charAt(0).toUpperCase();
+      return (
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#5A7190] text-[10px] font-bold text-white shadow-sm select-none"
+          title={displayName}
+        >
+          {initials}
+        </div>
+      );
+    }
+  };
+
+  // Detect system notification messages (AI quota errors saved by webhookProcessor)
+  // The backend stores these with name='System' or we can fallback to checking text
+  const isSystemMessage =
+    message.name === "System" ||
+    (message.content_text || "").includes("AI credit limit reached");
+
+  if (isSystemMessage) {
+    return <div className="w-full">{children}</div>;
+  }
+
   // Row alignment lives here (not in MessageBubble) so the `group/actions`
-  // hover region matches the bubble's content width — hovering empty space
-  // in the row no longer reveals the toolbar.
+  // hover region matches the bubble's content width.
   return (
     <div
       className={cn(
-        "flex w-full",
-        isAgent ? "justify-end" : "justify-start",
+        "flex w-full items-end gap-2 mb-1",
+        isAgent ? "justify-end" : "justify-start flex-row",
       )}
       onContextMenu={handleContextMenu}
       onBlur={() => setTouchOpen(false)}
     >
-      {/* `min-w-0` lets this flex child actually respect the 75% cap.
-       *  Default `min-width: auto` lets content (a long quote preview,
-       *  an unbroken URL) push past the cap and shove the row past
-       *  100%, which used to bleed across into the contact-sidebar
-       *  area. See issue #165. */}
+      {!isAgent && renderAvatar()}
+
+      {/* `min-w-0` lets this flex child actually respect the 75% cap. */}
       <div className="group/actions relative min-w-0 max-w-[75%]">
         {children}
-      <div
-        data-touch-open={touchOpen || pickerOpen ? "true" : undefined}
-        className={cn(
-          "absolute -top-3 z-10 flex h-7 items-center gap-0.5 rounded-full border border-slate-700 bg-slate-900/95 px-1 shadow-md backdrop-blur-sm transition-opacity",
-          "opacity-0 group-hover/actions:opacity-100 group-focus-within/actions:opacity-100",
-          "data-[touch-open=true]:opacity-100",
-          isAgent ? "right-3" : "left-3",
-        )}
-      >
-        <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-          <PopoverTrigger
-            className="flex h-5 w-5 items-center justify-center rounded-full text-slate-300 hover:bg-slate-700 hover:text-white"
-            aria-label="React"
-          >
-            <SmilePlus className="h-3.5 w-3.5" />
-          </PopoverTrigger>
-          <PopoverContent
-            className="flex w-auto flex-row gap-1 p-1.5"
-            sideOffset={6}
-          >
-            {QUICK_EMOJIS.map((e) => (
+
+        {/* Action toolbar — appears on hover/touch */}
+        <div
+          data-touch-open={touchOpen || pickerOpen ? "true" : undefined}
+          className={cn(
+            "absolute -top-8 z-30 flex h-8 items-center gap-0.5 rounded-full",
+            "border border-white/20 bg-[#1C2331]/90 px-1.5 shadow-xl backdrop-blur-md",
+            "opacity-0 transition-all duration-150",
+            "group-hover/actions:opacity-100 group-focus-within/actions:opacity-100",
+            "data-[touch-open=true]:opacity-100",
+            isAgent ? "right-1" : "left-1",
+          )}
+        >
+          {/* Emoji react button — opens WhatsApp-style picker */}
+          <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+            <PopoverTrigger asChild>
               <button
-                key={e}
                 type="button"
-                onClick={() => handlePickEmoji(e)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none transition-transform hover:scale-125 hover:bg-slate-700"
-                aria-label={`React with ${e}`}
+                className="flex h-6 w-6 items-center justify-center rounded-full text-white/70 hover:bg-white/15 hover:text-white transition-colors"
+                aria-label="React with emoji"
+                title="React"
               >
-                {e}
+                <SmilePlus className="h-3.5 w-3.5" />
               </button>
-            ))}
-          </PopoverContent>
-        </Popover>
-        <button
-          type="button"
-          onClick={handleReply}
-          className="flex h-5 w-5 items-center justify-center rounded-full text-slate-300 hover:bg-slate-700 hover:text-white"
-          aria-label="Reply"
-        >
-          <CornerUpLeft className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="flex h-5 w-5 items-center justify-center rounded-full text-slate-300 hover:bg-slate-700 hover:text-white"
-          aria-label="Copy"
-        >
-          <Copy className="h-3.5 w-3.5" />
-        </button>
-      </div>
+            </PopoverTrigger>
+            <PopoverContent
+              className={cn(
+                "flex w-auto flex-row items-center gap-0.5 rounded-full border-none p-1.5 shadow-2xl",
+                "bg-[#1C2331]/95 backdrop-blur-xl",
+              )}
+              sideOffset={6}
+              align={isAgent ? "end" : "start"}
+            >
+              {QUICK_EMOJIS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  onClick={() => handlePickEmoji(e)}
+                  title={`React with ${e}`}
+                  className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-full text-xl",
+                    "transition-all duration-150 hover:scale-125 hover:bg-white/10 active:scale-95",
+                  )}
+                  aria-label={`React with ${e}`}
+                >
+                  {e}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
+
+          {/* Divider */}
+          <div className="mx-0.5 h-4 w-px bg-white/10" />
+
+          {/* Reply button */}
+          <button
+            type="button"
+            onClick={handleReply}
+            className="flex h-6 w-6 items-center justify-center rounded-full text-white/70 hover:bg-white/15 hover:text-white transition-colors"
+            aria-label="Reply"
+            title="Reply"
+          >
+            <CornerUpLeft className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Copy button */}
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex h-6 w-6 items-center justify-center rounded-full text-white/70 hover:bg-white/15 hover:text-white transition-colors"
+            aria-label="Copy"
+            title="Copy"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

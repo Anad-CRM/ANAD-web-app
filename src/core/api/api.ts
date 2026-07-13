@@ -137,4 +137,8 @@ export const API_ENDPOINTS = {
   NOTIFICATIONS: {
     GET_BY_USER: "/notification/getByUser",
   },
+  AI: {
+    CONFIG: "/ai/config",
+    TEST_PROMPT: "/ai/test-prompt",
+  },
 };
