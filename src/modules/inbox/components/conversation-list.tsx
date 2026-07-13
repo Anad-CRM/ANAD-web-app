@@ -133,37 +133,37 @@ export function ConversationList({
     // w-full on mobile so the list occupies the whole viewport when it's
     // the single pane showing; fixed 320px on desktop where it shares the
     // row with the thread + contact sidebar.
-    <div className="flex h-full w-full flex-col border-r border-slate-800 bg-slate-900 lg:w-80">
+    <div className="flex h-full w-full flex-col border-r border-[#D6E4F0] bg-[#F6F6F6] lg:w-80">
       {/* Search + Filter */}
-      <div className="space-y-2 border-b border-slate-800 p-3">
+      <div className="space-y-2 border-b border-[#D6E4F0] p-3 bg-white">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8BA5C0]" />
           <Input
             value={search}
             onChange={handleSearchChange}
             placeholder="Search conversations..."
-            className="border-slate-700 bg-slate-800 pl-9 text-sm text-white placeholder-slate-500 focus:border-primary/50"
+            className="border-[#D6E4F0] bg-[#F6F6F6] pl-9 text-sm text-[#0D1B3E] placeholder-[#8BA5C0] focus:border-[#1E56A0]/50 focus:bg-white"
           />
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center justify-center h-7 gap-1 px-2 text-xs text-slate-400 hover:text-white rounded-md hover:bg-slate-800">
+          <DropdownMenuTrigger className="inline-flex items-center justify-center h-7 gap-1 px-2 text-xs text-[#5A7190] hover:text-[#0D1B3E] rounded-md hover:bg-[#EEF4FB] transition-colors">
             {activeFilter?.label ?? "All"}
             <ChevronDown className="h-3 w-3" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="border-slate-700 bg-slate-800"
+            className="border-[#D6E4F0] bg-white shadow-lg"
           >
             {FILTER_OPTIONS.map((opt) => (
               <DropdownMenuItem
                 key={opt.value}
                 onClick={() => setFilter(opt.value)}
                 className={cn(
-                  "text-sm",
+                  "text-sm cursor-pointer hover:bg-[#EEF4FB] text-[#0D1B3E]",
                   filter === opt.value
-                    ? "text-primary"
-                    : "text-slate-300"
+                    ? "text-[#1E56A0] font-semibold bg-[#EEF4FB]"
+                    : "text-[#0D1B3E]"
                 )}
               >
                 {opt.label}
@@ -177,11 +177,11 @@ export function ConversationList({
       <ScrollArea className="flex-1">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#1E56A0] border-t-transparent" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="px-4 py-12 text-center">
-            <p className="text-sm text-slate-500">No conversations found</p>
+            <p className="text-sm font-medium text-[#8BA5C0]">No conversations found</p>
           </div>
         ) : (
           <div className="flex flex-col">
@@ -249,12 +249,12 @@ function ConversationItem({
     <button
       onClick={handleClick}
       className={cn(
-        "flex w-full items-start gap-3 px-3 py-3 text-left transition-colors hover:bg-slate-800/50",
-        isActive && "border-l-2 border-primary bg-slate-800/70"
+        "flex w-full items-start gap-3 px-3 py-3 text-left transition-colors hover:bg-[#EEF4FB]/30",
+        isActive && "border-l-2 border-[#1E56A0] bg-[#EEF4FB]/70 hover:bg-[#EEF4FB]/70"
       )}
     >
       {/* Avatar */}
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-700 text-sm font-medium text-white">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1E56A0] text-sm font-semibold text-white">
         {contact?.avatar_url ? (
           <img
             src={contact.avatar_url}
@@ -269,13 +269,13 @@ function ConversationItem({
       {/* Content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm font-medium text-white">
+          <span className="truncate text-sm font-semibold text-[#0D1B3E]">
             {displayName}
           </span>
-          <span className="shrink-0 text-[10px] text-slate-500">{timeAgo}</span>
+          <span className="shrink-0 text-[10px] font-medium text-[#8BA5C0]">{timeAgo}</span>
         </div>
         <div className="mt-0.5 flex items-center justify-between gap-2">
-          <p className="truncate text-xs text-slate-400">
+          <p className="truncate text-xs text-[#5A7190] font-medium">
             {formatLastMessageText(conversation.last_message_text)}
           </p>
           <div className="flex shrink-0 items-center gap-1.5">
