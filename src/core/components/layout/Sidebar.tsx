@@ -25,7 +25,7 @@ const NAV: NavItem[] = [
     subItems: [
       { href: "/inbox", label: "Chats" },
       { href: "/broadcasts", label: "Broadcasts" },
-      { href: "/flows", label: "Flows" },
+      // { href: "/flows", label: "Flows" },
       { href: "/wa-pipeline", label: "WA Pipeline" },
       { href: "/automations", label: "Automations" }
     ]

@@ -22,18 +22,29 @@ export function FlowBuilder() {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const nodeRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Flash effect — scroll to node and briefly highlight
+  const [prevFlashKey, setPrevFlashKey] = useState<string | null | undefined>(null);
+  if (flashKey !== prevFlashKey) {
+    setPrevFlashKey(flashKey);
+    if (flashKey) {
+      setExpandedKeys((prev) => {
+        const next = new Set(prev);
+        next.add(flashKey);
+        return next;
+      });
+    }
+  }
+
+  // Flash effect — scroll to node
   useEffect(() => {
     if (!flashKey) return;
-    const el = nodeRefs.current[flashKey];
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-    setExpandedKeys((prev) => {
-      const next = new Set(prev);
-      next.add(flashKey);
-      return next;
-    });
+    // Delay scroll slightly to allow the node expansion to render first
+    const timer = setTimeout(() => {
+      const el = nodeRefs.current[flashKey];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 50);
+    return () => clearTimeout(timer);
   }, [flashKey]);
 
   const toggleExpanded = (key: string) => {
@@ -291,7 +302,7 @@ function TriggerPanel() {
         <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>This flow starts automatically when a lead sends their very first WhatsApp message to your number.</p>
       )}
       {state.trigger_type === "manual" && (
-        <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>This flow is only started via API. It won't auto-trigger from inbound messages.</p>
+        <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>This flow is only started via API. It won&#39;t auto-trigger from inbound messages.</p>
       )}
     </div>
   );
