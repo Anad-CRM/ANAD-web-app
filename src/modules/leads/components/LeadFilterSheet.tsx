@@ -14,6 +14,8 @@ export interface FilterState {
   endDate: string | null;
   teamIds: string[];
   adIds: string[];
+  durationMin?: number;
+  durationMax?: number;
 }
 
 interface LeadFilterSheetProps {
@@ -39,6 +41,20 @@ const STATUS_OPTIONS = [
 const DATE_PRESETS = [
   "Today", "Yesterday", "This Week", "This Month", "Last Month", "Custom",
 ];
+
+// ── Duration slider constants ──────────────────────────────────────────────
+
+const DUR_MAX_SEC = 7200; // 2 hours; treated as "no upper cap" on backend
+
+function fmtDur(sec: number): string {
+  if (sec >= DUR_MAX_SEC) return "2+ hrs";
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m${s > 0 ? " " + s + "s" : ""}`;
+  return `${s}s`;
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -158,7 +174,7 @@ function SectionRow({
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-type SectionKey = "date" | "status" | "staff" | "ads" | null;
+type SectionKey = "date" | "status" | "staff" | "ads" | "duration" | null;
 
 export function LeadFilterSheet({
   isOpen,
@@ -178,6 +194,8 @@ export function LeadFilterSheet({
   const [customEnd, setCustomEnd] = useState<string>("");
   const [staffSearch, setStaffSearch] = useState<string>("");
   const [adSearch, setAdSearch] = useState<string>("");
+  const [durMin, setDurMin] = useState<number>(0);
+  const [durMax, setDurMax] = useState<number>(DUR_MAX_SEC);
 
   // Only one section expanded at a time — matches Flutter's _expandedType
   const [expandedKey, setExpandedKey] = useState<SectionKey>("date");
@@ -197,6 +215,8 @@ export function LeadFilterSheet({
         setDatePreset(initialFilters.datePreset);
         setCustomStart(initialFilters.startDate ?? "");
         setCustomEnd(initialFilters.endDate ?? "");
+        setDurMin(initialFilters.durationMin ?? 0);
+        setDurMax(initialFilters.durationMax ?? DUR_MAX_SEC);
         setStaffSearch("");
         setAdSearch("");
         setExpandedKey("date");
@@ -253,6 +273,7 @@ export function LeadFilterSheet({
       end = r.endDate;
     }
 
+    const hasDurationFilter = durMin > 0 || durMax < DUR_MAX_SEC;
     onApply({
       statuses: lockedStatus ? [lockedStatus] : tempStatuses,
       staffIds: tempStaffIds,
@@ -261,6 +282,8 @@ export function LeadFilterSheet({
       datePreset,
       startDate: start,
       endDate: end,
+      durationMin: hasDurationFilter ? durMin : undefined,
+      durationMax: hasDurationFilter ? durMax : undefined,
     });
     onClose();
   }
@@ -272,6 +295,8 @@ export function LeadFilterSheet({
     setDatePreset(null);
     setCustomStart("");
     setCustomEnd("");
+    setDurMin(0);
+    setDurMax(DUR_MAX_SEC);
     setStaffSearch("");
     setAdSearch("");
     onClearAll();
@@ -285,6 +310,7 @@ export function LeadFilterSheet({
   if (tempStaffIds.length) { summaryCount++; summaryParts.push(`${tempStaffIds.length} staff`); }
   if (tempAdIds.length) { summaryCount++; summaryParts.push(`${tempAdIds.length} ad${tempAdIds.length > 1 ? "s" : ""}`); }
   if (datePreset) { summaryCount++; summaryParts.push("date range"); }
+  if (durMin > 0 || durMax < DUR_MAX_SEC) { summaryCount++; summaryParts.push("duration"); }
 
   // Staff name lookup for collapsed chips
   const selectedStaffLabels = tempStaffIds.map(id => {
@@ -670,6 +696,110 @@ export function LeadFilterSheet({
                 </div>
               )}
             </>
+          )}
+
+          {/* ────────── CALL DURATION ────────── */}
+          <div className="h-px bg-gray-200 mb-1" />
+          <SectionRow
+            title="Call Duration"
+            count={durMin > 0 || durMax < DUR_MAX_SEC ? 1 : 0}
+            isExpanded={expandedKey === "duration"}
+            onToggle={() => toggleSection("duration")}
+          />
+
+          {/* Collapsed preview */}
+          {expandedKey !== "duration" && (durMin > 0 || durMax < DUR_MAX_SEC) && (
+            <div className="flex flex-wrap gap-2 pb-3">
+              <span
+                className="px-2.5 py-1.5 rounded-full"
+                style={{
+                  backgroundColor: COLORS.primaryXlight,
+                  color: COLORS.primary,
+                  border: `1px solid ${COLORS.primaryLight}`,
+                }}
+              >
+                <Text weight="semibold" style={{ fontSize: '10px' }}>
+                  {fmtDur(durMin)} – {fmtDur(durMax)}
+                </Text>
+              </span>
+            </div>
+          )}
+
+          {/* Expanded content */}
+          {expandedKey === "duration" && (
+            <div className="pb-5 pt-1">
+              {/* Value badges */}
+              <div className="flex justify-between items-center mb-4">
+                <span
+                  className="text-[13px] font-bold px-3 py-1 rounded-lg"
+                  style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primary, border: `1px solid ${COLORS.primaryLight}` }}
+                >
+                  {fmtDur(durMin)}
+                </span>
+                <span className="text-[11px] text-gray-400 font-medium">to</span>
+                <span
+                  className="text-[13px] font-bold px-3 py-1 rounded-lg"
+                  style={{ backgroundColor: COLORS.primaryXlight, color: COLORS.primary, border: `1px solid ${COLORS.primaryLight}` }}
+                >
+                  {fmtDur(durMax)}
+                </span>
+              </div>
+
+              {/* Dual-handle slider */}
+              <div className="relative h-6 flex items-center mx-1">
+                {/* Track bg */}
+                <div className="absolute w-full h-[6px] rounded-full bg-gray-200" />
+                {/* Active fill */}
+                <div
+                  className="absolute h-[6px] rounded-full"
+                  style={{
+                    left: `${(durMin / DUR_MAX_SEC) * 100}%`,
+                    width: `${((durMax - durMin) / DUR_MAX_SEC) * 100}%`,
+                    background: `linear-gradient(90deg, ${COLORS.primaryDark}, ${COLORS.primary})`,
+                  }}
+                />
+                {/* Min input */}
+                <input
+                  type="range" min={0} max={DUR_MAX_SEC} step={30} value={durMin}
+                  onChange={e => setDurMin(Math.min(Number(e.target.value), durMax - 30))}
+                  className="absolute w-full h-full opacity-0 cursor-pointer z-20"
+                />
+                {/* Max input */}
+                <input
+                  type="range" min={0} max={DUR_MAX_SEC} step={30} value={durMax}
+                  onChange={e => setDurMax(Math.max(Number(e.target.value), durMin + 30))}
+                  className="absolute w-full h-full opacity-0 cursor-pointer z-20"
+                />
+                {/* Visual min thumb */}
+                <div
+                  className="absolute w-5 h-5 rounded-full bg-white shadow-md z-10 -translate-x-1/2"
+                  style={{ left: `${(durMin / DUR_MAX_SEC) * 100}%`, border: `3px solid ${COLORS.primary}` }}
+                />
+                {/* Visual max thumb */}
+                <div
+                  className="absolute w-5 h-5 rounded-full bg-white shadow-md z-10 -translate-x-1/2"
+                  style={{ left: `${(durMax / DUR_MAX_SEC) * 100}%`, border: `3px solid ${COLORS.primary}` }}
+                />
+              </div>
+
+              {/* Axis labels */}
+              <div className="flex justify-between mt-2 px-0.5">
+                {["0s", "30m", "1h", "1h 30m", "2h+"].map(l => (
+                  <span key={l} className="text-[9px] text-gray-400">{l}</span>
+                ))}
+              </div>
+
+              {/* Quick reset */}
+              {(durMin > 0 || durMax < DUR_MAX_SEC) && (
+                <button
+                  onClick={() => { setDurMin(0); setDurMax(DUR_MAX_SEC); }}
+                  className="mt-3 text-[11px] font-semibold underline"
+                  style={{ color: COLORS.primary }}
+                >
+                  Reset duration
+                </button>
+              )}
+            </div>
           )}
 
           <div className="h-4" />
