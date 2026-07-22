@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { User, Search, Phone, PlayCircle, AlertTriangle } from "lucide-react";
+import { User, Search, Phone, PlayCircle, AlertTriangle, SlidersHorizontal, RefreshCw, ArrowUpDown } from "lucide-react";
 import { getSpecificCallLogs, getRecordingUrl } from "@/modules/calls/api/callsApi";
 import { CallLog } from "@/modules/calls/types";
 import { AudioPlayerModal } from "@/core/components/ui/AudioPlayerModal";
@@ -12,15 +12,40 @@ import { Text } from "@/core/components/ui/Text";
 const LogsPage = () => {
   const searchParams = useSearchParams();
 
-  const callType = searchParams.get("callType") || "Incoming";
   const startDate = searchParams.get("startDate") || "";
   const endDate = searchParams.get("endDate") || "";
   const staffId = searchParams.get("staffId") || "";
+
+  // Filtration states
+  const [selectedCallType, setSelectedCallType] = useState(searchParams.get("callType") || "Incoming");
+  const [recordingFilter, setRecordingFilter] = useState<"all" | "with" | "without">("all");
+  const [durationMin, setDurationMin] = useState<string>("");
+  const [durationMax, setDurationMax] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
 
   const [logs, setLogs] = useState<CallLog[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(true);
   const [playingRecordingUrl, setPlayingRecordingUrl] = useState<string | null>(null);
+
+  const updateUrl = (newCallType: string) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("callType", newCallType);
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+  };
+
+  const handleCallTypeChange = (type: string) => {
+    setSelectedCallType(type);
+    updateUrl(type);
+  };
+
+  const handleResetFilters = () => {
+    setSelectedCallType(searchParams.get("callType") || "Incoming");
+    setRecordingFilter("all");
+    setDurationMin("");
+    setDurationMax("");
+    setSortOrder("DESC");
+  };
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -43,14 +68,22 @@ const LogsPage = () => {
         startDate?: string;
         endDate?: string;
         staffIds?: string[];
+        recordingFilter?: "all" | "with" | "without";
+        durationMin?: number;
+        durationMax?: number;
+        sortOrder?: "ASC" | "DESC";
       } = {
-        callType: callTypeMap[callType as string] || callType.toLowerCase(),
+        callType: callTypeMap[selectedCallType] || selectedCallType.toLowerCase(),
         limit: 100,
+        recordingFilter,
+        sortOrder,
       };
 
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
       if (staffId) params.staffIds = [staffId];
+      if (durationMin) params.durationMin = Number(durationMin);
+      if (durationMax) params.durationMax = Number(durationMax);
 
       const { logs: data, totalCount } = await getSpecificCallLogs(params);
       setLogs(data);
@@ -59,7 +92,7 @@ const LogsPage = () => {
     };
 
     fetchLogs();
-  }, [callType, startDate, endDate, staffId]);
+  }, [selectedCallType, startDate, endDate, staffId, recordingFilter, durationMin, durationMax, sortOrder]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -86,11 +119,105 @@ const LogsPage = () => {
               <Text weight="semibold" size="xs" className="text-slate-400">/ Call Analytics</Text>
             </div>
             <Text as="h1" className="flex flex-wrap items-baseline gap-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-              {callType} History
+              {selectedCallType} History
               <Text as="span" weight="medium" size="custom" className="text-slate-300" style={{ fontSize: '20px' }}>
                 ({totalRecords})
               </Text>
             </Text>
+          </div>
+        </div>
+      </div>
+
+      {/* Premium Filtration Panel */}
+      <div className="mx-auto w-full max-w-5xl mb-6">
+        <div className="rounded-[28px] border border-slate-100 bg-white/80 p-5 shadow-sm backdrop-blur-md sm:p-6">
+          <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-blue-50 text-[#1C3A76]">
+                <SlidersHorizontal size={18} />
+              </span>
+              <Text weight="bold" size="base" className="text-slate-800">Advanced Filters</Text>
+            </div>
+            <button
+              onClick={handleResetFilters}
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#1C3A76] transition-colors"
+            >
+              <RefreshCw size={14} className="animate-spin-slow" />
+              Reset Filters
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Call Type Selector */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Call Type</label>
+              <select
+                value={selectedCallType}
+                onChange={(e) => handleCallTypeChange(e.target.value)}
+                className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1C3A76]/20 focus:border-[#1C3A76] transition-all"
+              >
+                <option value="Total">Total Calls</option>
+                <option value="Incoming">Incoming Calls</option>
+                <option value="Outgoing">Outgoing Calls</option>
+                <option value="Missed">Missed Calls</option>
+                <option value="Rejected">Rejected Calls</option>
+                <option value="Personal">Personal Calls</option>
+                <option value="New">New Calls</option>
+                <option value="NotPickedUp">Not Picked Up</option>
+                <option value="Connected">Connected Calls</option>
+              </select>
+            </div>
+
+            {/* Recording Filter */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Recordings</label>
+              <select
+                value={recordingFilter}
+                onChange={(e) => setRecordingFilter(e.target.value as "all" | "with" | "without")}
+                className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1C3A76]/20 focus:border-[#1C3A76] transition-all"
+              >
+                <option value="all">All Recordings</option>
+                <option value="with">With Recording Only</option>
+                <option value="without">Without Recording Only</option>
+              </select>
+            </div>
+
+            {/* Call Duration Range */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Duration Range</label>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="number"
+                  placeholder="Min (sec)"
+                  value={durationMin}
+                  onChange={(e) => setDurationMin(e.target.value)}
+                  className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1C3A76]/20 focus:border-[#1C3A76] transition-all"
+                />
+                <span className="text-slate-300 font-semibold">-</span>
+                <input
+                  type="number"
+                  placeholder="Max (sec)"
+                  value={durationMax}
+                  onChange={(e) => setDurationMax(e.target.value)}
+                  className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1C3A76]/20 focus:border-[#1C3A76] transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Sort Order Toggle */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Sort Order</label>
+              <button
+                onClick={() => setSortOrder(prev => prev === "DESC" ? "ASC" : "DESC")}
+                className="flex items-center justify-between w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 text-sm font-semibold hover:bg-slate-100/50 active:scale-[0.98] transition-all focus:outline-none"
+              >
+                <span className="flex items-center gap-2">
+                  <ArrowUpDown size={16} className="text-slate-400" />
+                  {sortOrder === "DESC" ? "Newest First" : "Oldest First"}
+                </span>
+                <span className="text-xs text-slate-400 uppercase font-bold tracking-widest">{sortOrder}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
