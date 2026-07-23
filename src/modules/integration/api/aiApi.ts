@@ -4,6 +4,7 @@ import { getUser } from '@/core/utils/auth';
 
 export interface AiConfigPayload {
   provider: 'gemini' | 'openai' | 'none';
+  model?: string | null;
   apiKey: string;
   systemPrompt: string;
   isEnabled: boolean;
@@ -12,6 +13,7 @@ export interface AiConfigPayload {
 export interface AiConfigResponse {
   id?: string;
   provider: 'gemini' | 'openai' | 'none';
+  model?: string | null;
   apiKey: string;
   systemPrompt: string;
   isEnabled: boolean;
@@ -59,7 +61,7 @@ export const deleteAiConfig = async (): Promise<void> => {
 
 /**
  * Test the AI prompt with a sample message.
- * Can pass provider / apiKey / systemPrompt directly to test before saving.
+ * Can pass provider / apiKey / systemPrompt / model directly to test before saving.
  */
 export const testAiPrompt = async (
   testMessage: string,
@@ -75,6 +77,7 @@ export const testAiPrompt = async (
     ...(overrides?.provider ? { provider: overrides.provider } : {}),
     ...(overrides?.apiKey ? { apiKey: overrides.apiKey } : {}),
     ...(overrides?.systemPrompt !== undefined ? { systemPrompt: overrides.systemPrompt } : {}),
+    ...(overrides?.model ? { model: overrides.model } : {}),
   });
 
   return resp.data?.data?.reply as string;

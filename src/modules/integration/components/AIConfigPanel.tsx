@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Bot, Brain, ChevronDown, Eye, EyeOff, Key, Loader2,
+  Bot, Brain, ChevronDown, Cpu, Eye, EyeOff, Key, Loader2,
   RefreshCw, Send, Sparkles, Trash2, WifiOff, Zap,
 } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
@@ -31,6 +31,28 @@ interface ChatMessage {
 
 const MAX_PROMPT_CHARS = 3000;
 
+// ─── Model options per provider ─────────────────────────────────────────────
+const PROVIDER_MODELS: Record<Exclude<Provider, 'none'>, { value: string; label: string; badge?: string }[]> = {
+  gemini: [
+    { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', badge: 'Recommended' },
+    { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', badge: 'Powerful' },
+    { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+    { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', badge: 'Fast' },
+  ],
+  openai: [
+    { value: 'gpt-4o', label: 'GPT-4o', badge: 'Recommended' },
+    { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', badge: 'Powerful' },
+    { value: 'gpt-4', label: 'GPT-4' },
+    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', badge: 'Fast' },
+  ],
+};
+
+// Default model per provider
+const DEFAULT_MODEL: Record<Exclude<Provider, 'none'>, string> = {
+  gemini: 'gemini-2.5-flash',
+  openai: 'gpt-3.5-turbo',
+};
+
 const PROVIDER_INFO: Record<Exclude<Provider, 'none'>, { label: string; color: string; hint: string }> = {
   gemini: {
     label: 'Google Gemini',
@@ -55,6 +77,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
 
   // ── Form state ────────────────────────────────────────────────────
   const [provider, setProvider] = useState<Provider>('none');
+  const [model, setModel] = useState<string>('');
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState('');
@@ -84,6 +107,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
       const data: AiConfigResponse = await getAiConfig();
       setSavedConfig(data);
       setProvider(data.provider || 'none');
+      setModel(data.model || (data.provider !== 'none' ? DEFAULT_MODEL[data.provider as Exclude<Provider, 'none'>] : ''));
       setApiKey(data.apiKey || '');
       setSystemPrompt(data.systemPrompt || '');
       setIsEnabled(data.isEnabled !== undefined ? data.isEnabled : true);
@@ -105,9 +129,12 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
 
   const handleProviderChange = (p: Provider) => {
     setProvider(p);
+    // Reset model to default for the new provider
+    setModel(p !== 'none' ? DEFAULT_MODEL[p as Exclude<Provider, 'none'>] : '');
     if (savedConfig && savedConfig.provider === p) {
       setApiKey(savedConfig.apiKey || '');
       setSystemPrompt(savedConfig.systemPrompt || '');
+      setModel(savedConfig.model || DEFAULT_MODEL[p as Exclude<Provider, 'none'>]);
     } else {
       setApiKey('');
       setSystemPrompt('');
@@ -123,9 +150,9 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
 
     setSaving(true);
     try {
-      const payload: AiConfigPayload = { provider, apiKey, systemPrompt, isEnabled };
+      const payload: AiConfigPayload = { provider, model: model || null, apiKey, systemPrompt, isEnabled };
       await saveAiConfig(payload);
-      setSavedConfig({ provider, apiKey, systemPrompt, isEnabled, hasApiKey: !!apiKey });
+      setSavedConfig({ provider, model: model || null, apiKey, systemPrompt, isEnabled, hasApiKey: !!apiKey });
       setIsConnected(provider !== 'none' && !!apiKey);
       setIsDefault(false);
       showToast('✅ AI configuration saved successfully', 'success');
@@ -144,6 +171,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
     try {
       await deleteAiConfig();
       setProvider('none');
+      setModel('');
       setApiKey('');
       setSystemPrompt('');
       setIsEnabled(true);
@@ -168,14 +196,14 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
 
     try {
       const overrides = provider !== 'none' && apiKey && !apiKey.startsWith('••••')
-        ? { provider, apiKey, systemPrompt }
+        ? { provider, apiKey, systemPrompt, model: model || undefined }
         : undefined;
 
       const reply = await testAiPrompt(userMsg, chatHistory, overrides);
       setChatHistory(prev => [...prev, { role: 'ai', text: reply }]);
     } catch (err) {
       const e = err as { response?: { data?: { message?: string } } };
-      const msg = e?.response?.data?.message || 'AI request failed';
+      const msg = e?.response?.data?.message || 'The AI provider did not respond properly. Please check your API key and model selection.';
       setChatHistory(prev => [...prev, { role: 'ai', text: `⚠️ ${msg}` }]);
     } finally {
       setTestLoading(false);
@@ -233,7 +261,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
                 // Immediately save the toggle state if we are already connected
                 if (isConnected) {
                   try {
-                    await saveAiConfig({ provider, apiKey, systemPrompt, isEnabled: nextVal });
+                    await saveAiConfig({ provider, model: model || null, apiKey, systemPrompt, isEnabled: nextVal });
                     showToast(`AI Auto Responder ${nextVal ? 'enabled' : 'disabled'}`, 'success');
                   } catch {
                     setIsEnabled(!nextVal);
@@ -266,8 +294,8 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
         <div className="mt-3 flex items-center gap-2">
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold ${isConnected
-                ? 'bg-violet-100 text-violet-700'
-                : 'bg-[#F1F5F9] text-[#94A3B8]'
+              ? 'bg-violet-100 text-violet-700'
+              : 'bg-[#F1F5F9] text-[#94A3B8]'
               }`}
           >
             {isConnected ? (
@@ -288,6 +316,14 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-[11px] font-semibold text-green-700">
               <Sparkles className="h-3 w-3" />
               Enabled
+            </span>
+          )}
+
+          {/* Active model badge */}
+          {isConnected && model && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-[11px] font-semibold text-indigo-600">
+              <Cpu className="h-3 w-3" />
+              {model}
             </span>
           )}
         </div>
@@ -313,8 +349,8 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
                   key={p}
                   onClick={() => handleProviderChange(p)}
                   className={`rounded-[14px] px-3 py-2.5 text-[12px] font-semibold transition-all border-2 ${provider === p
-                      ? 'border-violet-500 bg-white text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.18)]'
-                      : 'border-transparent bg-white/60 text-[#64748B] hover:bg-white hover:text-[#0D1B3E]'
+                    ? 'border-violet-500 bg-white text-violet-700 shadow-[0_4px_12px_rgba(124,58,237,0.18)]'
+                    : 'border-transparent bg-white/60 text-[#64748B] hover:bg-white hover:text-[#0D1B3E]'
                     }`}
                 >
                   {p === 'none' ? '🚫 None' : p === 'gemini' ? '✨ Gemini' : '🤖 OpenAI'}
@@ -328,6 +364,47 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
               </p>
             )}
           </div>
+
+          {/* ── Model selector ────────────────────────────────────── */}
+          {provider !== 'none' && (
+            <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
+              <Text size="xs" weight="semibold" className="text-[#0D1B3E] mb-3 ml-1 flex items-center gap-1.5">
+                <Cpu className="h-3.5 w-3.5" />
+                Model
+              </Text>
+
+              <div className="grid grid-cols-2 gap-2">
+                {PROVIDER_MODELS[provider].map((m) => (
+                  <button
+                    key={m.value}
+                    id={`ai-model-${m.value}`}
+                    onClick={() => setModel(m.value)}
+                    className={`relative rounded-[14px] px-3 py-2.5 text-left transition-all border-2 ${model === m.value
+                        ? 'border-violet-500 bg-white shadow-[0_4px_12px_rgba(124,58,237,0.18)]'
+                        : 'border-transparent bg-white/60 hover:bg-white'
+                      }`}
+                  >
+                    <span
+                      className={`block text-[12px] font-semibold leading-tight ${model === m.value ? 'text-violet-700' : 'text-[#374151]'
+                        }`}
+                    >
+                      {m.label}
+                    </span>
+                    {m.badge && (
+                      <span
+                        className={`mt-1 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${model === m.value
+                            ? 'bg-violet-100 text-violet-600'
+                            : 'bg-[#E2E8F0] text-[#94A3B8]'
+                          }`}
+                      >
+                        {m.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ── API Key input ─────────────────────────────────────── */}
           {provider !== 'none' && (
@@ -467,8 +544,8 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
                       >
                         <div
                           className={`max-w-[80%] rounded-[14px] px-3 py-2 text-[12px] leading-relaxed ${msg.role === 'user'
-                              ? 'bg-violet-600 text-white rounded-br-[4px]'
-                              : 'bg-white text-[#374151] shadow-sm rounded-bl-[4px]'
+                            ? 'bg-violet-600 text-white rounded-br-[4px]'
+                            : 'bg-white text-[#374151] shadow-sm rounded-bl-[4px]'
                             }`}
                         >
                           {msg.text}
@@ -526,7 +603,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
                 </div>
 
                 <p className="px-4 pb-3 text-[10px] text-[#94A3B8]">
-                  ⚡ This uses the saved (or current form) API key and system prompt. Results reflect live AI behavior.
+                  ⚡ This uses the saved (or current form) API key, model, and system prompt. Results reflect live AI behavior.
                 </p>
               </div>
             )}

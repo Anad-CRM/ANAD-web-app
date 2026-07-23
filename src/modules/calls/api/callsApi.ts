@@ -25,6 +25,10 @@ export const getSpecificCallLogs = async (params: {
   endDate?: string;
   staffIds?: string[];
   limit?: number;
+  recordingFilter?: "all" | "with" | "without";
+  durationMin?: number;
+  durationMax?: number;
+  sortOrder?: "ASC" | "DESC";
 }): Promise<{ logs: CallLog[]; totalCount: number }> => {
   try {
     const user = getUser<{ organizationId?: string }>();
@@ -52,7 +56,6 @@ export const getSpecificCallLogs = async (params: {
         leadName?: string;
         customerName?: string;
       };
-
       const callDetails: CallDetailItem[] = Array.isArray(response.data.data?.callDetails)
         ? response.data.data.callDetails
         : [];
