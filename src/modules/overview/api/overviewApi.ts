@@ -10,6 +10,10 @@ export const getLeadSummary = async (params?: {
   customEndDate?: string;
   teamId?: string;
   staffId?: string;
+  callFilter?: string;
+  durationMin?: number;
+  durationMax?: number;
+  dateSort?: string;
 }): Promise<LeadCountsData | null> => {
   try {
     const user = getUser<{ id?: string; organizationId?: string; role?: string; organization?: { id?: string } }>();
@@ -24,6 +28,8 @@ export const getLeadSummary = async (params?: {
     if (params?.customEndDate) queryParams.customEndDate = params.customEndDate;
     if (params?.teamId) queryParams.teamId = params.teamId;
     if (params?.staffId) queryParams.staffId = params.staffId;
+    if (params?.durationMin !== undefined) queryParams.durationMin = params.durationMin;
+    if (params?.durationMax !== undefined) queryParams.durationMax = params.durationMax;
 
     const response = await api.post(API_ENDPOINTS.DASHBOARD.GET_FILTERED_LEAD_COUNT, queryParams);
 

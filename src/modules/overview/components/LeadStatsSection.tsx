@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { LeadCountsData } from "../types";
 import { COLORS } from "@/core/components/theme/colors";
@@ -14,11 +14,19 @@ interface LeadStatsSectionProps {
   customStartDate?: string;
   customEndDate?: string;
   staffId?: string;
+  callFilter?: string;
+  durationMin?: number;
+  durationMax?: number;
+  dateSort?: string;
   onFilterChange?: (opts: {
     filter: string;
     customStartDate?: string;
     customEndDate?: string;
     staffId?: string;
+    callFilter?: string;
+    durationMin?: number;
+    durationMax?: number;
+    dateSort?: string;
   }) => void;
 }
 
@@ -89,37 +97,109 @@ function DonutChart({ segments, total, size = 140, stroke = 22 }: DonutProps) {
 
 const DATE_FILTERS = ["Overall", "This Day", "This Week", "This Month", "Custom"];
 
+const CALL_FILTERS = [
+  "Missed Calls",
+  "Incoming",
+  "Outgoing",
+  "With Recording",
+  "Without Recording",
+  "Personal Calls",
+  "Over 5 Minutes",
+];
+
+// Max slider value in seconds (120 min = 7200 s); displayed as "2+ hrs" = no upper cap
+const DURATION_MAX_SEC = 7200;
+
+function formatDuration(sec: number): string {
+  if (sec >= DURATION_MAX_SEC) return "2+ hrs";
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s > 0 ? s + "s" : ""}`;
+  return `${s}s`;
+}
+
+const DATE_SORTS = [
+  { label: "Newest First", sub: "Timestamp DESC" },
+  { label: "Oldest First", sub: "Timestamp ASC" },
+];
+
 interface FilterModalProps {
   open: boolean;
   currentFilter: string;
   currentStartDate?: string;
   currentEndDate?: string;
   currentStaffId?: string;
+  currentCallFilter?: string;
+  currentDurationSort?: string;
+  currentDurationMin?: number;
+  currentDurationMax?: number;
+  currentDateSort?: string;
   onClose: () => void;
-  onApply: (opts: { filter: string; customStartDate?: string; customEndDate?: string; staffId?: string }) => void;
+  onApply: (opts: {
+    filter: string;
+    customStartDate?: string;
+    customEndDate?: string;
+    staffId?: string;
+    callFilter?: string;
+    durationSort?: string;
+    durationMin?: number;
+    durationMax?: number;
+    dateSort?: string;
+  }) => void;
 }
 
-function FilterModal({ open, currentFilter, currentStartDate, currentEndDate, currentStaffId, onClose, onApply }: FilterModalProps) {
+function FilterModal({ open, currentFilter, currentStartDate, currentEndDate, currentStaffId, currentCallFilter, currentDurationSort, currentDurationMin, currentDurationMax, currentDateSort, onClose, onApply }: FilterModalProps) {
   const [selFilter, setSelFilter] = useState(currentFilter);
   const [startDate, setStartDate] = useState(currentStartDate || "");
   const [endDate, setEndDate] = useState(currentEndDate || "");
+  const [selCallFilter, setSelCallFilter] = useState(currentCallFilter || "");
+  const [selDurationSort, setSelDurationSort] = useState(currentDurationSort || "");
+  const [durationMin, setDurationMin] = useState<number>(currentDurationMin ?? 0);
+  const [durationMax, setDurationMax] = useState<number>(currentDurationMax ?? DURATION_MAX_SEC);
+  const [selDateSort, setSelDateSort] = useState(currentDateSort || "");
 
-  useEffect(() => {
+  // Update state during render to avoid cascading renders from useEffect
+  const [prevProps, setPrevProps] = useState({ open, currentFilter, currentStartDate, currentEndDate, currentCallFilter, currentDurationSort, currentDurationMin, currentDurationMax, currentDateSort });
+  if (
+    open !== prevProps.open ||
+    currentFilter !== prevProps.currentFilter ||
+    currentStartDate !== prevProps.currentStartDate ||
+    currentEndDate !== prevProps.currentEndDate ||
+    currentCallFilter !== prevProps.currentCallFilter ||
+    currentDurationSort !== prevProps.currentDurationSort ||
+    currentDurationMin !== prevProps.currentDurationMin ||
+    currentDurationMax !== prevProps.currentDurationMax ||
+    currentDateSort !== prevProps.currentDateSort
+  ) {
+    setPrevProps({ open, currentFilter, currentStartDate, currentEndDate, currentCallFilter, currentDurationSort, currentDurationMin, currentDurationMax, currentDateSort });
     if (open) {
       setSelFilter(currentFilter);
       setStartDate(currentStartDate || "");
       setEndDate(currentEndDate || "");
+      setSelCallFilter(currentCallFilter || "");
+      setSelDurationSort(currentDurationSort || "");
+      setDurationMin(currentDurationMin ?? 0);
+      setDurationMax(currentDurationMax ?? DURATION_MAX_SEC);
+      setSelDateSort(currentDateSort || "");
     }
-  }, [open, currentFilter, currentStartDate, currentEndDate]);
+  }
 
   if (!open) return null;
 
   function handleApply() {
+    const hasDurationFilter = durationMin > 0 || durationMax < DURATION_MAX_SEC;
     onApply({
       filter: selFilter,
       customStartDate: selFilter === "Custom" && startDate ? startDate : undefined,
       customEndDate: selFilter === "Custom" && endDate ? endDate : undefined,
       staffId: currentStaffId,
+      callFilter: selCallFilter || undefined,
+      durationSort: selDurationSort || undefined,
+      durationMin: hasDurationFilter ? durationMin : undefined,
+      durationMax: hasDurationFilter ? durationMax : undefined,
+      dateSort: selDateSort || undefined,
     });
     onClose();
   }
@@ -128,6 +208,11 @@ function FilterModal({ open, currentFilter, currentStartDate, currentEndDate, cu
     setSelFilter("Overall");
     setStartDate("");
     setEndDate("");
+    setSelCallFilter("");
+    setSelDurationSort("");
+    setDurationMin(0);
+    setDurationMax(DURATION_MAX_SEC);
+    setSelDateSort("");
     onApply({ filter: "Overall" });
     onClose();
   }
@@ -160,7 +245,7 @@ function FilterModal({ open, currentFilter, currentStartDate, currentEndDate, cu
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold border-[1.5px] transition-all ${active
                   ? "bg-[#1C3A76] text-white border-[#1C3A76] shadow-md"
                   : "bg-white text-[#1E293B] border-gray-200 hover:border-[#1C3A76]"
-                }`}
+                  }`}
               >
                 {active && <Check size={11} strokeWidth={3} />}
                 {f}
@@ -189,6 +274,126 @@ function FilterModal({ open, currentFilter, currentStartDate, currentEndDate, cu
           </div>
         )}
 
+        {/* ── Today's Calls ── */}
+        <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+          Today&apos;s Calls
+        </p>
+        <div className="flex flex-wrap gap-2 mb-5">
+          {CALL_FILTERS.map((f) => {
+            const active = selCallFilter === f;
+            return (
+              <button
+                key={f}
+                onClick={() => setSelCallFilter(active ? "" : f)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold border-[1.5px] transition-all ${active
+                  ? "bg-[#1C3A76] text-white border-[#1C3A76] shadow-md"
+                  : "bg-white text-[#1E293B] border-gray-200 hover:border-[#1C3A76]"
+                  }`}
+              >
+                {active && <Check size={11} strokeWidth={3} />}
+                {f}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Call Duration Range ── */}
+        <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mb-4">Call Duration Range</p>
+        <div className="mb-6 px-1">
+          {/* Time display */}
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-[13px] font-bold text-[#1C3A76] bg-[#EEF4FB] border border-[#A5BCD1] rounded-lg px-3 py-1">
+              {formatDuration(durationMin)}
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">to</span>
+            <span className="text-[13px] font-bold text-[#1C3A76] bg-[#EEF4FB] border border-[#A5BCD1] rounded-lg px-3 py-1">
+              {formatDuration(durationMax)}
+            </span>
+          </div>
+          {/* Dual-handle slider */}
+          <div className="relative h-6 flex items-center">
+            {/* Track background */}
+            <div className="absolute w-full h-[6px] rounded-full bg-gray-200" />
+            {/* Active fill between handles */}
+            <div
+              className="absolute h-[6px] rounded-full"
+              style={{
+                left: `${(durationMin / DURATION_MAX_SEC) * 100}%`,
+                width: `${((durationMax - durationMin) / DURATION_MAX_SEC) * 100}%`,
+                background: "linear-gradient(90deg, #1C3A76, #1E56A0)",
+              }}
+            />
+            {/* Min handle */}
+            <input
+              type="range"
+              min={0}
+              max={DURATION_MAX_SEC}
+              step={30}
+              value={durationMin}
+              onChange={(e) => {
+                const v = Math.min(Number(e.target.value), durationMax - 30);
+                setDurationMin(v);
+              }}
+              className="absolute w-full h-full opacity-0 cursor-pointer z-20"
+              style={{ pointerEvents: "auto" }}
+            />
+            {/* Max handle */}
+            <input
+              type="range"
+              min={0}
+              max={DURATION_MAX_SEC}
+              step={30}
+              value={durationMax}
+              onChange={(e) => {
+                const v = Math.max(Number(e.target.value), durationMin + 30);
+                setDurationMax(v);
+              }}
+              className="absolute w-full h-full opacity-0 cursor-pointer z-20"
+              style={{ pointerEvents: "auto" }}
+            />
+            {/* Visual min thumb */}
+            <div
+              className="absolute w-5 h-5 rounded-full bg-white border-[3px] border-[#1C3A76] shadow-md z-10 -translate-x-1/2"
+              style={{ left: `${(durationMin / DURATION_MAX_SEC) * 100}%` }}
+            />
+            {/* Visual max thumb */}
+            <div
+              className="absolute w-5 h-5 rounded-full bg-white border-[3px] border-[#1C3A76] shadow-md z-10 -translate-x-1/2"
+              style={{ left: `${(durationMax / DURATION_MAX_SEC) * 100}%` }}
+            />
+          </div>
+          {/* Axis labels */}
+          <div className="flex justify-between mt-2">
+            <span className="text-[10px] text-slate-400">0s</span>
+            <span className="text-[10px] text-slate-400">30m</span>
+            <span className="text-[10px] text-slate-400">1h</span>
+            <span className="text-[10px] text-slate-400">1h 30m</span>
+            <span className="text-[10px] text-slate-400">2h+</span>
+          </div>
+        </div>
+
+        {/* ── Date Sort ── */}
+        <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mb-3">Date</p>
+        <div className="flex flex-wrap gap-2 mb-5">
+          {DATE_SORTS.map(({ label, sub }) => {
+            const active = selDateSort === label;
+            return (
+              <button
+                key={label}
+                onClick={() => setSelDateSort(active ? "" : label)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold border-[1.5px] transition-all ${active
+                  ? "bg-[#1C3A76] text-white border-[#1C3A76] shadow-md"
+                  : "bg-white text-[#1E293B] border-gray-200 hover:border-[#1C3A76]"
+                  }`}
+              >
+                {active && <Check size={11} strokeWidth={3} />}
+                <span>{label}</span>
+                <span className={`text-[11px] font-normal ${active ? "text-white/70" : "text-slate-400"}`}>{sub}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="flex gap-3 mt-2">
           <button onClick={handleClear} className="flex-1 py-3 rounded-2xl bg-gray-100 text-[#374151] font-semibold text-[14px] hover:bg-gray-200 transition-colors">
             Clear
@@ -209,17 +414,17 @@ function FilterModal({ open, currentFilter, currentStartDate, currentEndDate, cu
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function LeadStatsSection({ data, filter, customStartDate, customEndDate, staffId, onFilterChange }: LeadStatsSectionProps) {
+export default function LeadStatsSection({ data, filter, customStartDate, customEndDate, staffId, callFilter, durationMin, durationMax, dateSort, onFilterChange }: LeadStatsSectionProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const counts = data?.statusCounts;
 
   const statItems = [
-    { label: "New Lead",   count: counts?.newLead   ?? counts?.newLeadCount   ?? 0, status: "New Lead",   color: COLORS.primaryDark },
-    { label: "Hot Lead",   count: counts?.hotLead   ?? counts?.hotLeadCount   ?? 0, status: "Hot Lead",   color: COLORS.violet },
-    { label: "Follow Up",  count: counts?.followUp  ?? counts?.followUpCount  ?? 0, status: "Follow Up",  color: COLORS.primary },
-    { label: "Registered", count: counts?.registered ?? counts?.registerCount  ?? 0, status: "Register",  color: COLORS.anccent_green },
-    { label: "Enrolled",   count: counts?.closed    ?? counts?.closedLeadCount ?? 0, status: "Closed",    color: COLORS.muted },
-    { label: "RNR",        count: counts?.rnr       ?? counts?.rnrCount       ?? 0, status: "RNR",        color: COLORS.subtle },
+    { label: "New Lead", count: counts?.newLead ?? counts?.newLeadCount ?? 0, status: "New Lead", color: COLORS.primaryDark },
+    { label: "Hot Lead", count: counts?.hotLead ?? counts?.hotLeadCount ?? 0, status: "Hot Lead", color: COLORS.violet },
+    { label: "Follow Up", count: counts?.followUp ?? counts?.followUpCount ?? 0, status: "Follow Up", color: COLORS.primary },
+    { label: "Registered", count: counts?.registered ?? counts?.registerCount ?? 0, status: "Register", color: COLORS.anccent_green },
+    { label: "Enrolled", count: counts?.closed ?? counts?.closedLeadCount ?? 0, status: "Closed", color: COLORS.muted },
+    { label: "RNR", count: counts?.rnr ?? counts?.rnrCount ?? 0, status: "RNR", color: COLORS.subtle },
   ];
 
   const totalLeads = data?.totalLeads ?? 0;
@@ -249,11 +454,10 @@ export default function LeadStatsSection({ data, filter, customStartDate, custom
         <button
           id="lead-filter-btn"
           onClick={() => setModalOpen(true)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold border transition-all shadow-sm ${
-            isFiltered
-              ? "bg-[#1C3A76] text-white border-[#1C3A76]"
-              : "bg-white text-[#1C3A76] border-[#E2E8F0] hover:border-[#1C3A76]"
-          }`}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold border transition-all shadow-sm ${isFiltered
+            ? "bg-[#1C3A76] text-white border-[#1C3A76]"
+            : "bg-white text-[#1C3A76] border-[#E2E8F0] hover:border-[#1C3A76]"
+            }`}
         >
           <SlidersHorizontal size={14} />
           {isFiltered ? getFilterLabel() : "Filter"}
@@ -357,6 +561,10 @@ export default function LeadStatsSection({ data, filter, customStartDate, custom
         currentStartDate={customStartDate}
         currentEndDate={customEndDate}
         currentStaffId={staffId}
+        currentCallFilter={callFilter}
+        currentDurationMin={durationMin}
+        currentDurationMax={durationMax}
+        currentDateSort={dateSort}
         onClose={() => setModalOpen(false)}
         onApply={(opts) => onFilterChange?.(opts)}
       />

@@ -59,6 +59,10 @@ export default function OverviewPage() {
   const [customStartDate, setCustomStartDate] = useState<string | undefined>();
   const [customEndDate, setCustomEndDate] = useState<string | undefined>();
   const [staffId, setStaffId] = useState<string | undefined>();
+  const [callFilter, setCallFilter] = useState<string | undefined>();
+  const [durationMin, setDurationMin] = useState<number | undefined>();
+  const [durationMax, setDurationMax] = useState<number | undefined>();
+  const [dateSort, setDateSort] = useState<string | undefined>();
   const [leadSummary, setLeadSummary] = useState<LeadCountsData | null>(null);
   const [eodData, setEodData] = useState<StaffEodSummary[]>([]);
   const [topPerformers, setTopPerformers] = useState<TopPerformersResponse | null>(null);
@@ -67,7 +71,7 @@ export default function OverviewPage() {
 
   useEffect(() => {
     const loadOverviewData = async () => {
-      const summary = await getLeadSummary({ filter, customStartDate, customEndDate, staffId });
+      const summary = await getLeadSummary({ filter, customStartDate, customEndDate, staffId, durationMin, durationMax });
       if (summary) setLeadSummary(summary);
       const eods = await getEodReports();
       if (eods) setEodData(eods);
@@ -76,7 +80,7 @@ export default function OverviewPage() {
       if (performers) setTopPerformers(performers);
     };
     loadOverviewData();
-  }, [filter, customStartDate, customEndDate, staffId]);
+  }, [filter, customStartDate, customEndDate, staffId, durationMin, durationMax]);
 
   return (
     <div className="flex min-w-0 flex-col gap-6 pb-10">
@@ -192,11 +196,19 @@ export default function OverviewPage() {
         customStartDate={customStartDate}
         customEndDate={customEndDate}
         staffId={staffId}
+        callFilter={callFilter}
+        durationMin={durationMin}
+        durationMax={durationMax}
+        dateSort={dateSort}
         onFilterChange={(opts) => {
           setFilter(opts.filter);
           setCustomStartDate(opts.customStartDate);
           setCustomEndDate(opts.customEndDate);
           setStaffId(opts.staffId);
+          setCallFilter(opts.callFilter);
+          setDurationMin(opts.durationMin);
+          setDurationMax(opts.durationMax);
+          setDateSort(opts.dateSort);
         }}
       />
 
