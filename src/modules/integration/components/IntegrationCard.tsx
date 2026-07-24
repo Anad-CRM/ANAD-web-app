@@ -49,7 +49,16 @@ export const IntegrationIcons: Record<string, React.FC<{ active?: boolean }>> = 
       </svg>
     </div>
   ),
+  "instagram": ({ active }) => (
+    <div
+      className={`w-16 h-16 rounded-[18px] flex items-center justify-center shadow-[0_10px_24px_rgba(225,48,108,0.3)] ${active ? 'bg-white/15' : ''}`}
+      style={active ? undefined : { background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}
+    >
+      <img src="/instagram.png" alt="Instagram" className="w-9 h-9 object-contain" style={active ? { filter: 'brightness(0) invert(1) opacity(0.85)' } : {}} />
+    </div>
+  ),
 };
+
 
 interface Props {
   item: IntegrationItem;

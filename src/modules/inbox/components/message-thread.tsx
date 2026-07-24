@@ -170,6 +170,9 @@ export function MessageThread({
   const { user } = useAuthContext();
   const [togglingAi, setTogglingAi] = useState(false);
 
+  /** True when this conversation is an Instagram DM thread */
+  const isInstagram = conversation?.channel === 'instagram';
+
   const isAiEnabled = conversation?.is_ai_enabled === true;
 
   const handleAiToggleClick = async () => {
@@ -390,17 +393,27 @@ export function MessageThread({
       setReplyTo(null);
 
       try {
-        const res = await api.post("/whatsapp/send", {
-          waId: conversation.id,
-          message_type: "text",
-          content_text: text,
-          reply_to_message_id: replyToId,
-        });
+        let res;
+        if (isInstagram) {
+          // Instagram DM — route to instagram send endpoint
+          res = await api.post("/instagram/send", {
+            igSenderId: conversation.ig_sender_id || conversation.id,
+            text,
+          });
+        } else {
+          res = await api.post("/whatsapp/send", {
+            waId: conversation.id,
+            message_type: "text",
+            content_text: text,
+            reply_to_message_id: replyToId,
+          });
+        }
         const messageId = res.data?.data?.messageId;
         onUpdateMessage(tempId, {
           id: messageId || tempId,
           status: "sent",
         });
+
       } catch (err: unknown) {
         console.error("Failed to send message:", err);
         let reason = "Failed to send message. Please try again.";
@@ -645,12 +658,21 @@ export function MessageThread({
         {/* Compact embedded header */}
         <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-100 bg-white shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#E8F5E9] flex items-center justify-center shrink-0">
-              <WhatsappIcon width={18} height={18} className="text-[#4CAF50]" />
+            <div
+              className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                isInstagram ? 'rounded-[9px]' : 'bg-[#E8F5E9]'
+              )}
+              style={isInstagram ? {
+                background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)'
+              } : undefined}
+            >
+              {isInstagram
+                ? <img src="/instagram.png" alt="Instagram" className="w-4 h-4 object-contain brightness-0 invert" />
+                : <WhatsappIcon width={18} height={18} className="text-[#4CAF50]" />}
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-slate-800 truncate">
-                {contact ? contact.name || contact.phone || "WhatsApp Chat" : "WhatsApp Chat"}
+                {contact ? contact.name || contact.phone || (isInstagram ? 'Instagram DM' : 'WhatsApp Chat') : (isInstagram ? 'Instagram DM' : 'WhatsApp Chat')}
               </p>
               {visibleMessages.length > 0 && (
                 <p className="text-[10px] text-slate-400">{visibleMessages.length} messages</p>
@@ -695,7 +717,9 @@ export function MessageThread({
             </div>
           ) : visibleMessages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-2">
-              <WhatsappIcon width={32} height={32} className="text-slate-300" />
+              {isInstagram
+                ? <span className="text-3xl">📸</span>
+                : <WhatsappIcon width={32} height={32} className="text-slate-300" />}
               <p className="text-sm text-slate-400">No messages yet</p>
             </div>
           ) : (
@@ -756,12 +780,13 @@ export function MessageThread({
             conversationId={conversation?.id ?? ""}
             sessionExpired={sessionInfo.expired}
             onSend={handleSend}
-            onSendMedia={handleSendMedia}
-            onOpenTemplates={handleOpenTemplates}
+            onSendMedia={isInstagram ? undefined : handleSendMedia}
+            onOpenTemplates={isInstagram ? () => {} : handleOpenTemplates}
             replyTo={replyTo}
             onClearReply={() => setReplyTo(null)}
             prefillText={prefillText}
             onPrefillConsumed={() => setPrefillText("")}
+            channel={isInstagram ? 'instagram' : 'whatsapp'}
           />
         </div>
 
@@ -1113,14 +1138,16 @@ export function MessageThread({
           conversationId={conversation.id}
           sessionExpired={sessionInfo.expired}
           onSend={handleSend}
-          onSendMedia={handleSendMedia}
-          onOpenTemplates={handleOpenTemplates}
+          onSendMedia={isInstagram ? undefined : handleSendMedia}
+          onOpenTemplates={isInstagram ? () => {} : handleOpenTemplates}
           replyTo={replyTo}
           onClearReply={() => setReplyTo(null)}
           prefillText={prefillText}
           onPrefillConsumed={() => setPrefillText("")}
+          channel={isInstagram ? 'instagram' : 'whatsapp'}
         />
       </div>
+
 
       <TemplatePicker
         open={templateModalOpen}

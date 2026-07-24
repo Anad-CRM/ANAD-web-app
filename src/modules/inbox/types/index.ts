@@ -28,6 +28,10 @@ export type Conversation = {
   last_message_text?: string;
   contact?: Contact;
   is_ai_enabled?: boolean;
+  /** Channel this conversation is on — whatsapp (default) or instagram */
+  channel?: 'whatsapp' | 'instagram';
+  /** For Instagram conversations: the sender's IGSID */
+  ig_sender_id?: string;
 };
 
 export type MessageReaction = {
@@ -59,6 +63,8 @@ export type Message = {
   /** WhatsApp message ID (wamid) — used to match incoming reactions to target messages */
   wamid?: string;
   name?: string;
+  /** Channel this message belongs to */
+  channel?: 'whatsapp' | 'instagram';
 };
 
 export type MessageTemplate = {

@@ -31,6 +31,8 @@ interface MessageComposerProps {
   onClearReply?: () => void;
   prefillText?: string;
   onPrefillConsumed?: () => void;
+  /** Channel this composer is operating on — affects expired banner and available actions */
+  channel?: 'whatsapp' | 'instagram';
 }
 
 // ── File type helpers ────────────────────────────────────────────────
@@ -77,7 +79,10 @@ export function MessageComposer({
   onClearReply,
   prefillText,
   onPrefillConsumed,
+  channel = 'whatsapp',
 }: MessageComposerProps) {
+  const isInstagram = channel === 'instagram';
+
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -304,20 +309,25 @@ export function MessageComposer({
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
             <p className="text-xs font-medium text-amber-700">
-              24-hour session expired — use a template to re-engage
+              {isInstagram
+                ? '24-hour window expired — you cannot send new messages until the customer replies'
+                : '24-hour session expired — use a template to re-engage'}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 shrink-0 text-xs font-semibold text-amber-700 hover:text-amber-800 hover:bg-amber-100 rounded-lg"
-            onClick={onOpenTemplates}
-          >
-            <LayoutTemplate className="mr-1 h-3.5 w-3.5" />
-            Templates
-          </Button>
+          {!isInstagram && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 shrink-0 text-xs font-semibold text-amber-700 hover:text-amber-800 hover:bg-amber-100 rounded-lg"
+              onClick={onOpenTemplates}
+            >
+              <LayoutTemplate className="mr-1 h-3.5 w-3.5" />
+              Templates
+            </Button>
+          )}
         </div>
       )}
+
 
       {/* Pending file preview */}
       {pendingFile && (
@@ -339,36 +349,42 @@ export function MessageComposer({
       <div className="flex items-end gap-2">
         {/* Action buttons */}
         <div className="flex items-center gap-0.5 pb-0.5">
-          {/* Templates */}
-          <Button
-            variant="ghost"
-            size="sm"
-            title="Insert template"
-            className="h-9 w-9 shrink-0 rounded-xl p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-            onClick={onOpenTemplates}
-            disabled={readOnly || isRecording}
-          >
-            <LayoutTemplate className="h-4.5 w-4.5" />
-          </Button>
+          {/* Templates — hidden for Instagram */}
+          {!isInstagram && (
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Insert template"
+              className="h-9 w-9 shrink-0 rounded-xl p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+              onClick={onOpenTemplates}
+              disabled={readOnly || isRecording}
+            >
+              <LayoutTemplate className="h-4.5 w-4.5" />
+            </Button>
+          )}
 
-          {/* Attachment */}
-          <Button
-            variant="ghost"
-            size="sm"
-            title="Attach file"
-            className="h-9 w-9 shrink-0 rounded-xl p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-            onClick={handleAttachmentClick}
-            disabled={readOnly || isRecording || sending}
-          >
-            <Paperclip className="h-4.5 w-4.5" />
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip"
-            className="hidden"
-            onChange={handleFileChange}
-          />
+          {/* Attachment — hidden for Instagram (text-only) */}
+          {!isInstagram && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                title="Attach file"
+                className="h-9 w-9 shrink-0 rounded-xl p-0 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                onClick={handleAttachmentClick}
+                disabled={readOnly || isRecording || sending}
+              >
+                <Paperclip className="h-4.5 w-4.5" />
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </>
+          )}
         </div>
 
         {/* Text area */}

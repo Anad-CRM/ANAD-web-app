@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { cn, createClient, parseSafeDate } from "../lib/utils";
 import type { Conversation, ConversationStatus } from "../types";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, MessageSquareText } from "lucide-react";
 import { isToday, isYesterday, format } from "date-fns";
 import { Input } from "./ui/input";
 import {
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { ScrollArea } from "./ui/scroll-area";
+
 
 interface ConversationListProps {
   activeConversationId: string | null;
@@ -50,7 +51,9 @@ export function ConversationList({
 }: ConversationListProps) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<ConversationStatus | "all">("all");
+  const [channelFilter, setChannelFilter] = useState<'all' | 'whatsapp' | 'instagram'>('all');
   const [loading, setLoading] = useState(true);
+
 
   const onConversationsLoadedRef = useRef(onConversationsLoaded);
   useEffect(() => {
@@ -100,6 +103,11 @@ export function ConversationList({
       result = result.filter((c) => c.status === filter);
     }
 
+    // Channel filter: default whatsapp if not set
+    if (channelFilter !== 'all') {
+      result = result.filter((c) => (c.channel || 'whatsapp') === channelFilter);
+    }
+
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((c) => {
@@ -111,7 +119,8 @@ export function ConversationList({
     }
 
     return result;
-  }, [conversations, filter, search]);
+  }, [conversations, filter, channelFilter, search]);
+
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,7 +155,34 @@ export function ConversationList({
           />
         </div>
 
+        {/* Channel filter pills */}
+        <div className="flex items-center gap-1.5">
+          {(['all', 'whatsapp', 'instagram'] as const).map((ch) => (
+            <button
+              key={ch}
+              onClick={() => setChannelFilter(ch)}
+              className={cn(
+                "flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all",
+                channelFilter === ch
+                  ? ch === 'instagram'
+                    ? 'text-white shadow-sm'
+                    : 'bg-[#1E56A0] text-white'
+                  : 'bg-[#F0F4FA] text-[#5A7190] hover:bg-[#E2EAF5]'
+              )}
+              style={channelFilter === ch && ch === 'instagram' ? {
+                background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)'
+              } : undefined}
+            >
+              {ch === 'all' && <MessageSquareText className="h-3 w-3" />}
+              {ch === 'whatsapp' && <img src="/whatsapp.png" alt="" className="h-3 w-3 object-contain" />}
+              {ch === 'instagram' && <img src="/instagram.png" alt="" className="h-3 w-3 object-contain" style={channelFilter === 'instagram' ? { filter: 'brightness(0) invert(1)' } : {}} />}
+              {ch === 'all' ? 'All' : ch === 'whatsapp' ? 'WhatsApp' : 'Instagram'}
+            </button>
+          ))}
+        </div>
+
         <DropdownMenu>
+
           <DropdownMenuTrigger className="inline-flex items-center justify-center h-7 gap-1 px-2 text-xs text-[#5A7190] hover:text-[#0D1B3E] rounded-md hover:bg-[#EEF4FB] transition-colors">
             {activeFilter?.label ?? "All"}
             <ChevronDown className="h-3 w-3" />
@@ -282,6 +318,23 @@ function ConversationItem({
             {conversation.unread_count > 0 && (
               <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#25D366] px-1 text-[10px] font-bold text-white">
                 {conversation.unread_count > 9 ? "10+" : conversation.unread_count}
+              </span>
+            )}
+            {/* Channel badge */}
+            {conversation.channel === 'instagram' ? (
+              <span
+                className="flex h-4 w-4 items-center justify-center rounded-full"
+                title="Instagram DM"
+                style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)' }}
+              >
+                <img src="/instagram.png" alt="IG" className="h-2.5 w-2.5 object-contain brightness-0 invert" />
+              </span>
+            ) : (
+              <span
+                className="flex h-4 w-4 items-center justify-center rounded-full bg-[#25D366]"
+                title="WhatsApp"
+              >
+                <img src="/whatsapp.png" alt="WA" className="h-2.5 w-2.5 object-contain brightness-0 invert" />
               </span>
             )}
             <span

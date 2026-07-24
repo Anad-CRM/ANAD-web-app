@@ -7,6 +7,8 @@ import { FacebookConfigPanel } from './FacebookConfigPanel';
 import { GoogleConfigPanel } from './GoogleConfigPanel';
 import { BroadcastPanel } from './BroadcastPanel';
 import { AIConfigPanel } from './AIConfigPanel';
+import { InstagramConfigPanel } from './InstagramConfigPanel';
+
 
 export const IntegrationDashboard: React.FC = () => {
   const [activeId, setActiveId] = useState<string>("1");
@@ -77,7 +79,11 @@ export const IntegrationDashboard: React.FC = () => {
                 {activeItem?.iconType === 'ai' && (
                   <AIConfigPanel activeIndex={activeIndex} total={total} />
                 )}
+                {activeItem?.iconType === 'instagram' && (
+                  <InstagramConfigPanel activeIndex={activeIndex} total={total} />
+                )}
               </>
+
             );
           })()}
         </div>
