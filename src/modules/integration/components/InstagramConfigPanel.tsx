@@ -11,6 +11,7 @@ import {
   getConnectedInstagramAccounts,
   connectInstagramIntegration,
   disconnectInstagramAccount,
+  lookupInstagramPage,
 } from '../api/instagramApi';
 import type { FBLoginResponse } from '../types/facebook';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
@@ -33,10 +34,12 @@ interface ConnectedAccount {
 const IG_PERMISSIONS = [
   'instagram_basic',
   'instagram_manage_messages',
+  'instagram_content_publish',
   'pages_messaging',
   'pages_read_engagement',
   'pages_manage_metadata',
   'pages_show_list',
+  'business_management',
 ];
 
 const HELP_TOPICS = [
@@ -124,76 +127,100 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
           try {
             const userToken = response.authResponse.accessToken;
 
-            // 1. Fetch pages
+            // Log what permissions were actually granted
+            const grantedScopes = (response.authResponse as unknown as { grantedScopes?: string })?.grantedScopes;
+            console.log('✅ Granted scopes:', grantedScopes);
+
+            // 1. Fetch the list of Facebook Pages the user manages
             const pagesResp = await fetch(
               `https://graph.facebook.com/v20.0/me/accounts?access_token=${userToken}`
             );
             const pagesData = await pagesResp.json();
+            console.log('📘 Pages API Response:', pagesData);
+
+            if (pagesData.error) {
+              showToast(`Facebook API Error: ${pagesData.error.message}`, 'error');
+              setLoading(false);
+              return;
+            }
+
             const pages: Array<{ id: string; access_token: string; name: string }> = pagesData.data || [];
 
             if (pages.length === 0) {
-              showToast('No Facebook Pages found. Please create a Page linked to your Instagram account.', 'error');
+              showToast('No Facebook Pages found. Please create a Facebook Page and link your Instagram Business account to it.', 'error');
               setLoading(false);
               return;
             }
 
             let connected = 0;
-            const debugLog: Record<string, unknown>[] = [];
 
             for (const page of pages) {
-              // 2. Check if this page has a linked Instagram Business Account
-              const igResp = await fetch(
+              console.log(`🔍 Processing page: "${page.name}" (${page.id})`);
+
+              // Strategy 1: Try the page access token directly (works if instagram_basic was granted)
+              let igUserId: string | null = null;
+              let igUsername: string | null = null;
+
+              const directResp = await fetch(
                 `https://graph.facebook.com/v20.0/${page.id}?fields=instagram_business_account&access_token=${page.access_token}`
               );
-              const igData = await igResp.json();
-              const igAccount = igData.instagram_business_account;
+              const directData = await directResp.json();
+              console.log(`📘 Direct page lookup for "${page.name}":`, directData);
 
-              debugLog.push({
-                pageName: page.name,
-                pageId: page.id,
-                graphAPIResponse: igData,
-                igAccount: igAccount ?? null,
-              });
-              console.log(`📘 Page "${page.name}" (${page.id}) → instagram_business_account:`, igData);
-
-              // If the Graph API itself returned an error (e.g. missing permission)
-              if (igData.error) {
-                console.error('❌ Graph API error fetching IG account for page', page.id, igData.error);
-                showToast(
-                  `Graph API Error: ${igData.error.message} (Code ${igData.error.code})`,
-                  'error'
-                );
-                setLoading(false);
-                return;
+              if (directData.instagram_business_account?.id) {
+                igUserId = directData.instagram_business_account.id;
+                // Fetch username via page token
+                try {
+                  const unameResp = await fetch(
+                    `https://graph.facebook.com/v20.0/${igUserId}?fields=username&access_token=${page.access_token}`
+                  );
+                  const unameData = await unameResp.json();
+                  igUsername = unameData.username || null;
+                } catch { /* no-op */ }
+                console.log(`✅ [Direct] Found IG account: ${igUsername || igUserId}`);
               }
 
-              if (!igAccount?.id) {
-                console.warn(`⚠️ Page "${page.name}" has no Instagram Business Account linked.`);
+              // Strategy 2: Server-side lookup using META_SYSTEM_USER_TOKEN (never exposed to browser)
+              // This works even when instagram_basic permission wasn't granted by the user
+              if (!igUserId) {
+                console.log(`⚠️ Direct lookup returned no IG account for "${page.name}" — trying server-side system token lookup...`);
+                try {
+                  const serverLookup = await lookupInstagramPage(page.id);
+                  console.log('📘 Server-side lookup result:', serverLookup);
+
+                  if (serverLookup.success && serverLookup.data?.igUserId) {
+                    igUserId = serverLookup.data.igUserId;
+                    igUsername = serverLookup.data.igUsername || null;
+                    console.log(`✅ [Server token] Found IG account: ${igUsername || igUserId}`);
+                  } else {
+                    console.warn(`⚠️ Server lookup: ${serverLookup.error}`);
+                    if (serverLookup.hint) console.warn(`   Hint: ${serverLookup.hint}`);
+                  }
+                } catch (lookupErr) {
+                  console.error('❌ Server-side IG lookup failed:', lookupErr);
+                }
+              }
+
+              if (!igUserId) {
+                console.warn(`❌ No Instagram Business Account found for page "${page.name}" via any method.`);
+                console.warn(`   ACTION REQUIRED: Go to the "${page.name}" Facebook Page → Settings → Linked Accounts → Instagram and connect your account.`);
                 continue;
               }
-
-              // 3. Fetch IG username
-              const igInfoResp = await fetch(
-                `https://graph.facebook.com/v20.0/${igAccount.id}?fields=username&access_token=${page.access_token}`
-              );
-              const igInfo = await igInfoResp.json();
-              console.log(`📷 IG account info for page "${page.name}":`, igInfo);
 
               // 4. Store to backend
               await connectInstagramIntegration({
                 pageId: page.id,
-                igUserId: igAccount.id,
-                igUsername: igInfo.username || null,
+                igUserId,
+                igUsername: igUsername || undefined,
                 pageAccessToken: page.access_token,
               });
               connected++;
+              console.log(`🎉 Connected Instagram @${igUsername || igUserId} for page "${page.name}"`);
             }
-
-            console.log('📊 Full debug summary:', debugLog);
 
             if (connected === 0) {
               showToast(
-                'No Instagram Business accounts found linked to your Pages. Check the browser Console (F12) for the full Graph API response.',
+                '⚠️ Could not find an Instagram Business Account linked to your Facebook Page. Go to your Page → Settings → Linked Accounts → Instagram and connect your account, then try again.',
                 'error'
               );
             } else {

@@ -7,11 +7,33 @@ export interface InstagramConnectPayload {
   pageAccessToken: string;
 }
 
+export interface InstagramLookupResult {
+  success: boolean;
+  data?: {
+    igUserId: string;
+    igUsername: string | null;
+    pageId: string;
+    pageName: string;
+  };
+  error?: string;
+  hint?: string;
+}
+
 /**
  * Fetch all connected Instagram integrations for the current org.
  */
 export const getConnectedInstagramAccounts = async () => {
   return api.get('/instagram/config');
+};
+
+/**
+ * Look up the Instagram Business Account for a given Facebook Page ID.
+ * The backend uses META_SYSTEM_USER_TOKEN (never exposed to browser) to do the lookup.
+ * This bypasses the need for instagram_basic permission in the browser FB login.
+ */
+export const lookupInstagramPage = async (pageId: string): Promise<InstagramLookupResult> => {
+  const resp = await api.get(`/instagram/lookup-page/${pageId}`);
+  return resp.data as InstagramLookupResult;
 };
 
 /**
