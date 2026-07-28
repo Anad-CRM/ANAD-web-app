@@ -72,8 +72,8 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
     window.fbAsyncInit = function () {
       window.FB.init({
         appId: process.env.NEXT_PUBLIC_META_APP_ID,
-        autoLogAppEvents: true,
-        xfbml: true,
+        autoLogAppEvents: false, // prevent SDK from globally overriding the access token after login
+        xfbml: false,            // not using FB social plugins (like/share buttons)
         version: 'v20.0',
       });
       setSdkReady(true);
@@ -138,6 +138,8 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
             }
 
             let connected = 0;
+            const debugLog: Record<string, unknown>[] = [];
+
             for (const page of pages) {
               // 2. Check if this page has a linked Instagram Business Account
               const igResp = await fetch(
@@ -146,13 +148,36 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
               const igData = await igResp.json();
               const igAccount = igData.instagram_business_account;
 
-              if (!igAccount?.id) continue; // This page has no IG account linked
+              debugLog.push({
+                pageName: page.name,
+                pageId: page.id,
+                graphAPIResponse: igData,
+                igAccount: igAccount ?? null,
+              });
+              console.log(`📘 Page "${page.name}" (${page.id}) → instagram_business_account:`, igData);
+
+              // If the Graph API itself returned an error (e.g. missing permission)
+              if (igData.error) {
+                console.error('❌ Graph API error fetching IG account for page', page.id, igData.error);
+                showToast(
+                  `Graph API Error: ${igData.error.message} (Code ${igData.error.code})`,
+                  'error'
+                );
+                setLoading(false);
+                return;
+              }
+
+              if (!igAccount?.id) {
+                console.warn(`⚠️ Page "${page.name}" has no Instagram Business Account linked.`);
+                continue;
+              }
 
               // 3. Fetch IG username
               const igInfoResp = await fetch(
                 `https://graph.facebook.com/v20.0/${igAccount.id}?fields=username&access_token=${page.access_token}`
               );
               const igInfo = await igInfoResp.json();
+              console.log(`📷 IG account info for page "${page.name}":`, igInfo);
 
               // 4. Store to backend
               await connectInstagramIntegration({
@@ -164,9 +189,11 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
               connected++;
             }
 
+            console.log('📊 Full debug summary:', debugLog);
+
             if (connected === 0) {
               showToast(
-                'No Instagram Business accounts found linked to your Pages. Make sure your Instagram is a Business or Creator account connected to a Facebook Page.',
+                'No Instagram Business accounts found linked to your Pages. Check the browser Console (F12) for the full Graph API response.',
                 'error'
               );
             } else {
@@ -175,6 +202,7 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
             }
           } catch (err) {
             const e = err as { message?: string };
+            console.error('❌ Error during Facebook/Instagram connection flow:', err);
             showToast(e?.message || 'Failed to connect Instagram.', 'error');
           } finally {
             setLoading(false);
@@ -221,7 +249,8 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
       await fetchAccounts();
       setManualPageId(''); setManualIgUserId(''); setManualIgUsername(''); setManualToken('');
       setShowManual(false);
-    } catch {
+    } catch (err) {
+      console.error('❌ Error during manual Instagram connection:', err);
       showToast('Failed to connect Instagram', 'error');
     } finally {
       setLoading(false);
@@ -230,8 +259,8 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
 
   const roundedClass =
     activeIndex === 0 ? 'rounded-tr-[28px] rounded-bl-[28px] rounded-br-[28px] rounded-tl-0' :
-    activeIndex === total - 1 ? 'rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0' :
-    'rounded-[28px]';
+      activeIndex === total - 1 ? 'rounded-tl-[28px] rounded-tr-[28px] rounded-br-[28px] rounded-bl-0' :
+        'rounded-[28px]';
 
   // Instagram brand gradient
   const igGradient = 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)';

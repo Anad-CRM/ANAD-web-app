@@ -1,5 +1,4 @@
 import { api } from '@/core/api/axios';
-import { getUser } from '@/core/utils/auth';
 
 export interface InstagramConnectPayload {
   pageId: string;
@@ -19,9 +18,8 @@ export const getConnectedInstagramAccounts = async () => {
  * Connect an Instagram integration (Page + IG Business Account).
  */
 export const connectInstagramIntegration = async (data: InstagramConnectPayload) => {
-  const user = getUser<{ id?: string; organizationId?: string }>();
-  if (!user?.organizationId) throw new Error('Authentication context missing');
-  return api.post('/instagram/connect', { ...data, organizationId: user.organizationId, userId: user.id });
+  // organizationId and userId are derived server-side from the JWT token
+  return api.post('/instagram/connect', data);
 };
 
 /**
