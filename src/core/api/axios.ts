@@ -30,9 +30,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error?.response?.status === 401) {
-      // Don't wipe session for background/non-critical endpoints
+      // Don't wipe session for message sending / integration endpoints
       const url = error?.config?.url ?? "";
-      const skipLogout = ["/whatsapp/react"].some((p) => url.includes(p));
+      const isIntegrationError = error?.response?.data?.errorType === 'token_expired';
+      const skipLogout = ["/whatsapp/react", "/instagram/send", "/whatsapp/send"].some((p) => url.includes(p)) || isIntegrationError;
       if (!skipLogout) {
         clearToken();
         if (typeof window !== "undefined") {
@@ -40,7 +41,9 @@ api.interceptors.response.use(
         }
       }
     }
+    const resError = error?.response?.data?.error;
     const message =
+      (typeof resError === "string" ? resError : null) ||
       error?.response?.data?.message ||
       (error?.code === "ERR_NETWORK" ? "Cannot reach server — check your connection or backend" : null) ||
       error?.message ||
