@@ -55,7 +55,7 @@ export const disconnectInstagramAccount = async (pageId: string) => {
  * Get all Instagram conversations for the current org.
  */
 export const getInstagramConversations = async () => {
-  return api.get('/instagram/conversations');
+  return api.get('/whatsapp/conversations', { params: { channel: 'instagram' } });
 };
 
 /**

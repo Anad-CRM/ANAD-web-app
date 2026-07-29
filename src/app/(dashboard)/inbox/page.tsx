@@ -58,91 +58,70 @@ function InboxPageContent() {
     }
   }, []);
 
-  // ─── Fetch WhatsApp conversations ──────────────────────────────────────────
-  const fetchWhatsappConversations = useCallback(async (): Promise<Conversation[]> => {
+  // ─── Unified fetch: both channels in 1 API call ─────────────────────────────
+  const fetchConversations = useCallback(async () => {
     try {
       const { data } = await api.get('/whatsapp/conversations');
       if (data.success) {
-        return data.data.map((c: Record<string, unknown>) => ({
-          id: c.waId as string,
-          contact_id: c.waId as string,
-          status: 'open',
-          unread_count: (c.unreadCount as number) || 0,
-          last_message_at: c.lastMessageTime as string,
-          last_message_text: c.lastMessage as string,
-          is_ai_enabled: c.isAiEnabled !== false,
-          channel: 'whatsapp' as const,
-          contact: {
-            id: c.waId as string,
-            name: (c.name !== 'Agent' && c.name !== c.waId) ? c.name as string : null,
-            phone_number: c.waId as string,
-            phone: c.waId as string,
-          }
-        }));
-      }
-    } catch (err) {
-      console.error("Failed to fetch WhatsApp conversations", err);
-    }
-    return [];
-  }, []);
-
-  // ─── Fetch Instagram conversations ─────────────────────────────────────────
-  const fetchInstagramConversations = useCallback(async (): Promise<Conversation[]> => {
-    try {
-      const { data } = await api.get('/instagram/conversations');
-      if (data.success) {
-        return data.data.map((c: Record<string, unknown>) => {
-          const igSenderId = (c.igSenderId || c.waId) as string;
-          // Prefix with 'ig_' so Instagram IDs never clash with WhatsApp IDs
-          const convId = `ig_${igSenderId}`;
-          return {
-            id: convId,
-            contact_id: convId,
-            status: 'open' as const,
-            unread_count: (c.unreadCount as number) || 0,
-            last_message_at: c.lastMessageTime as string,
-            last_message_text: c.lastMessage as string,
-            is_ai_enabled: c.isAiEnabled === true,
-            channel: 'instagram' as const,
-            ig_sender_id: igSenderId,
-            contact: {
+        const mapped: Conversation[] = data.data.map((c: Record<string, unknown>) => {
+          const isIg = c.channel === 'instagram';
+          if (isIg) {
+            const igSenderId = (c.igSenderId || c.waId) as string;
+            const convId = `ig_${igSenderId}`;
+            return {
               id: convId,
-              name: c.name ? (c.name as string) : igSenderId,
-              phone_number: igSenderId,
-              phone: igSenderId,
-            }
-          };
+              contact_id: convId,
+              status: 'open' as const,
+              unread_count: (c.unreadCount as number) || 0,
+              last_message_at: c.lastMessageTime as string,
+              last_message_text: c.lastMessage as string,
+              is_ai_enabled: c.isAiEnabled === true,
+              channel: 'instagram' as const,
+              ig_sender_id: igSenderId,
+              contact: {
+                id: convId,
+                name: c.name ? (c.name as string) : igSenderId,
+                phone_number: igSenderId,
+                phone: igSenderId,
+              }
+            };
+          } else {
+            return {
+              id: c.waId as string,
+              contact_id: c.waId as string,
+              status: 'open' as const,
+              unread_count: (c.unreadCount as number) || 0,
+              last_message_at: c.lastMessageTime as string,
+              last_message_text: c.lastMessage as string,
+              is_ai_enabled: c.isAiEnabled !== false,
+              channel: 'whatsapp' as const,
+              contact: {
+                id: c.waId as string,
+                name: (c.name !== 'Agent' && c.name !== c.waId) ? (c.name as string) : null,
+                phone_number: c.waId as string,
+                phone: c.waId as string,
+              }
+            };
+          }
         });
+
+        // Helper: parse timestamp that may be Unix seconds string OR ISO string
+        const toMs = (t: string | undefined): number => {
+          if (!t) return 0;
+          if (/^\d+$/.test(t)) {
+            const n = Number(t);
+            return n < 10_000_000_000 ? n * 1000 : n;
+          }
+          return new Date(t).getTime() || 0;
+        };
+
+        mapped.sort((a, b) => toMs(b.last_message_at) - toMs(a.last_message_at));
+        setConversations(mapped);
       }
     } catch (err) {
-      console.error("Failed to fetch Instagram conversations", err);
+      console.error("Failed to fetch conversations", err);
     }
-    return [];
   }, []);
-
-
-  // ─── Merged fetch: both channels sorted by recency ─────────────────────────
-  const fetchConversations = useCallback(async () => {
-    const [waConvs, igConvs] = await Promise.all([
-      fetchWhatsappConversations(),
-      fetchInstagramConversations(),
-    ]);
-    // Helper: parse timestamp that may be Unix seconds string OR ISO string
-    const toMs = (t: string | undefined): number => {
-      if (!t) return 0;
-      // Unix epoch string (all digits)
-      if (/^\d+$/.test(t)) {
-        const n = Number(t);
-        return n < 10_000_000_000 ? n * 1000 : n;
-      }
-      return new Date(t).getTime() || 0;
-    };
-    const merged = [...waConvs, ...igConvs].sort((a, b) =>
-      toMs(b.last_message_at) - toMs(a.last_message_at)
-    );
-    setConversations(merged);
-
-  }, [fetchWhatsappConversations, fetchInstagramConversations]);
 
   // ─── Fetch WhatsApp messages ────────────────────────────────────────────────
   const fetchWhatsappMessages = useCallback(async (waId: string, limit = 30, offset = 0) => {
