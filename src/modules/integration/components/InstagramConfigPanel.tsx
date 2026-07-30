@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   CheckCircle2, ChevronDown, ExternalLink, Key, Loader2,
-  RefreshCw, Trash2, Wifi, WifiOff, Instagram,
+  RefreshCw, Trash2, Wifi, WifiOff, Instagram, Sparkles, Zap,
 } from 'lucide-react';
 import { COLORS } from '@/core/components/theme/colors';
 import { Text } from '@/core/components/ui/Text';
@@ -13,6 +13,7 @@ import {
   disconnectInstagramAccount,
   lookupInstagramPage,
 } from '../api/instagramApi';
+import { getAiConfig, saveAiConfig, type AiConfigResponse } from '../api/aiApi';
 import type { FBLoginResponse } from '../types/facebook';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
 
@@ -64,6 +65,49 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
   const [manualIgUserId, setManualIgUserId] = useState('');
   const [manualIgUsername, setManualIgUsername] = useState('');
   const [manualToken, setManualToken] = useState('');
+
+  // AI Config state
+  const [aiConfig, setAiConfig] = useState<AiConfigResponse | null>(null);
+  const [savingAi, setSavingAi] = useState(false);
+  const [igSystemPrompt, setIgSystemPrompt] = useState('');
+  const [askContactNumber, setAskContactNumber] = useState(true);
+  const [useCustomIgPrompt, setUseCustomIgPrompt] = useState(false);
+
+  const fetchAiConfig = useCallback(async () => {
+    try {
+      const data = await getAiConfig();
+      setAiConfig(data);
+      setIgSystemPrompt(data.instagramSystemPrompt || '');
+      setAskContactNumber(data.askContactNumber !== false);
+      setUseCustomIgPrompt(!!data.instagramSystemPrompt && data.instagramSystemPrompt !== data.systemPrompt);
+    } catch {
+      // silently fail
+    }
+  }, []);
+
+  useEffect(() => { fetchAiConfig(); }, [fetchAiConfig]);
+
+  const handleSaveAi = async () => {
+    if (!aiConfig) return;
+    setSavingAi(true);
+    try {
+      await saveAiConfig({
+        provider: aiConfig.provider,
+        model: aiConfig.model || null,
+        apiKey: aiConfig.apiKey || '',
+        systemPrompt: aiConfig.systemPrompt || '',
+        instagramSystemPrompt: useCustomIgPrompt ? igSystemPrompt : '',
+        askContactNumber,
+        isEnabled: aiConfig.isEnabled,
+      });
+      showToast('✅ Instagram AI settings saved successfully', 'success');
+      await fetchAiConfig();
+    } catch {
+      showToast('Failed to save Instagram AI settings', 'error');
+    } finally {
+      setSavingAi(false);
+    }
+  };
 
   const isConnected = accounts.length > 0;
 
@@ -451,6 +495,119 @@ export const InstagramConfigPanel: React.FC<Props> = ({ activeIndex, total }) =>
           </Button>
         </div>
       )}
+
+      {/* Instagram AI System Prompt & Settings */}
+      <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.08)] space-y-3">
+        <div className="flex items-center justify-between border-b border-[#CBD5E1] pb-2">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-purple-600" />
+            <Text weight="bold" className="text-[#0D1B3E]" style={{ fontSize: '14px' }}>
+              Instagram AI System Prompt &amp; Lead Settings
+            </Text>
+          </div>
+          <span className={`text-[11px] font-semibold rounded-full px-2.5 py-0.5 ${
+            aiConfig?.isEnabled ? 'bg-purple-100 text-purple-700' : 'bg-slate-200 text-slate-600'
+          }`}>
+            {aiConfig?.isEnabled ? 'AI Active' : 'AI Inactive'}
+          </span>
+        </div>
+
+        {/* Prompt Mode Toggle */}
+        <div className="flex items-center justify-between bg-white/70 p-2 rounded-xl border border-slate-200">
+          <Text size="xs" weight="semibold" className="text-[#0D1B3E]">
+            Instagram Prompt Mode
+          </Text>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setUseCustomIgPrompt(false)}
+              className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                !useCustomIgPrompt
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Same as WhatsApp
+            </button>
+            <button
+              type="button"
+              onClick={() => setUseCustomIgPrompt(true)}
+              className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                useCustomIgPrompt
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Custom Instagram Prompt
+            </button>
+          </div>
+        </div>
+
+        {/* System Prompt Input */}
+        {useCustomIgPrompt ? (
+          <div>
+            <Text size="xs" weight="medium" className="text-[#64748B] mb-1 ml-1">
+              Custom Instagram System Prompt
+            </Text>
+            <div className="rounded-[14px] bg-white border border-transparent focus-within:border-purple-300 transition-all">
+              <textarea
+                value={igSystemPrompt}
+                onChange={e => setIgSystemPrompt(e.target.value)}
+                rows={4}
+                placeholder="Describe how AI should behave specifically for Instagram DMs…"
+                className="w-full resize-none bg-transparent px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#9CA3AF] focus:outline-none leading-relaxed"
+              />
+            </div>
+          </div>
+        ) : (
+          <p className="text-[12px] text-[#64748B] bg-white/60 p-3 rounded-[14px]">
+            ℹ️ AI is configured to use the same System Prompt as WhatsApp for Instagram DMs.
+          </p>
+        )}
+
+        {/* Ask for contact number option */}
+        <div className="pt-2 flex items-center justify-between border-t border-slate-300/60">
+          <div>
+            <Text size="xs" weight="semibold" className="text-[#0D1B3E]">
+              Ask for Contact/WhatsApp Number in Instagram Chat
+            </Text>
+            <p className="text-[11px] text-[#64748B]">
+              AI will ask Instagram users for their phone/WhatsApp number if missing, and automatically update the lead record.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAskContactNumber(v => !v)}
+            className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+              askContactNumber ? 'bg-purple-600' : 'bg-[#CBD5E1]'
+            }`}
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                askContactNumber ? 'translate-x-4' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Save button */}
+        <Button
+          variant="primary"
+          onClick={handleSaveAi}
+          disabled={savingAi || !aiConfig}
+          className="w-full h-[40px] rounded-full text-[13px] font-bold transition-all disabled:opacity-70"
+          style={{ background: igGradient }}
+        >
+          {savingAi ? (
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Saving...</span>
+            </div>
+          ) : (
+            <span>Save Instagram AI Settings</span>
+          )}
+        </Button>
+      </div>
 
       {/* Manual Setup Accordion */}
       <div className="rounded-[22px] bg-[#E2E8F0] shadow-[0_4px_12px_rgba(15,23,42,0.06)] overflow-hidden">

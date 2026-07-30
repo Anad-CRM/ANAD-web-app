@@ -82,6 +82,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
   const [showKey, setShowKey] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState('');
   const [instagramSystemPrompt, setInstagramSystemPrompt] = useState('');
+  const [useSamePrompt, setUseSamePrompt] = useState(true);
   const [askContactNumber, setAskContactNumber] = useState(true);
   const [promptTab, setPromptTab] = useState<'whatsapp' | 'instagram'>('whatsapp');
   const [isEnabled, setIsEnabled] = useState(true);
@@ -114,6 +115,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
       setApiKey(data.apiKey || '');
       setSystemPrompt(data.systemPrompt || '');
       setInstagramSystemPrompt(data.instagramSystemPrompt || '');
+      setUseSamePrompt(!data.instagramSystemPrompt || data.instagramSystemPrompt === data.systemPrompt);
       setAskContactNumber(data.askContactNumber !== false);
       setIsEnabled(data.isEnabled !== undefined ? data.isEnabled : true);
       setIsConnected(data.provider !== 'none' && (data.hasApiKey || !!data.apiKey));
@@ -140,12 +142,14 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
       setApiKey(savedConfig.apiKey || '');
       setSystemPrompt(savedConfig.systemPrompt || '');
       setInstagramSystemPrompt(savedConfig.instagramSystemPrompt || '');
+      setUseSamePrompt(!savedConfig.instagramSystemPrompt || savedConfig.instagramSystemPrompt === savedConfig.systemPrompt);
       setAskContactNumber(savedConfig.askContactNumber !== false);
       setModel(savedConfig.model || DEFAULT_MODEL[p as Exclude<Provider, 'none'>]);
     } else {
       setApiKey('');
       setSystemPrompt('');
       setInstagramSystemPrompt('');
+      setUseSamePrompt(true);
       setAskContactNumber(true);
     }
   };
@@ -164,7 +168,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
         model: model || null,
         apiKey,
         systemPrompt,
-        instagramSystemPrompt,
+        instagramSystemPrompt: useSamePrompt ? '' : instagramSystemPrompt,
         askContactNumber,
         isEnabled,
       };
@@ -174,7 +178,7 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
         model: model || null,
         apiKey,
         systemPrompt,
-        instagramSystemPrompt,
+        instagramSystemPrompt: useSamePrompt ? '' : instagramSystemPrompt,
         askContactNumber,
         isEnabled,
         hasApiKey: !!apiKey,
@@ -461,83 +465,123 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
 
           {/* ── System Prompt editor ──────────────────────────────── */}
           <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
-            {/* Channel Tabs */}
+            {/* Mode selection: Same vs Separate prompts */}
             <div className="flex items-center justify-between mb-3 border-b border-[#CBD5E1] pb-2">
-              <div className="flex items-center gap-1.5 bg-white/70 p-1 rounded-xl border border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setPromptTab('whatsapp')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    promptTab === 'whatsapp'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  WhatsApp Prompt
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPromptTab('instagram')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    promptTab === 'instagram'
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Instagram Prompt
-                </button>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-violet-600" />
+                <Text size="xs" weight="semibold" className="text-[#0D1B3E]">
+                  System Prompt Mode
+                </Text>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className={`text-[11px] font-medium ${(promptTab === 'whatsapp' ? systemPrompt : instagramSystemPrompt).length > MAX_PROMPT_CHARS ? 'text-red-500' : 'text-[#94A3B8]'}`}>
-                  {(promptTab === 'whatsapp' ? systemPrompt : instagramSystemPrompt).length}/{MAX_PROMPT_CHARS}
-                </span>
-                {(promptTab === 'whatsapp' ? systemPrompt : instagramSystemPrompt) && (
-                  <button
-                    onClick={() => promptTab === 'whatsapp' ? setSystemPrompt('') : setInstagramSystemPrompt('')}
-                    className="text-red-400 hover:text-red-600 transition-colors"
-                    title="Clear prompt"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
+              <div className="flex items-center gap-1 bg-white/70 p-1 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setUseSamePrompt(true)}
+                  className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                    useSamePrompt
+                      ? 'bg-violet-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Same for Both
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUseSamePrompt(false)}
+                  className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                    !useSamePrompt
+                      ? 'bg-violet-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Separate Prompts
+                </button>
               </div>
             </div>
 
-            {/* Prompt Editor for active tab */}
-            {promptTab === 'whatsapp' ? (
+            {/* Prompt Editor */}
+            {useSamePrompt ? (
               <div>
-                <div className="rounded-[14px] bg-white border border-transparent focus-within:border-emerald-400 transition-all">
+                <div className="flex items-center justify-between mb-2 ml-1">
+                  <Text size="xs" weight="medium" className="text-[#64748B]">
+                    Prompt for WhatsApp &amp; Instagram
+                  </Text>
+                  <span className={`text-[11px] font-medium ${systemPrompt.length > MAX_PROMPT_CHARS ? 'text-red-500' : 'text-[#94A3B8]'}`}>
+                    {systemPrompt.length}/{MAX_PROMPT_CHARS}
+                  </span>
+                </div>
+                <div className="rounded-[14px] bg-white border border-transparent focus-within:border-violet-300 transition-all">
                   <textarea
                     id="ai-system-prompt"
                     value={systemPrompt}
                     onChange={e => setSystemPrompt(e.target.value)}
                     rows={7}
                     maxLength={MAX_PROMPT_CHARS}
-                    placeholder={`Describe how the AI should behave on WhatsApp…\n\nExample:\nYou are Aishwarya, a friendly admission counselor. Answer WhatsApp queries clearly and guide students.`}
+                    placeholder={`Describe how the AI should behave across WhatsApp & Instagram…\n\nExample:\nYou are Aishwarya, a friendly admission counselor. Answer queries clearly and guide users.`}
                     className="w-full resize-none bg-transparent px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#9CA3AF] focus:outline-none leading-relaxed"
                   />
                 </div>
-                <p className="mt-2 ml-1 text-[11px] text-[#94A3B8]">
-                  This prompt controls AI replies for inbound WhatsApp messages.
-                </p>
               </div>
             ) : (
               <div>
-                <div className="rounded-[14px] bg-white border border-transparent focus-within:border-purple-400 transition-all">
-                  <textarea
-                    id="ai-instagram-prompt"
-                    value={instagramSystemPrompt}
-                    onChange={e => setInstagramSystemPrompt(e.target.value)}
-                    rows={7}
-                    maxLength={MAX_PROMPT_CHARS}
-                    placeholder={`Describe how the AI should behave on Instagram (optional — falls back to WhatsApp prompt if left empty)…\n\nExample:\nYou are the Instagram assistant for our brand. Answer questions casually and ask for contact details.`}
-                    className="w-full resize-none bg-transparent px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#9CA3AF] focus:outline-none leading-relaxed"
-                  />
+                {/* Channel Tabs */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1.5 bg-white/70 p-1 rounded-xl border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setPromptTab('whatsapp')}
+                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                        promptTab === 'whatsapp'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      WhatsApp Prompt
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPromptTab('instagram')}
+                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                        promptTab === 'instagram'
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Instagram Prompt
+                    </button>
+                  </div>
+
+                  <span className={`text-[11px] font-medium ${(promptTab === 'whatsapp' ? systemPrompt : instagramSystemPrompt).length > MAX_PROMPT_CHARS ? 'text-red-500' : 'text-[#94A3B8]'}`}>
+                    {(promptTab === 'whatsapp' ? systemPrompt : instagramSystemPrompt).length}/{MAX_PROMPT_CHARS}
+                  </span>
                 </div>
-                <p className="mt-2 ml-1 text-[11px] text-[#94A3B8]">
-                  Separate system prompt for Instagram DMs. If left blank, the WhatsApp prompt will be used.
-                </p>
+
+                {promptTab === 'whatsapp' ? (
+                  <div className="rounded-[14px] bg-white border border-transparent focus-within:border-emerald-400 transition-all">
+                    <textarea
+                      id="ai-system-prompt-wa"
+                      value={systemPrompt}
+                      onChange={e => setSystemPrompt(e.target.value)}
+                      rows={7}
+                      maxLength={MAX_PROMPT_CHARS}
+                      placeholder={`Describe how the AI should behave on WhatsApp…`}
+                      className="w-full resize-none bg-transparent px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#9CA3AF] focus:outline-none leading-relaxed"
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-[14px] bg-white border border-transparent focus-within:border-purple-400 transition-all">
+                    <textarea
+                      id="ai-system-prompt-ig"
+                      value={instagramSystemPrompt}
+                      onChange={e => setInstagramSystemPrompt(e.target.value)}
+                      rows={7}
+                      maxLength={MAX_PROMPT_CHARS}
+                      placeholder={`Describe how the AI should behave on Instagram…`}
+                      className="w-full resize-none bg-transparent px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#9CA3AF] focus:outline-none leading-relaxed"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
