@@ -395,6 +395,42 @@ function InboxPageContent() {
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, is_ai_enabled: isAiEnabled } : c));
   }, []);
 
+  const handleClearChat = useCallback(async () => {
+    const currentId = activeConversationIdRef.current;
+    if (!currentId) return;
+    try {
+      if (isIgConv(currentId)) {
+        const igSenderId = igSenderIdFromConvId(currentId);
+        await api.delete(`/instagram/conversations/${igSenderId}`);
+      } else {
+        await api.delete(`/whatsapp/conversations/${currentId}`);
+      }
+      setMessages([]);
+      await fetchConversations();
+    } catch (err) {
+      console.error("Failed to clear chat", err);
+      throw err;
+    }
+  }, [fetchConversations]);
+
+  const handleDeleteChat = useCallback(async () => {
+    const currentId = activeConversationIdRef.current;
+    if (!currentId) return;
+    try {
+      if (isIgConv(currentId)) {
+        const igSenderId = igSenderIdFromConvId(currentId);
+        await api.delete(`/instagram/conversations/${igSenderId}`);
+      } else {
+        await api.delete(`/whatsapp/conversations/${currentId}`);
+      }
+      handleCloseConversation();
+      await fetchConversations();
+    } catch (err) {
+      console.error("Failed to delete chat", err);
+      throw err;
+    }
+  }, [handleCloseConversation, fetchConversations]);
+
   const hasActiveConv = !!activeConversationId;
 
   return (
@@ -441,7 +477,12 @@ function InboxPageContent() {
         </div>
 
         <div className="hidden lg:block">
-          <ContactSidebar key={activeConversationId || 'empty'} contact={activeContactWithContact} />
+          <ContactSidebar
+            key={activeConversationId || 'empty'}
+            contact={activeContactWithContact}
+            onClearChat={handleClearChat}
+            onDeleteChat={handleDeleteChat}
+          />
         </div>
       </div>
     </div>
