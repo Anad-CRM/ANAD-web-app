@@ -81,6 +81,9 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState('');
+  const [instagramSystemPrompt, setInstagramSystemPrompt] = useState('');
+  const [askContactNumber, setAskContactNumber] = useState(true);
+  const [promptTab, setPromptTab] = useState<'whatsapp' | 'instagram'>('whatsapp');
   const [isEnabled, setIsEnabled] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [isDefault, setIsDefault] = useState(false);
@@ -110,6 +113,8 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
       setModel(data.model || (data.provider !== 'none' ? DEFAULT_MODEL[data.provider as Exclude<Provider, 'none'>] : ''));
       setApiKey(data.apiKey || '');
       setSystemPrompt(data.systemPrompt || '');
+      setInstagramSystemPrompt(data.instagramSystemPrompt || '');
+      setAskContactNumber(data.askContactNumber !== false);
       setIsEnabled(data.isEnabled !== undefined ? data.isEnabled : true);
       setIsConnected(data.provider !== 'none' && (data.hasApiKey || !!data.apiKey));
       setIsDefault(!!data.isDefault);
@@ -134,10 +139,14 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
     if (savedConfig && savedConfig.provider === p) {
       setApiKey(savedConfig.apiKey || '');
       setSystemPrompt(savedConfig.systemPrompt || '');
+      setInstagramSystemPrompt(savedConfig.instagramSystemPrompt || '');
+      setAskContactNumber(savedConfig.askContactNumber !== false);
       setModel(savedConfig.model || DEFAULT_MODEL[p as Exclude<Provider, 'none'>]);
     } else {
       setApiKey('');
       setSystemPrompt('');
+      setInstagramSystemPrompt('');
+      setAskContactNumber(true);
     }
   };
 
@@ -150,9 +159,26 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
 
     setSaving(true);
     try {
-      const payload: AiConfigPayload = { provider, model: model || null, apiKey, systemPrompt, isEnabled };
+      const payload: AiConfigPayload = {
+        provider,
+        model: model || null,
+        apiKey,
+        systemPrompt,
+        instagramSystemPrompt,
+        askContactNumber,
+        isEnabled,
+      };
       await saveAiConfig(payload);
-      setSavedConfig({ provider, model: model || null, apiKey, systemPrompt, isEnabled, hasApiKey: !!apiKey });
+      setSavedConfig({
+        provider,
+        model: model || null,
+        apiKey,
+        systemPrompt,
+        instagramSystemPrompt,
+        askContactNumber,
+        isEnabled,
+        hasApiKey: !!apiKey,
+      });
       setIsConnected(provider !== 'none' && !!apiKey);
       setIsDefault(false);
       showToast('✅ AI configuration saved successfully', 'success');
@@ -435,18 +461,40 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
 
           {/* ── System Prompt editor ──────────────────────────────── */}
           <div className="rounded-[22px] bg-[#E2E8F0] px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
-            <div className="flex items-center justify-between mb-2 ml-1">
-              <Text size="xs" weight="semibold" className="text-[#0D1B3E] flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" />
-                System Prompt
-              </Text>
+            {/* Channel Tabs */}
+            <div className="flex items-center justify-between mb-3 border-b border-[#CBD5E1] pb-2">
+              <div className="flex items-center gap-1.5 bg-white/70 p-1 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPromptTab('whatsapp')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    promptTab === 'whatsapp'
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  WhatsApp Prompt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPromptTab('instagram')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    promptTab === 'instagram'
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Instagram Prompt
+                </button>
+              </div>
+
               <div className="flex items-center gap-2">
-                <span className={`text-[11px] font-medium ${systemPrompt.length > MAX_PROMPT_CHARS ? 'text-red-500' : 'text-[#94A3B8]'}`}>
-                  {systemPrompt.length}/{MAX_PROMPT_CHARS}
+                <span className={`text-[11px] font-medium ${(promptTab === 'whatsapp' ? systemPrompt : instagramSystemPrompt).length > MAX_PROMPT_CHARS ? 'text-red-500' : 'text-[#94A3B8]'}`}>
+                  {(promptTab === 'whatsapp' ? systemPrompt : instagramSystemPrompt).length}/{MAX_PROMPT_CHARS}
                 </span>
-                {systemPrompt && (
+                {(promptTab === 'whatsapp' ? systemPrompt : instagramSystemPrompt) && (
                   <button
-                    onClick={() => setSystemPrompt('')}
+                    onClick={() => promptTab === 'whatsapp' ? setSystemPrompt('') : setInstagramSystemPrompt('')}
                     className="text-red-400 hover:text-red-600 transition-colors"
                     title="Clear prompt"
                   >
@@ -456,21 +504,67 @@ export const AIConfigPanel: React.FC<Props> = ({ activeIndex, total }) => {
               </div>
             </div>
 
-            <div className="rounded-[14px] bg-white border border-transparent focus-within:border-violet-300 transition-all">
-              <textarea
-                id="ai-system-prompt"
-                value={systemPrompt}
-                onChange={e => setSystemPrompt(e.target.value)}
-                rows={8}
-                maxLength={MAX_PROMPT_CHARS}
-                placeholder={`Describe how the AI should behave…\n\nExample:\nYou are Aishwarya, a friendly admission counselor. Ask one question at a time and guide students through course selection.`}
-                className="w-full resize-none bg-transparent px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#9CA3AF] focus:outline-none leading-relaxed"
-              />
-            </div>
+            {/* Prompt Editor for active tab */}
+            {promptTab === 'whatsapp' ? (
+              <div>
+                <div className="rounded-[14px] bg-white border border-transparent focus-within:border-emerald-400 transition-all">
+                  <textarea
+                    id="ai-system-prompt"
+                    value={systemPrompt}
+                    onChange={e => setSystemPrompt(e.target.value)}
+                    rows={7}
+                    maxLength={MAX_PROMPT_CHARS}
+                    placeholder={`Describe how the AI should behave on WhatsApp…\n\nExample:\nYou are Aishwarya, a friendly admission counselor. Answer WhatsApp queries clearly and guide students.`}
+                    className="w-full resize-none bg-transparent px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#9CA3AF] focus:outline-none leading-relaxed"
+                  />
+                </div>
+                <p className="mt-2 ml-1 text-[11px] text-[#94A3B8]">
+                  This prompt controls AI replies for inbound WhatsApp messages.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <div className="rounded-[14px] bg-white border border-transparent focus-within:border-purple-400 transition-all">
+                  <textarea
+                    id="ai-instagram-prompt"
+                    value={instagramSystemPrompt}
+                    onChange={e => setInstagramSystemPrompt(e.target.value)}
+                    rows={7}
+                    maxLength={MAX_PROMPT_CHARS}
+                    placeholder={`Describe how the AI should behave on Instagram (optional — falls back to WhatsApp prompt if left empty)…\n\nExample:\nYou are the Instagram assistant for our brand. Answer questions casually and ask for contact details.`}
+                    className="w-full resize-none bg-transparent px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#9CA3AF] focus:outline-none leading-relaxed"
+                  />
+                </div>
+                <p className="mt-2 ml-1 text-[11px] text-[#94A3B8]">
+                  Separate system prompt for Instagram DMs. If left blank, the WhatsApp prompt will be used.
+                </p>
+              </div>
+            )}
 
-            <p className="mt-2 ml-1 text-[11px] text-[#94A3B8]">
-              This prompt defines the AI&apos;s personality and goals. Use clear instructions for best results.
-            </p>
+            {/* Ask for contact number on Instagram option */}
+            <div className="mt-3 pt-3 border-t border-slate-300/60 flex items-center justify-between">
+              <div>
+                <Text size="xs" weight="semibold" className="text-[#0D1B3E]">
+                  Ask for Contact/WhatsApp Number on Instagram
+                </Text>
+                <p className="text-[11px] text-[#64748B]">
+                  AI will ask Instagram users for their contact number if missing, and automatically save it to the lead record.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAskContactNumber(v => !v)}
+                className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                  askContactNumber ? 'bg-purple-600' : 'bg-[#CBD5E1]'
+                }`}
+              >
+                <span
+                  className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                    askContactNumber ? 'translate-x-4' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           {/* ── Action buttons ─────────────────────────────────────── */}
