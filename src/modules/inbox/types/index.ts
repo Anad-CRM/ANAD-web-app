@@ -21,6 +21,7 @@ export type ConversationStatus = 'open' | 'closed' | 'pending';
 export type Conversation = {
   id: string;
   contact_id: string;
+  lead_id?: string;
   status: ConversationStatus;
   unread_count: number;
   assigned_agent_id?: string;

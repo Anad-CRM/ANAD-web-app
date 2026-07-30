@@ -9,6 +9,7 @@ import { WifiOff } from "lucide-react";
 import { Suspense } from "react";
 import { cn } from "@/modules/inbox/lib/utils";
 import { api } from "@/core/api/axios";
+import { leadsApi } from "@/modules/leads/api/leadsApi";
 // Instagram conversations use an 'ig_' prefix on their ID to avoid collision with WhatsApp IDs
 
 function InboxPageContent() {
@@ -71,6 +72,7 @@ function InboxPageContent() {
             return {
               id: convId,
               contact_id: convId,
+              lead_id: c.leadId as string | undefined,
               status: 'open' as const,
               unread_count: (c.unreadCount as number) || 0,
               last_message_at: c.lastMessageTime as string,
@@ -89,6 +91,7 @@ function InboxPageContent() {
             return {
               id: c.waId as string,
               contact_id: c.waId as string,
+              lead_id: c.leadId as string | undefined,
               status: 'open' as const,
               unread_count: (c.unreadCount as number) || 0,
               last_message_at: c.lastMessageTime as string,
@@ -431,6 +434,32 @@ function InboxPageContent() {
     }
   }, [handleCloseConversation, fetchConversations]);
 
+  const handleDeleteLead = useCallback(async () => {
+    const currentId = activeConversationIdRef.current;
+    if (!currentId) return;
+
+    const activeConv = conversationsWithContacts.find(c => c.id === currentId);
+    const leadId = activeConv?.lead_id;
+
+    try {
+      if (leadId) {
+        await leadsApi.deleteLead(leadId, false);
+      }
+      // Also delete the chat thread for this contact
+      if (isIgConv(currentId)) {
+        const igSenderId = igSenderIdFromConvId(currentId);
+        await api.delete(`/instagram/conversations/${igSenderId}`);
+      } else {
+        await api.delete(`/whatsapp/conversations/${currentId}`);
+      }
+      handleCloseConversation();
+      await fetchConversations();
+    } catch (err) {
+      console.error("Failed to delete lead", err);
+      throw err;
+    }
+  }, [conversationsWithContacts, handleCloseConversation, fetchConversations]);
+
   const hasActiveConv = !!activeConversationId;
 
   return (
@@ -482,6 +511,7 @@ function InboxPageContent() {
             contact={activeContactWithContact}
             onClearChat={handleClearChat}
             onDeleteChat={handleDeleteChat}
+            onDeleteLead={handleDeleteLead}
           />
         </div>
       </div>

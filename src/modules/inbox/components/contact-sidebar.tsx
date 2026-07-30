@@ -16,6 +16,7 @@ import {
   Eraser,
   Trash2,
   MessageSquareOff,
+  UserX,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
@@ -25,9 +26,10 @@ interface ContactSidebarProps {
   contact: Contact | null;
   onClearChat?: () => Promise<void>;
   onDeleteChat?: () => Promise<void>;
+  onDeleteLead?: () => Promise<void>;
 }
 
-export function ContactSidebar({ contact, onClearChat, onDeleteChat }: ContactSidebarProps) {
+export function ContactSidebar({ contact, onClearChat, onDeleteChat, onDeleteLead }: ContactSidebarProps) {
   const [copied, setCopied] = useState(false);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [notes, setNotes] = useState<ContactNote[]>([]);
@@ -37,8 +39,10 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat }: ContactSi
 
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteLeadConfirm, setShowDeleteLeadConfirm] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeletingLead, setIsDeletingLead] = useState(false);
 
   const handleConfirmClear = async () => {
     if (!onClearChat) return;
@@ -63,6 +67,19 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat }: ContactSi
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleConfirmDeleteLead = async () => {
+    if (!onDeleteLead) return;
+    try {
+      setIsDeletingLead(true);
+      await onDeleteLead();
+    } catch (err) {
+      console.error("Error deleting lead:", err);
+    } finally {
+      setIsDeletingLead(false);
+      setShowDeleteLeadConfirm(false);
     }
   };
 
@@ -350,7 +367,7 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat }: ContactSi
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                disabled={isClearing || isDeleting}
+                disabled={isClearing || isDeleting || isDeletingLead}
                 className="flex w-full items-center justify-between rounded-lg border border-red-200 bg-red-50/50 px-3 py-2 text-xs font-medium text-red-600 shadow-sm transition-all hover:bg-red-100 hover:border-red-300 disabled:opacity-50"
               >
                 <div className="flex items-center gap-2">
@@ -358,6 +375,19 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat }: ContactSi
                   <span>Delete Chat</span>
                 </div>
                 <span className="text-[10px] text-red-400">Remove thread</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDeleteLeadConfirm(true)}
+                disabled={isClearing || isDeleting || isDeletingLead}
+                className="flex w-full items-center justify-between rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2 text-xs font-medium text-rose-700 shadow-sm transition-all hover:bg-rose-100 hover:border-rose-300 disabled:opacity-50"
+              >
+                <div className="flex items-center gap-2">
+                  <UserX className="h-4 w-4 text-rose-600" />
+                  <span>Delete Lead</span>
+                </div>
+                <span className="text-[10px] text-rose-400">Delete CRM lead</span>
               </button>
             </div>
           </div>
@@ -449,6 +479,52 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat }: ContactSi
                   </>
                 ) : (
                   <span>Delete Chat</span>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Lead Confirmation Modal */}
+      {showDeleteLeadConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-[#D6E4F0]">
+            <div className="flex items-center gap-3 text-rose-600 mb-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100">
+                <UserX className="h-5 w-5 text-rose-600" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-[#0D1B3E]">Delete CRM Lead?</h4>
+                <p className="text-xs text-[#5A7190]">Permanently remove lead from CRM</p>
+              </div>
+            </div>
+            <p className="text-xs text-[#5A7190] mb-5 leading-relaxed">
+              Are you sure you want to delete this lead? The lead record will be permanently removed from your CRM database.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDeleteLeadConfirm(false)}
+                disabled={isDeletingLead}
+                className="rounded-lg text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleConfirmDeleteLead}
+                disabled={isDeletingLead}
+                className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5"
+              >
+                {isDeletingLead ? (
+                  <>
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>Deleting Lead...</span>
+                  </>
+                ) : (
+                  <span>Delete Lead</span>
                 )}
               </Button>
             </div>
