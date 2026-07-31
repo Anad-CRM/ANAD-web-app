@@ -205,6 +205,7 @@ export function MessageThread({
     const wamidToId = new Map<string, string>();
     messages.forEach((m) => {
       if (m.wamid) wamidToId.set(m.wamid, m.id);
+      if (m.id) wamidToId.set(m.id, m.id);
     });
 
     const map = new Map<string, MessageReaction>();
@@ -399,6 +400,7 @@ export function MessageThread({
           res = await api.post("/instagram/send", {
             igSenderId: conversation.ig_sender_id || conversation.id,
             text,
+            replyToMessageId: replyToId,
           });
         } else {
           res = await api.post("/whatsapp/send", {
@@ -476,14 +478,25 @@ export function MessageThread({
       setReplyTo(null);
 
       try {
-        const res = await api.post("/whatsapp/send", {
-          waId: conversation.id,
-          message_type: payload.message_type,
-          media_id: payload.media_id,
-          caption: payload.caption,
-          filename: payload.filename,
-          reply_to_message_id: replyToId,
-        });
+        let res;
+        if (isInstagram) {
+          res = await api.post("/instagram/send", {
+            igSenderId: conversation.ig_sender_id || conversation.id,
+            text: payload.caption || "",
+            messageType: payload.message_type,
+            mediaUrl: `/api/whatsapp/media/${payload.media_id}`,
+            replyToMessageId: replyToId,
+          });
+        } else {
+          res = await api.post("/whatsapp/send", {
+            waId: conversation.id,
+            message_type: payload.message_type,
+            media_id: payload.media_id,
+            caption: payload.caption,
+            filename: payload.filename,
+            reply_to_message_id: replyToId,
+          });
+        }
         const messageId = res.data?.data?.messageId;
         onUpdateMessage(tempId, {
           id: messageId || tempId,
@@ -539,7 +552,10 @@ export function MessageThread({
 
   const messagesById = useMemo(() => {
     const map = new Map<string, Message>();
-    for (const m of messages) map.set(m.id, m);
+    for (const m of messages) {
+      if (m.id) map.set(m.id, m);
+      if (m.wamid) map.set(m.wamid, m);
+    }
     return map;
   }, [messages]);
 
