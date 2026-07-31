@@ -505,7 +505,7 @@ export function MessageBubble({
         )}
       >
         {reply && !isSticker && (
-          <ReplyQuote authorLabel={reply.authorLabel} preview={reply.preview} />
+          <ReplyQuote authorLabel={reply.authorLabel} preview={reply.preview} isOutbound={isAgent} />
         )}
         <MessageContent
           message={message}

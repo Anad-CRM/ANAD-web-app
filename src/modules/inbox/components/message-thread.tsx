@@ -552,7 +552,10 @@ export function MessageThread({
 
   const messagesById = useMemo(() => {
     const map = new Map<string, Message>();
-    for (const m of messages) map.set(m.id, m);
+    for (const m of messages) {
+      if (m.id) map.set(m.id, m);
+      if (m.wamid) map.set(m.wamid, m);
+    }
     return map;
   }, [messages]);
 
