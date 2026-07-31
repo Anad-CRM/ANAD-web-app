@@ -205,6 +205,7 @@ export function MessageThread({
     const wamidToId = new Map<string, string>();
     messages.forEach((m) => {
       if (m.wamid) wamidToId.set(m.wamid, m.id);
+      if (m.id) wamidToId.set(m.id, m.id);
     });
 
     const map = new Map<string, MessageReaction>();
