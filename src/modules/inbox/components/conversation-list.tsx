@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { cn, createClient, parseSafeDate } from "../lib/utils";
+import { cn, parseSafeDate } from "../lib/utils";
 import type { Conversation, ConversationStatus } from "../types";
 import { Search, ChevronDown, MessageSquareText } from "lucide-react";
 import { isToday, isYesterday, format } from "date-fns";
@@ -61,40 +61,8 @@ export function ConversationList({
   });
 
   useEffect(() => {
-    const supabase = createClient();
-    let cancelled = false;
-
-    (async () => {
-      const { data, error } = await supabase
-        .from("conversations")
-        .select("*, contact:contacts(*)")
-        .order("last_message_at", { ascending: false });
-
-      if (cancelled) return;
-
-      if (error) {
-        // Supabase errors have non-enumerable properties — log fields explicitly
-        console.error("Failed to fetch conversations:", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-        });
-        setLoading(false);
-        return;
-      }
-
-      onConversationsLoadedRef.current(data ?? []);
-      setLoading(false);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-    // `resyncToken` is included so the parent can force a refetch when
-    // the realtime channel reconnects or the tab regains focus — catches
-    // up on any events sent while the WS was disconnected or throttled.
-  }, [resyncToken]);
+    setLoading(false);
+  }, [conversations]);
 
   const filtered = useMemo(() => {
     let result = conversations;

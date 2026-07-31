@@ -199,8 +199,14 @@ function InboxPageContent() {
           }
           return s;
         };
+        const contentTypeMap: Record<string, string> = {
+          text: 'text', image: 'image', audio: 'audio',
+          video: 'video', document: 'document', template: 'template',
+          sticker: 'image', voice: 'audio', reaction: 'reaction',
+        };
         const mapped: Message[] = data.data.map((m: Record<string, unknown>) => {
           const direction = m.direction === 'outbound' ? 'outbound' : 'inbound';
+          const rawMsgType = (m.messageType as string) || 'text';
           return {
             id: m.id as string,
             conversation_id: convId,
@@ -209,8 +215,16 @@ function InboxPageContent() {
             direction,
             sender_type: direction === 'outbound' ? 'agent' : 'customer',
             status: (m.status as string) || 'sent',
-            message_type: 'text' as const,
-            content_type: 'text',
+            message_type: (rawMsgType as Message['message_type']),
+            content_type: contentTypeMap[rawMsgType] || 'text',
+            media_url: m.mediaUrl ? (
+              (m.mediaUrl as string).startsWith('/whatsapp/media/')
+                ? `/api${m.mediaUrl as string}`
+                : (m.mediaUrl as string)
+            ) : undefined,
+            errorMessage: (m.errorMessage as string) || undefined,
+            reply_to_message_id: (m.replyToMessageId as string) || undefined,
+            wamid: (m.messageId as string) || undefined,
             channel: 'instagram' as const,
             name: (m.name as string) || undefined,
           };
