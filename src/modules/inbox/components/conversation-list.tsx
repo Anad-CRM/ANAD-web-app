@@ -20,13 +20,8 @@ interface ConversationListProps {
   onSelect: (conversation: Conversation) => void;
   conversations: Conversation[];
   onConversationsLoaded: (conversations: Conversation[]) => void;
-  /**
-   * Increment to force the fetch effect below to refire. The parent
-   * bumps this on realtime reconnect / tab visibility → visible so the
-   * list catches up on any events sent while the WS was disconnected
-   * or the tab was throttled. Optional so existing callers keep working.
-   */
   resyncToken?: number;
+  loading?: boolean;
 }
 
 const STATUS_COLORS: Record<ConversationStatus, string> = {
@@ -48,12 +43,12 @@ export function ConversationList({
   conversations,
   onConversationsLoaded,
   resyncToken = 0,
+  loading: externalLoading,
 }: ConversationListProps) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<ConversationStatus | "all">("all");
   const [channelFilter, setChannelFilter] = useState<'all' | 'whatsapp' | 'instagram'>('all');
-  const [loading, setLoading] = useState(true);
-
+  const [internalLoading, setInternalLoading] = useState(true);
 
   const onConversationsLoadedRef = useRef(onConversationsLoaded);
   useEffect(() => {
@@ -61,8 +56,12 @@ export function ConversationList({
   });
 
   useEffect(() => {
-    setLoading(false);
+    if (conversations.length > 0) {
+      setInternalLoading(false);
+    }
   }, [conversations]);
+
+  const isLoading = externalLoading ?? (internalLoading && conversations.length === 0);
 
   const filtered = useMemo(() => {
     let result = conversations;
@@ -179,7 +178,7 @@ export function ConversationList({
 
       {/* Conversation Items */}
       <ScrollArea className="flex-1">
-        {loading ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#1E56A0] border-t-transparent" />
           </div>

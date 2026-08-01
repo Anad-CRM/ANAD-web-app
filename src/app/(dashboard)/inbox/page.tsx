@@ -59,6 +59,8 @@ function InboxPageContent() {
     }
   }, []);
 
+  const [loadingConversations, setLoadingConversations] = useState(true);
+
   // ─── Unified fetch: both channels in 1 API call ─────────────────────────────
   const fetchConversations = useCallback(async () => {
     try {
@@ -125,6 +127,8 @@ function InboxPageContent() {
       }
     } catch (err) {
       console.error("Failed to fetch conversations", err);
+    } finally {
+      setLoadingConversations(false);
     }
   }, []);
 
@@ -375,8 +379,8 @@ function InboxPageContent() {
   const conversationsWithContacts = useMemo(() => {
     return conversations.map(conv => {
       const isIG = conv.channel === 'instagram';
-      const igSenderId = conv.ig_sender_id || '';
-      const cleanId = conv.id.replace(/\D/g, '');
+      const igSenderId = String(conv.ig_sender_id || '');
+      const cleanId = String(conv.id || '').replace(/\D/g, '');
       const existingContact = contactsMap[cleanId] || contactsMap[cleanId.slice(-10)] || contactsMap[conv.id];
       const name = (existingContact?.name && existingContact.name !== existingContact.id)
         ? existingContact.name
@@ -384,14 +388,14 @@ function InboxPageContent() {
           ? conv.contact.name
           : (isIG ? igSenderId : conv.id);
       const rawPhone = conv.contact?.phone || conv.contact?.phone_number;
-      const isRealPhone = (num?: string) => {
+      const isRealPhone = (num?: unknown) => {
         if (!num) return false;
-        const cleanNum = num.replace(/\D/g, '');
-        const cleanIg = igSenderId.replace(/\D/g, '');
+        const cleanNum = String(num).replace(/\D/g, '');
+        const cleanIg = String(igSenderId).replace(/\D/g, '');
         if (!cleanNum || cleanNum === cleanIg || cleanNum.length > 15) return false;
         return true;
       };
-      const phoneDisplay = isRealPhone(rawPhone) ? rawPhone! : (isIG ? igSenderId : conv.id);
+      const phoneDisplay = isRealPhone(rawPhone) ? String(rawPhone) : (isIG ? igSenderId : String(conv.id));
 
       return {
         ...conv,
@@ -505,6 +509,7 @@ function InboxPageContent() {
             conversations={conversationsWithContacts}
             onConversationsLoaded={handleConversationsLoaded}
             resyncToken={resyncToken}
+            loading={loadingConversations}
           />
         </div>
 
