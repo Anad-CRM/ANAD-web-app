@@ -8,11 +8,8 @@ interface ReplyQuoteProps {
   /** Sender label of the quoted message: "You" for our own messages,
    *  contact name for customer-sent messages. */
   authorLabel: string;
-  /** Compact text preview. */
   preview: string;
-  /** True when rendered inside an outbound (agent) message bubble. */
   isOutbound?: boolean;
-  /** Present → renders the composer-chip variant with an X button. */
   onDismiss?: () => void;
 }
 
@@ -30,8 +27,8 @@ export function ReplyQuote({
         isChip
           ? "bg-[#EEF4FB] border-[#1E56A0] border"
           : isOutbound
-          ? "mb-1.5 bg-black/25 border-white/90"
-          : "mb-1.5 bg-slate-100/90 border-[#1E56A0]",
+            ? "mb-1.5 bg-black/25 border-white/90"
+            : "mb-1.5 bg-slate-100/90 border-[#1E56A0]",
       )}
     >
       <div className="min-w-0 flex-1 overflow-hidden">
