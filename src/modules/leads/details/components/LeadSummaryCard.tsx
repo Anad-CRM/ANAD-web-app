@@ -48,9 +48,11 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   const assignedName = lead.assignedUser?.userName || 'Not Assigned';
   const source = (lead.source || (lead.ad as { platform?: string } | null)?.platform || 'Unknown') as string;
   const adName = lead.ad?.adName || 'Unknown';
-  const cleanMobile = (lead.mobileNumber || '').replace(/\D/g, '');
   const formDataPhone = (lead.formData as Record<string, any> | undefined)?.contactNumber || (lead.formData as Record<string, any> | undefined)?.phone || '';
-  const phoneNumber = (cleanMobile && cleanMobile.length <= 15) ? (lead.mobileNumber || cleanMobile) : (formDataPhone || lead.mobileNumber || 'N/A');
+  const cleanMobile = (lead.mobileNumber || '').replace(/\D/g, '');
+  const cleanIg = String((lead.formData as Record<string, any> | undefined)?.instagramId || '').replace(/\D/g, '');
+  const isRealPhone = Boolean(cleanMobile && cleanMobile.length <= 15 && (!cleanIg || cleanMobile !== cleanIg));
+  const phoneNumber = isRealPhone ? (lead.mobileNumber || cleanMobile) : (formDataPhone || lead.mobileNumber || 'N/A');
   const email = lead.email || 'N/A';
 
   const handleCall = async () => {
