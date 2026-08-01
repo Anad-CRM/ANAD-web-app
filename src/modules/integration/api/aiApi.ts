@@ -7,6 +7,8 @@ export interface AiConfigPayload {
   model?: string | null;
   apiKey: string;
   systemPrompt: string;
+  instagramSystemPrompt?: string;
+  askContactNumber?: boolean;
   isEnabled: boolean;
 }
 
@@ -16,6 +18,8 @@ export interface AiConfigResponse {
   model?: string | null;
   apiKey: string;
   systemPrompt: string;
+  instagramSystemPrompt?: string;
+  askContactNumber?: boolean;
   isEnabled: boolean;
   isDefault?: boolean;
   hasApiKey?: boolean;

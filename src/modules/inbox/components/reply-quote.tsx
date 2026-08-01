@@ -6,43 +6,49 @@ import type { Message } from "../types";
 
 interface ReplyQuoteProps {
   /** Sender label of the quoted message: "You" for our own messages,
-   *  contact name for customer-sent messages. Caller resolves this — the
-   *  quote component doesn't see the parent Message. */
+   *  contact name for customer-sent messages. */
   authorLabel: string;
-  /** Compact text preview. Falls back to a placeholder for media types. */
+  /** Compact text preview. */
   preview: string;
-  /** Present → renders the composer-chip variant with an X button. Absent →
-   *  renders the embedded-in-bubble variant. */
+  /** True when rendered inside an outbound (agent) message bubble. */
+  isOutbound?: boolean;
+  /** Present → renders the composer-chip variant with an X button. */
   onDismiss?: () => void;
 }
 
 export function ReplyQuote({
   authorLabel,
   preview,
+  isOutbound,
   onDismiss,
 }: ReplyQuoteProps) {
   const isChip = !!onDismiss;
   return (
     <div
       className={cn(
-        "flex items-start gap-2 border-l-2 border-[#1E56A0] px-2 py-1",
+        "flex items-start gap-2 border-l-2 px-2.5 py-1.5 transition-all rounded-md",
         isChip
-          ? "rounded-md bg-[#EEF4FB] border border-[#D6E4F0]"
-          : "mb-1.5 rounded-md bg-[#0D1B3E]/5",
+          ? "bg-[#EEF4FB] border-[#1E56A0] border"
+          : isOutbound
+          ? "mb-1.5 bg-black/25 border-white/90"
+          : "mb-1.5 bg-slate-100/90 border-[#1E56A0]",
       )}
     >
       <div className="min-w-0 flex-1 overflow-hidden">
-        <div className="truncate text-[11px] font-semibold text-[#1E56A0]">
+        <div
+          className={cn(
+            "truncate text-[11px] font-semibold",
+            isChip || !isOutbound ? "text-[#1E56A0]" : "text-white font-bold"
+          )}
+        >
           {authorLabel}
         </div>
-        {/* Wrap the preview instead of truncating to a single line.
-         *  `truncate` (white-space: nowrap) forced the quote onto one
-         *  impossibly-wide line and — because the parent flex chain
-         *  lacked `min-w-0` at every step — pushed the entire inbox
-         *  layout wider, shoving the contact sidebar off-screen.
-         *  `break-words` also wraps long URLs that have no whitespace
-         *  to break on. Issue #165. */}
-        <div className="whitespace-pre-wrap break-words text-xs text-[#5A7190]">
+        <div
+          className={cn(
+            "whitespace-pre-wrap break-words text-xs",
+            isChip || !isOutbound ? "text-[#5A7190]" : "text-white/90 font-medium"
+          )}
+        >
           {preview}
         </div>
       </div>
@@ -62,16 +68,23 @@ export function ReplyQuote({
 
 /** Build the one-line preview text shown inside a reply quote. */
 export function buildReplyPreview(message: Message): string {
-  if (message.content_text) return message.content_text;
-  switch (message.content_type) {
+  if (message.content_text) {
+    const text = message.content_text.trim();
+    if (!text.startsWith("[reaction]:")) return text;
+  }
+  const type = message.content_type || message.message_type;
+  switch (type) {
     case "image":
       return "[Image]";
     case "video":
       return "[Video]";
     case "audio":
-      return "[Audio]";
+    case "voice":
+      return "[Voice Note]";
     case "document":
       return "[Document]";
+    case "sticker":
+      return "[Sticker]";
     case "location":
       return "[Location]";
     case "template":
