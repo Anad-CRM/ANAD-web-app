@@ -66,9 +66,11 @@ function InboxPageContent() {
       if (data.success) {
         const mapped: Conversation[] = data.data.map((c: Record<string, unknown>) => {
           const isIg = c.channel === 'instagram';
+          const realPhone = (c.mobileNumber || c.phone) as string | undefined;
           if (isIg) {
             const igSenderId = (c.igSenderId || c.waId) as string;
             const convId = `ig_${igSenderId}`;
+            const contactPhone = (realPhone && realPhone !== igSenderId && realPhone.length <= 15) ? realPhone : igSenderId;
             return {
               id: convId,
               contact_id: convId,
@@ -83,8 +85,8 @@ function InboxPageContent() {
               contact: {
                 id: convId,
                 name: c.name ? (c.name as string) : igSenderId,
-                phone_number: igSenderId,
-                phone: igSenderId,
+                phone_number: contactPhone,
+                phone: contactPhone,
               }
             };
           } else {
@@ -101,8 +103,8 @@ function InboxPageContent() {
               contact: {
                 id: c.waId as string,
                 name: (c.name !== 'Agent' && c.name !== c.waId) ? (c.name as string) : null,
-                phone_number: c.waId as string,
-                phone: c.waId as string,
+                phone_number: (realPhone && realPhone.length <= 15) ? realPhone : (c.waId as string),
+                phone: (realPhone && realPhone.length <= 15) ? realPhone : (c.waId as string),
               }
             };
           }
@@ -381,8 +383,16 @@ function InboxPageContent() {
         : (conv.contact?.name && conv.contact.name !== conv.id)
           ? conv.contact.name
           : (isIG ? igSenderId : conv.id);
-      // For Instagram: expose igSenderId as the phone so the header/sidebar shows the IG user id
-      const phoneDisplay = isIG ? igSenderId : conv.id;
+      const rawPhone = conv.contact?.phone || conv.contact?.phone_number;
+      const isRealPhone = (num?: string) => {
+        if (!num) return false;
+        const cleanNum = num.replace(/\D/g, '');
+        const cleanIg = igSenderId.replace(/\D/g, '');
+        if (!cleanNum || cleanNum === cleanIg || cleanNum.length > 15) return false;
+        return true;
+      };
+      const phoneDisplay = isRealPhone(rawPhone) ? rawPhone! : (isIG ? igSenderId : conv.id);
+
       return {
         ...conv,
         contact: {
