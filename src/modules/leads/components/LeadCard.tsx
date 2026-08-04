@@ -139,9 +139,15 @@ export function LeadCard({
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
+  const formDataPhone = (lead.formData as Record<string, any> | undefined)?.contactNumber || (lead.formData as Record<string, any> | undefined)?.phone || '';
+  const cleanMobile = (lead.mobileNumber || '').replace(/\D/g, '');
+  const cleanIg = String((lead.formData as Record<string, any> | undefined)?.instagramId || '').replace(/\D/g, '');
+  const isRealPhone = Boolean(cleanMobile && cleanMobile.length <= 15 && (!cleanIg || cleanMobile !== cleanIg));
+  const resolvedMobile = isRealPhone ? (lead.mobileNumber || cleanMobile) : (formDataPhone || lead.mobileNumber || '');
+
   const name = safeText(lead.userName ?? lead.name, "Unknown Lead");
   const email = safeText(lead.email, "No email provided");
-  const mobile = safeText(lead.mobileNumber ?? lead.mobile, "No phone provided");
+  const mobile = safeText(resolvedMobile, "No phone provided");
   const source = safeText(lead.source, "Manual");
   const adName = safeText(lead.ad?.adName ?? lead.campaignName ?? lead.adSet, "");
   const createdAt = formatDate(lead.createdAt);
