@@ -17,7 +17,11 @@ import {
   Calendar,
   Filter,
   UserX,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Video,
+  Music,
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import { COLORS } from "@/core/components/theme/colors";
@@ -75,9 +79,11 @@ export default function AutomationsPage() {
   const [delayMinutes, setDelayMinutes] = useState<number>(0);
   const [delaySeconds, setDelaySeconds] = useState<number>(0);
   const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<'text' | 'image' | 'video' | 'audio' | 'document'>('text');
   const [targetAudience, setTargetAudience] = useState<'everyone' | 'selected'>('everyone');
   const [excludeInput, setExcludeInput] = useState("");
   const [excludeChatIds, setExcludeChatIds] = useState<string[]>([]);
+  const [maxExecutionCount, setMaxExecutionCount] = useState<number>(1);
 
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -118,9 +124,11 @@ export default function AutomationsPage() {
     setDelayMinutes(0);
     setDelaySeconds(0);
     setMediaUrl('');
+    setMediaType('text');
     setTargetAudience('everyone');
     setExcludeInput('');
     setExcludeChatIds([]);
+    setMaxExecutionCount(1);
     setModalOpen(true);
   };
 
@@ -134,9 +142,11 @@ export default function AutomationsPage() {
     setDelayMinutes(rule.delayMinutes ?? 0);
     setDelaySeconds(rule.delaySeconds ?? 0);
     setMediaUrl(rule.mediaUrl || '');
+    setMediaType((rule.mediaType as 'text' | 'image' | 'video' | 'audio' | 'document') || (rule.mediaUrl ? 'image' : 'text'));
     setTargetAudience(rule.targetAudience || 'everyone');
     setExcludeInput('');
     setExcludeChatIds(Array.isArray(rule.excludeChatIds) ? rule.excludeChatIds : []);
+    setMaxExecutionCount(rule.maxExecutionCount ?? 1);
     setModalOpen(true);
   };
 
@@ -150,9 +160,11 @@ export default function AutomationsPage() {
     setDelayMinutes(0);
     setDelaySeconds(0);
     setMediaUrl(preset.mediaUrl || '');
+    setMediaType(preset.mediaUrl ? 'image' : 'text');
     setTargetAudience('everyone');
     setExcludeInput('');
     setExcludeChatIds([]);
+    setMaxExecutionCount(1);
     setModalOpen(true);
   };
 
@@ -186,9 +198,10 @@ export default function AutomationsPage() {
       delayMinutes: Number(delayMinutes) || 0,
       delaySeconds: Number(delaySeconds) || 0,
       mediaUrl: mediaUrl.trim() || null,
-      mediaType: mediaUrl.trim() ? 'image' : 'text',
+      mediaType: mediaUrl.trim() ? mediaType : 'text',
       targetAudience,
       excludeChatIds,
+      maxExecutionCount: Number(maxExecutionCount) >= 0 ? Number(maxExecutionCount) : 1,
     };
 
     try {
@@ -272,7 +285,7 @@ export default function AutomationsPage() {
             Automations & Scheduled Messages
           </h1>
           <p className="mt-1 text-sm" style={{ color: COLORS.muted }}>
-            Set up keyword auto-replies or scheduled 24-hr follow-up messages for Instagram & WhatsApp.
+            Set up keyword auto-replies or exact scheduled-time follow-up messages (with auto-cancel on reply) for Instagram & WhatsApp.
           </p>
         </div>
         <button
@@ -377,13 +390,18 @@ export default function AutomationsPage() {
                         </span>
 
                         {/* Rule type badge */}
-                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                          isScheduled
+                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${isScheduled
                             ? "bg-pink-100 text-pink-700 border border-pink-200"
                             : "bg-blue-100 text-blue-700 border border-blue-200"
-                        }`}>
+                          }`}>
                           {isScheduled ? `Scheduled (${formatDelay(rule.delayHours, rule.delayMinutes, rule.delaySeconds)} Delay)` : "Keyword Trigger"}
                         </span>
+
+                        {isScheduled && (
+                          <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            Limit: {rule.maxExecutionCount === 0 ? "Unlimited" : `${rule.maxExecutionCount ?? 1}x per chat`}
+                          </span>
+                        )}
 
                         {/* Channel Badge */}
                         <span className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
@@ -405,9 +423,14 @@ export default function AutomationsPage() {
 
                       {/* Media URL badge if exists */}
                       {rule.mediaUrl && (
-                        <div className="flex items-center gap-1.5 text-xs text-blue-600 font-medium">
-                          <LinkIcon className="h-3.5 w-3.5" />
-                          <a href={rule.mediaUrl} target="_blank" rel="noreferrer" className="hover:underline truncate max-w-md">
+                        <div className="flex items-center gap-1.5 text-xs text-blue-600 font-medium bg-blue-50/70 border border-blue-100 px-2.5 py-1 rounded-lg w-fit">
+                          {rule.mediaType === 'image' && <ImageIcon className="h-3.5 w-3.5 text-blue-600" />}
+                          {rule.mediaType === 'video' && <Video className="h-3.5 w-3.5 text-blue-600" />}
+                          {rule.mediaType === 'audio' && <Music className="h-3.5 w-3.5 text-blue-600" />}
+                          {rule.mediaType === 'document' && <FileText className="h-3.5 w-3.5 text-blue-600" />}
+                          {(!rule.mediaType || rule.mediaType === 'text') && <LinkIcon className="h-3.5 w-3.5 text-blue-600" />}
+                          <span className="capitalize font-bold text-[11px] text-blue-800">{rule.mediaType || 'Link'}:</span>
+                          <a href={rule.mediaUrl} target="_blank" rel="noreferrer" className="hover:underline truncate max-w-xs">
                             {rule.mediaUrl}
                           </a>
                         </div>
@@ -500,11 +523,10 @@ export default function AutomationsPage() {
                   <button
                     type="button"
                     onClick={() => setRuleType('keyword')}
-                    className={`flex items-center justify-center gap-2 rounded-xl p-3 border text-xs font-bold transition-all ${
-                      ruleType === 'keyword'
+                    className={`flex items-center justify-center gap-2 rounded-xl p-3 border text-xs font-bold transition-all ${ruleType === 'keyword'
                         ? 'border-blue-500 bg-blue-50/50 text-blue-700 shadow-sm'
                         : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
+                      }`}
                   >
                     <Zap className="h-4 w-4" />
                     Keyword Trigger
@@ -513,11 +535,10 @@ export default function AutomationsPage() {
                   <button
                     type="button"
                     onClick={() => setRuleType('scheduled')}
-                    className={`flex items-center justify-center gap-2 rounded-xl p-3 border text-xs font-bold transition-all ${
-                      ruleType === 'scheduled'
+                    className={`flex items-center justify-center gap-2 rounded-xl p-3 border text-xs font-bold transition-all ${ruleType === 'scheduled'
                         ? 'border-pink-500 bg-pink-50/50 text-pink-700 shadow-sm'
                         : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
+                      }`}
                   >
                     <Calendar className="h-4 w-4" />
                     Scheduled Follow-up (24h)
@@ -532,11 +553,10 @@ export default function AutomationsPage() {
                   <button
                     type="button"
                     onClick={() => setChannel('all')}
-                    className={`flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 border text-xs font-bold transition-all ${
-                      channel === 'all'
+                    className={`flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 border text-xs font-bold transition-all ${channel === 'all'
                         ? 'border-slate-800 bg-slate-900 text-white shadow-sm'
                         : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
+                      }`}
                   >
                     All Channels
                   </button>
@@ -544,11 +564,10 @@ export default function AutomationsPage() {
                   <button
                     type="button"
                     onClick={() => setChannel('instagram')}
-                    className={`flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 border text-xs font-bold transition-all ${
-                      channel === 'instagram'
+                    className={`flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 border text-xs font-bold transition-all ${channel === 'instagram'
                         ? 'border-pink-500 text-white shadow-sm'
                         : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
+                      }`}
                     style={channel === 'instagram' ? { background: COLORS.instagram_gradient } : undefined}
                   >
                     <Instagram className="h-3.5 w-3.5" />
@@ -558,11 +577,10 @@ export default function AutomationsPage() {
                   <button
                     type="button"
                     onClick={() => setChannel('whatsapp')}
-                    className={`flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 border text-xs font-bold transition-all ${
-                      channel === 'whatsapp'
+                    className={`flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 border text-xs font-bold transition-all ${channel === 'whatsapp'
                         ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm'
                         : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
+                      }`}
                   >
                     <WhatsAppIcon className="h-3.5 w-3.5" />
                     WhatsApp
@@ -640,8 +658,28 @@ export default function AutomationsPage() {
                     </div>
                   </div>
 
+                  {/* Repeat Count / Execution limit */}
+                  <div className="flex items-center justify-between border-t border-pink-200/60 pt-2.5 mt-1">
+                    <div className="flex flex-col">
+                      <label className="text-xs font-bold text-pink-900">
+                        Max Times Per Chat
+                      </label>
+                      <span className="text-[10px] text-pink-700">
+                        How many times this rule can run for the same chat (1 = once, 0 = unlimited).
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={maxExecutionCount}
+                      onChange={(e) => setMaxExecutionCount(Math.max(0, Number(e.target.value)))}
+                      className="w-20 rounded-xl border border-pink-200 px-3 py-1.5 text-sm bg-white text-center font-bold text-pink-900 focus:outline-none focus:border-pink-500"
+                    />
+                  </div>
+
                   <p className="text-[11px] text-pink-700 leading-tight">
-                    ⚡ <strong>Meta 24-hr Policy:</strong> For Instagram, messages must be delivered within 24 hours of customer&apos;s last DM. Setting <strong>22 hours</strong> allows delivering your message automatically right before the 24h window closes!
+                    <strong>Exact Scheduled Execution:</strong> Message triggers at this exact delay after a customer message, and automatically cancels if an agent or bot replies in the interim! (Meta 24-hr policy applies to Instagram).
                   </p>
                 </div>
               )}
@@ -658,18 +696,89 @@ export default function AutomationsPage() {
                 />
               </div>
 
-              {/* Media URL / Links Input */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
-                  Media / Reel / Link Attachment (Optional)
+              {/* Media Type & Payload Attachment */}
+              <div className="flex flex-col gap-2 rounded-2xl bg-blue-50/50 p-3.5 border border-blue-100">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <LinkIcon className="h-3.5 w-3.5 text-blue-600" />
+                  Media Attachment & Payload (Optional)
                 </label>
+
+                {/* Media Type Selector */}
+                <div className="grid grid-cols-5 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setMediaType('text')}
+                    className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-[10px] font-bold transition-all ${mediaType === 'text'
+                        ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    <LinkIcon className="h-3.5 w-3.5 mb-0.5" />
+                    Link / Reel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setMediaType('image')}
+                    className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-[10px] font-bold transition-all ${mediaType === 'image'
+                        ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    <ImageIcon className="h-3.5 w-3.5 mb-0.5" />
+                    Image
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setMediaType('video')}
+                    className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-[10px] font-bold transition-all ${mediaType === 'video'
+                        ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    <Video className="h-3.5 w-3.5 mb-0.5" />
+                    Video
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setMediaType('audio')}
+                    className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-[10px] font-bold transition-all ${mediaType === 'audio'
+                        ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    <Music className="h-3.5 w-3.5 mb-0.5" />
+                    Audio
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setMediaType('document')}
+                    className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-[10px] font-bold transition-all ${mediaType === 'document'
+                        ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    <FileText className="h-3.5 w-3.5 mb-0.5" />
+                    Document
+                  </button>
+                </div>
+
+                {/* Media URL Input */}
                 <input
                   type="text"
-                  placeholder="e.g. https://instagram.com/reel/... or image URL"
+                  placeholder={
+                    mediaType === 'image' ? "Enter image URL (PNG, JPG)..." :
+                      mediaType === 'video' ? "Enter video or Instagram Reel URL (MP4)..." :
+                        mediaType === 'audio' ? "Enter audio URL (MP3, AAC)..." :
+                          mediaType === 'document' ? "Enter document URL (PDF, DOCX)..." :
+                            "e.g. https://instagram.com/reel/... or media URL"
+                  }
                   value={mediaUrl}
                   onChange={(e) => setMediaUrl(e.target.value)}
-                  className="rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm transition-all focus:border-blue-500 focus:outline-none"
+                  className="rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs bg-white focus:outline-none focus:border-blue-500 shadow-sm"
                 />
               </div>
 
@@ -679,7 +788,7 @@ export default function AutomationsPage() {
                   <Filter className="h-3.5 w-3.5 text-slate-600" />
                   Exclude Specific Contacts / Chat IDs (Exceptions)
                 </label>
-                
+
                 <div className="flex items-center gap-2">
                   <input
                     type="text"

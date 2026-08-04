@@ -13,11 +13,12 @@ export interface TemplateMessage {
   delayMinutes?: number;
   delaySeconds?: number;
   mediaUrl?: string | null;
-  mediaType?: 'text' | 'image' | 'video' | 'document';
+  mediaType?: 'text' | 'image' | 'video' | 'audio' | 'document';
   targetAudience?: 'everyone' | 'selected';
   excludeChatIds?: string[];
   includeChatIds?: string[];
   lastTriggeredAt?: string | null;
+  maxExecutionCount?: number;
 }
 
 export interface CreateTemplatePayload {
@@ -30,10 +31,11 @@ export interface CreateTemplatePayload {
   delayMinutes?: number;
   delaySeconds?: number;
   mediaUrl?: string | null;
-  mediaType?: 'text' | 'image' | 'video' | 'document';
+  mediaType?: 'text' | 'image' | 'video' | 'audio' | 'document';
   targetAudience?: 'everyone' | 'selected';
   excludeChatIds?: string[];
   includeChatIds?: string[];
+  maxExecutionCount?: number;
 }
 
 export async function getTemplateMessages(): Promise<TemplateMessage[]> {
