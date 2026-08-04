@@ -43,7 +43,7 @@ function WhatsAppIcon({ className = "h-4 w-4", style }: { className?: string; st
 function InstagramIcon({ className = "h-4 w-4", style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg className={className} style={style} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
     </svg>
   );
 }
@@ -126,16 +126,24 @@ export function ConversationList({
       {/* ── Top Header matching reference image ───────────────────────────── */}
       <div className="px-4 pt-4 pb-3 border-b border-slate-100 bg-white space-y-3">
         {/* Title + All/Unread Toggle */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">Chats</h1>
-          <div className="inline-flex items-center rounded-full bg-slate-100 p-0.5 text-xs font-medium">
+        {/* Title + All/Unread Toggle */}
+        <div className="flex items-center justify-between px-1">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            Chats
+            {activeFilter?.value !== 'all' && (
+              <span className="flex h-5 items-center justify-center rounded-full bg-primary/10 px-2 text-[10px] font-bold text-primary">
+                {activeFilter?.label}
+              </span>
+            )}
+          </h1>
+          <div className="inline-flex items-center rounded-lg bg-slate-100 p-0.5 text-xs font-medium shadow-inner">
             <button
               onClick={() => setReadFilter('all')}
               className={cn(
-                "rounded-full px-3 py-1 text-xs font-semibold transition-all",
+                "rounded-md px-3 py-1 text-xs font-semibold transition-all duration-200",
                 readFilter === 'all'
-                  ? "bg-slate-800 text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white text-slate-800 shadow-sm ring-1 ring-slate-200/50"
+                  : "text-slate-500 hover:text-slate-700"
               )}
             >
               All
@@ -143,10 +151,10 @@ export function ConversationList({
             <button
               onClick={() => setReadFilter('unread')}
               className={cn(
-                "rounded-full px-3 py-1 text-xs font-semibold transition-all",
+                "rounded-md px-3 py-1 text-xs font-semibold transition-all duration-200",
                 readFilter === 'unread'
-                  ? "bg-slate-800 text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white text-slate-800 shadow-sm ring-1 ring-slate-200/50"
+                  : "text-slate-500 hover:text-slate-700"
               )}
             >
               Unread
@@ -155,78 +163,73 @@ export function ConversationList({
         </div>
 
         {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <div className="relative group px-1">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
           <Input
             value={search}
             onChange={handleSearchChange}
-            placeholder="Search chats..."
-            className="h-9 border-0 bg-slate-100/80 pl-9 text-xs text-slate-900 placeholder-slate-400 rounded-xl focus-visible:ring-1 focus-visible:ring-slate-300 focus-visible:bg-white transition-all"
+            placeholder="Search by name, phone or message..."
+            className="h-9 w-full border-0 bg-slate-100/70 pl-9 text-xs text-slate-900 placeholder-slate-400 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:bg-white transition-all shadow-sm"
           />
         </div>
 
-        {/* Channel Filter Pills (Instagram, WhatsApp, All) */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        {/* Channel Filter Pills (Instagram, WhatsApp, All) & Status Dropdown */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-1">
           <button
-            onClick={() => setChannelFilter('instagram')}
+            onClick={() => setChannelFilter(channelFilter === 'instagram' ? 'all' : 'instagram')}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all shrink-0 border",
+              "flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold transition-all shrink-0 border",
               channelFilter === 'instagram'
-                ? "text-white border-transparent shadow-sm"
-                : "bg-slate-100/90 text-slate-700 border-slate-200/60 hover:bg-slate-200/80"
+                ? "text-white border-transparent shadow-md scale-[1.02]"
+                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-800"
             )}
             style={channelFilter === 'instagram' ? { background: COLORS.instagram_gradient } : undefined}
           >
-            <InstagramIcon className={cn("h-3.5 w-3.5", channelFilter === 'instagram' ? "text-white" : "")} style={channelFilter !== 'instagram' ? { color: COLORS.instagram } : undefined} />
-            <span>Instagram</span>
-            <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
+            <InstagramIcon className={cn("h-3 w-3", channelFilter === 'instagram' ? "text-white" : "")} style={channelFilter !== 'instagram' ? { color: COLORS.instagram } : undefined} />
+            Instagram
           </button>
 
           <button
-            onClick={() => setChannelFilter('whatsapp')}
+            onClick={() => setChannelFilter(channelFilter === 'whatsapp' ? 'all' : 'whatsapp')}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all shrink-0 border",
+              "flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold transition-all shrink-0 border",
               channelFilter === 'whatsapp'
-                ? "text-white border-transparent shadow-sm"
-                : "bg-slate-100/90 text-slate-700 border-slate-200/60 hover:bg-slate-200/80"
+                ? "text-white border-transparent shadow-md scale-[1.02]"
+                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-800"
             )}
             style={channelFilter === 'whatsapp' ? { backgroundColor: COLORS.whatsapp } : undefined}
           >
-            <WhatsAppIcon className={cn("h-3.5 w-3.5", channelFilter === 'whatsapp' ? "text-white" : "")} style={channelFilter !== 'whatsapp' ? { color: COLORS.whatsapp } : undefined} />
-            <span>WhatsApp</span>
-            <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
+            <WhatsAppIcon className={cn("h-3 w-3", channelFilter === 'whatsapp' ? "text-white" : "")} style={channelFilter !== 'whatsapp' ? { color: COLORS.whatsapp } : undefined} />
+            WhatsApp
           </button>
 
-          {channelFilter !== 'all' && (
-            <button
-              onClick={() => setChannelFilter('all')}
-              className="px-2.5 py-1 text-xs font-semibold text-slate-500 hover:text-slate-900 rounded-full bg-slate-100 hover:bg-slate-200 shrink-0 transition-colors"
-            >
-              Reset
-            </button>
-          )}
-
           {/* Status Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-slate-500 hover:text-slate-800 rounded-full bg-slate-100 hover:bg-slate-200 ml-auto shrink-0 transition-colors">
-              {activeFilter?.label ?? "Status"}
-              <ChevronDown className="h-3 w-3 opacity-60" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="border-slate-200 bg-white shadow-lg rounded-xl min-w-[120px]">
-              {FILTER_OPTIONS.map((opt) => (
-                <DropdownMenuItem
-                  key={opt.value}
-                  onClick={() => setFilter(opt.value)}
-                  className={cn(
-                    "text-xs font-medium cursor-pointer rounded-lg text-slate-700 hover:bg-slate-100",
-                    filter === opt.value && "font-bold text-slate-900 bg-slate-100"
-                  )}
-                >
-                  {opt.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="ml-auto flex items-center shrink-0">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold text-slate-600 hover:text-slate-900 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                Status
+                <ChevronDown className="h-3 w-3 opacity-50" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36 border-slate-200 bg-white shadow-xl rounded-xl p-1">
+                {FILTER_OPTIONS.map((opt) => (
+                  <DropdownMenuItem
+                    key={opt.value}
+                    onClick={() => setFilter(opt.value)}
+                    className={cn(
+                      "text-[11px] font-semibold cursor-pointer rounded-lg px-2.5 py-2 transition-colors",
+                      filter === opt.value 
+                        ? "text-primary bg-primary/5" 
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    )}
+                  >
+                    {opt.label}
+                    {filter === opt.value && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -314,7 +317,7 @@ function ConversationItem({
     <button
       onClick={handleClick}
       className={cn(
-        "flex w-full items-center gap-3 px-4 py-3 text-left transition-all relative group",
+        "flex w-full items-center gap-3 py-2 pl-1 pr-4 text-left transition-all relative group",
         isActive
           ? "bg-slate-100/90 font-medium"
           : "hover:bg-slate-50/80 bg-white"
@@ -328,7 +331,10 @@ function ConversationItem({
       </div>
 
       {/* Avatar */}
-      <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-sm font-bold text-white shadow-sm">
+      <div
+        className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm"
+        style={{ backgroundColor: COLORS.primary }}
+      >
         {contact?.avatar_url ? (
           <img
             src={contact.avatar_url}
@@ -356,14 +362,13 @@ function ConversationItem({
             {formatLastMessageText(conversation.last_message_text)}
           </p>
 
-          {/* Right Channel Icon + Chevron (reference image style) */}
+          {/* Right Channel Icon (reference image style) */}
           <div className="flex items-center shrink-0 ml-1">
             {isInstagram ? (
-              <InstagramIcon className="h-4 w-4" style={{ color: COLORS.instagram }} />
+              <InstagramIcon className="h-3 w-3" style={{ color: COLORS.instagram }} />
             ) : (
-              <WhatsAppIcon className="h-4 w-4" style={{ color: COLORS.whatsapp }} />
+              <WhatsAppIcon className="h-3 w-3" style={{ color: COLORS.whatsapp }} />
             )}
-            <ChevronRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all ml-0.5" />
           </div>
         </div>
       </div>
