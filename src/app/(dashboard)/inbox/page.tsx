@@ -311,6 +311,12 @@ function InboxPageContent() {
     if (activeConversationIdRef.current === conv.id) return;
     activeConversationIdRef.current = conv.id;
     setActiveConversationId(conv.id);
+
+    // Immediately clear unread_count for the selected conversation in state
+    setConversations(prev =>
+      prev.map(c => (c.id === conv.id ? { ...c, unread_count: 0 } : c))
+    );
+
     setMessages([]);
     setHasMore(true);
     fetchMessages(conv.id, 30, 0);
