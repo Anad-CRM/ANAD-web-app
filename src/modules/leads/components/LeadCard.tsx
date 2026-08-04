@@ -21,8 +21,10 @@ function getInitials(name: string): string {
     .map(p => p[0]).join("").toUpperCase();
 }
 
-function safeText(s?: string | null, fallback = ""): string {
-  return s?.replace(/[\uD800-\uDFFF]/g, "") || fallback;
+function safeText(s?: unknown, fallback = ""): string {
+  if (s === null || s === undefined) return fallback;
+  const str = typeof s === "string" ? s : String(s);
+  return str.replace(/[\uD800-\uDFFF]/g, "") || fallback;
 }
 
 function formatDate(dateStr?: string | null): string {
@@ -140,7 +142,7 @@ export function LeadCard({
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
   const formDataPhone = (lead.formData as Record<string, any> | undefined)?.contactNumber || (lead.formData as Record<string, any> | undefined)?.phone || '';
-  const cleanMobile = (lead.mobileNumber || '').replace(/\D/g, '');
+  const cleanMobile = String(lead.mobileNumber || '').replace(/\D/g, '');
   const cleanIg = String((lead.formData as Record<string, any> | undefined)?.instagramId || '').replace(/\D/g, '');
   const isRealPhone = Boolean(cleanMobile && cleanMobile.length <= 15 && (!cleanIg || cleanMobile !== cleanIg));
   const resolvedMobile = isRealPhone ? (lead.mobileNumber || cleanMobile) : (formDataPhone || lead.mobileNumber || '');
