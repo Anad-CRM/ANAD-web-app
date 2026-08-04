@@ -35,6 +35,7 @@ export const COLORS = {
 
   platform_facebook: "#1877F2",
   platform_instagram: "#E1306C",
+  platform_whatsapp: "#25D366",
   platform_google: "#4285F4",
   platform_youtube: "#FF0000",
   platform_tiktok: "#010101",
@@ -42,6 +43,12 @@ export const COLORS = {
   platform_linkedin: "#0A66C2",
   platform_snapchat: "#FFFC00",
   platform_pinterest: "#E60023",
+
+  whatsapp: "#25D366",
+  whatsapp_dark: "#128C7E",
+  whatsapp_light: "#DCF8C6",
+  instagram: "#E1306C",
+  instagram_gradient: "radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)",
 };
 
 export function getPlatformColor(platform?: string): string {

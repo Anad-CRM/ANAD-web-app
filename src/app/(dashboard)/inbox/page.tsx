@@ -59,6 +59,8 @@ function InboxPageContent() {
     }
   }, []);
 
+  const [loadingConversations, setLoadingConversations] = useState(true);
+
   // ─── Unified fetch: both channels in 1 API call ─────────────────────────────
   const fetchConversations = useCallback(async () => {
     try {
@@ -66,9 +68,11 @@ function InboxPageContent() {
       if (data.success) {
         const mapped: Conversation[] = data.data.map((c: Record<string, unknown>) => {
           const isIg = c.channel === 'instagram';
+          const realPhone = (c.mobileNumber || c.phone) as string | undefined;
           if (isIg) {
             const igSenderId = (c.igSenderId || c.waId) as string;
             const convId = `ig_${igSenderId}`;
+            const contactPhone = (realPhone && realPhone !== igSenderId && realPhone.length <= 15) ? realPhone : igSenderId;
             return {
               id: convId,
               contact_id: convId,
@@ -83,8 +87,8 @@ function InboxPageContent() {
               contact: {
                 id: convId,
                 name: c.name ? (c.name as string) : igSenderId,
-                phone_number: igSenderId,
-                phone: igSenderId,
+                phone_number: contactPhone,
+                phone: contactPhone,
               }
             };
           } else {
@@ -101,8 +105,8 @@ function InboxPageContent() {
               contact: {
                 id: c.waId as string,
                 name: (c.name !== 'Agent' && c.name !== c.waId) ? (c.name as string) : null,
-                phone_number: c.waId as string,
-                phone: c.waId as string,
+                phone_number: (realPhone && realPhone.length <= 15) ? realPhone : (c.waId as string),
+                phone: (realPhone && realPhone.length <= 15) ? realPhone : (c.waId as string),
               }
             };
           }
@@ -123,6 +127,8 @@ function InboxPageContent() {
       }
     } catch (err) {
       console.error("Failed to fetch conversations", err);
+    } finally {
+      setLoadingConversations(false);
     }
   }, []);
 
@@ -305,6 +311,12 @@ function InboxPageContent() {
     if (activeConversationIdRef.current === conv.id) return;
     activeConversationIdRef.current = conv.id;
     setActiveConversationId(conv.id);
+
+    // Immediately clear unread_count for the selected conversation in state
+    setConversations(prev =>
+      prev.map(c => (c.id === conv.id ? { ...c, unread_count: 0 } : c))
+    );
+
     setMessages([]);
     setHasMore(true);
     fetchMessages(conv.id, 30, 0);
@@ -373,16 +385,24 @@ function InboxPageContent() {
   const conversationsWithContacts = useMemo(() => {
     return conversations.map(conv => {
       const isIG = conv.channel === 'instagram';
-      const igSenderId = conv.ig_sender_id || '';
-      const cleanId = conv.id.replace(/\D/g, '');
+      const igSenderId = String(conv.ig_sender_id || '');
+      const cleanId = String(conv.id || '').replace(/\D/g, '');
       const existingContact = contactsMap[cleanId] || contactsMap[cleanId.slice(-10)] || contactsMap[conv.id];
       const name = (existingContact?.name && existingContact.name !== existingContact.id)
         ? existingContact.name
         : (conv.contact?.name && conv.contact.name !== conv.id)
           ? conv.contact.name
           : (isIG ? igSenderId : conv.id);
-      // For Instagram: expose igSenderId as the phone so the header/sidebar shows the IG user id
-      const phoneDisplay = isIG ? igSenderId : conv.id;
+      const rawPhone = conv.contact?.phone || conv.contact?.phone_number;
+      const isRealPhone = (num?: unknown) => {
+        if (!num) return false;
+        const cleanNum = String(num).replace(/\D/g, '');
+        const cleanIg = String(igSenderId).replace(/\D/g, '');
+        if (!cleanNum || cleanNum === cleanIg || cleanNum.length > 15) return false;
+        return true;
+      };
+      const phoneDisplay = isRealPhone(rawPhone) ? String(rawPhone) : (isIG ? igSenderId : String(conv.id));
+
       return {
         ...conv,
         contact: {
@@ -495,6 +515,7 @@ function InboxPageContent() {
             conversations={conversationsWithContacts}
             onConversationsLoaded={handleConversationsLoaded}
             resyncToken={resyncToken}
+            loading={loadingConversations}
           />
         </div>
 

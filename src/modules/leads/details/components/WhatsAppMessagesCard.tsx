@@ -64,6 +64,7 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
   const [loading, setLoading] = useState(false);
   // waId discovered from the server response (guaranteed to match DB)
   const [resolvedWaId, setResolvedWaId] = useState<string | null>(null);
+  const [resolvedChannel, setResolvedChannel] = useState<'whatsapp' | 'instagram'>('whatsapp');
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
@@ -76,7 +77,9 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
       });
       if (data.success && Array.isArray(data.data)) {
         const waId: string = data.waId ?? '';
+        const channel: 'whatsapp' | 'instagram' = data.channel === 'instagram' ? 'instagram' : 'whatsapp';
         setResolvedWaId(waId || null);
+        setResolvedChannel(channel);
 
         const mapped = (data.data as Record<string, unknown>[])
           .filter(
@@ -149,7 +152,15 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
   // Use resolvedWaId (exact DB value) so sending goes to the right number
   const waId = resolvedWaId ?? '';
   const conversation: Conversation | null = waId
-    ? { id: waId, contact_id: waId, status: 'open', unread_count: 0, is_ai_enabled: false }
+    ? {
+        id: waId,
+        contact_id: waId,
+        status: 'open',
+        unread_count: 0,
+        is_ai_enabled: false,
+        channel: resolvedChannel,
+        ig_sender_id: resolvedChannel === 'instagram' ? waId : undefined,
+      }
     : null;
 
   const contact: Contact | null = waId
