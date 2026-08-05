@@ -87,7 +87,7 @@ export default function AutomationsPage() {
   const [intervalHours, setIntervalHours] = useState<number>(0);
   const [intervalMinutes, setIntervalMinutes] = useState<number>(0);
   const [intervalSeconds, setIntervalSeconds] = useState<number>(0);
-  const [triggerAfterAiComplete, setTriggerAfterAiComplete] = useState<boolean>(false);
+  const [sendAfterAiChat, setSendAfterAiChat] = useState<boolean>(false);
 
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -136,7 +136,7 @@ export default function AutomationsPage() {
     setExcludeInput('');
     setExcludeChatIds([]);
     setMaxExecutionCount(1);
-    setTriggerAfterAiComplete(false);
+    setSendAfterAiChat(false);
     setModalOpen(true);
   };
 
@@ -158,7 +158,7 @@ export default function AutomationsPage() {
     setExcludeInput('');
     setExcludeChatIds(Array.isArray(rule.excludeChatIds) ? rule.excludeChatIds : []);
     setMaxExecutionCount(rule.maxExecutionCount ?? 1);
-    setTriggerAfterAiComplete(Boolean(rule.triggerAfterAiComplete));
+    setSendAfterAiChat(rule.sendAfterAiChat ?? false);
     setModalOpen(true);
   };
 
@@ -180,7 +180,7 @@ export default function AutomationsPage() {
     setExcludeInput('');
     setExcludeChatIds([]);
     setMaxExecutionCount(1);
-    setTriggerAfterAiComplete(false);
+    setSendAfterAiChat(false);
     setModalOpen(true);
   };
 
@@ -221,7 +221,7 @@ export default function AutomationsPage() {
       intervalHours: Number(intervalHours) || 0,
       intervalMinutes: Number(intervalMinutes) || 0,
       intervalSeconds: Number(intervalSeconds) || 0,
-      triggerAfterAiComplete,
+      sendAfterAiChat,
     };
 
     try {
@@ -429,12 +429,11 @@ export default function AutomationsPage() {
                           </span>
                         ) : null}
 
-                        {isScheduled && rule.triggerAfterAiComplete ? (
+                        {isScheduled && rule.sendAfterAiChat && (
                           <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
-                            <Sparkles className="h-3 w-3 text-indigo-500" />
-                            After AI Chat
+                            🤖 After AI Chat Done
                           </span>
-                        ) : null}
+                        )}
 
                         {/* Channel Badge */}
                         <span className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
@@ -764,27 +763,28 @@ export default function AutomationsPage() {
                     </div>
                   )}
 
-                  {/* Trigger After AI Complete Toggle */}
+                  {/* Send After AI Chat Completes */}
                   <div className="flex items-center justify-between border-t border-pink-200/60 pt-2.5 mt-1">
                     <div className="flex flex-col">
                       <label className="text-xs font-bold text-pink-900 flex items-center gap-1.5">
-                        <Sparkles className="h-3.5 w-3.5 text-purple-600" />
-                        Send Only After AI Conversation Completes
+                        <span className="text-base">🤖</span>
+                        Only Send After AI Chat Completes
                       </label>
-                      <span className="text-[10px] text-pink-700">
-                        If AI Auto-Reply is active on a chat, wait until the AI conversation finishes before sending.
+                      <span className="text-[10px] text-pink-700 mt-0.5 max-w-xs">
+                        If AI auto-reply is on, wait until the AI finishes responding before sending this message.
                       </span>
                     </div>
                     <button
                       type="button"
-                      onClick={() => setTriggerAfterAiComplete(!triggerAfterAiComplete)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        triggerAfterAiComplete ? "bg-purple-600" : "bg-slate-300"
+                      onClick={() => setSendAfterAiChat(v => !v)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                        sendAfterAiChat ? 'bg-pink-600' : 'bg-slate-200'
                       }`}
+                      aria-pressed={sendAfterAiChat}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          triggerAfterAiComplete ? "translate-x-6" : "translate-x-1"
+                        className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${
+                          sendAfterAiChat ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
                     </button>
