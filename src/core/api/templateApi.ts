@@ -22,6 +22,7 @@ export interface TemplateMessage {
   intervalHours?: number;
   intervalMinutes?: number;
   intervalSeconds?: number;
+  triggerAfterAiComplete?: boolean;
 }
 
 export interface CreateTemplatePayload {
@@ -42,6 +43,7 @@ export interface CreateTemplatePayload {
   intervalHours?: number;
   intervalMinutes?: number;
   intervalSeconds?: number;
+  triggerAfterAiComplete?: boolean;
 }
 
 export async function getTemplateMessages(): Promise<TemplateMessage[]> {

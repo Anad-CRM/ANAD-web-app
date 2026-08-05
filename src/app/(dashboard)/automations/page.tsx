@@ -87,6 +87,7 @@ export default function AutomationsPage() {
   const [intervalHours, setIntervalHours] = useState<number>(0);
   const [intervalMinutes, setIntervalMinutes] = useState<number>(0);
   const [intervalSeconds, setIntervalSeconds] = useState<number>(0);
+  const [triggerAfterAiComplete, setTriggerAfterAiComplete] = useState<boolean>(false);
 
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -135,6 +136,7 @@ export default function AutomationsPage() {
     setExcludeInput('');
     setExcludeChatIds([]);
     setMaxExecutionCount(1);
+    setTriggerAfterAiComplete(false);
     setModalOpen(true);
   };
 
@@ -156,6 +158,7 @@ export default function AutomationsPage() {
     setExcludeInput('');
     setExcludeChatIds(Array.isArray(rule.excludeChatIds) ? rule.excludeChatIds : []);
     setMaxExecutionCount(rule.maxExecutionCount ?? 1);
+    setTriggerAfterAiComplete(Boolean(rule.triggerAfterAiComplete));
     setModalOpen(true);
   };
 
@@ -177,6 +180,7 @@ export default function AutomationsPage() {
     setExcludeInput('');
     setExcludeChatIds([]);
     setMaxExecutionCount(1);
+    setTriggerAfterAiComplete(false);
     setModalOpen(true);
   };
 
@@ -217,6 +221,7 @@ export default function AutomationsPage() {
       intervalHours: Number(intervalHours) || 0,
       intervalMinutes: Number(intervalMinutes) || 0,
       intervalSeconds: Number(intervalSeconds) || 0,
+      triggerAfterAiComplete,
     };
 
     try {
@@ -421,6 +426,13 @@ export default function AutomationsPage() {
                         {isScheduled && (rule.intervalHours || rule.intervalMinutes || rule.intervalSeconds) ? (
                           <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
                             Repeat Every: {formatDelay(rule.intervalHours, rule.intervalMinutes, rule.intervalSeconds)}
+                          </span>
+                        ) : null}
+
+                        {isScheduled && rule.triggerAfterAiComplete ? (
+                          <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
+                            <Sparkles className="h-3 w-3 text-indigo-500" />
+                            After AI Chat
                           </span>
                         ) : null}
 
@@ -751,6 +763,32 @@ export default function AutomationsPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* Trigger After AI Complete Toggle */}
+                  <div className="flex items-center justify-between border-t border-pink-200/60 pt-2.5 mt-1">
+                    <div className="flex flex-col">
+                      <label className="text-xs font-bold text-pink-900 flex items-center gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 text-purple-600" />
+                        Send Only After AI Conversation Completes
+                      </label>
+                      <span className="text-[10px] text-pink-700">
+                        If AI Auto-Reply is active on a chat, wait until the AI conversation finishes before sending.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTriggerAfterAiComplete(!triggerAfterAiComplete)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        triggerAfterAiComplete ? "bg-purple-600" : "bg-slate-300"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          triggerAfterAiComplete ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
 
                   <p className="text-[11px] text-pink-700 leading-tight">
                     <strong>Exact Scheduled Execution:</strong> Message triggers at this exact delay after a customer message, and automatically cancels if an agent or bot replies in the interim! (Meta 24-hr policy applies to Instagram).
