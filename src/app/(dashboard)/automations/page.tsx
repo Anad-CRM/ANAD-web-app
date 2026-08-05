@@ -84,6 +84,9 @@ export default function AutomationsPage() {
   const [excludeInput, setExcludeInput] = useState("");
   const [excludeChatIds, setExcludeChatIds] = useState<string[]>([]);
   const [maxExecutionCount, setMaxExecutionCount] = useState<number>(1);
+  const [intervalHours, setIntervalHours] = useState<number>(0);
+  const [intervalMinutes, setIntervalMinutes] = useState<number>(0);
+  const [intervalSeconds, setIntervalSeconds] = useState<number>(0);
 
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -123,6 +126,9 @@ export default function AutomationsPage() {
     setDelayHours(22);
     setDelayMinutes(0);
     setDelaySeconds(0);
+    setIntervalHours(0);
+    setIntervalMinutes(0);
+    setIntervalSeconds(0);
     setMediaUrl('');
     setMediaType('text');
     setTargetAudience('everyone');
@@ -141,6 +147,9 @@ export default function AutomationsPage() {
     setDelayHours(rule.delayHours ?? 22);
     setDelayMinutes(rule.delayMinutes ?? 0);
     setDelaySeconds(rule.delaySeconds ?? 0);
+    setIntervalHours(rule.intervalHours ?? 0);
+    setIntervalMinutes(rule.intervalMinutes ?? 0);
+    setIntervalSeconds(rule.intervalSeconds ?? 0);
     setMediaUrl(rule.mediaUrl || '');
     setMediaType((rule.mediaType as 'text' | 'image' | 'video' | 'audio' | 'document') || (rule.mediaUrl ? 'image' : 'text'));
     setTargetAudience(rule.targetAudience || 'everyone');
@@ -159,6 +168,9 @@ export default function AutomationsPage() {
     setDelayHours(preset.delayHours ?? 22);
     setDelayMinutes(0);
     setDelaySeconds(0);
+    setIntervalHours(0);
+    setIntervalMinutes(0);
+    setIntervalSeconds(0);
     setMediaUrl(preset.mediaUrl || '');
     setMediaType(preset.mediaUrl ? 'image' : 'text');
     setTargetAudience('everyone');
@@ -202,6 +214,9 @@ export default function AutomationsPage() {
       targetAudience,
       excludeChatIds,
       maxExecutionCount: Number(maxExecutionCount) >= 0 ? Number(maxExecutionCount) : 1,
+      intervalHours: Number(intervalHours) || 0,
+      intervalMinutes: Number(intervalMinutes) || 0,
+      intervalSeconds: Number(intervalSeconds) || 0,
     };
 
     try {
@@ -402,6 +417,12 @@ export default function AutomationsPage() {
                             Limit: {rule.maxExecutionCount === 0 ? "Unlimited" : `${rule.maxExecutionCount ?? 1}x per chat`}
                           </span>
                         )}
+
+                        {isScheduled && (rule.intervalHours || rule.intervalMinutes || rule.intervalSeconds) ? (
+                          <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                            Repeat Every: {formatDelay(rule.intervalHours, rule.intervalMinutes, rule.intervalSeconds)}
+                          </span>
+                        ) : null}
 
                         {/* Channel Badge */}
                         <span className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
@@ -677,6 +698,59 @@ export default function AutomationsPage() {
                       className="w-20 rounded-xl border border-pink-200 px-3 py-1.5 text-sm bg-white text-center font-bold text-pink-900 focus:outline-none focus:border-pink-500"
                     />
                   </div>
+
+                  {/* Repeat Interval (if maxExecutionCount > 1 or 0) */}
+                  {(maxExecutionCount > 1 || maxExecutionCount === 0) && (
+                    <div className="flex flex-col gap-2 border-t border-pink-200/60 pt-2.5 mt-1">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-pink-900 flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-pink-600" />
+                          Repeat Interval Between Executions
+                        </label>
+                        <span className="text-xs font-bold text-pink-700 bg-pink-200/60 px-2.5 py-0.5 rounded-full font-mono">
+                          {formatDelay(intervalHours, intervalMinutes, intervalSeconds)}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-bold text-pink-800">Hours</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="23"
+                            value={intervalHours}
+                            onChange={(e) => setIntervalHours(Math.max(0, Number(e.target.value)))}
+                            className="rounded-xl border border-pink-200 px-3 py-2 text-sm bg-white focus:outline-none focus:border-pink-500 font-medium"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-bold text-pink-800">Minutes</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="59"
+                            value={intervalMinutes}
+                            onChange={(e) => setIntervalMinutes(Math.max(0, Math.min(59, Number(e.target.value))))}
+                            className="rounded-xl border border-pink-200 px-3 py-2 text-sm bg-white focus:outline-none focus:border-pink-500 font-medium"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-bold text-pink-800">Seconds</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="59"
+                            value={intervalSeconds}
+                            onChange={(e) => setIntervalSeconds(Math.max(0, Math.min(59, Number(e.target.value))))}
+                            className="rounded-xl border border-pink-200 px-3 py-2 text-sm bg-white focus:outline-none focus:border-pink-500 font-medium"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <p className="text-[11px] text-pink-700 leading-tight">
                     <strong>Exact Scheduled Execution:</strong> Message triggers at this exact delay after a customer message, and automatically cancels if an agent or bot replies in the interim! (Meta 24-hr policy applies to Instagram).

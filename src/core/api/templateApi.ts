@@ -19,6 +19,9 @@ export interface TemplateMessage {
   includeChatIds?: string[];
   lastTriggeredAt?: string | null;
   maxExecutionCount?: number;
+  intervalHours?: number;
+  intervalMinutes?: number;
+  intervalSeconds?: number;
 }
 
 export interface CreateTemplatePayload {
@@ -36,6 +39,9 @@ export interface CreateTemplatePayload {
   excludeChatIds?: string[];
   includeChatIds?: string[];
   maxExecutionCount?: number;
+  intervalHours?: number;
+  intervalMinutes?: number;
+  intervalSeconds?: number;
 }
 
 export async function getTemplateMessages(): Promise<TemplateMessage[]> {
