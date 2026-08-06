@@ -30,6 +30,9 @@ function InboxPageContent() {
   const [loadingMore, setLoadingMore] = useState(false);
 
   const autoSelectedForDeepLinkRef = useRef<string | null>(null);
+  // Track which conversations the user has opened (marked as read locally)
+  // so polling never re-shows the unread badge while the chat is open
+  const readConvIdsRef = useRef<Set<string>>(new Set());
 
   /** Returns true when convId belongs to an Instagram conversation */
   const isIgConv = (convId: string) => convId.startsWith('ig_');
@@ -123,7 +126,10 @@ function InboxPageContent() {
         };
 
         mapped.sort((a, b) => toMs(b.last_message_at) - toMs(a.last_message_at));
-        setConversations(mapped);
+        // Force unread_count=0 for any conversation the user has already opened,
+        // even if the server hasn't processed the mark-read yet (race with 5s poll)
+        const readIds = readConvIdsRef.current;
+        setConversations(mapped.map(c => readIds.has(c.id) ? { ...c, unread_count: 0 } : c));
       }
     } catch (err) {
       console.error("Failed to fetch conversations", err);
@@ -312,6 +318,9 @@ function InboxPageContent() {
     activeConversationIdRef.current = conv.id;
     setActiveConversationId(conv.id);
 
+    // Mark this conversation as read locally so polling never reverts the badge
+    readConvIdsRef.current.add(conv.id);
+
     // Immediately clear unread_count for the selected conversation in state
     setConversations(prev =>
       prev.map(c => (c.id === conv.id ? { ...c, unread_count: 0 } : c))
@@ -335,6 +344,11 @@ function InboxPageContent() {
   useEffect(() => {
     if (c && conversations.length > 0) {
       const decoded = decodeURIComponent(c);
+
+      // If the user has already manually selected this conversation (or any other),
+      // don't let the polling-triggered conversations refresh override their selection.
+      if (activeConversationId !== null) return;
+
       // Exact match (handles ig_ prefixed Instagram conv IDs)
       const exactMatch = conversations.find(x => x.id === decoded);
       if (exactMatch) {
@@ -358,9 +372,11 @@ function InboxPageContent() {
         setTimeout(() => { handleSelectConversation(conv); }, 0);
       }
     }
-  }, [c, conversations, handleSelectConversation]);
+  }, [c, conversations, handleSelectConversation, activeConversationId]);
 
   const handleCloseConversation = useCallback(() => {
+    const closingId = activeConversationIdRef.current;
+    if (closingId) readConvIdsRef.current.delete(closingId);
     activeConversationIdRef.current = null;
     setActiveConversationId(null);
     setMessages([]);
