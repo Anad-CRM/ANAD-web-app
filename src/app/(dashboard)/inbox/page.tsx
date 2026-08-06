@@ -335,6 +335,11 @@ function InboxPageContent() {
   useEffect(() => {
     if (c && conversations.length > 0) {
       const decoded = decodeURIComponent(c);
+
+      // If the user has already manually selected this conversation (or any other),
+      // don't let the polling-triggered conversations refresh override their selection.
+      if (activeConversationId !== null) return;
+
       // Exact match (handles ig_ prefixed Instagram conv IDs)
       const exactMatch = conversations.find(x => x.id === decoded);
       if (exactMatch) {
@@ -358,7 +363,7 @@ function InboxPageContent() {
         setTimeout(() => { handleSelectConversation(conv); }, 0);
       }
     }
-  }, [c, conversations, handleSelectConversation]);
+  }, [c, conversations, handleSelectConversation, activeConversationId]);
 
   const handleCloseConversation = useCallback(() => {
     activeConversationIdRef.current = null;
