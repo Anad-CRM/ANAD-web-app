@@ -52,10 +52,11 @@ export const LeadDetailsDashboard: React.FC = () => {
       if (leadData) {
         setLead(leadData);
 
-        const loggedInUser = getUser<{ id: string }>();
-        const loggedInUserId = loggedInUser?.id || '';
+        const loggedInUser = getUser<{ id?: string; _id?: string }>();
+        const loggedInUserId = loggedInUser?.id || loggedInUser?._id || '';
 
-        const userIdForFollowups = (leadData as unknown as { userId?: string })?.userId ?? '';
+        const leadObj = leadData as unknown as { userId?: string; assignedTo?: string; user_id?: string };
+        const userIdForFollowups = leadObj?.userId || leadObj?.assignedTo || leadObj?.user_id || loggedInUserId;
 
         // Step 3: Fetch activities, followups, and WhatsApp messages in parallel
 
