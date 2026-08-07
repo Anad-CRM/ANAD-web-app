@@ -26,7 +26,7 @@ export type TemplateSource =
       language: string;
       category: string;
       /** Full component list (HEADER, BODY, FOOTER, BUTTONS) */
-      components: { type: string; text?: string }[];
+      components: { type: string; format?: string; text?: string; buttons?: { type: string; text: string }[] }[];
     }
   | {
       source: "custom";

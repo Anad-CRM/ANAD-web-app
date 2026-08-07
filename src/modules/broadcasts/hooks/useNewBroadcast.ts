@@ -36,6 +36,14 @@ export interface UseNewBroadcastReturn {
   setCampaignName: React.Dispatch<React.SetStateAction<string>>;
   audienceType: string;
   setAudienceType: React.Dispatch<React.SetStateAction<string>>;
+  selectedLeadIds: string[];
+  setSelectedLeadIds: React.Dispatch<React.SetStateAction<string[]>>;
+
+  // Variables & Media Header
+  headerMediaUrl: string;
+  setHeaderMediaUrl: React.Dispatch<React.SetStateAction<string>>;
+  headerVariables: Record<string, string>;
+  handleHeaderVariableChange: (key: string, val: string) => void;
   bodyVariables: Record<string, string>;
   handleVariableChange: (key: string, val: string) => void;
   sendImmediately: boolean;
@@ -43,7 +51,11 @@ export interface UseNewBroadcastReturn {
 
   // Derived
   bodyText: string;
+  headerText: string;
+  headerFormat: string | null;
+  headerPlaceholders: string[];
   placeholders: string[];
+  previewHeader: string;
   previewText: string;
 
   // Actions
@@ -52,8 +64,8 @@ export interface UseNewBroadcastReturn {
 }
 
 /**
- * Encapsulates all state and business logic for the New Broadcast Modal.
- * Loads both Meta-approved templates and local custom templates.
+ * Encapsulates all state and business logic for the New Broadcast Modal/Page.
+ * Loads Meta-approved templates & local custom templates.
  */
 export function useNewBroadcast(
   open: boolean,
@@ -68,11 +80,14 @@ export function useNewBroadcast(
   const [campaignName, setCampaignName] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSource | null>(null);
   const [audienceType, setAudienceType] = useState("all");
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [headerMediaUrl, setHeaderMediaUrl] = useState("");
+  const [headerVariables, setHeaderVariables] = useState<Record<string, string>>({});
   const [bodyVariables, setBodyVariables] = useState<Record<string, string>>({});
   const [sendImmediately, setSendImmediately] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Reset + fetch templates when modal opens
+  // Reset + fetch templates when opened
   useEffect(() => {
     if (!open) return;
 
@@ -80,13 +95,15 @@ export function useNewBroadcast(
     setCampaignName("");
     setSelectedTemplate(null);
     setAudienceType("all");
+    setSelectedLeadIds([]);
+    setHeaderMediaUrl("");
+    setHeaderVariables({});
     setBodyVariables({});
     setSendImmediately(true);
 
     const fetchTemplates = async () => {
       setLoadingTemplates(true);
       try {
-        // Load both sources concurrently; gracefully handle Meta failures
         const [metaResult, customResult] = await Promise.allSettled([
           getTemplates(),
           getTemplateMessages(),
@@ -113,7 +130,7 @@ export function useNewBroadcast(
     fetchTemplates();
   }, [open]);
 
-  /** Add a new custom template and refresh the list */
+  /** Add a new custom template */
   const addCustomTemplate = useCallback(async (title: string, message: string) => {
     setAddingCustomTemplate(true);
     try {
@@ -127,7 +144,7 @@ export function useNewBroadcast(
     }
   }, []);
 
-  /** Delete a custom template and remove from list; deselect if selected */
+  /** Delete a custom template */
   const deleteCustomTemplate = useCallback(async (id: string) => {
     try {
       await deleteTemplateMessage(id);
@@ -142,19 +159,36 @@ export function useNewBroadcast(
     }
   }, []);
 
-  // Derived: body text from selected template
+  // Header component info
+  const headerComponent = useMemo(() => {
+    if (selectedTemplate?.source === "meta") {
+      return selectedTemplate.components.find((c) => c.type === "HEADER") ?? null;
+    }
+    return null;
+  }, [selectedTemplate]);
+
+  const headerText = headerComponent?.text ?? "";
+  const headerFormat = headerComponent?.format ?? null;
+
+  const headerPlaceholders = useMemo(() => {
+    if (!headerText) return [];
+    const matches = headerText.match(/\{\{(\d+)\}\}/g);
+    if (!matches) return [];
+    return Array.from(new Set(matches)).sort(
+      (a, b) => parseInt(a.replace(/\D/g, "")) - parseInt(b.replace(/\D/g, ""))
+    );
+  }, [headerText]);
+
+  // Body text from selected template
   const bodyText = useMemo(() => {
     if (!selectedTemplate) return "";
     if (selectedTemplate.source === "meta") {
-      return (
-        selectedTemplate.components.find((c) => c.type === "BODY")?.text ?? ""
-      );
+      return selectedTemplate.components.find((c) => c.type === "BODY")?.text ?? "";
     }
-    // custom
     return selectedTemplate.body;
   }, [selectedTemplate]);
 
-  // Derived: sorted unique placeholders like {{1}}, {{2}}
+  // Body placeholders
   const placeholders = useMemo(() => {
     const matches = bodyText.match(/\{\{(\d+)\}\}/g);
     if (!matches) return [];
@@ -163,7 +197,17 @@ export function useNewBroadcast(
     });
   }, [bodyText]);
 
-  // Derived: message body with variables substituted for preview
+  // Preview header text
+  const previewHeader = useMemo(() => {
+    let text = headerText;
+    headerPlaceholders.forEach((ph) => {
+      const num = ph.replace(/\D/g, "");
+      text = text.replaceAll(ph, headerVariables[num] || ph);
+    });
+    return text;
+  }, [headerText, headerPlaceholders, headerVariables]);
+
+  // Preview body text
   const previewText = useMemo(() => {
     let text = bodyText;
     placeholders.forEach((ph) => {
@@ -172,6 +216,10 @@ export function useNewBroadcast(
     });
     return text;
   }, [bodyText, placeholders, bodyVariables]);
+
+  const handleHeaderVariableChange = (key: string, val: string) => {
+    setHeaderVariables((prev) => ({ ...prev, [key]: val }));
+  };
 
   const handleVariableChange = (key: string, val: string) => {
     setBodyVariables((prev) => ({ ...prev, [key]: val }));
@@ -192,6 +240,12 @@ export function useNewBroadcast(
         return;
       }
     }
+    if (step === 2) {
+      if (audienceType === "selected" && selectedLeadIds.length === 0) {
+        toast.error("Please select at least one recipient lead");
+        return;
+      }
+    }
     setStep((s) => s + 1);
   };
 
@@ -206,17 +260,6 @@ export function useNewBroadcast(
       toast.error("Please select a template");
       return;
     }
-
-    const missingVariables = placeholders.some((ph) => {
-      const num = ph.replace(/\D/g, "");
-      return !bodyVariables[num]?.trim();
-    });
-
-    if (missingVariables) {
-      toast.error("Please fill out all template variables");
-      return;
-    }
-
     if (selectedTemplate.source === "custom") {
       toast.error(
         "Custom templates cannot be used for broadcast — please select a Meta-approved WhatsApp template."
@@ -224,34 +267,86 @@ export function useNewBroadcast(
       return;
     }
 
+    // Check header variables
+    const missingHeaderVars = headerPlaceholders.some((ph) => {
+      const num = ph.replace(/\D/g, "");
+      return !headerVariables[num]?.trim();
+    });
+    if (missingHeaderVars) {
+      toast.error("Please fill out all header template variables");
+      return;
+    }
+
+    // Check media header URL if required
+    const isMediaHeader = ["IMAGE", "VIDEO", "DOCUMENT"].includes(headerFormat || "");
+    if (isMediaHeader && !headerMediaUrl.trim()) {
+      toast.error(`Please provide a ${headerFormat} URL for the template header`);
+      return;
+    }
+
+    // Check body variables
+    const missingBodyVars = placeholders.some((ph) => {
+      const num = ph.replace(/\D/g, "");
+      return !bodyVariables[num]?.trim();
+    });
+    if (missingBodyVars) {
+      toast.error("Please fill out all body template variables");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const templateParams =
-        placeholders.length > 0
-          ? [
-              {
-                type: "body",
-                parameters: placeholders.map((ph) => ({
-                  type: "text",
-                  text: bodyVariables[ph.replace(/\D/g, "")] || "",
-                })),
-              },
-            ]
-          : [];
+      const templateParams: any[] = [];
 
-      const res = await createBroadcast({
+      // Add header component parameter if needed
+      if (headerFormat === "TEXT" && headerPlaceholders.length > 0) {
+        templateParams.push({
+          type: "header",
+          parameters: headerPlaceholders.map((ph) => ({
+            type: "text",
+            text: headerVariables[ph.replace(/\D/g, "")] || "",
+          })),
+        });
+      } else if (isMediaHeader && headerMediaUrl.trim()) {
+        const mediaType = (headerFormat || "IMAGE").toLowerCase();
+        templateParams.push({
+          type: "header",
+          parameters: [
+            {
+              type: mediaType,
+              [mediaType]: { link: headerMediaUrl.trim() },
+            },
+          ],
+        });
+      }
+
+      // Add body component parameters if needed
+      if (placeholders.length > 0) {
+        templateParams.push({
+          type: "body",
+          parameters: placeholders.map((ph) => ({
+            type: "text",
+            text: bodyVariables[ph.replace(/\D/g, "")] || "",
+          })),
+        });
+      }
+
+      const createPayload = {
         campaignName: campaignName.trim(),
         templateName: selectedTemplate.name,
         templateLanguage: selectedTemplate.language,
         templateParams,
-        filterByStatus: audienceType,
-      });
+        ...(selectedLeadIds.length > 0
+          ? { leadIds: selectedLeadIds }
+          : { filterByStatus: audienceType }),
+      };
 
+      const res = await createBroadcast(createPayload);
       toast.success("Broadcast campaign created successfully!");
 
       if (sendImmediately && res?.broadcastId) {
         await sendBroadcast(res.broadcastId);
-        toast.success("Broadcast sending started!");
+        toast.success("Broadcast campaign execution started!");
       }
 
       onCreated();
@@ -279,12 +374,22 @@ export function useNewBroadcast(
     setCampaignName,
     audienceType,
     setAudienceType,
+    selectedLeadIds,
+    setSelectedLeadIds,
+    headerMediaUrl,
+    setHeaderMediaUrl,
+    headerVariables,
+    handleHeaderVariableChange,
     bodyVariables,
     handleVariableChange,
     sendImmediately,
     setSendImmediately,
     bodyText,
+    headerText,
+    headerFormat,
+    headerPlaceholders,
     placeholders,
+    previewHeader,
     previewText,
     submitting,
     handleSubmit,

@@ -39,11 +39,20 @@ export default function NewBroadcastPage() {
     setCampaignName,
     audienceType,
     setAudienceType,
+    selectedLeadIds,
+    setSelectedLeadIds,
+    headerMediaUrl,
+    setHeaderMediaUrl,
+    headerVariables,
+    handleHeaderVariableChange,
     bodyVariables,
     handleVariableChange,
     sendImmediately,
     setSendImmediately,
+    headerFormat,
+    headerPlaceholders,
     placeholders,
+    previewHeader,
     previewText,
     submitting,
     handleSubmit: _hookSubmit,
@@ -54,7 +63,7 @@ export default function NewBroadcastPage() {
     }
   );
 
-  // Wrap handleSubmit to redirect after success
+  // Wrap handleSubmit
   const handleSubmit = async () => {
     if (!campaignName.trim()) {
       toast.error("Please enter a campaign name");
@@ -68,11 +77,9 @@ export default function NewBroadcastPage() {
       toast.error("Custom templates cannot be used for broadcast — please select a Meta-approved template.");
       return;
     }
-    // _hookSubmit handles everything including the onCreated callback (router.push)
     await _hookSubmit();
   };
 
-  // Convert TemplateSource → MetaTemplate-compatible shape for StepPersonalize
   const templateForPreview: MetaTemplate | null =
     selectedTemplate?.source === "meta"
       ? {
@@ -95,7 +102,7 @@ export default function NewBroadcastPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/broadcasts")}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border transition-colors hover:bg-gray-50"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border transition-colors hover:bg-gray-50 bg-white shadow-sm"
           style={{ borderColor: "#D1D5DB" }}
         >
           <ArrowLeft className="h-5 w-5" style={{ color: COLORS.text }} />
@@ -170,15 +177,24 @@ export default function NewBroadcastPage() {
           <StepAudience
             audienceType={audienceType}
             onAudienceTypeChange={setAudienceType}
+            selectedLeadIds={selectedLeadIds}
+            onSelectedLeadIdsChange={setSelectedLeadIds}
           />
         )}
 
         {step === 3 && (
           <StepPersonalize
             selectedTemplate={templateForPreview}
+            headerFormat={headerFormat}
+            headerPlaceholders={headerPlaceholders}
+            headerVariables={headerVariables}
+            onHeaderVariableChange={handleHeaderVariableChange}
+            headerMediaUrl={headerMediaUrl}
+            onHeaderMediaUrlChange={setHeaderMediaUrl}
             placeholders={placeholders}
             bodyVariables={bodyVariables}
             onVariableChange={handleVariableChange}
+            previewHeader={previewHeader}
             previewText={previewText}
             sendImmediately={sendImmediately}
             onSendImmediatelyChange={setSendImmediately}
@@ -203,7 +219,6 @@ export default function NewBroadcastPage() {
           )}
 
           <div className="flex items-center gap-3">
-            {/* Warning when custom template at step 3 */}
             {step === 3 && selectedTemplate?.source === "custom" && (
               <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />

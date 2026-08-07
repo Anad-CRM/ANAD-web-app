@@ -11,13 +11,6 @@ import type { NewBroadcastModalProps, MetaTemplate } from "@/modules/broadcasts/
 
 /**
  * Multi-step modal for creating a WhatsApp broadcast campaign.
- *
- * Orchestrates three steps:
- *  1. Template selection + campaign name  →  <StepTemplate />
- *  2. Target audience filter              →  <StepAudience />
- *  3. Variable personalisation + preview  →  <StepPersonalize />
- *
- * All business logic lives in the `useNewBroadcast` hook.
  */
 export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModalProps) {
   const {
@@ -37,11 +30,20 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
     setCampaignName,
     audienceType,
     setAudienceType,
+    selectedLeadIds,
+    setSelectedLeadIds,
+    headerMediaUrl,
+    setHeaderMediaUrl,
+    headerVariables,
+    handleHeaderVariableChange,
     bodyVariables,
     handleVariableChange,
     sendImmediately,
     setSendImmediately,
+    headerFormat,
+    headerPlaceholders,
     placeholders,
+    previewHeader,
     previewText,
     submitting,
     handleSubmit,
@@ -51,7 +53,6 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
 
   const canSubmit = selectedTemplate?.source === "meta" && !submitting;
 
-  // Convert TemplateSource to MetaTemplate-compatible shape for StepPersonalize
   const templateForPreview: MetaTemplate | null =
     selectedTemplate?.source === "meta"
       ? {
@@ -70,14 +71,14 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
       style={{ backgroundColor: "rgba(13,27,62,0.45)", backdropFilter: "blur(4px)" }}
     >
       <div
-        className="flex h-[90vh] max-h-[640px] w-full max-w-2xl flex-col rounded-3xl bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="flex h-[90vh] max-h-[660px] w-full max-w-2xl flex-col rounded-3xl bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border"
         style={{ borderColor: COLORS.border }}
       >
         {/* ── Header ──────────────────────────────────────── */}
         <div className="border-b px-6 pt-4 pb-3" style={{ borderColor: "#E5E7EB" }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold" style={{ color: COLORS.text }}>
-              Create WhatsApp Broadcast
+              Create WhatsApp Broadcast Campaign
             </h2>
             <button
               type="button"
@@ -112,15 +113,24 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
             <StepAudience
               audienceType={audienceType}
               onAudienceTypeChange={setAudienceType}
+              selectedLeadIds={selectedLeadIds}
+              onSelectedLeadIdsChange={setSelectedLeadIds}
             />
           )}
 
           {step === 3 && (
             <StepPersonalize
               selectedTemplate={templateForPreview}
+              headerFormat={headerFormat}
+              headerPlaceholders={headerPlaceholders}
+              headerVariables={headerVariables}
+              onHeaderVariableChange={handleHeaderVariableChange}
+              headerMediaUrl={headerMediaUrl}
+              onHeaderMediaUrlChange={setHeaderMediaUrl}
               placeholders={placeholders}
               bodyVariables={bodyVariables}
               onVariableChange={handleVariableChange}
+              previewHeader={previewHeader}
               previewText={previewText}
               sendImmediately={sendImmediately}
               onSendImmediatelyChange={setSendImmediately}
@@ -134,7 +144,6 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
           className="flex items-center justify-between border-t px-6 py-4 bg-gray-50"
           style={{ borderColor: "#E5E7EB" }}
         >
-          {/* Back button */}
           {step > 1 ? (
             <button
               type="button"
@@ -151,7 +160,6 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
           )}
 
           <div className="flex items-center gap-3">
-            {/* Warning when custom template is selected at submit step */}
             {step === 3 && selectedTemplate?.source === "custom" && (
               <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -159,7 +167,6 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
               </div>
             )}
 
-            {/* Next / Submit button */}
             {step < 3 ? (
               <button
                 type="button"
