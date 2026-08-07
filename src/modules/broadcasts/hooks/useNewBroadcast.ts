@@ -227,13 +227,13 @@ export function useNewBroadcast(
 
   const handleNext = () => {
     if (step === 1) {
-      if (!campaignName.trim()) {
-        toast.error("Please enter a campaign name");
-        return;
-      }
       if (!selectedTemplate) {
         toast.error("Please select a message template");
         return;
+      }
+      if (!campaignName.trim()) {
+        const formatted = selectedTemplate.name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+        setCampaignName(`${formatted} Campaign`);
       }
       if (loadingTemplates) {
         toast.error("Please wait for templates to finish loading");
