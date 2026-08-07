@@ -126,8 +126,13 @@ export const leadsApi = {
 
   fetchFollowupsByLead: async (leadId: string, leadUserId?: string): Promise<Record<string, unknown>[]> => {
     try {
-      const userId = leadUserId ?? '';
+      const userData = getUser<{ id?: string; _id?: string }>();
+      const userId = leadUserId || userData?.id || userData?._id || '';
       console.log('[leadsApi] fetchFollowupsByLead →', { leadId, userId });
+      if (!userId) {
+        console.warn('[leadsApi] fetchFollowupsByLead missing userId, skipping API call');
+        return [];
+      }
       const response = await api.post(API_ENDPOINTS.FOLLOW_UP.GET_BY_LEAD, { leadId, userId });
       console.log('[leadsApi] getAllFollowUpByLeads response:', response.data);
       if (response.data?.success === true) {
