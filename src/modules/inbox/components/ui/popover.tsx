@@ -63,7 +63,7 @@ export const PopoverTrigger = ({
   className,
   ...props
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode | ((props: any) => React.ReactNode);
   asChild?: boolean;
   className?: string;
   [key: string]: any;
@@ -72,13 +72,16 @@ export const PopoverTrigger = ({
   if (!context) return null;
   const { open, setOpen } = context;
 
+  const content = typeof children === "function" ? (children as any)({ open }) : children;
+  const renderedContent = typeof content === "function" ? React.createElement(content as any, { open }) : content;
+
   return (
     <div
       className={cn("popover-trigger cursor-pointer select-none", className)}
       onClick={() => setOpen(!open)}
       {...props}
     >
-      {children}
+      {renderedContent}
     </div>
   );
 };

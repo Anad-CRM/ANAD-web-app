@@ -26,5 +26,11 @@ export const DialogDescription = ({ children, className }: { children: React.Rea
 export const DialogFooter = ({ children, className }: { children: React.ReactNode; className?: string }) =>
   <div className={cn("mt-4 flex items-center justify-end gap-2", className)}>{children}</div>;
 
-export const DialogTrigger = ({ children }: { children: React.ReactNode; asChild?: boolean }) =>
-  <div>{children}</div>;
+export const DialogTrigger = ({ children, asChild }: { children: React.ReactNode | ((props: any) => React.ReactNode); asChild?: boolean }) => {
+  const content = typeof children === "function" ? (children as any)({}) : children;
+  if (typeof content === "function") {
+    const Component = content as any;
+    return <div><Component /></div>;
+  }
+  return <div>{content}</div>;
+};

@@ -39,9 +39,10 @@ export const DropdownMenu = ({ children }: { children: React.ReactNode }) => {
 
 export const DropdownMenuTrigger = ({
   children,
+  asChild,
   className,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode | ((props: any) => React.ReactNode);
   asChild?: boolean;
   className?: string;
 }) => {
@@ -49,12 +50,15 @@ export const DropdownMenuTrigger = ({
   if (!context) return null;
   const { open, setOpen } = context;
 
+  const content = typeof children === "function" ? (children as any)({ open }) : children;
+  const renderedContent = typeof content === "function" ? React.createElement(content as any, { open }) : content;
+
   return (
     <div
       className={cn("dropdown-trigger cursor-pointer select-none", className)}
       onClick={() => setOpen(!open)}
     >
-      {children}
+      {renderedContent}
     </div>
   );
 };
