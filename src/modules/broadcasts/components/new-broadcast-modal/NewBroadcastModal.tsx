@@ -32,6 +32,8 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
     setAudienceType,
     selectedLeadIds,
     setSelectedLeadIds,
+    csvContacts,
+    setCsvContacts,
     headerMediaUrl,
     setHeaderMediaUrl,
     headerVariables,
@@ -115,6 +117,8 @@ export function NewBroadcastModal({ open, onClose, onCreated }: NewBroadcastModa
               onAudienceTypeChange={setAudienceType}
               selectedLeadIds={selectedLeadIds}
               onSelectedLeadIdsChange={setSelectedLeadIds}
+              csvContacts={csvContacts}
+              onCsvContactsChange={setCsvContacts}
             />
           )}
 

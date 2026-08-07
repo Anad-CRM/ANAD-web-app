@@ -41,6 +41,8 @@ export default function NewBroadcastPage() {
     setAudienceType,
     selectedLeadIds,
     setSelectedLeadIds,
+    csvContacts,
+    setCsvContacts,
     headerMediaUrl,
     setHeaderMediaUrl,
     headerVariables,
@@ -179,6 +181,8 @@ export default function NewBroadcastPage() {
             onAudienceTypeChange={setAudienceType}
             selectedLeadIds={selectedLeadIds}
             onSelectedLeadIdsChange={setSelectedLeadIds}
+            csvContacts={csvContacts}
+            onCsvContactsChange={setCsvContacts}
           />
         )}
 

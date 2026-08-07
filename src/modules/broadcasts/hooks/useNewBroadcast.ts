@@ -38,6 +38,8 @@ export interface UseNewBroadcastReturn {
   setAudienceType: React.Dispatch<React.SetStateAction<string>>;
   selectedLeadIds: string[];
   setSelectedLeadIds: React.Dispatch<React.SetStateAction<string[]>>;
+  csvContacts: { phone: string; name?: string }[];
+  setCsvContacts: React.Dispatch<React.SetStateAction<{ phone: string; name?: string }[]>>;
 
   // Variables & Media Header
   headerMediaUrl: string;
@@ -81,6 +83,7 @@ export function useNewBroadcast(
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSource | null>(null);
   const [audienceType, setAudienceType] = useState("all");
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [csvContacts, setCsvContacts] = useState<{ phone: string; name?: string }[]>([]);
   const [headerMediaUrl, setHeaderMediaUrl] = useState("");
   const [headerVariables, setHeaderVariables] = useState<Record<string, string>>({});
   const [bodyVariables, setBodyVariables] = useState<Record<string, string>>({});
@@ -96,6 +99,7 @@ export function useNewBroadcast(
     setSelectedTemplate(null);
     setAudienceType("all");
     setSelectedLeadIds([]);
+    setCsvContacts([]);
     setHeaderMediaUrl("");
     setHeaderVariables({});
     setBodyVariables({});
@@ -245,6 +249,10 @@ export function useNewBroadcast(
         toast.error("Please select at least one recipient lead");
         return;
       }
+      if (audienceType === "csv" && csvContacts.length === 0) {
+        toast.error("Please upload a CSV file or enter valid phone numbers");
+        return;
+      }
     }
     setStep((s) => s + 1);
   };
@@ -331,15 +339,20 @@ export function useNewBroadcast(
         });
       }
 
-      const createPayload = {
+      const createPayload: any = {
         campaignName: campaignName.trim(),
         templateName: selectedTemplate.name,
         templateLanguage: selectedTemplate.language,
         templateParams,
-        ...(selectedLeadIds.length > 0
-          ? { leadIds: selectedLeadIds }
-          : { filterByStatus: audienceType }),
       };
+
+      if (audienceType === "csv" && csvContacts.length > 0) {
+        createPayload.customPhoneNumbers = csvContacts;
+      } else if (audienceType === "selected" && selectedLeadIds.length > 0) {
+        createPayload.leadIds = selectedLeadIds;
+      } else {
+        createPayload.filterByStatus = audienceType;
+      }
 
       const res = await createBroadcast(createPayload);
       toast.success("Broadcast campaign created successfully!");
@@ -376,6 +389,8 @@ export function useNewBroadcast(
     setAudienceType,
     selectedLeadIds,
     setSelectedLeadIds,
+    csvContacts,
+    setCsvContacts,
     headerMediaUrl,
     setHeaderMediaUrl,
     headerVariables,
