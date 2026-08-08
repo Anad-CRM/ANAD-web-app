@@ -484,7 +484,7 @@ function InboxPageContent() {
     }
   }, [handleCloseConversation, fetchConversations]);
 
-  const handleDeleteLead = useCallback(async () => {
+  const handleDeleteLead = useCallback(async (deleteDuplicates: boolean = false) => {
     const currentId = activeConversationIdRef.current;
     if (!currentId) return;
 
@@ -493,7 +493,7 @@ function InboxPageContent() {
 
     try {
       if (leadId) {
-        await leadsApi.deleteLead(leadId, false);
+        await leadsApi.deleteLead(leadId, deleteDuplicates);
       }
       // Also delete the chat thread for this contact
       if (isIgConv(currentId)) {

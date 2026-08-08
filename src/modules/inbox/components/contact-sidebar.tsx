@@ -26,7 +26,7 @@ interface ContactSidebarProps {
   contact: Contact | null;
   onClearChat?: () => Promise<void>;
   onDeleteChat?: () => Promise<void>;
-  onDeleteLead?: () => Promise<void>;
+  onDeleteLead?: (deleteDuplicates: boolean) => Promise<void>;
 }
 
 export function ContactSidebar({ contact, onClearChat, onDeleteChat, onDeleteLead }: ContactSidebarProps) {
@@ -43,6 +43,7 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat, onDeleteLea
   const [isClearing, setIsClearing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeletingLead, setIsDeletingLead] = useState(false);
+  const [deleteDuplicates, setDeleteDuplicates] = useState(false);
 
   const handleConfirmClear = async () => {
     if (!onClearChat) return;
@@ -74,12 +75,13 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat, onDeleteLea
     if (!onDeleteLead) return;
     try {
       setIsDeletingLead(true);
-      await onDeleteLead();
+      await onDeleteLead(deleteDuplicates);
     } catch (err) {
       console.error("Error deleting lead:", err);
     } finally {
       setIsDeletingLead(false);
       setShowDeleteLeadConfirm(false);
+      setDeleteDuplicates(false);
     }
   };
 
@@ -379,7 +381,10 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat, onDeleteLea
 
               <button
                 type="button"
-                onClick={() => setShowDeleteLeadConfirm(true)}
+                onClick={() => {
+                  setDeleteDuplicates(false);
+                  setShowDeleteLeadConfirm(true);
+                }}
                 disabled={isClearing || isDeleting || isDeletingLead}
                 className="flex w-full items-center justify-between rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2 text-xs font-medium text-rose-700 shadow-sm transition-all hover:bg-rose-100 hover:border-rose-300 disabled:opacity-50"
               >
@@ -499,9 +504,26 @@ export function ContactSidebar({ contact, onClearChat, onDeleteChat, onDeleteLea
                 <p className="text-xs text-[#5A7190]">Permanently remove lead from CRM</p>
               </div>
             </div>
-            <p className="text-xs text-[#5A7190] mb-5 leading-relaxed">
+            <p className="text-xs text-[#5A7190] mb-4 leading-relaxed">
               Are you sure you want to delete this lead? The lead record will be permanently removed from your CRM database.
             </p>
+
+            <label className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50/70 hover:bg-gray-50 cursor-pointer transition-colors mb-5 select-none">
+              <input
+                type="checkbox"
+                checked={deleteDuplicates}
+                onChange={(e) => setDeleteDuplicates(e.target.checked)}
+                disabled={isDeletingLead}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500 accent-rose-600 cursor-pointer disabled:cursor-not-allowed"
+              />
+              <div className="text-xs">
+                <span className="font-semibold text-[#0D1B3E] block">Delete duplicate leads also</span>
+                <span className="text-[#5A7190] leading-normal block mt-0.5">
+                  Also remove all duplicate entries linked to this contact
+                </span>
+              </div>
+            </label>
+
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
