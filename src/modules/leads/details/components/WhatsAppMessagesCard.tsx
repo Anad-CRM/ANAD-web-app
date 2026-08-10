@@ -46,7 +46,7 @@ function mapToMessage(m: Record<string, unknown>, conversationWaId: string): Mes
     content_type: typeMap[rawType] ?? 'text',
     sender_type: direction === 'outbound' ? 'agent' : 'customer',
     direction,
-    status: (m.status as Message['status']) ?? 'delivered',
+    status: (m.status as Message['status']) ?? (direction === 'outbound' ? 'sent' : 'delivered'),
     message_type: typeMap[rawType] ?? 'text',
     created_at,
     media_url,
