@@ -44,6 +44,14 @@ export function StepTemplate({
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
 
+  const handleSelect = (tpl: TemplateSource) => {
+    onSelectTemplate(tpl);
+    if (!campaignName.trim()) {
+      const formatted = tpl.name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+      onCampaignNameChange(`${formatted} Campaign`);
+    }
+  };
+
   const handleAddSubmit = async () => {
     if (!newTitle.trim() || !newBody.trim()) return;
     await onAddCustomTemplate(newTitle.trim(), newBody.trim());
@@ -175,7 +183,7 @@ export function StepTemplate({
                       key={tpl.id}
                       type="button"
                       onClick={() =>
-                        onSelectTemplate({
+                        handleSelect({
                           source: "meta",
                           id: tpl.id,
                           name: tpl.name,
@@ -342,7 +350,7 @@ export function StepTemplate({
                         type="button"
                         className="flex-1 flex flex-col text-left gap-0.5 min-w-0"
                         onClick={() =>
-                          onSelectTemplate({
+                          handleSelect({
                             source: "custom",
                             id: tpl.id,
                             name: tpl.title,

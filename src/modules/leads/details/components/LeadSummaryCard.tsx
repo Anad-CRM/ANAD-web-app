@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, Edit2, Trash2, Globe, Flag, Megaphone, UserPlus } from 'lucide-react';
+import { Phone, Mail, Edit2, Trash2, Globe, Flag, Megaphone, UserPlus, Loader2 } from 'lucide-react';
 import { Whatsapp } from '@thesvg/react';
 import { useRouter } from 'next/navigation';
 import { Lead } from '@/modules/leads/types/lead.types';
@@ -17,6 +17,8 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   const { showLoader, hideLoader, showToast } = useFeedback();
   const [showWhatsApp, setShowWhatsApp] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [deleteDuplicates, setDeleteDuplicates] = React.useState(false);
 
   const [isAssignModalOpen, setIsAssignModalOpen] = React.useState(false);
   const [staffToAssign, setStaffToAssign] = React.useState("");
@@ -107,23 +109,28 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
     if (isDeleting) return;
-    const shouldDeleteLead = window.confirm("Do you want to delete this lead?");
-    if (!shouldDeleteLead) return;
+    setDeleteDuplicates(false);
+    setShowDeleteModal(true);
+  };
 
-    const deleteDuplicates = window.confirm("Do you want to delete duplicate leads also?");
-
+  const handleConfirmDelete = async () => {
+    if (isDeleting) return;
     setIsDeleting(true);
     showLoader();
     try {
       const result = await leadsApi.deleteLead(lead.id, deleteDuplicates);
       if (result.status === "success") {
         showToast(result.message || "Lead deleted successfully", "success");
+        setShowDeleteModal(false);
         router.back();
         return;
       }
       showToast(result.message || "Failed to delete lead", "error");
+    } catch (err) {
+      console.error("Error deleting lead:", err);
+      showToast("Failed to delete lead", "error");
     } finally {
       hideLoader();
       setIsDeleting(false);
@@ -154,13 +161,18 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
             { icon: <Mail className="w-4 h-4" />, label: "Email", color: COLORS.primaryDark, onClick: handleEmail },
             ...(canAssign && !isClosed ? [{ icon: <UserPlus className="w-4 h-4" />, label: "Assign", color: COLORS.primaryDark, onClick: () => setIsAssignModalOpen(true) }] : []),
             { icon: <Edit2 className="w-4 h-4" />, label: "Edit", color: COLORS.primaryDark, onClick: () => {} },
-            { icon: <Trash2 className="w-4 h-4" />, label: isDeleting ? "Deleting" : "Delete", color: COLORS.primaryDark, onClick: handleDelete }
+            { 
+              icon: isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />, 
+              label: isDeleting ? "Deleting..." : "Delete", 
+              color: isDeleting ? "#EF4444" : COLORS.primaryDark, 
+              onClick: handleDeleteClick 
+            }
           ].map((action, i) => (
             <div key={i} className="flex flex-col items-center gap-1 cursor-pointer group" onClick={action.onClick}>
               <button
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white transition-all shadow-sm active:scale-95 hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ backgroundColor: action.color }}
-                disabled={isDeleting && action.label === "Deleting"}
+                disabled={isDeleting && (action.label === "Deleting..." || action.label === "Delete")}
               >
                 {action.icon}
               </button>
@@ -272,6 +284,86 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
                 <Text weight="bold" style={{ fontSize: '13px' }}>
                   {isAssigning ? "Assigning..." : "Confirm"}
                 </Text>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4" 
+          style={{ backgroundColor: "rgba(13,27,62,0.55)", backdropFilter: "blur(3px)" }}
+          onClick={() => !isDeleting && setShowDeleteModal(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl w-full max-w-sm sm:max-w-md overflow-hidden shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-gray-100 flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                <Trash2 className="h-5 w-5 text-rose-600" />
+              </div>
+              <div>
+                <Text as="h3" weight="bold" className="text-gray-900 text-[16px]">
+                  Delete Lead
+                </Text>
+                <Text className="text-gray-500 text-[12px] mt-0.5">
+                  Permanently remove this lead from CRM
+                </Text>
+              </div>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <p className="text-[13px] text-[#5A7190] leading-relaxed">
+                Are you sure you want to delete <span className="font-semibold text-gray-900">{leadName}</span>? This action cannot be undone and will permanently remove all associated activities and follow-ups.
+              </p>
+
+              <label className="flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 bg-gray-50/70 hover:bg-gray-50 cursor-pointer transition-colors select-none">
+                <input
+                  type="checkbox"
+                  checked={deleteDuplicates}
+                  onChange={(e) => setDeleteDuplicates(e.target.checked)}
+                  disabled={isDeleting}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500 accent-rose-600 cursor-pointer disabled:cursor-not-allowed"
+                />
+                <div className="text-xs">
+                  <span className="font-semibold text-[#0D1B3E] block">
+                    Delete duplicate leads also
+                  </span>
+                  <span className="text-[#5A7190] leading-normal block mt-0.5">
+                    Also remove all duplicate records linked to this lead across your organization.
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            <div className="p-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
+              >
+                <Text weight="semibold" style={{ fontSize: '13px' }}>Cancel</Text>
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-[13px] transition-all disabled:opacity-50 flex items-center gap-2 shadow-sm"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Deleting Lead...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete Lead</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
