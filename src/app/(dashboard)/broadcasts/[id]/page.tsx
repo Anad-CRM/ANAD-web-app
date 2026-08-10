@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, Users, Send, AlertCircle, Clock, Download, Search, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2, Users, Send, AlertCircle, Clock, Download, Search, RefreshCw, Play } from "lucide-react";
+import { toast } from "sonner";
 import {
   Broadcast,
   BroadcastRecipient,
   getBroadcastHistory,
   getBroadcastRecipients,
+  sendBroadcast,
 } from "@/core/api/broadcastApi";
 import { COLORS } from "@/core/components/theme/colors";
 
@@ -23,6 +25,7 @@ export default function BroadcastDetailPage() {
   const [broadcast, setBroadcast] = useState<Broadcast | null>(null);
   const [recipients, setRecipients] = useState<BroadcastRecipient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Filtering and searching
@@ -51,6 +54,20 @@ export default function BroadcastDetailPage() {
       setLoading(false);
     }
   }, [broadcastId]);
+
+  const handleStartSending = async () => {
+    if (!broadcastId) return;
+    setSending(true);
+    try {
+      await sendBroadcast(broadcastId);
+      toast.success("Broadcast campaign sending started!");
+      await loadData();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to start broadcast");
+    } finally {
+      setSending(false);
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -174,6 +191,26 @@ export default function BroadcastDetailPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {["draft", "failed"].includes(broadcast.status) && (
+            <button
+              onClick={handleStartSending}
+              disabled={sending}
+              className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+              style={{ backgroundColor: COLORS.success }}
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Sending…
+                </>
+              ) : (
+                <>
+                  <Play className="h-3.5 w-3.5" />
+                  {broadcast.status === "failed" ? "Retry Sending" : "Start Sending"}
+                </>
+              )}
+            </button>
+          )}
           <button
             onClick={loadData}
             className="flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors hover:bg-gray-50"

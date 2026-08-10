@@ -64,6 +64,8 @@ export function StepPersonalize({
   }
 
   const isMediaHeader = ["IMAGE", "VIDEO", "DOCUMENT"].includes(headerFormat || "");
+  const headerComp = selectedTemplate.components?.find((c) => c.type === "HEADER");
+  const templateExampleHeader = headerComp?.example?.header_handle?.[0] || null;
   const footerComponent = selectedTemplate.components?.find((c) => c.type === "FOOTER");
   const buttonsComponent = selectedTemplate.components?.find((c) => c.type === "BUTTONS");
 
@@ -72,12 +74,23 @@ export function StepPersonalize({
       {/* Media Header URL input */}
       {isMediaHeader && (
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold flex items-center gap-1.5" style={{ color: COLORS.text }}>
-            {headerFormat === "IMAGE" && <Image className="h-4 w-4 text-blue-500" />}
-            {headerFormat === "VIDEO" && <Video className="h-4 w-4 text-purple-500" />}
-            {headerFormat === "DOCUMENT" && <FileText className="h-4 w-4 text-amber-500" />}
-            Header {headerFormat} URL <span style={{ color: "#EF4444" }}>*</span>
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold flex items-center gap-1.5" style={{ color: COLORS.text }}>
+              {headerFormat === "IMAGE" && <Image className="h-4 w-4 text-blue-500" />}
+              {headerFormat === "VIDEO" && <Video className="h-4 w-4 text-purple-500" />}
+              {headerFormat === "DOCUMENT" && <FileText className="h-4 w-4 text-amber-500" />}
+              Header {headerFormat} Attachment <span style={{ color: "#EF4444" }}>*</span>
+            </label>
+            {templateExampleHeader && (
+              <button
+                type="button"
+                onClick={() => onHeaderMediaUrlChange?.(templateExampleHeader)}
+                className="text-[11px] font-semibold text-blue-600 hover:underline"
+              >
+                Use Template Default
+              </button>
+            )}
+          </div>
           <input
             type="url"
             placeholder={`Enter public ${headerFormat} URL (e.g. https://example.com/banner.png)`}
@@ -100,20 +113,20 @@ export function StepPersonalize({
           </label>
           <div className="flex flex-col gap-2.5 rounded-2xl border p-3.5 bg-gray-50/50">
             {headerPlaceholders.map((ph) => {
-              const num = ph.replace(/\D/g, "");
+              const key = ph.replace(/[{}]/g, "").trim();
               return (
                 <div key={`h-${ph}`} className="flex items-center gap-3">
                   <span
-                    className="inline-flex h-7 w-12 items-center justify-center rounded-lg text-xs font-mono font-bold flex-shrink-0"
+                    className="inline-flex h-7 px-2.5 items-center justify-center rounded-lg text-xs font-mono font-bold flex-shrink-0"
                     style={{ backgroundColor: `${COLORS.primary}15`, color: COLORS.primary }}
                   >
                     Header {ph}
                   </span>
                   <input
                     type="text"
-                    placeholder={`Value for Header ${ph}…`}
-                    value={headerVariables[num] || ""}
-                    onChange={(e) => onHeaderVariableChange?.(num, e.target.value)}
+                    placeholder={`Value for ${ph}…`}
+                    value={headerVariables[key] || ""}
+                    onChange={(e) => onHeaderVariableChange?.(key, e.target.value)}
                     className="flex-1 rounded-xl border px-3 py-1.5 text-xs focus:border-blue-500 focus:outline-none bg-white"
                     style={{ borderColor: "#D1D5DB" }}
                   />
@@ -132,11 +145,11 @@ export function StepPersonalize({
           </label>
           <div className="flex flex-col gap-2.5 rounded-2xl border p-3.5 bg-gray-50/50">
             {placeholders.map((ph) => {
-              const num = ph.replace(/\D/g, "");
+              const key = ph.replace(/[{}]/g, "").trim();
               return (
                 <div key={`b-${ph}`} className="flex items-center gap-3">
                   <span
-                    className="inline-flex h-7 w-12 items-center justify-center rounded-lg text-xs font-mono font-bold flex-shrink-0"
+                    className="inline-flex h-7 px-2.5 items-center justify-center rounded-lg text-xs font-mono font-bold flex-shrink-0"
                     style={{ backgroundColor: `${COLORS.primary}12`, color: COLORS.primary }}
                   >
                     Body {ph}
@@ -144,8 +157,8 @@ export function StepPersonalize({
                   <input
                     type="text"
                     placeholder={`Value for ${ph}…`}
-                    value={bodyVariables[num] || ""}
-                    onChange={(e) => onVariableChange(num, e.target.value)}
+                    value={bodyVariables[key] || ""}
+                    onChange={(e) => onVariableChange(key, e.target.value)}
                     className="flex-1 rounded-xl border px-3 py-1.5 text-xs focus:border-blue-500 focus:outline-none bg-white"
                     style={{ borderColor: "#D1D5DB" }}
                   />
