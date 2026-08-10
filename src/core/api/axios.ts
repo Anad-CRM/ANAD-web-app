@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken, clearToken } from "@/core/utils/auth";
 
 // Base API URL driven by process.env.NEXT_PUBLIC_API_URL in .env.local
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
 export const api = axios.create({

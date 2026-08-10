@@ -1,5 +1,5 @@
-// Re-export shared API types so consumers import from the module,
-// not directly from core/api
+import type { MetaTemplateComponent } from "@/core/api/broadcastApi";
+
 export type {
   MetaTemplate,
   MetaTemplateComponent,
@@ -26,7 +26,7 @@ export type TemplateSource =
       language: string;
       category: string;
       /** Full component list (HEADER, BODY, FOOTER, BUTTONS) */
-      components: { type: string; format?: string; text?: string; buttons?: { type: string; text: string }[] }[];
+      components: MetaTemplateComponent[];
     }
   | {
       source: "custom";

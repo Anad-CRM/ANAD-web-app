@@ -166,7 +166,7 @@ export function useNewBroadcast(
   // Header component info
   const headerComponent = useMemo(() => {
     if (selectedTemplate?.source === "meta") {
-      return selectedTemplate.components.find((c) => c.type === "HEADER") ?? null;
+      return selectedTemplate.components?.find((c) => c.type === "HEADER") ?? null;
     }
     return null;
   }, [selectedTemplate]);
@@ -174,39 +174,56 @@ export function useNewBroadcast(
   const headerText = headerComponent?.text ?? "";
   const headerFormat = headerComponent?.format ?? null;
 
-  const headerPlaceholders = useMemo(() => {
+  // Auto-prefill headerMediaUrl from template example handle if available
+  useEffect(() => {
+    if (selectedTemplate?.source === "meta") {
+      const header = selectedTemplate.components?.find((c) => c.type === "HEADER");
+      const exampleUrl = header?.example?.header_handle?.[0];
+      if (exampleUrl && !headerMediaUrl) {
+        setHeaderMediaUrl(exampleUrl);
+      }
+    }
+  }, [selectedTemplate, headerMediaUrl]);
+
+  const headerPlaceholders = useMemo<string[]>(() => {
     if (!headerText) return [];
-    const matches = headerText.match(/\{\{(\d+)\}\}/g);
+    const matches = headerText.match(/\{\{([^}]+)\}\}/g);
     if (!matches) return [];
-    return Array.from(new Set(matches)).sort(
-      (a, b) => parseInt(a.replace(/\D/g, "")) - parseInt(b.replace(/\D/g, ""))
-    );
+    return (Array.from(new Set(matches)) as string[]).sort((a: string, b: string) => {
+      const numA = parseInt(a.replace(/\D/g, ""));
+      const numB = parseInt(b.replace(/\D/g, ""));
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.localeCompare(b);
+    });
   }, [headerText]);
 
   // Body text from selected template
   const bodyText = useMemo(() => {
     if (!selectedTemplate) return "";
     if (selectedTemplate.source === "meta") {
-      return selectedTemplate.components.find((c) => c.type === "BODY")?.text ?? "";
+      return selectedTemplate.components?.find((c) => c.type === "BODY")?.text ?? "";
     }
     return selectedTemplate.body;
   }, [selectedTemplate]);
 
-  // Body placeholders
-  const placeholders = useMemo(() => {
-    const matches = bodyText.match(/\{\{(\d+)\}\}/g);
+  // Body placeholders (matches both {{1}} and {{name}})
+  const placeholders = useMemo<string[]>(() => {
+    const matches = bodyText.match(/\{\{([^}]+)\}\}/g);
     if (!matches) return [];
-    return Array.from(new Set(matches)).sort((a, b) => {
-      return parseInt(a.replace(/\D/g, "")) - parseInt(b.replace(/\D/g, ""));
+    return (Array.from(new Set(matches)) as string[]).sort((a: string, b: string) => {
+      const numA = parseInt(a.replace(/\D/g, ""));
+      const numB = parseInt(b.replace(/\D/g, ""));
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.localeCompare(b);
     });
   }, [bodyText]);
 
   // Preview header text
   const previewHeader = useMemo(() => {
     let text = headerText;
-    headerPlaceholders.forEach((ph) => {
-      const num = ph.replace(/\D/g, "");
-      text = text.replaceAll(ph, headerVariables[num] || ph);
+    headerPlaceholders.forEach((ph: string) => {
+      const key = ph.replace(/[{}]/g, "").trim();
+      text = text.replaceAll(ph, headerVariables[key] || ph);
     });
     return text;
   }, [headerText, headerPlaceholders, headerVariables]);
@@ -214,9 +231,9 @@ export function useNewBroadcast(
   // Preview body text
   const previewText = useMemo(() => {
     let text = bodyText;
-    placeholders.forEach((ph) => {
-      const num = ph.replace(/\D/g, "");
-      text = text.replaceAll(ph, bodyVariables[num] || ph);
+    placeholders.forEach((ph: string) => {
+      const key = ph.replace(/[{}]/g, "").trim();
+      text = text.replaceAll(ph, bodyVariables[key] || ph);
     });
     return text;
   }, [bodyText, placeholders, bodyVariables]);
@@ -276,9 +293,9 @@ export function useNewBroadcast(
     }
 
     // Check header variables
-    const missingHeaderVars = headerPlaceholders.some((ph) => {
-      const num = ph.replace(/\D/g, "");
-      return !headerVariables[num]?.trim();
+    const missingHeaderVars = headerPlaceholders.some((ph: string) => {
+      const key = ph.replace(/[{}]/g, "").trim();
+      return !headerVariables[key]?.trim();
     });
     if (missingHeaderVars) {
       toast.error("Please fill out all header template variables");
@@ -293,9 +310,9 @@ export function useNewBroadcast(
     }
 
     // Check body variables
-    const missingBodyVars = placeholders.some((ph) => {
-      const num = ph.replace(/\D/g, "");
-      return !bodyVariables[num]?.trim();
+    const missingBodyVars = placeholders.some((ph: string) => {
+      const key = ph.replace(/[{}]/g, "").trim();
+      return !bodyVariables[key]?.trim();
     });
     if (missingBodyVars) {
       toast.error("Please fill out all body template variables");
@@ -310,9 +327,9 @@ export function useNewBroadcast(
       if (headerFormat === "TEXT" && headerPlaceholders.length > 0) {
         templateParams.push({
           type: "header",
-          parameters: headerPlaceholders.map((ph) => ({
+          parameters: headerPlaceholders.map((ph: string) => ({
             type: "text",
-            text: headerVariables[ph.replace(/\D/g, "")] || "",
+            text: headerVariables[ph.replace(/[{}]/g, "").trim()] || "",
           })),
         });
       } else if (isMediaHeader && headerMediaUrl.trim()) {
@@ -332,9 +349,9 @@ export function useNewBroadcast(
       if (placeholders.length > 0) {
         templateParams.push({
           type: "body",
-          parameters: placeholders.map((ph) => ({
+          parameters: placeholders.map((ph: string) => ({
             type: "text",
-            text: bodyVariables[ph.replace(/\D/g, "")] || "",
+            text: bodyVariables[ph.replace(/[{}]/g, "").trim()] || "",
           })),
         });
       }
@@ -342,7 +359,7 @@ export function useNewBroadcast(
       const createPayload: any = {
         campaignName: campaignName.trim(),
         templateName: selectedTemplate.name,
-        templateLanguage: selectedTemplate.language,
+        templateLanguage: selectedTemplate.language || "en",
         templateParams,
       };
 
@@ -355,11 +372,12 @@ export function useNewBroadcast(
       }
 
       const res = await createBroadcast(createPayload);
+      const broadcastId = res?.broadcastId || (res as any)?.data?.broadcastId;
       toast.success("Broadcast campaign created successfully!");
 
-      if (sendImmediately && res?.broadcastId) {
-        await sendBroadcast(res.broadcastId);
-        toast.success("Broadcast campaign execution started!");
+      if (sendImmediately && broadcastId) {
+        await sendBroadcast(broadcastId);
+        toast.success("Broadcast campaign sending started!");
       }
 
       onCreated();
