@@ -57,6 +57,7 @@ export interface CreateBroadcastPayload {
   templateParams?: unknown[];
   leadIds?: string[];
   filterByStatus?: string;
+  customPhoneNumbers?: ({ phone: string; name?: string } | string)[];
   phoneNumberId?: string;
 }
 
