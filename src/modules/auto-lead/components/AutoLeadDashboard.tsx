@@ -434,7 +434,12 @@ export const AutoLeadDashboard: React.FC = () => {
 
                 <div className="transition-all duration-300">
                   {routingStrategy === 'attendance' ? (
-                    <AttendanceAssignmentSection attendanceRequired={attendanceReq} />
+                    <AttendanceAssignmentSection
+                      currentStrategy={routingStrategy}
+                      attendanceRequired={attendanceReq}
+                      onStrategyChange={setRoutingStrategyState}
+                      campaigns={campaigns}
+                    />
                   ) : routingStrategy === 'manager' ? (
                     <ManagerAssignmentSection campaigns={campaigns} />
                   ) : (
