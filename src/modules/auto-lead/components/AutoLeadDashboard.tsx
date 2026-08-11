@@ -3,6 +3,7 @@ import { Bot, CalendarCheck, Folder, AlertTriangle, Check, Lock } from 'lucide-r
 import { CampaignSelectionArea } from './CampaignSelectionArea';
 import { TeamAssignmentSection } from './TeamAssignmentSection';
 import { ManagerAssignmentSection } from './ManagerAssignmentSection';
+import { AttendanceAssignmentSection } from './AttendanceAssignmentSection';
 import { Text } from '@/core/components/ui/Text';
 import { COLORS } from '@/core/components/theme/colors';
 import {
@@ -11,6 +12,8 @@ import {
   toggleGlobalAutoAssign,
   toggleGlobalAttendanceRequirement,
   toggleManagerAutoAssign,
+  setRoutingStrategy,
+  RoutingStrategy,
 } from '../api/autoLeadApi';
 import { AutoLeadCampaign } from '../types';
 
@@ -20,7 +23,7 @@ export const AutoLeadDashboard: React.FC = () => {
   const [savedAdIds, setSavedAdIds] = useState<string[]>([]);
   const [autoAssign, setAutoAssign] = useState(false);
   const [attendanceReq, setAttendanceReq] = useState(false);
-  const [isManagerMode, setIsManagerMode] = useState(false);
+  const [routingStrategy, setRoutingStrategyState] = useState<RoutingStrategy>('team');
   const [loading, setLoading] = useState(true);
   const [isApplying, setIsApplying] = useState(false);
   const [routingExpanded, setRoutingExpanded] = useState(true);
@@ -37,7 +40,7 @@ export const AutoLeadDashboard: React.FC = () => {
       setAttendanceReq(paramsRes.attendanceRequired);
       setSelectedAdIds(ads);
       setSavedAdIds(ads);
-      setIsManagerMode(paramsRes.managerAutoAssignEnabled ?? false);
+      setRoutingStrategyState(paramsRes.routingStrategy ?? (paramsRes.managerAutoAssignEnabled ? 'manager' : 'team'));
       setLoading(false);
     };
 
@@ -69,13 +72,16 @@ export const AutoLeadDashboard: React.FC = () => {
     }
   };
 
-  const handleSwitchRoutingStrategy = async (toManager: boolean) => {
-    if (toManager === isManagerMode) return;
-    setIsManagerMode(toManager);
+  const handleSwitchRoutingStrategy = async (strategy: RoutingStrategy) => {
+    if (strategy === routingStrategy) return;
+    const prev = routingStrategy;
+    setRoutingStrategyState(strategy);
     try {
-      await toggleManagerAutoAssign(toManager);
+      await setRoutingStrategy(strategy);
+      // Keep legacy toggleManagerAutoAssign in sync for backward compat
+      await toggleManagerAutoAssign(strategy === 'manager').catch(() => {});
     } catch {
-      setIsManagerMode(!toManager);
+      setRoutingStrategyState(prev);
       showToast('Failed to switch strategy', 'error');
     }
   };
@@ -322,41 +328,52 @@ export const AutoLeadDashboard: React.FC = () => {
             className={`w-full flex items-center gap-3 px-4 sm:px-5 py-4 border-b border-gray-50 text-left ${
               !autoAssign || selectedAdIds.length === 0 ? 'cursor-not-allowed opacity-60' : 'hover:bg-gray-50/45 cursor-pointer'
             }`}
-          >
-            <div
+          >            <div
               className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                 !autoAssign || selectedAdIds.length === 0
                   ? 'bg-gray-100 text-gray-400'
-                  : isManagerMode
+                  : routingStrategy === 'manager'
                     ? 'bg-purple-100 text-purple-600'
-                    : 'bg-[#1C3A76]/10 text-[#1C3A76]'
+                    : routingStrategy === 'attendance'
+                      ? 'bg-blue-100 text-blue-600'
+                      : 'bg-[#1C3A76]/10 text-[#1C3A76]'
               }`}
             >
-              <span className="text-lg">{isManagerMode ? '👤' : '👥'}</span>
+              <span className="text-lg">
+                {routingStrategy === 'manager' ? '👤' : routingStrategy === 'attendance' ? '🧠' : '👥'}
+              </span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Text weight="bold" className="text-gray-800 block" style={{ fontSize: '15px' }}>
-                  Step 2: Routing Strategy & Targets
+                  Step 2: Routing Strategy &amp; Targets
                 </Text>
                 {autoAssign && selectedAdIds.length > 0 && (
                   <span
                     className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                      isManagerMode
+                      routingStrategy === 'manager'
                         ? 'bg-purple-50 text-purple-600 border-purple-100'
-                        : 'bg-green-50 text-green-700 border-green-100'
+                        : routingStrategy === 'attendance'
+                          ? 'bg-blue-50 text-blue-600 border-blue-100'
+                          : 'bg-green-50 text-green-700 border-green-100'
                     }`}
                   >
-                    {isManagerMode ? 'Manager-Based' : 'Team-Based'}
+                    {routingStrategy === 'manager'
+                      ? 'Manager-Based'
+                      : routingStrategy === 'attendance'
+                        ? 'Attendance-Based'
+                        : 'Team-Based'}
                   </span>
                 )}
               </div>
               <Text className="text-gray-400 block mt-0.5" style={{ fontSize: '12px' }}>
                 {!autoAssign || selectedAdIds.length === 0
                   ? 'Configure lead distribution strategy'
-                  : isManagerMode
+                  : routingStrategy === 'manager'
                     ? 'Manager-based lead distribution active'
-                    : 'Team-based lead distribution active'}
+                    : routingStrategy === 'attendance'
+                      ? 'Attendance & skill-based individual distribution active'
+                      : 'Team-based lead distribution active'}
               </Text>
             </div>
             {autoAssign && selectedAdIds.length > 0 && (
@@ -381,31 +398,44 @@ export const AutoLeadDashboard: React.FC = () => {
           ) : (
             routingExpanded && (
               <div className="p-4 sm:p-5 space-y-4">
+                {/* ── 3-way routing strategy selector ── */}
                 <div className="flex flex-col sm:flex-row rounded-xl overflow-hidden border border-gray-200/80 bg-gray-50/70 p-1 gap-1 sm:gap-0">
                   <button
-                    onClick={() => handleSwitchRoutingStrategy(false)}
+                    onClick={() => handleSwitchRoutingStrategy('attendance')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-bold transition-all duration-200 cursor-pointer active:scale-[0.985] transform ${
-                      !isManagerMode
+                      routingStrategy === 'attendance'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/15'
+                        : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100/50'
+                    }`}
+                  >
+                    <span>🧠</span> Attendance-Based
+                  </button>
+                  <button
+                    onClick={() => handleSwitchRoutingStrategy('team')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-bold transition-all duration-200 cursor-pointer active:scale-[0.985] transform ${
+                      routingStrategy === 'team'
                         ? 'bg-[#1C3A76] text-white shadow-md shadow-[#1C3A76]/15'
                         : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100/50'
                     }`}
                   >
-                    <span>👥</span> Team-Based Routing
+                    <span>👥</span> Team-Based
                   </button>
                   <button
-                    onClick={() => handleSwitchRoutingStrategy(true)}
+                    onClick={() => handleSwitchRoutingStrategy('manager')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-bold transition-all duration-200 cursor-pointer active:scale-[0.985] transform ${
-                      isManagerMode
+                      routingStrategy === 'manager'
                         ? 'bg-purple-600 text-white shadow-md shadow-purple-600/15'
                         : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100/50'
                     }`}
                   >
-                    <span>👤</span> Manager-Based Routing
+                    <span>👤</span> Manager-Based
                   </button>
                 </div>
 
                 <div className="transition-all duration-300">
-                  {isManagerMode ? (
+                  {routingStrategy === 'attendance' ? (
+                    <AttendanceAssignmentSection attendanceRequired={attendanceReq} />
+                  ) : routingStrategy === 'manager' ? (
                     <ManagerAssignmentSection campaigns={campaigns} />
                   ) : (
                     <TeamAssignmentSection campaigns={campaigns} attendanceRequired={attendanceReq} />

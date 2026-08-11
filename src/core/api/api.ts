@@ -78,6 +78,9 @@ export const API_ENDPOINTS = {
     MANAGER_STATUS: (orgId: string | number) => `/autoAssign/managers/auto-assign-status/${orgId}`,
     MANAGER_UPDATE_ADS: "/autoAssign/managers/update-ads",
     MANAGER_ADS_STATUS: (managerId: string) => `/autoAssign/managers/ads-status/${managerId}`,
+    // Routing strategy (attendance | team | manager)
+    ROUTING_STRATEGY_SET: "/autoAssign/routing-strategy",
+    ROUTING_STRATEGY_GET: (orgId: string | number) => `/autoAssign/routing-strategy/${orgId}`,
   },
   INTEGRATION: {
     CREATE_WHATSAPP: "/webhook/createWhatsappIntegration",
