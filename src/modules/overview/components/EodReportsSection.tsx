@@ -7,16 +7,16 @@ import { Text } from "../../../core/components/ui/Text";
 import { PhoneOutgoing, PhoneIncoming, Phone, ArrowRight, TrendingUp } from "lucide-react";
 
 const STATUS_CONFIG = [
-  { key: "New Lead",       label: "New",          color: COLORS.primaryDark },
-  { key: "Hot Lead",       label: "Hot",           color: COLORS.violet },
-  { key: "Follow Up",     label: "Follow Up",     color: COLORS.primary },
-  { key: "Contacted",     label: "Contacted",     color: COLORS.light_yellow },
-  { key: "Not Interested", label: "Not Int.",     color: COLORS.warning },
-  { key: "RNR",           label: "RNR",           color: COLORS.dark_orange },
-  { key: "Busy",          label: "Busy",          color: COLORS.brown },
-  { key: "Switch Off",    label: "Switch Off",    color: COLORS.danger },
-  { key: "Disqualified",  label: "Disqualified",  color: COLORS.subtle },
-  { key: "Assigned",      label: "Assigned",      color: COLORS.anccent_green },
+  { key: "New Lead", label: "New", color: COLORS.primaryDark },
+  { key: "Hot Lead", label: "Hot", color: COLORS.violet },
+  { key: "Follow Up", label: "Follow Up", color: COLORS.primary },
+  { key: "Contacted", label: "Contacted", color: COLORS.light_yellow },
+  { key: "Not Interested", label: "Not Int.", color: COLORS.warning },
+  { key: "RNR", label: "RNR", color: COLORS.dark_orange },
+  { key: "Busy", label: "Busy", color: COLORS.brown },
+  { key: "Switch Off", label: "Switch Off", color: COLORS.danger },
+  { key: "Disqualified", label: "Disqualified", color: COLORS.subtle },
+  { key: "Assigned", label: "Assigned", color: COLORS.anccent_green },
 ];
 
 function calcWidth(count: number, total: number) {
@@ -165,7 +165,7 @@ export default function EodReportsSection({ eodData }: { eodData: StaffEodSummar
                     {[
                       { Icon: PhoneOutgoing, value: callStats.totalOutgoingCalls || 0, label: "Out" },
                       { Icon: PhoneIncoming, value: callStats.totalIncomingCalls || 0, label: "In" },
-                      { Icon: Phone,         value: callStats.totalCalls || 0,         label: "Total" },
+                      { Icon: Phone, value: callStats.totalCalls || 0, label: "Total" },
                     ].map(({ Icon, value, label }) => (
                       <div key={label} className="flex flex-col items-center gap-0.5">
                         <Icon size={15} className="text-white/60" />
