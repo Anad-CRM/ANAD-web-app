@@ -9,6 +9,7 @@ import { COLORS } from '@/core/components/theme/colors';
 import { activityService } from '@/modules/activities/services/activityService';
 import { getUser } from '@/core/utils/auth';
 import { WhatsAppTemplateModal } from './WhatsAppTemplateModal';
+import { EditLeadModal } from './EditLeadModal';
 import { leadsApi } from '@/modules/leads/api/leadsApi';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
 
@@ -19,6 +20,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const [deleteDuplicates, setDeleteDuplicates] = React.useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
 
   const [isAssignModalOpen, setIsAssignModalOpen] = React.useState(false);
   const [staffToAssign, setStaffToAssign] = React.useState("");
@@ -37,6 +39,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   const role = userData?.role ?? "";
   const canAssign = ["Admin", "Manager", "Team Leader"].includes(role);
   const isClosed = lead.status === "Closed" || lead.status === "Enrolled";
+  const leadStatus = lead.status || 'New Lead';
 
   const leadName = lead.userName || 'Unknown';
 
@@ -160,7 +163,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
             { icon: <Whatsapp className="w-4 h-4" />, label: "WhatsApp", color: COLORS.primaryDark, onClick: handleWhatsapp },
             { icon: <Mail className="w-4 h-4" />, label: "Email", color: COLORS.primaryDark, onClick: handleEmail },
             ...(canAssign && !isClosed ? [{ icon: <UserPlus className="w-4 h-4" />, label: "Assign", color: COLORS.primaryDark, onClick: () => setIsAssignModalOpen(true) }] : []),
-            { icon: <Edit2 className="w-4 h-4" />, label: "Edit", color: COLORS.primaryDark, onClick: () => {} },
+            { icon: <Edit2 className="w-4 h-4" />, label: "Edit", color: COLORS.primaryDark, onClick: () => setIsEditModalOpen(true) },
             { 
               icon: isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />, 
               label: isDeleting ? "Deleting..." : "Delete", 
@@ -214,9 +217,9 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
           />
           <InfoItem
             label="Status"
-            value={status}
+            value={leadStatus}
             icon={<Flag className="w-5 h-5 " />}
-            valueColor={status.toLowerCase() === 'enrolled' || status.toLowerCase() === 'closed' ? '#16A34A' : '#1C3A76'}
+            valueColor={leadStatus.toLowerCase() === 'enrolled' || leadStatus.toLowerCase() === 'closed' ? '#16A34A' : '#1C3A76'}
           />
           <InfoItem
             label="Phone"
@@ -240,6 +243,18 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
           onClose={() => setShowWhatsApp(false)}
           onSuccess={() => {
             setShowWhatsApp(false);
+            onRefresh?.();
+          }}
+        />
+      )}
+
+      {isEditModalOpen && (
+        <EditLeadModal
+          isOpen={isEditModalOpen}
+          lead={lead}
+          onClose={() => setIsEditModalOpen(false)}
+          onSuccess={() => {
+            setIsEditModalOpen(false);
             onRefresh?.();
           }}
         />
