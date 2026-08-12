@@ -190,7 +190,7 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
   const adOptions = [
     { id: '', label: 'No Ad Campaign', subLabel: 'Direct / Organic' },
     ...ads.map(ad => ({
-      id: ad.adId,
+      id: ad.id || ad.adId,
       label: ad.adName || 'Unnamed Ad',
       subLabel: ad.platform || '',
     }))
