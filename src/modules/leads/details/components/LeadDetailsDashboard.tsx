@@ -27,26 +27,30 @@ export const LeadDetailsDashboard: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (forceRefresh = false) => {
     if (!leadId) return;
     setIsLoading(true);
     try {
-      // Step 1: Try reading the lead from sessionStorage cache first.
-      // LeadList stores the lead object when a card is clicked — this avoids
-      // a blind list re-fetch and ensures we have the correct userId fields.
       let leadData: Lead | null = null;
-      try {
-        const cached = sessionStorage.getItem(`lead_cache_${leadId}`);
-        if (cached) {
-          leadData = JSON.parse(cached) as Lead;
-          console.log('[LeadDetailsDashboard] ✅ Lead loaded from sessionStorage cache');
-        }
-      } catch { }
+      if (!forceRefresh) {
+        try {
+          const cached = sessionStorage.getItem(`lead_cache_${leadId}`);
+          if (cached) {
+            leadData = JSON.parse(cached) as Lead;
+            console.log('[LeadDetailsDashboard] ✅ Lead loaded from sessionStorage cache');
+          }
+        } catch { }
+      }
 
-      // Fall back to API search if cache miss
+      // Fetch lead from API if cache miss or forced refresh
       if (!leadData) {
-        console.log('[LeadDetailsDashboard] 📡 Cache miss — fetching lead from API...');
+        console.log('[LeadDetailsDashboard] 📡 Fetching fresh lead from API...');
         leadData = await leadsApi.fetchLeadFromList(leadId);
+        if (leadData) {
+          try {
+            sessionStorage.setItem(`lead_cache_${leadId}`, JSON.stringify(leadData));
+          } catch { }
+        }
       }
 
       if (leadData) {
@@ -134,7 +138,7 @@ export const LeadDetailsDashboard: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 items-stretch">
             <div ref={summaryCardRef} className="h-fit self-start">
-              <LeadSummaryCard lead={lead} onRefresh={loadData} />
+              <LeadSummaryCard lead={lead} onRefresh={() => loadData(true)} />
             </div>
             <div className="h-full">
               <FormDetailsCard
@@ -147,7 +151,7 @@ export const LeadDetailsDashboard: React.FC = () => {
               <LeadActivityLog
                 activities={activities}
                 leadId={leadId}
-                onRefresh={loadData}
+                onRefresh={() => loadData(true)}
               />
             </div>
             <div className="h-full">
@@ -155,13 +159,16 @@ export const LeadDetailsDashboard: React.FC = () => {
                 followups={followups}
                 leadId={leadId}
                 assignedUserId={(lead as unknown as any)?.assignedUser?.id || (lead as unknown as any)?.assignedUser?._id || ''}
-                onRefresh={loadData}
+                onRefresh={() => loadData(true)}
               />
             </div>
 
-            <div className="xl:col-span-2">
-              <WhatsAppMessagesCard leadId={leadId} waId={lead.mobileNumber} leadName={lead.userName} />
-            </div>
+            <WhatsAppMessagesCard
+              leadId={leadId}
+              waId={lead.mobileNumber}
+              leadName={lead.userName}
+              className="xl:col-span-2"
+            />
           </div>
         )}
       </div>

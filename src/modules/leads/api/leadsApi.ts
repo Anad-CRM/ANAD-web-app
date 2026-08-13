@@ -33,6 +33,27 @@ interface DeleteLeadResponse {
   message?: string;
 }
 
+export interface UpdateLeadPayload {
+  leadId?: string;
+  id?: string;
+  userName?: string;
+  email?: string;
+  mobileNumber?: string;
+  leadSource?: string;
+  source?: string;
+  adId?: string;
+  staffId?: string;
+  userId?: string;
+  status?: string;
+  formData?: Record<string, unknown>;
+}
+
+export interface UpdateLeadResponse {
+  status: string;
+  message?: string;
+  data?: Lead;
+}
+
 export interface WhatsAppMessage {
   text: string;
   date: string;
@@ -212,6 +233,22 @@ export const leadsApi = {
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       return { status: "failed", message: err?.response?.data?.message || "Failed to delete lead" };
+    }
+  },
+
+  updateLead: async (leadId: string, payload: UpdateLeadPayload): Promise<UpdateLeadResponse> => {
+    const userData = getUser<Record<string, string>>();
+    try {
+      const response = await api.post(API_ENDPOINTS.LEADS.UPDATE, {
+        leadId,
+        organizationId: userData?.organizationId,
+        ...payload,
+      });
+      return response.data;
+    } catch (error: unknown) {
+      console.error("[leadsApi] Error updating lead:", error);
+      const err = error as { response?: { data?: { message?: string } } };
+      throw new Error(err?.response?.data?.message || "Failed to update lead");
     }
   },
 

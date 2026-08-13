@@ -3,11 +3,14 @@ import { API_ENDPOINTS } from "@/core/api/api";
 import { getUser } from "@/core/utils/auth";
 import { AutoLeadCampaign } from "../types";
 
+export type RoutingStrategy = 'attendance' | 'team' | 'manager';
+
 export interface AutoAssignState {
   autoAssignLeads: boolean;
   attendanceRequired: boolean;
   selectedAdIds: string[];
   managerAutoAssignEnabled: boolean;
+  routingStrategy: RoutingStrategy;
 }
 
 export interface StaffMember {
@@ -54,26 +57,33 @@ export const getAutoAssignParams = async (orgId?: number): Promise<AutoAssignSta
    try {
       const user = getUser<{ organizationId?: number }>();
       const org = orgId || user?.organizationId;
-      if (!org) return { autoAssignLeads: false, attendanceRequired: false, selectedAdIds: [], managerAutoAssignEnabled: false };
+      if (!org) return { autoAssignLeads: false, attendanceRequired: false, selectedAdIds: [], managerAutoAssignEnabled: false, routingStrategy: 'team' };
 
-      const [autoAssignRes, attendanceRes, managerRes] = await Promise.all([
+      const [autoAssignRes, attendanceRes, managerRes, routingRes] = await Promise.all([
          api.get(API_ENDPOINTS.AUTO_LEAD.GET_AUTO_ASSIGN_STATUS(org)),
          api.get(API_ENDPOINTS.AUTO_LEAD.GET_ATTENDANCE_STATUS(org)),
          api.get(API_ENDPOINTS.AUTO_LEAD.MANAGER_STATUS(org)).catch(() => ({ data: { data: {} } })),
+         api.get(API_ENDPOINTS.AUTO_LEAD.ROUTING_STRATEGY_GET(org)).catch(() => ({ data: { data: { routingStrategy: null } } })),
       ]);
 
       const ads = autoAssignRes.data?.data?.ads || [];
       const selectedAdIds = ads.filter((ad: Record<string, unknown>) => ad.autoAssignLeads === true).map((ad: Record<string, unknown>) => ad.adId);
 
+      // Derive routing strategy: prefer new field, fall back to legacy managerAutoAssignEnabled
+      const managerAutoAssignEnabled: boolean = managerRes.data?.data?.managerAutoAssignLeads ?? false;
+      const fetchedStrategy: RoutingStrategy | null = routingRes.data?.data?.routingStrategy ?? null;
+      const routingStrategy: RoutingStrategy = fetchedStrategy || (managerAutoAssignEnabled ? 'manager' : 'team');
+
       return {
          autoAssignLeads: autoAssignRes.data?.data?.organizationAutoAssign ?? false,
          attendanceRequired: attendanceRes.data?.data?.attendanceRequiredForAutoAssign ?? false,
          selectedAdIds,
-         managerAutoAssignEnabled: managerRes.data?.data?.managerAutoAssignLeads ?? false,
+         managerAutoAssignEnabled,
+         routingStrategy,
       };
    } catch (error) {
       console.error("Failed to fetch auto assign settings", error);
-      return { autoAssignLeads: false, attendanceRequired: false, selectedAdIds: [], managerAutoAssignEnabled: false };
+      return { autoAssignLeads: false, attendanceRequired: false, selectedAdIds: [], managerAutoAssignEnabled: false, routingStrategy: 'team' };
    }
 };
 
@@ -117,6 +127,16 @@ export const toggleManagerAutoAssign = async (status: boolean, orgId?: number) =
    const user = getUser<{ organizationId?: number }>();
    const org = orgId || user?.organizationId;
    return api.post(API_ENDPOINTS.AUTO_LEAD.MANAGER_TOGGLE, { organizationId: org, autoAssignLeads: status });
+};
+
+/**
+ * Set routing strategy: 'attendance' | 'team' | 'manager'
+ * This is the primary routing switch used by the 3-way selector in the dashboard.
+ */
+export const setRoutingStrategy = async (strategy: RoutingStrategy, orgId?: number) => {
+   const user = getUser<{ organizationId?: number }>();
+   const org = orgId || user?.organizationId;
+   return api.post(API_ENDPOINTS.AUTO_LEAD.ROUTING_STRATEGY_SET, { organizationId: org, strategy });
 };
 
 export const getManagerAdsStatus = async (managerId: string) => {

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Copy } from 'lucide-react';
+import React, { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
 import { Text } from '@/core/components/ui/Text';
 import { useFeedback } from '@/core/contexts/FeedbackContext';
 
@@ -10,6 +10,7 @@ interface Props {
 
 export const FormDetailsCard: React.FC<Props> = ({ formData, style }) => {
   const { showToast } = useFeedback();
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const safeFormData = formData ?? {};
 
   const skipFields = ['full_name', 'phone_number', 'mobileNumber', 'userName', 'email'];
@@ -27,9 +28,22 @@ export const FormDetailsCard: React.FC<Props> = ({ formData, style }) => {
       + '?';
   };
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (text: string, key?: string) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
+    if (key) {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    }
     showToast('Copied to clipboard', 'success');
+  };
+
+  const handleCopyAll = () => {
+    if (filteredData.length === 0) return;
+    const allText = filteredData
+      .map(([k, v]) => `${formatKey(k)} ${Array.isArray(v) ? v[0] : v ?? 'N/A'}`)
+      .join('\n');
+    handleCopy(allText, '__all__');
   };
 
   return (
@@ -37,11 +51,30 @@ export const FormDetailsCard: React.FC<Props> = ({ formData, style }) => {
       className="bg-[#F8F7F3] rounded-[24px] sm:rounded-[32px] p-4 sm:p-6 shadow-sm border border-black/5 flex flex-col relative overflow-hidden"
       style={style}
     >
-      <div className="flex items-center gap-2 mb-4 sm:mb-6">
-
-        <Text weight="bold" className="text-slate-800" size="xl" >
+      <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
+        <Text weight="bold" className="text-slate-800" size="xl">
           Form Details
         </Text>
+        {filteredData.length > 0 && (
+          <button
+            type="button"
+            onClick={handleCopyAll}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-black/5 active:scale-95 transition-all select-none cursor-pointer"
+            title="Copy all form details"
+          >
+            {copiedKey === '__all__' ? (
+              <>
+                <Check size={13} className="text-emerald-600" />
+                <span className="text-emerald-600 font-semibold">Copied</span>
+              </>
+            ) : (
+              <>
+                <Copy size={13} className="text-slate-500" />
+                <span>Copy All</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-scroll pr-1 sm:pr-2 custom-scrollbar" style={{ scrollbarWidth: 'thin', scrollbarGutter: 'stable' }}>
@@ -59,6 +92,8 @@ export const FormDetailsCard: React.FC<Props> = ({ formData, style }) => {
           {filteredData.map(([key, value], index) => {
             const displayValue = Array.isArray(value) ? value[0] : value;
             const isLast = index === filteredData.length - 1;
+            const textToCopy = displayValue?.toString() || '';
+            const isCopied = copiedKey === key;
 
             return (
               <div key={key} className="flex flex-col gap-1.5">
@@ -66,15 +101,22 @@ export const FormDetailsCard: React.FC<Props> = ({ formData, style }) => {
                   {formatKey(key)}
                 </Text>
                 <div
-                  className="flex items-center justify-between group cursor-pointer"
-                  onClick={() => handleCopy(displayValue?.toString() || '')}
+                  className="flex items-center justify-between group cursor-pointer p-1.5 -mx-1.5 rounded-xl hover:bg-black/[0.03] transition-colors"
+                  onClick={() => handleCopy(textToCopy, key)}
+                  title="Click to copy"
                 >
                   <Text weight="medium" className="text-slate-900 leading-relaxed break-words pr-3" style={{ fontSize: '14px' }}>
                     {displayValue?.toString() || 'N/A'}
                   </Text>
-                  <Copy size={14} className="text-slate-300 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0" />
+                  <div className="p-1 rounded-lg text-slate-400 group-hover:text-slate-700 transition-colors shrink-0">
+                    {isCopied ? (
+                      <Check size={14} className="text-emerald-600" />
+                    ) : (
+                      <Copy size={14} className="text-slate-400 group-hover:text-slate-700 transition-colors" />
+                    )}
+                  </div>
                 </div>
-                {!isLast && <div className="h-px bg-slate-50 mt-1" />}
+                {!isLast && <div className="h-px bg-slate-200/50 mt-1" />}
               </div>
             );
           })}

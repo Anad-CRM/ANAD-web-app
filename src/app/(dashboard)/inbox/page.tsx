@@ -159,7 +159,7 @@ function InboxPageContent() {
             created_at: (m.timestamp as string) || new Date().toISOString(),
             direction,
             sender_type: direction === 'outbound' ? 'agent' : 'customer',
-            status: (m.status as string) || 'delivered',
+            status: (m.status as Message['status']) || (direction === 'outbound' ? 'sent' : 'delivered'),
             message_type: (rawMsgType as Message['message_type']),
             content_type: contentTypeMap[rawMsgType] || 'text',
             media_url: m.mediaUrl ? (

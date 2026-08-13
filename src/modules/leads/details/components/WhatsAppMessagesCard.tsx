@@ -10,6 +10,7 @@ interface Props {
   leadId: string;
   waId?: string; // hint from lead.mobileNumber, not used for fetching
   leadName?: string;
+  className?: string;
 }
 
 /** Maps the raw backend whatsapp row to the shared inbox Message type */
@@ -46,7 +47,7 @@ function mapToMessage(m: Record<string, unknown>, conversationWaId: string): Mes
     content_type: typeMap[rawType] ?? 'text',
     sender_type: direction === 'outbound' ? 'agent' : 'customer',
     direction,
-    status: (m.status as Message['status']) ?? 'delivered',
+    status: (m.status as Message['status']) ?? (direction === 'outbound' ? 'sent' : 'delivered'),
     message_type: typeMap[rawType] ?? 'text',
     created_at,
     media_url,
@@ -57,7 +58,7 @@ function mapToMessage(m: Record<string, unknown>, conversationWaId: string): Mes
   };
 }
 
-export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
+export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName, className }) => {
   const router = useRouter();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -148,6 +149,11 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates } : m)));
   }, []);
 
+  // If there are no messages, do not display the card
+  if (messages.length === 0) {
+    return null;
+  }
+
   // Build minimal Conversation + Contact for MessageThread
   // Use resolvedWaId (exact DB value) so sending goes to the right number
   const waId = resolvedWaId ?? '';
@@ -168,22 +174,24 @@ export const WhatsAppMessagesCard: React.FC<Props> = ({ leadId, leadName }) => {
     : null;
 
   return (
-    <MessageThread
-      key={waId || 'empty'}
-      embedded
-      conversation={conversation}
-      contact={contact}
-      messages={loading && messages.length === 0 ? [] : messages}
-      onMessagesLoaded={() => {}}
-      onNewMessage={handleNewMessage}
-      onUpdateMessage={handleUpdateMessage}
-      onStatusChange={() => {}}
-      onAssignChange={() => {}}
-      onRefresh={fetchMessages}
-      onOpenInInbox={waId ? () => router.push(`/inbox?c=${waId}`) : undefined}
-      onLoadMore={handleLoadMore}
-      hasMore={hasMore}
-      loadingMore={loadingMore}
-    />
+    <div className={className || "xl:col-span-2"}>
+      <MessageThread
+        key={waId || 'empty'}
+        embedded
+        conversation={conversation}
+        contact={contact}
+        messages={messages}
+        onMessagesLoaded={() => {}}
+        onNewMessage={handleNewMessage}
+        onUpdateMessage={handleUpdateMessage}
+        onStatusChange={() => {}}
+        onAssignChange={() => {}}
+        onRefresh={fetchMessages}
+        onOpenInInbox={waId ? () => router.push(`/inbox?c=${waId}`) : undefined}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        loadingMore={loadingMore}
+      />
+    </div>
   );
 };
