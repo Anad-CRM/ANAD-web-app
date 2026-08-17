@@ -45,6 +45,7 @@ export interface UpdateLeadPayload {
   staffId?: string;
   userId?: string;
   status?: string;
+  type?: string;
   formData?: Record<string, unknown>;
 }
 
@@ -239,7 +240,7 @@ export const leadsApi = {
   updateLead: async (leadId: string, payload: UpdateLeadPayload): Promise<UpdateLeadResponse> => {
     const userData = getUser<Record<string, string>>();
     try {
-      const response = await api.post(API_ENDPOINTS.LEADS.UPDATE, {
+      const response = await api.put(API_ENDPOINTS.LEADS.UPDATE, {
         leadId,
         organizationId: userData?.organizationId,
         ...payload,

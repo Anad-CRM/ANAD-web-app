@@ -58,6 +58,7 @@ export interface Lead {
   updatedAt?: string;
   followUpDate?: string;
   isDuplicated?: boolean;
+  type?: string;
   formData?: Record<string, unknown>;
 }
 

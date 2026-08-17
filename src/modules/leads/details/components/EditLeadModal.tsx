@@ -69,6 +69,7 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
     status: (lead.status || 'New Lead') as LeadStatus,
     adId: lead.ad?.adId || (lead as any)?.adId || '',
     staffId: lead.userId || lead.assignedUser?.id || (lead as any)?.assignedTo || '',
+    type: (lead.formData as Record<string, any> | undefined)?.type || '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -88,6 +89,7 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
         status: (lead.status || 'New Lead') as LeadStatus,
         adId: lead.ad?.adId || (lead as any)?.adId || '',
         staffId: lead.userId || lead.assignedUser?.id || (lead as any)?.assignedTo || '',
+        type: (lead.formData as Record<string, any> | undefined)?.type || '',
       });
       setErrors({});
       setApiError(null);
@@ -164,6 +166,7 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
         status: formData.status,
         adId: formData.adId || undefined,
         staffId: formData.staffId || undefined,
+        type: formData.type || undefined,
       });
 
       // Update session cache if exists
@@ -345,6 +348,27 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
                       {src}
                     </option>
                   ))}
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 block">Lead Type</label>
+              <div className="relative w-full h-[48px] bg-white rounded-[14px] border border-gray-200">
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full h-full bg-transparent text-[#0D1B3E] appearance-none rounded-[14px] px-3.5 text-[14px] focus:outline-none transition-all"
+                >
+                  <option value="">Select Type</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Corporate">Corporate</option>
+                  <option value="Business">Business</option>
+                  <option value="Student">Student</option>
+                  <option value="Other">Other</option>
                 </select>
                 <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
               </div>
