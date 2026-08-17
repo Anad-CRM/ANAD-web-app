@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { X, Edit2, ChevronDown, Loader2, FileText } from 'lucide-react';
+import { X, Edit2, ChevronDown, Loader2, FileText, Plus, Trash2 } from 'lucide-react';
 import { Lead, LeadStatus } from '@/modules/leads/types/lead.types';
 import { getAllAds } from '@/modules/ads/api/adsApi';
 import { StaffService } from '@/modules/staffs/services/staff.service';
@@ -86,6 +86,29 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
   };
 
   const [extraFormFields, setExtraFormFields] = useState<Record<string, string>>(getExtraFormFields);
+  const [newFieldName, setNewFieldName] = useState('');
+  const [newFieldValue, setNewFieldValue] = useState('');
+  const [showAddField, setShowAddField] = useState(false);
+
+  const handleAddNewField = () => {
+    if (!newFieldName.trim()) return;
+    const formattedKey = newFieldName.trim().replace(/\s+/g, '_').toLowerCase();
+    setExtraFormFields(prev => ({
+      ...prev,
+      [formattedKey]: newFieldValue.trim()
+    }));
+    setNewFieldName('');
+    setNewFieldValue('');
+    setShowAddField(false);
+  };
+
+  const handleRemoveField = (key: string) => {
+    setExtraFormFields(prev => {
+      const copy = { ...prev };
+      delete copy[key];
+      return copy;
+    });
+  };
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -107,6 +130,9 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
         type: (lead.formData as Record<string, any> | undefined)?.type || '',
       });
       setExtraFormFields(getExtraFormFields());
+      setNewFieldName('');
+      setNewFieldValue('');
+      setShowAddField(false);
       setErrors({});
       setApiError(null);
     }
@@ -430,17 +456,27 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
             />
           </div>
 
-          {/* Editable extra form details */}
-          {Object.keys(extraFormFields).length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3 pt-1">
-                <div className="flex-1 h-px bg-gray-100" />
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                  <FileText className="w-3.5 h-3.5" />
-                  Additional Details
-                </div>
-                <div className="flex-1 h-px bg-gray-100" />
+          {/* Editable extra form details & Add Field */}
+          <div>
+            <div className="flex items-center justify-between mb-3 pt-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                <FileText className="w-3.5 h-3.5" />
+                Additional Details
               </div>
+              {!showAddField && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddField(true)}
+                  className="flex items-center gap-1 text-[12px] font-semibold text-[#1C3A76] hover:underline"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Field
+                </button>
+              )}
+            </div>
+
+            {/* List of existing extra fields */}
+            {Object.keys(extraFormFields).length > 0 && (
               <div className="flex flex-col gap-3">
                 {Object.entries(extraFormFields).map(([key, val]) => {
                   const label = key
@@ -449,20 +485,79 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
                     .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
                     .join(' ');
                   return (
-                    <div key={key}>
-                      <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 block">{label}</label>
-                      <TextField
-                        type="text"
-                        value={val}
-                        onChange={(e) => setExtraFormFields(prev => ({ ...prev, [key]: e.target.value }))}
-                        placeholder={`Enter ${label.toLowerCase()}`}
-                      />
+                    <div key={key} className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 block">{label}</label>
+                        <TextField
+                          type="text"
+                          value={val}
+                          onChange={(e) => setExtraFormFields(prev => ({ ...prev, [key]: e.target.value }))}
+                          placeholder={`Enter ${label.toLowerCase()}`}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveField(key)}
+                        className="w-10 h-10 mb-1 rounded-xl flex items-center justify-center text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors flex-shrink-0"
+                        title="Remove field"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   );
                 })}
               </div>
-            </div>
-          )}
+            )}
+
+            {/* Form to add a new custom field */}
+            {showAddField && (
+              <div className="mt-3 p-3.5 bg-gray-50 border border-gray-200 rounded-2xl flex flex-col gap-3 animate-in fade-in duration-150">
+                <Text weight="bold" className="text-[13px] text-gray-800">Add Custom Form Field</Text>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-600 mb-1 block">Field Name *</label>
+                    <TextField
+                      type="text"
+                      value={newFieldName}
+                      onChange={(e) => setNewFieldName(e.target.value)}
+                      placeholder="e.g. City, Course, Budget"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-600 mb-1 block">Field Value</label>
+                    <TextField
+                      type="text"
+                      value={newFieldValue}
+                      onChange={(e) => setNewFieldValue(e.target.value)}
+                      placeholder="Enter value"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddField(false);
+                      setNewFieldName('');
+                      setNewFieldValue('');
+                    }}
+                    className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddNewField}
+                    disabled={!newFieldName.trim()}
+                    className="px-3.5 py-1.5 text-xs text-white rounded-lg font-semibold transition-all disabled:opacity-50"
+                    style={{ backgroundColor: COLORS.primary }}
+                  >
+                    Add Field
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </form>
 
         {/* Footer */}
