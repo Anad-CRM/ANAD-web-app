@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { X, Edit2, ChevronDown, Loader2 } from 'lucide-react';
+import { X, Edit2, ChevronDown, Loader2, FileText } from 'lucide-react';
 import { Lead, LeadStatus } from '@/modules/leads/types/lead.types';
 import { getAllAds } from '@/modules/ads/api/adsApi';
 import { StaffService } from '@/modules/staffs/services/staff.service';
@@ -11,6 +11,7 @@ import { Text } from '@/core/components/ui/Text';
 import TextField from '@/core/components/ui/TextField';
 import { COLORS } from '@/core/components/theme/colors';
 import { leadsApi } from '@/modules/leads/api/leadsApi';
+import { activityService } from '@/modules/activities/services/activityService';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -72,6 +73,20 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
     type: (lead.formData as Record<string, any> | undefined)?.type || '',
   });
 
+  // Extra editable formData fields (everything except internal/core fields)
+  const SKIP_FORM_KEYS = ['full_name', 'phone_number', 'mobileNumber', 'userName', 'email', 'contactNumber', 'phone', 'type'];
+  const getExtraFormFields = () => {
+    const fd = (lead.formData as Record<string, any> | undefined) ?? {};
+    return Object.entries(fd)
+      .filter(([k]) => !SKIP_FORM_KEYS.some(s => k.toLowerCase().includes(s.toLowerCase())))
+      .reduce<Record<string, string>>((acc, [k, v]) => {
+        acc[k] = Array.isArray(v) ? String(v[0] ?? '') : String(v ?? '');
+        return acc;
+      }, {});
+  };
+
+  const [extraFormFields, setExtraFormFields] = useState<Record<string, string>>(getExtraFormFields);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
@@ -91,6 +106,7 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
         staffId: lead.userId || lead.assignedUser?.id || (lead as any)?.assignedTo || '',
         type: (lead.formData as Record<string, any> | undefined)?.type || '',
       });
+      setExtraFormFields(getExtraFormFields());
       setErrors({});
       setApiError(null);
     }
@@ -158,6 +174,8 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
     setApiError(null);
 
     try {
+      const mergedFormData: Record<string, unknown> = { ...extraFormFields };
+
       const response = await leadsApi.updateLead(lead.id, {
         userName: formData.userName.trim(),
         email: formData.email.trim(),
@@ -167,6 +185,7 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
         adId: formData.adId || undefined,
         staffId: formData.staffId || undefined,
         type: formData.type || undefined,
+        formData: Object.keys(mergedFormData).length > 0 ? mergedFormData : undefined,
       });
 
       // Update session cache if exists
@@ -177,6 +196,24 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
           sessionStorage.removeItem(`lead_cache_${lead.id}`);
         }
       } catch { }
+
+      // Create activity for the update
+      try {
+        const user = getUser<{ id?: string; _id?: string }>();
+        const userId = user?.id || user?._id || '';
+        if (userId) {
+          await activityService.createActivity(lead.id, {
+            title: 'Lead Updated',
+            description: `Lead details updated: ${[
+              formData.userName !== (lead.userName || lead.name) && 'Name',
+              formData.status !== lead.status && 'Status',
+              formData.leadSource !== lead.source && 'Source',
+              formData.type && 'Type',
+            ].filter(Boolean).join(', ') || 'Details updated'}`,
+            userId,
+          });
+        }
+      } catch { /* activity creation is non-blocking */ }
 
       showToast('Lead updated successfully!', 'success');
       onSuccess?.();
@@ -392,6 +429,40 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
               placeholder="Select Staff Member"
             />
           </div>
+
+          {/* Editable extra form details */}
+          {Object.keys(extraFormFields).length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3 pt-1">
+                <div className="flex-1 h-px bg-gray-100" />
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  <FileText className="w-3.5 h-3.5" />
+                  Additional Details
+                </div>
+                <div className="flex-1 h-px bg-gray-100" />
+              </div>
+              <div className="flex flex-col gap-3">
+                {Object.entries(extraFormFields).map(([key, val]) => {
+                  const label = key
+                    .replace(/_/g, ' ')
+                    .split(' ')
+                    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                    .join(' ');
+                  return (
+                    <div key={key}>
+                      <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 block">{label}</label>
+                      <TextField
+                        type="text"
+                        value={val}
+                        onChange={(e) => setExtraFormFields(prev => ({ ...prev, [key]: e.target.value }))}
+                        placeholder={`Enter ${label.toLowerCase()}`}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </form>
 
         {/* Footer */}
