@@ -63,6 +63,16 @@ export function StaffListView() {
     load();
   }, [pageTitle]);
 
+  const handleSkillLevelUpdated = (staffId: string | number, newLevel: string) => {
+    setStaffs((prev) =>
+      prev.map((s) => (String(s.id) === String(staffId) ? { ...s, skillLevel: newLevel } : s))
+    );
+  };
+
+  const handleStaffDeleted = (staffId: string | number) => {
+    setStaffs((prev) => prev.filter((s) => String(s.id) !== String(staffId)));
+  };
+
   return (
     <div
       // style={{ backgroundColor: COLORS.bg }}
@@ -127,7 +137,13 @@ export function StaffListView() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredStaffs.map((staff) => (
-            <StaffCard key={String(staff.id)} staff={staff} pageTitle={pageTitle} />
+            <StaffCard
+              key={String(staff.id)}
+              staff={staff}
+              pageTitle={pageTitle}
+              onSkillLevelUpdated={handleSkillLevelUpdated}
+              onStaffDeleted={handleStaffDeleted}
+            />
           ))}
         </div>
       )}

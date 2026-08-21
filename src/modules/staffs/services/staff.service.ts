@@ -89,4 +89,20 @@ export const StaffService = {
     );
     return response.data;
   },
+
+  async updateSkillLevel(payload: { userId: string | number; skillLevel: string }): Promise<{ status: string; message?: string }> {
+    const response = await api.post<{ status: string; message?: string }>(
+      API_ENDPOINTS.STAFF.UPDATE_SKILL_LEVEL,
+      payload
+    );
+    return response.data;
+  },
+
+  async deleteStaff(payload: { userId: string | number }): Promise<{ status: string; message?: string }> {
+    const response = await api.post<{ status: string; message?: string }>(
+      API_ENDPOINTS.STAFF.DELETE_STAFF,
+      payload
+    );
+    return response.data;
+  },
 };

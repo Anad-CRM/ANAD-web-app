@@ -6,13 +6,16 @@ import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
 import { AvatarCircle } from "./AvatarCircle";
 import type { Staff } from "../types/staff.types";
+import { StaffActionsMenu } from "./StaffActionsMenu";
 
 interface StaffCardProps {
   staff: Staff;
   pageTitle: string;
+  onSkillLevelUpdated?: (staffId: string | number, newLevel: string) => void;
+  onStaffDeleted?: (staffId: string | number) => void;
 }
 
-export function StaffCard({ staff, pageTitle }: StaffCardProps) {
+export function StaffCard({ staff, pageTitle, onSkillLevelUpdated, onStaffDeleted }: StaffCardProps) {
   const router = useRouter();
   const isPending = !staff.userName && !staff.password;
   const isPresent = (staff.attendances as unknown[])?.length > 0;
@@ -26,17 +29,25 @@ export function StaffCard({ staff, pageTitle }: StaffCardProps) {
         boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
       }}
     >
-      {/* Avatar + Name */}
-      <div className="flex items-center gap-4">
-        <AvatarCircle avatar={staff.avatar} size={56} />
-        <div className="min-w-0">
-          <Text weight="bold" as="p" size="custom" className="text-[16px] text-white leading-tight mb-0.5 truncate">
-            {staff.userName || "Invited"}
-          </Text>
-          <Text as="p" size="custom" className="text-[13px] truncate" style={{ color: COLORS.subtle }}>
-            {staff.email || "—"}
-          </Text>
+      {/* Avatar + Name + Actions Menu */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <AvatarCircle avatar={staff.avatar} size={56} />
+          <div className="min-w-0">
+            <Text weight="bold" as="p" size="custom" className="text-[16px] text-white leading-tight mb-0.5 truncate">
+              {staff.userName || "Invited"}
+            </Text>
+            <Text as="p" size="custom" className="text-[13px] truncate" style={{ color: COLORS.subtle }}>
+              {staff.email || "—"}
+            </Text>
+          </div>
         </div>
+
+        <StaffActionsMenu
+          staff={staff}
+          onSkillLevelUpdated={(newLevel) => onSkillLevelUpdated?.(staff.id, newLevel)}
+          onStaffDeleted={() => onStaffDeleted?.(staff.id)}
+        />
       </div>
 
       {/* Info grid */}

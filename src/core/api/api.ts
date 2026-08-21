@@ -120,6 +120,8 @@ export const API_ENDPOINTS = {
     GET_ALL: "/staff/getAllStaff",
     GET_BY_ROLE: "/staff/getStaffByRole",
     GET_BY_ID: "/staff/getStaffById",
+    UPDATE_SKILL_LEVEL: "/staff/updateSkillLevel",
+    DELETE_STAFF: "/staff/deleteStaff",
   },
   ATTENDANCE: {
     GET_USER_ATTENDANCE: "/attendance/getUserAttendance",
