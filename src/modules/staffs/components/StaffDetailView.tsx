@@ -13,6 +13,7 @@ import { ProfileDetailsCard } from "./ProfileDetailsCard";
 import { AttendanceCard } from "./AttendanceCard";
 import { Calendar } from "lucide-react";
 import { BackButton } from "@/core/components/ui/BackButton";
+import { StaffActionsMenu } from "./StaffActionsMenu";
 
 function formatDate(iso?: string) {
   if (!iso) return "—";
@@ -95,6 +96,14 @@ export function StaffDetailView() {
     { label: "Switch Off", value: c.switchOffCount ?? 0 },
   ];
 
+  const handleSkillLevelUpdated = (newLevel: string) => {
+    setStaff((prev) => (prev ? { ...prev, skillLevel: newLevel } : prev));
+  };
+
+  const handleStaffDeleted = () => {
+    router.back();
+  };
+
   return (
     <div
       // style={{ backgroundColor: COLORS.bg }}
@@ -116,13 +125,24 @@ export function StaffDetailView() {
             {staff.role} Profile
           </Text>
         </div>
-        <button
-          style={{ backgroundColor: COLORS.primaryDark }}
-          className="w-[46px] h-[46px] mt-1 flex items-center justify-center rounded-xl text-white hover:opacity-90 transition-opacity shadow-lg"
-        >
-          <Calendar width={24} height={24} strokeWidth={1.5} />
-
-        </button>
+        <div className="flex items-center gap-3 mt-1">
+          <button
+            style={{ backgroundColor: COLORS.primaryDark }}
+            className="w-[46px] h-[46px] flex items-center justify-center rounded-xl text-white hover:opacity-90 transition-opacity shadow-lg"
+          >
+            <Calendar width={24} height={24} strokeWidth={1.5} />
+          </button>
+          <div
+            style={{ backgroundColor: COLORS.primaryDark }}
+            className="w-[46px] h-[46px] flex items-center justify-center rounded-xl text-white hover:opacity-90 transition-opacity shadow-lg"
+          >
+            <StaffActionsMenu
+              staff={staff}
+              onSkillLevelUpdated={handleSkillLevelUpdated}
+              onStaffDeleted={handleStaffDeleted}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Two-column layout */}
@@ -136,7 +156,12 @@ export function StaffDetailView() {
 
         {/* RIGHT */}
         <div className="xl:col-span-5 flex flex-col gap-8">
-          <ProfileDetailsCard staff={staff} formattedDate={formatDate(staff.createdAt)} />
+          <ProfileDetailsCard
+            staff={staff}
+            formattedDate={formatDate(staff.createdAt)}
+            onSkillLevelUpdated={handleSkillLevelUpdated}
+            onStaffDeleted={handleStaffDeleted}
+          />
           <AttendanceCard logs={attendance} />
         </div>
 

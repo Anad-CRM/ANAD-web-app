@@ -3,26 +3,42 @@ import { Text } from "@/core/components/ui/Text";
 import { COLORS } from "@/core/components/theme/colors";
 import { Calendar, Mail, BriefcaseIcon, UserIcon } from "lucide-react";
 import type { Staff } from "../types/staff.types";
+import { StaffActionsMenu } from "./StaffActionsMenu";
 
 interface ProfileDetailsCardProps {
   staff: Staff;
   formattedDate: string;
+  onSkillLevelUpdated?: (newSkill: string) => void;
+  onStaffDeleted?: () => void;
 }
 
-export function ProfileDetailsCard({ staff, formattedDate }: ProfileDetailsCardProps) {
+export function ProfileDetailsCard({
+  staff,
+  formattedDate,
+  onSkillLevelUpdated,
+  onStaffDeleted,
+}: ProfileDetailsCardProps) {
   return (
     <div
       style={{ backgroundColor: COLORS.primaryDark }}
       className="rounded-[28px] p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
     >
-      {/* Name header */}
-      <div className="mb-6">
-        <Text size="custom" className="text-[13px] font-light tracking-wide mb-1" style={{ color: COLORS.subtle }}>
-          Name
-        </Text>
-        <Text as="p" size="custom" className="text-[20px] md:text-[22px] text-white font-medium tracking-wide">
-          {staff.userName || "—"}
-        </Text>
+      {/* Name header + Actions Menu */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <Text size="custom" className="text-[13px] font-light tracking-wide mb-1" style={{ color: COLORS.subtle }}>
+            Name
+          </Text>
+          <Text as="p" size="custom" className="text-[20px] md:text-[22px] text-white font-medium tracking-wide">
+            {staff.userName || "—"}
+          </Text>
+        </div>
+        <StaffActionsMenu
+          staff={staff}
+          onSkillLevelUpdated={onSkillLevelUpdated}
+          onStaffDeleted={onStaffDeleted}
+          buttonClassName="bg-white/10 hover:bg-white/20 p-2.5 rounded-xl"
+        />
       </div>
 
       {/* Detail pills */}

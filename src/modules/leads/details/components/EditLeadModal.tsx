@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { X, Edit2, ChevronDown, Loader2 } from 'lucide-react';
+import { X, Edit2, ChevronDown, Loader2, FileText, Plus, Trash2 } from 'lucide-react';
 import { Lead, LeadStatus } from '@/modules/leads/types/lead.types';
 import { getAllAds } from '@/modules/ads/api/adsApi';
 import { StaffService } from '@/modules/staffs/services/staff.service';
@@ -11,6 +11,7 @@ import { Text } from '@/core/components/ui/Text';
 import TextField from '@/core/components/ui/TextField';
 import { COLORS } from '@/core/components/theme/colors';
 import { leadsApi } from '@/modules/leads/api/leadsApi';
+import { activityService } from '@/modules/activities/services/activityService';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -69,7 +70,45 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
     status: (lead.status || 'New Lead') as LeadStatus,
     adId: lead.ad?.adId || (lead as any)?.adId || '',
     staffId: lead.userId || lead.assignedUser?.id || (lead as any)?.assignedTo || '',
+    type: (lead.formData as Record<string, any> | undefined)?.type || '',
   });
+
+  // Extra editable formData fields (everything except internal/core fields)
+  const SKIP_FORM_KEYS = ['full_name', 'phone_number', 'mobileNumber', 'userName', 'email', 'contactNumber', 'phone', 'type'];
+  const getExtraFormFields = () => {
+    const fd = (lead.formData as Record<string, any> | undefined) ?? {};
+    return Object.entries(fd)
+      .filter(([k]) => !SKIP_FORM_KEYS.some(s => k.toLowerCase().includes(s.toLowerCase())))
+      .reduce<Record<string, string>>((acc, [k, v]) => {
+        acc[k] = Array.isArray(v) ? String(v[0] ?? '') : String(v ?? '');
+        return acc;
+      }, {});
+  };
+
+  const [extraFormFields, setExtraFormFields] = useState<Record<string, string>>(getExtraFormFields);
+  const [newFieldName, setNewFieldName] = useState('');
+  const [newFieldValue, setNewFieldValue] = useState('');
+  const [showAddField, setShowAddField] = useState(false);
+
+  const handleAddNewField = () => {
+    if (!newFieldName.trim()) return;
+    const formattedKey = newFieldName.trim().replace(/\s+/g, '_').toLowerCase();
+    setExtraFormFields(prev => ({
+      ...prev,
+      [formattedKey]: newFieldValue.trim()
+    }));
+    setNewFieldName('');
+    setNewFieldValue('');
+    setShowAddField(false);
+  };
+
+  const handleRemoveField = (key: string) => {
+    setExtraFormFields(prev => {
+      const copy = { ...prev };
+      delete copy[key];
+      return copy;
+    });
+  };
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -88,7 +127,12 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
         status: (lead.status || 'New Lead') as LeadStatus,
         adId: lead.ad?.adId || (lead as any)?.adId || '',
         staffId: lead.userId || lead.assignedUser?.id || (lead as any)?.assignedTo || '',
+        type: (lead.formData as Record<string, any> | undefined)?.type || '',
       });
+      setExtraFormFields(getExtraFormFields());
+      setNewFieldName('');
+      setNewFieldValue('');
+      setShowAddField(false);
       setErrors({});
       setApiError(null);
     }
@@ -156,6 +200,8 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
     setApiError(null);
 
     try {
+      const mergedFormData: Record<string, unknown> = { ...extraFormFields };
+
       const response = await leadsApi.updateLead(lead.id, {
         userName: formData.userName.trim(),
         email: formData.email.trim(),
@@ -164,6 +210,8 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
         status: formData.status,
         adId: formData.adId || undefined,
         staffId: formData.staffId || undefined,
+        type: formData.type || undefined,
+        formData: Object.keys(mergedFormData).length > 0 ? mergedFormData : undefined,
       });
 
       // Update session cache if exists
@@ -174,6 +222,24 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
           sessionStorage.removeItem(`lead_cache_${lead.id}`);
         }
       } catch { }
+
+      // Create activity for the update
+      try {
+        const user = getUser<{ id?: string; _id?: string }>();
+        const userId = user?.id || user?._id || '';
+        if (userId) {
+          await activityService.createActivity(lead.id, {
+            title: 'Lead Updated',
+            description: `Lead details updated: ${[
+              formData.userName !== (lead.userName || lead.name) && 'Name',
+              formData.status !== lead.status && 'Status',
+              formData.leadSource !== lead.source && 'Source',
+              formData.type && 'Type',
+            ].filter(Boolean).join(', ') || 'Details updated'}`,
+            userId,
+          });
+        }
+      } catch { /* activity creation is non-blocking */ }
 
       showToast('Lead updated successfully!', 'success');
       onSuccess?.();
@@ -351,6 +417,27 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
             </div>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 block">Lead Type</label>
+              <div className="relative w-full h-[48px] bg-white rounded-[14px] border border-gray-200">
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full h-full bg-transparent text-[#0D1B3E] appearance-none rounded-[14px] px-3.5 text-[14px] focus:outline-none transition-all"
+                >
+                  <option value="">Select Type</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Corporate">Corporate</option>
+                  <option value="Business">Business</option>
+                  <option value="Student">Student</option>
+                  <option value="Other">Other</option>
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-3.5">
             <SearchableDropdown
               label="Ad Campaign"
@@ -367,6 +454,109 @@ export const EditLeadModal: React.FC<EditLeadModalProps> = ({
               onChange={(val) => setFormData({ ...formData, staffId: val })}
               placeholder="Select Staff Member"
             />
+          </div>
+
+          {/* Editable extra form details & Add Field */}
+          <div>
+            <div className="flex items-center justify-between mb-3 pt-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                <FileText className="w-3.5 h-3.5" />
+                Additional Details
+              </div>
+              {!showAddField && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddField(true)}
+                  className="flex items-center gap-1 text-[12px] font-semibold text-[#1C3A76] hover:underline"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Field
+                </button>
+              )}
+            </div>
+
+            {/* List of existing extra fields */}
+            {Object.keys(extraFormFields).length > 0 && (
+              <div className="flex flex-col gap-3">
+                {Object.entries(extraFormFields).map(([key, val]) => {
+                  const label = key
+                    .replace(/_/g, ' ')
+                    .split(' ')
+                    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                    .join(' ');
+                  return (
+                    <div key={key} className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <label className="text-[12px] font-medium text-[#0D1B3E] mb-1 block">{label}</label>
+                        <TextField
+                          type="text"
+                          value={val}
+                          onChange={(e) => setExtraFormFields(prev => ({ ...prev, [key]: e.target.value }))}
+                          placeholder={`Enter ${label.toLowerCase()}`}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveField(key)}
+                        className="w-10 h-10 mb-1 rounded-xl flex items-center justify-center text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors flex-shrink-0"
+                        title="Remove field"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Form to add a new custom field */}
+            {showAddField && (
+              <div className="mt-3 p-3.5 bg-gray-50 border border-gray-200 rounded-2xl flex flex-col gap-3 animate-in fade-in duration-150">
+                <Text weight="bold" className="text-[13px] text-gray-800">Add Custom Form Field</Text>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-600 mb-1 block">Field Name *</label>
+                    <TextField
+                      type="text"
+                      value={newFieldName}
+                      onChange={(e) => setNewFieldName(e.target.value)}
+                      placeholder="e.g. City, Course, Budget"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-600 mb-1 block">Field Value</label>
+                    <TextField
+                      type="text"
+                      value={newFieldValue}
+                      onChange={(e) => setNewFieldValue(e.target.value)}
+                      placeholder="Enter value"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddField(false);
+                      setNewFieldName('');
+                      setNewFieldValue('');
+                    }}
+                    className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddNewField}
+                    disabled={!newFieldName.trim()}
+                    className="px-3.5 py-1.5 text-xs text-white rounded-lg font-semibold transition-all disabled:opacity-50"
+                    style={{ backgroundColor: COLORS.primary }}
+                  >
+                    Add Field
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </form>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, Edit2, Trash2, Globe, Flag, Megaphone, UserPlus, Loader2 } from 'lucide-react';
+import { Phone, Mail, Edit2, Trash2, Globe, Flag, Megaphone, UserPlus, Loader2, Tag } from 'lucide-react';
 import { Whatsapp } from '@thesvg/react';
 import { useRouter } from 'next/navigation';
 import { Lead } from '@/modules/leads/types/lead.types';
@@ -59,6 +59,7 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
   const isRealPhone = Boolean(cleanMobile && cleanMobile.length <= 15 && (!cleanIg || cleanMobile !== cleanIg));
   const phoneNumber = isRealPhone ? (lead.mobileNumber || cleanMobile) : (formDataPhone || lead.mobileNumber || 'N/A');
   const email = lead.email || 'N/A';
+  const leadType = (lead.formData as Record<string, any> | undefined)?.type || '';
 
   const handleCall = async () => {
     try {
@@ -231,6 +232,13 @@ export const LeadSummaryCard: React.FC<{ lead: Lead; onRefresh?: () => void }> =
             value={adName}
             icon={<Megaphone className="w-5 h-5 " />}
           />
+          {leadType && (
+            <InfoItem
+              label="Lead Type"
+              value={leadType}
+              icon={<Tag className="w-5 h-5" />}
+            />
+          )}
         </div>
       
       </div>
